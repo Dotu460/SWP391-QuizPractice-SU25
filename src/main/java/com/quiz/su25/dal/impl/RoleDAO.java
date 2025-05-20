@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.quiz.su25.entity.impl;
+package com.quiz.su25.dal.impl;
 
 import com.quiz.su25.dal.DBContext;
 import com.quiz.su25.dal.I_DAO;
