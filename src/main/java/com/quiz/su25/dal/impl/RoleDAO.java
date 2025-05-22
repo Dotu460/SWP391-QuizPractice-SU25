@@ -75,11 +75,4 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
-    public static void main(String[] args) {
-        RoleDAO roleDAO = new RoleDAO();
-        roleDAO.findAll().forEach(item -> {
-            System.out.println(item);
-        });
-    }
-
 }
