@@ -4,29 +4,21 @@
  */
 
 package com.quiz.su25.controller;
-
-
-
-
+import com.quiz.su25.dal.impl.UserDAO;
+import com.quiz.su25.entity.User;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
-import com.quiz.su25.dal.impl.PostDAO;
-import com.quiz.su25.dal.impl.SliderDAO;
-import com.quiz.su25.dal.impl.FeaturedSubjectDAO;
-import com.quiz.su25.entity.FeaturedSubject;
-import com.quiz.su25.entity.Post;
-import com.quiz.su25.entity.Slider;
-import java.util.List;
 /**
  *
- * @author FPT
+ * @author LENOVO
  */
-public class HomeController extends HttpServlet {
+public class LoginController extends HttpServlet {
    
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -37,20 +29,20 @@ public class HomeController extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet HomeController</title>");  
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet HomeController at " + request.getContextPath () + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+
+        UserDAO userDAO = new UserDAO();
+
+        if (userDAO != null) {
+            HttpSession session = request.getSession();
+            session.setAttribute("user", userDAO);
+            response.sendRedirect("home.jsp");
+        } else {
+            request.setAttribute("error", "Invalid email or password.");
+            request.getRequestDispatcher("view/login.jsp").forward(request, response);
         }
-    } 
+    }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /** 
@@ -63,14 +55,7 @@ public class HomeController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-         List<Slider> sliders = new SliderDAO().getAllSliders();
-        List<Post> hotPosts = new PostDAO().getHotPosts();
-        List<FeaturedSubject> featuredSubjects = new FeaturedSubjectDAO().getFeaturedSubjects();
-
-        request.setAttribute("sliders", sliders);
-        request.setAttribute("hotPosts", hotPosts);
-        request.setAttribute("featuredSubjects", featuredSubjects);
-        request.getRequestDispatcher("home.jsp").forward(request, response);
+        request.getRequestDispatcher("view/login.jsp").forward(request, response);
     } 
 
     /** 

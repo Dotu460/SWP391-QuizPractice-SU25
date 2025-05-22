@@ -8,6 +8,14 @@
         <servlet-name>MyRegistrationController</servlet-name>
         <servlet-class>com.quiz.su25.controller.MyRegistrationController</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>SliderDAO</servlet-name>
+        <servlet-class>com.quiz.su25.dal.impl.SliderDAO</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>LoginController</servlet-name>
+        <servlet-class>com.quiz.su25.controller.LoginController</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>HomeController</servlet-name>
         <url-pattern>/home</url-pattern>
@@ -15,6 +23,14 @@
     <servlet-mapping>
         <servlet-name>MyRegistrationController</servlet-name>
         <url-pattern>/MyRegistration</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>SliderDAO</servlet-name>
+        <url-pattern>/slider</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>LoginController</servlet-name>
+        <url-pattern>/controller</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

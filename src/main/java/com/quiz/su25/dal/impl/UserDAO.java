@@ -13,6 +13,8 @@ package com.quiz.su25.dal.impl;
 import com.quiz.su25.dal.DBContext;
 import com.quiz.su25.dal.I_DAO;
 import com.quiz.su25.entity.User;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -158,6 +160,36 @@ public class UserDAO extends DBContext implements I_DAO<User> {
                 .status(resultSet.getString("status"))
                 .build();
     }
+    
+public User login(String email, String password) {
+    DBContext db = new DBContext();
+    Connection conn = db.getConnection();
+    String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
+        ps.setString(1, email);
+        ps.setString(2, password);
+
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return User.builder()
+                    .id(rs.getInt("id"))
+                    .full_name(rs.getString("full_name"))
+                    .email(rs.getString("email"))
+                    .password(rs.getString("password"))
+                    .gender(rs.getInt("gender"))
+                    .mobile(rs.getString("mobile"))
+                    .avatar_url(rs.getString("avatar_url"))
+                    .role_id(rs.getInt("role_id"))
+                    .status(rs.getString("status"))
+                    .build();
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return null;
 }
+}
+
 
