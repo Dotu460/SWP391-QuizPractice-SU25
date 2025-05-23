@@ -10,4 +10,5 @@ package com.quiz.su25.config;
  */
 public class GlobalConfig {
     
+    public static final String SESSION_ACCOUNT = "account";
 }

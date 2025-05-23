@@ -8,7 +8,7 @@ package com.quiz.su25.controller;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import com.quiz.su25.dal.impl.MyRegistrationDAO;
+import com.quiz.su25.dal.impl.RegistrationDAO;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;

@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MyRegistrationDAO extends DBContext implements I_DAO<Registration> {
+public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
 
     @Override
     public List<Registration> findAll() {
@@ -133,7 +133,7 @@ public class MyRegistrationDAO extends DBContext implements I_DAO<Registration> 
     }
 
     public static void main(String[] args) {
-        MyRegistrationDAO myRegistrationDAO = new MyRegistrationDAO();
+        RegistrationDAO myRegistrationDAO = new RegistrationDAO();
         List<Registration> listRegistration = myRegistrationDAO.findAll();
         for (Registration registration : listRegistration) {
             System.out.println(registration);

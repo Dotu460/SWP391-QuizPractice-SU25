@@ -4,6 +4,7 @@
  */
 package com.quiz.su25.entity;
 
+import java.sql.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,8 +24,10 @@ public class Subject {
     private int id;
     private String title;
     private String thumbnail_url;
-    private String tag_line;
     private String brief_info;
     private String description;
-    
+    private int subjectcategories_id;
+    private int status;
+    private Date created_at;
+    private Date updated_at;
 }
