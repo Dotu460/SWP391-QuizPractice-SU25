@@ -24,7 +24,7 @@ import java.util.List;
  *
  * @author FPT
  */
-@WebServlet("/")
+@WebServlet("/my-home")
 public class HomeController extends HttpServlet {
    
     private SliderDAO sliderDAO;
