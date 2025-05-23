@@ -5,7 +5,7 @@
 package com.quiz.su25.controller;
 
 import com.quiz.su25.dal.impl.MyRegistrationDAO;
-import com.quiz.su25.entity.MyRegistration;
+import com.quiz.su25.entity.Registration;
 import com.quiz.su25.entity.User;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -39,46 +39,19 @@ public class MyRegistrationController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
+        
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+        int userId = user.getId();
+         
+        MyRegistrationDAO myRegistrationDAO = new MyRegistrationDAO();
+        List<Registration> listRegistration = myRegistrationDAO.findAll();
 
-        try (PrintWriter pr = response.getWriter()) {
-            HttpSession session = request.getSession();
+        request.setAttribute("listRegistration", listRegistration);
 
-            if (session.getAttribute("currUser") == null) {
-                request.getRequestDispatcher("SignIn.jsp").forward(request, response);
-                return;
-            }
+        //chuyen sang trang test.jsp
+        request.getRequestDispatcher("MyRegistration.jsp").forward(request, response);
 
-            try {
-                User user = (User) session.getAttribute("currUser");
-                int userId = user.getId();
-
-                MyRegistrationDAO registrationDAO = new MyRegistrationDAO();
-
-                final int PAGE_SIZE = 5;
-                int page = 1;
-                String pageStr = request.getParameter("page");
-                if (pageStr != null) {
-                    page = Integer.parseInt(pageStr);
-                }
-
-                int totalEntries = registrationDAO.getTotalByUserId(userId);
-
-                int totalPages = totalEntries / PAGE_SIZE + (totalEntries % PAGE_SIZE == 0 ? 0 : 1);
-
-                List<MyRegistration> registrations = registrationDAO.findAll();
-
-                request.setAttribute("registrations", registrations);
-                request.setAttribute("currentPage", page);
-                request.setAttribute("totalPages", totalPages);
-                request.setAttribute("paginationURL", "MyRegistrationController?");
-
-            } catch (Exception e) {
-                log("Error at MyRegistrationController: " + e.getMessage());
-                request.setAttribute("errorMessage", "Có lỗi xảy ra, vui lòng thử lại sau.");
-            }
-
-            request.getRequestDispatcher("MyRegistrations.jsp").forward(request, response);
-        }
     }
 
     @Override
@@ -86,6 +59,7 @@ public class MyRegistrationController extends HttpServlet {
             throws ServletException, IOException {
         processRequest(request, response);
     }
+
     @Override
     public String getServletInfo() {
         return "Short description";

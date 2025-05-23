@@ -18,12 +18,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class UserDAO extends DBContext implements I_DAO<User> {
 
     @Override
     public List<User> findAll() {
-        String sql = "SELECT id, full_name, email, password, gender, mobile, avatar_url, role_id, status FROM [User]"; // Giả sử tên bảng là User
+        String sql = "SELECT id, full_name, email, password, gender, mobile, avatar_url, role_id, status FROM usersusers"; // Giả sử tên bảng là User
         List<User> listUser = new ArrayList<>();
         try {
             connection = getConnection();
@@ -43,7 +45,7 @@ public class UserDAO extends DBContext implements I_DAO<User> {
 
     @Override
     public User findById(Integer id) {
-        String sql = "SELECT id, full_name, email, password, gender, mobile, avatar_url, role_id, status FROM [User] WHERE id = ?";
+        String sql = "SELECT id, full_name, email, password, gender, mobile, avatar_url, role_id, status FROM usersusers WHERE id = ?";
         User user = null;
         try {
             connection = getConnection();
@@ -63,7 +65,7 @@ public class UserDAO extends DBContext implements I_DAO<User> {
 
     @Override
     public int insert(User user) {
-        String sql = "INSERT INTO [User] (full_name, email, password, gender, mobile, avatar_url, role_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (full_name, email, password, gender, mobile, avatar_url, role_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         int generatedId = -1;
         try {
             connection = getConnection();
@@ -92,7 +94,7 @@ public class UserDAO extends DBContext implements I_DAO<User> {
 
     @Override
     public boolean update(User user) {
-        String sql = "UPDATE [User] SET full_name = ?, email = ?, password = ?, gender = ?, mobile = ?, avatar_url = ?, role_id = ?, status = ? WHERE id = ?";
+        String sql = "UPDATE usersusers SET full_name = ?, email = ?, password = ?, gender = ?, mobile = ?, avatar_url = ?, role_id = ?, status = ? WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -157,6 +159,34 @@ public class UserDAO extends DBContext implements I_DAO<User> {
                 .role_id(resultSet.getInt("role_id"))
                 .status(resultSet.getString("status"))
                 .build();
+    }
+
+//    @Override
+    public Map<Integer, User> findAllMap() {
+        String sql = "Select * from users";
+        Map<Integer, User> mapUser = new HashMap<>();
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                User user = getFromResultSet(resultSet);
+                mapUser.put(user.getId(), user);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error findAllMap at class UserDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return mapUser;
+    }
+
+    public static void main(String[] args) {
+        UserDAO userDAO = new UserDAO();
+        Map<Integer, User> mapUser = userDAO.findAllMap();
+        for (Map.Entry<Integer, User> entry : mapUser.entrySet()) {
+            System.out.println(entry.getKey() + " - " + entry.getValue());
+        }
     }
 
 }

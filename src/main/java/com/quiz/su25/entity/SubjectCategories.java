@@ -4,7 +4,6 @@
  */
 package com.quiz.su25.entity;
 
-import java.sql.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,17 +19,8 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter
 @Setter
-
-public class MyRegistration {
-    private Integer id;
-    private Integer user_id;
-    private Integer subject_id;
-    private Integer package_id;
-    private Date registration_time;
-    private double total_cost;
-    private String status;
-    private Date valid_from;
-    private Date valid_to;
-    private String subname;
-            
+public class SubjectCategories {
+       private Integer id;
+       private String name;
+       private String description;
 }

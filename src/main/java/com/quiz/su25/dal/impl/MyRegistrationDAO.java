@@ -2,172 +2,105 @@ package com.quiz.su25.dal.impl;
 
 import com.quiz.su25.dal.DBContext;
 import com.quiz.su25.dal.I_DAO;
-import com.quiz.su25.entity.MyRegistration;
+import com.quiz.su25.entity.Registration;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MyRegistrationDAO extends DBContext implements I_DAO<MyRegistration> {
+public class MyRegistrationDAO extends DBContext implements I_DAO<Registration> {
 
     @Override
-    public List<MyRegistration> findAll() {
-        String sql = "select * from registrations";
-        List<MyRegistration> listregistration = new ArrayList<>();
+    public List<Registration> findAll() {
+        String sql = "SELECT * FROM Registration";
+        List<Registration> listRegistration = new ArrayList<>();
         try {
-            //tao connection
             connection = getConnection();
-            //chuan bi cho statmenet
             statement = connection.prepareStatement(sql);
-            //set parameter (optional)
-
-            //thuc thi cau lenh
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                MyRegistration registration = getFromResultSet(resultSet);
-                listregistration.add(registration);
+                Registration registration = getFromResultSet(resultSet);
+                listRegistration.add(registration);
             }
         } catch (SQLException e) {
             System.out.println("Error findAll at class MyRegistrationDAO: " + e.getMessage());
         } finally {
             closeResources();
         }
-        return listregistration;
-    }
-
-    public List<MyRegistration> findAll1() {
-        String sql = "SELECT mr.*, s.title AS subject_title, p.list_price, p.status AS package_status "
-                + "FROM MyRegistration mr "
-                + "JOIN Subject s ON mr.subject_id = s.id "
-                + "JOIN PricePackage p ON mr.package_id = p.id";
-        List<MyRegistration> list = new ArrayList<>();
-        try {
-            connection = getConnection();
-            statement = connection.prepareStatement(sql);
-            resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                MyRegistration registration = getFromResultSet(resultSet);
-                list.add(registration);
-            }
-        } catch (SQLException e) {
-            System.out.println("Error findAll at MyRegistrationDAO: " + e.getMessage());
-        } finally {
-            closeResources();
-        }
-        return list;
+        return listRegistration;
     }
 
     @Override
-    public MyRegistration findById(Integer id) {
-        String sql = "SELECT mr.*, s.title AS subject_title, p.list_price, p.status AS package_status "
-                + "FROM MyRegistration mr "
-                + "JOIN Subject s ON mr.subject_id = s.id "
-                + "JOIN PricePackage p ON mr.package_id = p.id "
-                + "WHERE mr.id = ?";
-        MyRegistration registration = null;
-        try {
-            connection = getConnection();
-            statement = connection.prepareStatement(sql);
-            statement.setInt(1, id);
-            resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                registration = getFromResultSet(resultSet);
-            }
-        } catch (SQLException e) {
-            System.out.println("Error findById at MyRegistrationDAO: " + e.getMessage());
-        } finally {
-            closeResources();
-        }
-        return registration;
-    }
-
-    @Override
-    public int insert(MyRegistration registration) {
-        String sql = "INSERT INTO MyRegistration (user_id, subname, subject_id, package_id, registration_time, total_cost, status, valid_from, valid_to) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        int generatedId = -1;
-        try {
-            connection = getConnection();
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            statement.setInt(1, registration.getUser_id());
-            statement.setString(2, registration.getSubname());
-            statement.setInt(3, registration.getSubject_id());
-            statement.setInt(4, registration.getPackage_id());
-            statement.setDate(5, registration.getRegistration_time());
-            statement.setDouble(6, registration.getTotal_cost());
-            statement.setString(7, registration.getStatus());
-            statement.setDate(8, registration.getValid_from());
-            statement.setDate(9, registration.getValid_to());
-
-            statement.executeUpdate();
-            resultSet = statement.getGeneratedKeys();
-            if (resultSet.next()) {
-                generatedId = resultSet.getInt(1);
-            }
-        } catch (SQLException e) {
-            System.out.println("Error insert at MyRegistrationDAO: " + e.getMessage());
-        } finally {
-            closeResources();
-        }
-        return generatedId;
-    }
-
-    @Override
-    public boolean update(MyRegistration registration) {
-        String sql = "UPDATE MyRegistration "
+    public boolean update(Registration t) {
+        String sql = "UPDATE Registration "
                 + "SET user_id = ?, subname = ?, subject_id = ?, package_id = ?, registration_time = ?, total_cost = ?, status = ?, valid_from = ?, valid_to = ? "
                 + "WHERE id = ?";
-        boolean success = false;
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setInt(1, registration.getUser_id());
-            statement.setString(2, registration.getSubname());
-            statement.setInt(3, registration.getSubject_id());
-            statement.setInt(4, registration.getPackage_id());
-            statement.setDate(5, registration.getRegistration_time());
-            statement.setDouble(6, registration.getTotal_cost());
-            statement.setString(7, registration.getStatus());
-            statement.setDate(8, registration.getValid_from());
-            statement.setDate(9, registration.getValid_to());
-
+            statement.setInt(1, t.getUser_id());
+            statement.setInt(3, t.getSubject_id());
+            statement.setInt(4, t.getPackage_id());
+            statement.setDate(5, t.getRegistration_time());
+            statement.setDouble(6, t.getTotal_cost());
+            statement.setString(7, t.getStatus());
+            statement.setDate(8, t.getValid_from());
+            statement.setDate(9, t.getValid_to());
+            statement.setInt(10, t.getId());
             int rowsAffected = statement.executeUpdate();
-            success = rowsAffected > 0;
+            return rowsAffected > 0;
         } catch (SQLException e) {
-            System.out.println("Error update at MyRegistrationDAO: " + e.getMessage());
+            System.out.println("Error update at class MyRegistrationDAO: " + e.getMessage());
         } finally {
             closeResources();
         }
-        return success;
+        return false;
     }
 
     @Override
-    public boolean delete(MyRegistration registration) {
-        return deleteById(registration.getId());
-    }
-
-    public boolean deleteById(Integer id) {
-        String sql = "DELETE FROM MyRegistration WHERE id = ?";
-        boolean success = false;
+    public boolean delete(Registration t) {
+        String sql = "DELETE FROM Registration WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setInt(1, id);
-
+            statement.setInt(1, t.getId());
             int rowsAffected = statement.executeUpdate();
-            success = rowsAffected > 0;
+            return rowsAffected > 0;
         } catch (SQLException e) {
-            System.out.println("Error deleteById at MyRegistrationDAO: " + e.getMessage());
+            System.out.println("Error delete at class MyRegistrationDAO: " + e.getMessage());
         } finally {
             closeResources();
         }
-        return success;
+        return false;
     }
 
     @Override
-    public MyRegistration getFromResultSet(ResultSet resultSet) throws SQLException {
-        return MyRegistration.builder()
+    public int insert(Registration t) {
+        String sql = "INSERT INTO Registration (user_id, subject_id, package_id, registration_time, total_cost, status, valid_from, valid_to) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, t.getUser_id());
+            statement.setInt(2, t.getSubject_id());
+            statement.setInt(3, t.getPackage_id());
+            statement.setDate(4, t.getRegistration_time());
+            statement.setDouble(5, t.getTotal_cost());
+            statement.setString(6, t.getStatus());
+            statement.setDate(7, t.getValid_from());
+            statement.setDate(8, t.getValid_to());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error insert at class MyRegistrationDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return 0;
+    }
+
+    @Override
+    public Registration getFromResultSet(ResultSet resultSet) throws SQLException {
+        return Registration.builder()
                 .id(resultSet.getInt("id"))
                 .user_id(resultSet.getInt("user_id"))
                 .subject_id(resultSet.getInt("subject_id"))
@@ -178,43 +111,33 @@ public class MyRegistrationDAO extends DBContext implements I_DAO<MyRegistration
                 .valid_from(resultSet.getDate("valid_from"))
                 .valid_to(resultSet.getDate("valid_to"))
                 .build();
-
     }
 
-    public int getTotalByUserId(int userId) {
-        String sql = "SELECT COUNT(*) AS total FROM MyRegistration WHERE user_id = ?";
-        int total = 0;
-
+    @Override
+    public Registration findById(Integer id) {
+        String sql = "SELECT * FROM Registration WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setInt(1, userId);
+            statement.setInt(1, id);
             resultSet = statement.executeQuery();
-
             if (resultSet.next()) {
-                total = resultSet.getInt("total");
+                return getFromResultSet(resultSet);
             }
         } catch (SQLException e) {
-            System.out.println("Error getTotalByUserId at MyRegistrationDAO: " + e.getMessage());
+            System.out.println("Error findById at class MyRegistrationDAO: " + e.getMessage());
         } finally {
             closeResources();
         }
-
-        return total;
+        return null;
     }
 
     public static void main(String[] args) {
-        MyRegistrationDAO dao = new MyRegistrationDAO();
-
-        // Test findAll with join
-        System.out.println("Testing findAll():");
-        List<MyRegistration> registrations = dao.findAll();
-        registrations.forEach(System.out::println);
-
-        // Test findById with join
-        System.out.println("Testing findById(1):");
-        MyRegistration registration = dao.findById(1);
-        System.out.println(registration);
+        MyRegistrationDAO myRegistrationDAO = new MyRegistrationDAO();
+        List<Registration> listRegistration = myRegistrationDAO.findAll();
+        for (Registration registration : listRegistration) {
+            System.out.println(registration);
+        }
     }
 
 }
