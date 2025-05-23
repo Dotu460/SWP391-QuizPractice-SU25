@@ -5,9 +5,6 @@
 
 package com.quiz.su25.controller;
 
-
-
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -17,16 +14,36 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import com.quiz.su25.dal.impl.PostDAO;
 import com.quiz.su25.dal.impl.SliderDAO;
-import com.quiz.su25.dal.impl.FeaturedSubjectDAO;
-import com.quiz.su25.entity.FeaturedSubject;
+import com.quiz.su25.dal.impl.SubjectDAO;
+import com.quiz.su25.entity.Subject;
 import com.quiz.su25.entity.Post;
 import com.quiz.su25.entity.Slider;
+import jakarta.servlet.annotation.WebServlet;
 import java.util.List;
 /**
  *
  * @author FPT
  */
+@WebServlet("/")
 public class HomeController extends HttpServlet {
+   
+    private SliderDAO sliderDAO;
+    private PostDAO postDAO;
+    private SubjectDAO subjectDAO;
+    private List<Slider> sliders;
+    private List<Post> hotPosts;
+    private List<Subject> subjects;
+    
+    @Override
+    public void init() throws ServletException {
+        sliderDAO = new SliderDAO();
+        postDAO = new PostDAO();
+        subjectDAO = new SubjectDAO();
+        
+        sliders = sliderDAO.getAllSliders();
+        hotPosts = postDAO.getHotPosts();
+        subjects = subjectDAO.findAll();
+    }
    
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -63,14 +80,15 @@ public class HomeController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-         List<Slider> sliders = new SliderDAO().getAllSliders();
-        List<Post> hotPosts = new PostDAO().getHotPosts();
-        List<FeaturedSubject> featuredSubjects = new FeaturedSubjectDAO().getFeaturedSubjects();
-
-        request.setAttribute("sliders", sliders);
-        request.setAttribute("hotPosts", hotPosts);
-        request.setAttribute("featuredSubjects", featuredSubjects);
-        request.getRequestDispatcher("home.jsp").forward(request, response);
+        try {
+            request.setAttribute("sliders", sliders);
+            request.setAttribute("hotPosts", hotPosts);
+            request.setAttribute("subjects", subjects);
+            request.getRequestDispatcher("home.jsp").forward(request, response);
+        } catch (Exception e) {
+            System.out.println("Error in HomeController doGet: " + e.getMessage());
+            response.sendRedirect("error.jsp");
+        }
     } 
 
     /** 
@@ -83,7 +101,7 @@ public class HomeController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-        processRequest(request, response);
+        doGet(request, response);
     }
 
     /** 
@@ -92,7 +110,7 @@ public class HomeController extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
+        return "Home Controller";
     }// </editor-fold>
 
 }

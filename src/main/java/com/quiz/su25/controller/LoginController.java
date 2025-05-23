@@ -7,8 +7,8 @@ package com.quiz.su25.controller;
 import com.quiz.su25.dal.impl.UserDAO;
 import com.quiz.su25.entity.User;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,6 +18,7 @@ import jakarta.servlet.http.HttpSession;
  *
  * @author LENOVO
  */
+@WebServlet("/login")
 public class LoginController extends HttpServlet {
    
     /** 
@@ -33,10 +34,11 @@ public class LoginController extends HttpServlet {
         String password = request.getParameter("password");
 
         UserDAO userDAO = new UserDAO();
+        User user = userDAO.login(email, password);
 
-        if (userDAO != null) {
+        if (user != null) {
             HttpSession session = request.getSession();
-            session.setAttribute("user", userDAO);
+            session.setAttribute("user", user);
             response.sendRedirect("home.jsp");
         } else {
             request.setAttribute("error", "Invalid email or password.");

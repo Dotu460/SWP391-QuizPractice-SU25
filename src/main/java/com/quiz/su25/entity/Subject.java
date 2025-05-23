@@ -20,11 +20,11 @@ import lombok.ToString;
 @Getter
 @Setter
 public class Subject {
-    private int id;
+    private Integer id;
     private String title;
     private String thumbnail_url;
     private String tag_line;
     private String brief_info;
     private String description;
-    
+    private boolean featured;
 }

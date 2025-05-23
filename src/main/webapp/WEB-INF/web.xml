@@ -1,36 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
     <servlet>
-        <servlet-name>HomeController</servlet-name>
-        <servlet-class>com.quiz.su25.controller.HomeController</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>MyRegistrationController</servlet-name>
-        <servlet-class>com.quiz.su25.controller.MyRegistrationController</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>SliderDAO</servlet-name>
         <servlet-class>com.quiz.su25.dal.impl.SliderDAO</servlet-class>
     </servlet>
-    <servlet>
-        <servlet-name>LoginController</servlet-name>
-        <servlet-class>com.quiz.su25.controller.LoginController</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>HomeController</servlet-name>
-        <url-pattern>/home</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>MyRegistrationController</servlet-name>
-        <url-pattern>/MyRegistration</url-pattern>
-    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>SliderDAO</servlet-name>
         <url-pattern>/slider</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>LoginController</servlet-name>
-        <url-pattern>/controller</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
