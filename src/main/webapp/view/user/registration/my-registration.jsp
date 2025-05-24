@@ -1,3 +1,9 @@
+<%-- 
+    Document   : my-registrationn
+    Created on : 24 thg 5, 2025, 14:22:40
+    Author     : FPT
+--%>
+
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!doctype html>
 <html class="no-js" lang="en">
@@ -9,7 +15,7 @@
         <meta name="description" content="SkillGro - Online Courses & Education Template">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.png">
+        <link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/view/common/img/favicon.png">
         <!-- Place favicon.ico in the root directory -->
 
         <!-- CSS here -->
@@ -17,9 +23,6 @@
         </head>
 
         <body>
-
-            <!--Preloader-end -->
-
             <!-- Scroll-top -->
             <button class="scroll__top scroll-to-target" data-target="html">
                 <i class="tg-flaticon-arrowhead-up"></i>
@@ -37,19 +40,31 @@
 
                 <!-- dashboard-area -->
                 <section class="dashboard__area section-pb-120">
-                    <div class="dashboard__bg"><img src="assets/img/bg/dashboard_bg.jpg" alt=""></div>
-                    <div class="container">
-                    <jsp:include page="../../common/user/dashboard_top.jsp"></jsp:include>       
-                        <div class="dashboard__inner-wrap">
-                            <div class="row">
-                                <!--Sidebar-->
-                            <jsp:include page="../../common/user/sidebar.jsp"></jsp:include>            
-                                
-                                <!--Main-->
+                    <div class="dashboard__bg"><img src="${pageContext.request.contextPath}/view/common/img/bg/dashboard_bg.jpg" alt=""></div>
+                <div class="container">
+                    <div class="dashboard__top-wrap">
+                        <div class="dashboard__top-bg" data-background="${pageContext.request.contextPath}/view/common/img/bg/student_bg.jpg"></div>
+                        <div class="dashboard__instructor-info">
+                            <div class="dashboard__instructor-info-left">
+                                <div class="thumb">
+                                    <img src="${pageContext.request.contextPath}/view/common/img/courses/details_instructors02.jpg" alt="img">
+                                </div>
+                                <div class="content">
+                                    <h4 class="title">Emily Hannah</h4>
+                                    <ul class="list-wrap">
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard__inner-wrap">
+                        <div class="row">
+                            <jsp:include page="../../common/user/sidebarCustomer.jsp"></jsp:include>
+
                                 <div class="col-lg-9">
                                     <div class="dashboard__content-wrap">
                                         <div class="dashboard__content-title">
-                                            <h4 class="title">Quiz Attempts</h4>
+                                            <h4 class="title">My registration</h4>
                                         </div>
                                         <div class="row">
                                             <div class="col-12">
@@ -57,142 +72,30 @@
                                                     <table class="table table-borderless">
                                                         <thead>
                                                             <tr>
-                                                                <th>Quiz</th>
-                                                                <th>Qus</th>
-                                                                <th>TM</th>
-                                                                <th>CA</th>
-                                                                <th>Result</th>
-                                                                <th>&nbsp;</th>
+                                                                <th>Order ID</th>
+                                                                <th>Course Name</th>
+                                                                <th>Date</th>
+                                                                <th>Price</th>
+                                                                <th>Status</th>
+                                                                <th></th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                             <tr>
                                                                 <td>
-                                                                    <div class="dashboard__quiz-info">
-                                                                        <p>January 20, 2024</p>
-                                                                        <h6 class="title">Learning JavaScript With Imagination</h6>
-                                                                        <span>Student: <a href="#">John Due</a></span>
-                                                                    </div>
+                                                                    <p>#2348</p>
                                                                 </td>
                                                                 <td>
-                                                                    <p class="color-black">5</p>
+                                                                    <p>Application</p>
                                                                 </td>
                                                                 <td>
-                                                                    <p class="color-black">9</p>
+                                                                    <p>June 20, 2024</p>
                                                                 </td>
                                                                 <td>
-                                                                    <p class="color-black">3</p>
+                                                                    <p>$99.99</p>
                                                                 </td>
                                                                 <td>
-                                                                    <span class="dashboard__quiz-result">Pass</span>
-                                                                </td>
-                                                                <td>
-                                                                    <div class="dashboard__review-action">
-                                                                        <a href="#" title="Edit"><i class="skillgro-edit"></i></a>
-                                                                        <a href="#" title="Delete"><i class="skillgro-bin"></i></a>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>
-                                                                    <div class="dashboard__quiz-info">
-                                                                        <p>February 29, 2024</p>
-                                                                        <h6 class="title">Learning JavaScript With Imagination</h6>
-                                                                        <span>Student: <a href="#">John Due</a></span>
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <p class="color-black">2</p>
-                                                                </td>
-                                                                <td>
-                                                                    <p class="color-black">6</p>
-                                                                </td>
-                                                                <td>
-                                                                    <p class="color-black">3</p>
-                                                                </td>
-                                                                <td>
-                                                                    <span class="dashboard__quiz-result fail">Fail</span>
-                                                                </td>
-                                                                <td>
-                                                                    <div class="dashboard__review-action">
-                                                                        <a href="#" title="Edit"><i class="skillgro-edit"></i></a>
-                                                                        <a href="#" title="Delete"><i class="skillgro-bin"></i></a>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>
-                                                                    <div class="dashboard__quiz-info">
-                                                                        <p>January 20, 2024</p>
-                                                                        <h6 class="title">Learning JavaScript With Imagination</h6>
-                                                                        <span>Student: <a href="#">John Due</a></span>
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <p class="color-black">4</p>
-                                                                </td>
-                                                                <td>
-                                                                    <p class="color-black">8</p>
-                                                                </td>
-                                                                <td>
-                                                                    <p class="color-black">4</p>
-                                                                </td>
-                                                                <td>
-                                                                    <span class="dashboard__quiz-result">Pass</span>
-                                                                </td>
-                                                                <td>
-                                                                    <div class="dashboard__review-action">
-                                                                        <a href="#" title="Edit"><i class="skillgro-edit"></i></a>
-                                                                        <a href="#" title="Delete"><i class="skillgro-bin"></i></a>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>
-                                                                    <div class="dashboard__quiz-info">
-                                                                        <p>February 29, 2024</p>
-                                                                        <h6 class="title">Learning JavaScript With Imagination</h6>
-                                                                        <span>Student: <a href="#">John Due</a></span>
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <p class="color-black">2</p>
-                                                                </td>
-                                                                <td>
-                                                                    <p class="color-black">6</p>
-                                                                </td>
-                                                                <td>
-                                                                    <p class="color-black">3</p>
-                                                                </td>
-                                                                <td>
-                                                                    <span class="dashboard__quiz-result fail">Fail</span>
-                                                                </td>
-                                                                <td>
-                                                                    <div class="dashboard__review-action">
-                                                                        <a href="#" title="Edit"><i class="skillgro-edit"></i></a>
-                                                                        <a href="#" title="Delete"><i class="skillgro-bin"></i></a>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>
-                                                                    <div class="dashboard__quiz-info">
-                                                                        <p>January 20, 2024</p>
-                                                                        <h6 class="title">Learning JavaScript With Imagination</h6>
-                                                                        <span>Student: <a href="#">John Due</a></span>
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <p class="color-black">4</p>
-                                                                </td>
-                                                                <td>
-                                                                    <p class="color-black">8</p>
-                                                                </td>
-                                                                <td>
-                                                                    <p class="color-black">4</p>
-                                                                </td>
-                                                                <td>
-                                                                    <span class="dashboard__quiz-result">Pass</span>
+                                                                    <span class="dashboard__quiz-result">Success</span>
                                                                 </td>
                                                                 <td>
                                                                     <div class="dashboard__review-action">
@@ -221,10 +124,7 @@
 
             <!-- footer-area -->
         <jsp:include page="../../common/user/footer.jsp"></jsp:include>
-
             <!-- footer-area-end -->
-
-
 
             <!-- JS here -->
         <jsp:include page="../../common/js/"></jsp:include>

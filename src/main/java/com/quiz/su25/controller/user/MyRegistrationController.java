@@ -60,7 +60,7 @@ public class MyRegistrationController extends HttpServlet {
 
         request.setAttribute("listRegistration", listRegistration);
 
-        request.getRequestDispatcher("MyRegistration.jsp").forward(request, response);
+        request.getRequestDispatcher("view/user/registration/my-registration.jsp").forward(request, response);
 
     }
 

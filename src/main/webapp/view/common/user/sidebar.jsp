@@ -1,9 +1,3 @@
-<%-- 
-    Document   : sidebar
-    Created on : 23 thg 5, 2025, 23:40:08
-    Author     : FPT
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
  <div class="col-lg-3">
                                     <div class="dashboard__sidebar-wrap">
