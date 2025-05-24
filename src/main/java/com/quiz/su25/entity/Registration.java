@@ -27,7 +27,7 @@ public class Registration {
     private Integer subject_id;
     private Integer package_id;
     private Date registration_time;
-    private double total_cost;
+    private Double total_cost;
     private String status;
     private Date valid_from;
     private Date valid_to;

@@ -1,9 +1,4 @@
-<%-- 
-    Document   : my-registrationn
-    Created on : 24 thg 5, 2025, 14:22:40
-    Author     : FPT
---%>
-
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!doctype html>
 <html class="no-js" lang="en">
@@ -72,41 +67,53 @@
                                                     <table class="table table-borderless">
                                                         <thead>
                                                             <tr>
-                                                                <th>Order ID</th>
+                                                                <th>ID</th>
                                                                 <th>Course Name</th>
-                                                                <th>Date</th>
+                                                                <th>Package</th>
+                                                                <th>Registration time</th>
                                                                 <th>Price</th>
                                                                 <th>Status</th>
+                                                                <th>Valid from</th>
+                                                                <th>Valid to</th>
                                                                 <th></th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
+                                                        <c:forEach var="r" items="${listRegistration}">
                                                             <tr>
                                                                 <td>
-                                                                    <p>#2348</p>
+                                                                    <p>${r.id}</p>
                                                                 </td>
                                                                 <td>
-                                                                    <p>Application</p>
+                                                                    <p>${r.subject_id}</p>
                                                                 </td>
                                                                 <td>
-                                                                    <p>June 20, 2024</p>
+                                                                    <p>${r.package_id}</p>
                                                                 </td>
                                                                 <td>
-                                                                    <p>$99.99</p>
+                                                                    <p>${r.registration_time}</p>
                                                                 </td>
                                                                 <td>
-                                                                    <span class="dashboard__quiz-result">Success</span>
+                                                                    <p>${r.total_cost}</p>
+                                                                </td>
+                                                                                                                                <td>
+                                                                    <span class="dashboard__quiz-result">${r.status}</span>
+                                                                </td>
+                                                                 <td>
+                                                                    <p>${r.valid_from}</p>
+                                                                </td>
+                                                                 <td>
+                                                                    <p>${r.valid_to}</p>
                                                                 </td>
                                                                 <td>
                                                                     <div class="dashboard__review-action">
-                                                                        <a href="#" title="Edit"><i class="skillgro-edit"></i></a>
                                                                         <a href="#" title="Delete"><i class="skillgro-bin"></i></a>
                                                                     </div>
                                                                 </td>
                                                             </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
+                                                        </c:forEach>
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </div>
                                     </div>
@@ -114,15 +121,16 @@
                             </div>
                         </div>
                     </div>
-                </section>
-                <!-- dashboard-area-end -->
+                </div>
+            </section>
+            <!-- dashboard-area-end -->
 
-            </main>
-            <!-- main-area-end -->
+        </main>
+        <!-- main-area-end -->
 
 
 
-            <!-- footer-area -->
+        <!-- footer-area -->
         <jsp:include page="../../common/user/footer.jsp"></jsp:include>
             <!-- footer-area-end -->
 

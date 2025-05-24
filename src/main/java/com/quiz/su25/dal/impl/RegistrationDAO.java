@@ -12,7 +12,7 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
 
     @Override
     public List<Registration> findAll() {
-        String sql = "SELECT * FROM Registration";
+        String sql = "SELECT * FROM registrations";
         List<Registration> listRegistration = new ArrayList<>();
         try {
             connection = getConnection();
@@ -32,7 +32,7 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
 
     @Override
     public boolean update(Registration t) {
-        String sql = "UPDATE Registration "
+        String sql = "UPDATE registrations "
                 + "SET user_id = ?, subname = ?, subject_id = ?, package_id = ?, registration_time = ?, total_cost = ?, status = ?, valid_from = ?, valid_to = ? "
                 + "WHERE id = ?";
         try {
@@ -59,7 +59,7 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
 
     @Override
     public boolean delete(Registration t) {
-        String sql = "DELETE FROM Registration WHERE id = ?";
+        String sql = "DELETE FROM registrations WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -76,7 +76,7 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
 
     @Override
     public int insert(Registration t) {
-        String sql = "INSERT INTO Registration (user_id, subject_id, package_id, registration_time, total_cost, status, valid_from, valid_to) "
+        String sql = "INSERT INTO registrations (user_id, subject_id, package_id, registration_time, total_cost, status, valid_from, valid_to) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             connection = getConnection();
@@ -115,7 +115,7 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
 
     @Override
     public Registration findById(Integer id) {
-        String sql = "SELECT * FROM Registration WHERE id = ?";
+        String sql = "SELECT * FROM registrations WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);

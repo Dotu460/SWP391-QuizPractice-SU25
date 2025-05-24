@@ -21,13 +21,13 @@ import lombok.ToString;
 @Getter
 @Setter
 public class Subject {
-    private int id;
+    private Integer id;
     private String title;
     private String thumbnail_url;
     private String brief_info;
     private String description;
-    private int subjectcategories_id;
-    private int status;
+    private Integer subjectcategories_id;
+    private Integer status;
     private Date created_at;
     private Date updated_at;
 }
