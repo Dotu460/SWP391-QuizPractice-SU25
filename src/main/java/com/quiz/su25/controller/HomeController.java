@@ -40,9 +40,7 @@ public class HomeController extends HttpServlet {
         postDAO = new PostDAO();
         subjectDAO = new SubjectDAO();
         
-        sliders = sliderDAO.getAllSliders();
-        hotPosts = postDAO.getHotPosts();
-        subjects = subjectDAO.findAll();
+
     }
    
     /** 

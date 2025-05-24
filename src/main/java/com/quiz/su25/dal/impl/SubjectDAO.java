@@ -60,7 +60,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     @Override
     public int insert(Subject subject) {
-        String sql = "INSERT INTO Subject (title, thumbnail_url, tag_line, brief_info, description) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Subject (title, thumbnail_url, tag_line, brief_info, description, featured) VALUES (?, ?, ?, ?, ?, ?)";
         int generatedId = -1;
         try {
             connection = getConnection();
@@ -70,6 +70,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
             statement.setString(3, subject.getTag_line());
             statement.setString(4, subject.getBrief_info());
             statement.setString(5, subject.getDescription());
+            statement.setBoolean(6, subject.getFeatured());
 
             statement.executeUpdate();
             resultSet = statement.getGeneratedKeys();
@@ -86,7 +87,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     @Override
     public boolean update(Subject subject) {
-        String sql = "UPDATE Subject SET title = ?, thumbnail_url = ?, tag_line = ?, brief_info = ?, description = ? WHERE id = ?";
+        String sql = "UPDATE Subject SET title = ?, thumbnail_url = ?, tag_line = ?, brief_info = ?, description = ?, featured = ? WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -96,7 +97,8 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
             statement.setString(3, subject.getTag_line());
             statement.setString(4, subject.getBrief_info());
             statement.setString(5, subject.getDescription());
-            statement.setInt(6, subject.getId());
+            statement.setBoolean(6, subject.getFeatured());
+            statement.setInt(7, subject.getId());
 
             int rowsAffected = statement.executeUpdate();
             success = rowsAffected > 0;
@@ -143,12 +145,13 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
                 .tag_line(resultSet.getString("tag_line"))
                 .brief_info(resultSet.getString("brief_info"))
                 .description(resultSet.getString("description"))
+                .featured(resultSet.getBoolean("featured"))
                 .build();
     }
 
     public List<Subject> getFeaturedSubjects() {
         List<Subject> list = new ArrayList<>();
-        String sql = "SELECT * FROM Subject WHERE tag_line IS NOT NULL";  // Subjects with tag_line are considered featured
+        String sql = "SELECT * FROM Subject WHERE featured = true";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);

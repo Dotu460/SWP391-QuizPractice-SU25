@@ -27,5 +27,5 @@ public class Slider {
     private String title;
     private String image;
     private String backlink;
-    private boolean status;
+    private Boolean status;
 }

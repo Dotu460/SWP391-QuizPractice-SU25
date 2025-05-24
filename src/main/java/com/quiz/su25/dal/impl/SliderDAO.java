@@ -71,7 +71,7 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
             statement.setString(1, slider.getTitle());
             statement.setString(2, slider.getImage());
             statement.setString(3, slider.getBacklink());
-            statement.setBoolean(4, slider.isStatus());
+            statement.setBoolean(4, slider.getStatus());
 
             statement.executeUpdate();
             resultSet = statement.getGeneratedKeys();
@@ -96,7 +96,7 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
             statement.setString(1, slider.getTitle());
             statement.setString(2, slider.getImage());
             statement.setString(3, slider.getBacklink());
-            statement.setBoolean(4, slider.isStatus());
+            statement.setBoolean(4, slider.getStatus());
             statement.setInt(5, slider.getId());
 
             int rowsAffected = statement.executeUpdate();

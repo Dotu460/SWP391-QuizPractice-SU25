@@ -57,7 +57,7 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
 
     @Override
     public int insert(Post post) {
-        String sql = "INSERT INTO Post (title, thumbnail, postDate) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO Post (title, thumbnail, postDate, author, content) VALUES (?, ?, ?, ?, ?)";
         int generatedId = -1;
         try {
             connection = getConnection();
@@ -65,6 +65,8 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
             statement.setString(1, post.getTitle());
             statement.setString(2, post.getThumbnail());
             statement.setDate(3, new java.sql.Date(post.getPostDate().getTime()));
+            statement.setString(4, post.getAuthor());
+            statement.setString(5, post.getContent());
 
             statement.executeUpdate();
             resultSet = statement.getGeneratedKeys();
@@ -81,7 +83,7 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
 
     @Override
     public boolean update(Post post) {
-        String sql = "UPDATE Post SET title = ?, thumbnail = ?, postDate = ? WHERE id = ?";
+        String sql = "UPDATE Post SET title = ?, thumbnail = ?, postDate = ?, author = ?, content = ? WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -89,7 +91,9 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
             statement.setString(1, post.getTitle());
             statement.setString(2, post.getThumbnail());
             statement.setDate(3, new java.sql.Date(post.getPostDate().getTime()));
-            statement.setInt(4, post.getId());
+            statement.setString(4, post.getAuthor());
+            statement.setString(5, post.getContent());
+            statement.setInt(6, post.getId());
 
             int rowsAffected = statement.executeUpdate();
             success = rowsAffected > 0;
@@ -134,6 +138,8 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
                 .title(resultSet.getString("title"))
                 .thumbnail(resultSet.getString("thumbnail"))
                 .postDate(resultSet.getDate("postDate"))
+                .author(resultSet.getString("author"))
+                .content(resultSet.getString("content"))
                 .build();
     }
 

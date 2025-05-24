@@ -26,5 +26,5 @@ public class Subject {
     private String tag_line;
     private String brief_info;
     private String description;
-    private boolean featured;
+    private Boolean featured;
 }

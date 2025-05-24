@@ -24,4 +24,6 @@ public class Post {
     private String title;
     private String thumbnail;
     private Date postDate;
+    private String author;
+    private String content;
 }
