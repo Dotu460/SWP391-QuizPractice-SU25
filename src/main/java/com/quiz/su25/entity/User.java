@@ -22,7 +22,4 @@ public class User {
     private String avatar_url;
     private Role role;
     private String status;
-    private LocalDateTime email_verified_at;
-    private String reset_password_token;
-    private LocalDateTime reset_password_expires;
 }
