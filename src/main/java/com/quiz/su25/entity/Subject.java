@@ -27,7 +27,5 @@ public class Subject {
     private String brief_info;
     private String description;
     private Integer subjectcategories_id;
-    private Integer status;
-    private Date created_at;
-    private Date updated_at;
+    private String status;
 }

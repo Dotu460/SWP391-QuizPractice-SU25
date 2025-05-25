@@ -61,6 +61,37 @@
                                         <div class="dashboard__content-title">
                                             <h4 class="title">My registration</h4>
                                         </div>
+                                        <!-- Filter and Search Form -->
+                                        <div class="row mb-4">
+                                            <div class="col-12">
+                                                <form action="my-registration" method="get" class="dashboard__filter-form">
+                                                    <div class="row g-3 align-items-end">
+                                                        <div class="col-md-4">
+                                                            <label for="subjectIdFilter" class="form-label">Filter by Subject:</label>
+                                                            <select name="subjectId" id="subjectIdFilter" class="form-select">
+                                                                <option value="0">All Subjects</option>
+                                                                <c:forEach var="subject" items="${allSubjects}">
+                                                                    <option value="${subject.id}" ${subject.id eq selectedSubjectId ? 'selected' : ''}>
+                                                                        ${subject.title}
+                                                                    </option>
+                                                                </c:forEach>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label for="searchNameInput" class="form-label">Search by Subject Name:</label>
+                                                            <input type="text" name="searchName" id="searchNameInput" class="form-control" value="${currentSearchName}" placeholder="Enter subject name...">
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <button type="submit" class="btn btn-primary w-100">Filter/Search</button>
+                                                        </div>
+                                                         <div class="col-md-2">
+                                                            <a href="my-registration" class="btn btn-secondary w-100">Clear</a>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <!-- End Filter and Search Form -->
                                         <div class="row">
                                             <div class="col-12">
                                                 <div class="dashboard__review-table">
@@ -85,10 +116,10 @@
                                                                     <p>${r.id}</p>
                                                                 </td>
                                                                 <td>
-                                                                    <p>${r.subject_id}</p>
+                                                                    <p>${subjectDAO.findById(r.subject_id).title}</p>
                                                                 </td>
                                                                 <td>
-                                                                    <p>${r.package_id}</p>
+                                                                    <p>${packageDAO.findById(r.package_id).sale_price}</p>
                                                                 </td>
                                                                 <td>
                                                                     <p>${r.registration_time}</p>
@@ -115,6 +146,40 @@
                                                     </tbody>
                                                 </table>
                                             </div>
+                                            <!-- Pagination -->
+                                            <div class="col-12 mt-4">
+                                                <nav aria-label="Page navigation">
+                                                    <ul class="pagination justify-content-center">
+                                                        <c:if test="${currentPage > 1}">
+                                                            <li class="page-item">
+                                                                <a class="page-link" href="my-registration?page=${currentPage - 1}&subjectId=${selectedSubjectId}&searchName=${currentSearchName}">Previous</a>
+                                                            </li>
+                                                        </c:if>
+
+                                                        <c:forEach begin="1" end="${totalPages}" var="i">
+                                                            <c:choose>
+                                                                <c:when test="${currentPage eq i}">
+                                                                    <li class="page-item active" aria-current="page">
+                                                                        <span class="page-link">${i}</span>
+                                                                    </li>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <li class="page-item">
+                                                                        <a class="page-link" href="my-registration?page=${i}&subjectId=${selectedSubjectId}&searchName=${currentSearchName}">${i}</a>
+                                                                    </li>
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </c:forEach>
+
+                                                        <c:if test="${currentPage < totalPages}">
+                                                            <li class="page-item">
+                                                                <a class="page-link" href="my-registration?page=${currentPage + 1}&subjectId=${selectedSubjectId}&searchName=${currentSearchName}">Next</a>
+                                                            </li>
+                                                        </c:if>
+                                                    </ul>
+                                                </nav>
+                                            </div>
+                                            <!-- End Pagination -->
                                         </div>
                                     </div>
                                 </div>

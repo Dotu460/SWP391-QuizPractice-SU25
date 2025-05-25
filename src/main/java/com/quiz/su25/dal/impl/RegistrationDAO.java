@@ -33,7 +33,8 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     @Override
     public boolean update(Registration t) {
         String sql = "UPDATE registrations "
-                + "SET user_id = ?, subname = ?, subject_id = ?, package_id = ?, registration_time = ?, total_cost = ?, status = ?, valid_from = ?, valid_to = ? "
+                + "SET user_id = ?, subname = ?, subject_id = ?, package_id = ?, "
+                + "registration_time = ?, total_cost = ?, status = ?, valid_from = ?, valid_to = ? "
                 + "WHERE id = ?";
         try {
             connection = getConnection();
@@ -76,7 +77,8 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
 
     @Override
     public int insert(Registration t) {
-        String sql = "INSERT INTO registrations (user_id, subject_id, package_id, registration_time, total_cost, status, valid_from, valid_to) "
+        String sql = "INSERT INTO registrations (user_id, subject_id, package_id, "
+                + "registration_time, total_cost, status, valid_from, valid_to) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             connection = getConnection();
@@ -130,6 +132,126 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
             closeResources();
         }
         return null;
+    }
+    
+    public int countAll() {
+        String sql = "SELECT COUNT(*) FROM registrations";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error countAll at class RegistrationDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return 0;
+    }
+
+    public List<Registration> findAllPaginated(int offset, int limit) {
+        String sql = "SELECT * FROM registrations ORDER BY registration_time DESC LIMIT ? OFFSET ?";
+        List<Registration> listRegistration = new ArrayList<>();
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, limit);
+            statement.setInt(2, offset);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Registration registration = getFromResultSet(resultSet);
+                listRegistration.add(registration);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error findAllPaginated at class RegistrationDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return listRegistration;
+    }
+
+    public int countByCriteria(Integer subjectId, String subjectNameSearch) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(DISTINCT r.id) FROM registrations r");
+        List<Object> params = new ArrayList<>();
+
+        if (subjectNameSearch != null && !subjectNameSearch.trim().isEmpty()) {
+            sql.append(" JOIN subject s ON r.subject_id = s.id");
+        }
+
+        sql.append(" WHERE 1=1");
+
+        if (subjectId != null && subjectId > 0) {
+            sql.append(" AND r.subject_id = ?");
+            params.add(subjectId);
+        }
+
+        if (subjectNameSearch != null && !subjectNameSearch.trim().isEmpty()) {
+            sql.append(" AND s.title LIKE ?");
+            params.add("%" + subjectNameSearch.trim() + "%");
+        }
+
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+            for (int i = 0; i < params.size(); i++) {
+                statement.setObject(i + 1, params.get(i));
+            }
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error countByCriteria at RegistrationDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return 0;
+    }
+
+    public List<Registration> findByCriteriaPaginated(Integer subjectId, String subjectNameSearch, int offset, int limit) {
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT r.* FROM registrations r");
+        List<Object> params = new ArrayList<>();
+
+        if (subjectNameSearch != null && !subjectNameSearch.trim().isEmpty()) {
+            sql.append(" JOIN subject s ON r.subject_id = s.id");
+        }
+
+        sql.append(" WHERE 1=1");
+
+        if (subjectId != null && subjectId > 0) {
+            sql.append(" AND r.subject_id = ?");
+            params.add(subjectId);
+        }
+
+        if (subjectNameSearch != null && !subjectNameSearch.trim().isEmpty()) {
+            sql.append(" AND s.title LIKE ?");
+            params.add("%" + subjectNameSearch.trim() + "%");
+        }
+
+        sql.append(" ORDER BY r.registration_time DESC LIMIT ? OFFSET ?");
+        params.add(limit);
+        params.add(offset);
+
+        List<Registration> listRegistration = new ArrayList<>();
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+            for (int i = 0; i < params.size(); i++) {
+                statement.setObject(i + 1, params.get(i));
+            }
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Registration registration = getFromResultSet(resultSet);
+                listRegistration.add(registration);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error findByCriteriaPaginated at RegistrationDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return listRegistration;
     }
 
     public static void main(String[] args) {
