@@ -14,6 +14,23 @@
         <!-- Header -->
         <jsp:include page="../common/user/header.jsp"></jsp:include>
 
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 hero-content">
+                        <h1 class="hero-title">Level Up<br>Your English</h1>
+                        <h2 class="hero-subtitle">with Quizzes</h2>
+                        <p class="hero-text">Master English through interactive quizzes, track your progress, and achieve your language learning goals.</p>
+                        <a href="${pageContext.request.contextPath}/quizzes" class="hero-button">Start Learning</a>
+                    </div>
+                    <div class="col-lg-6 hero-image">
+                        <img src="${pageContext.request.contextPath}/assets/images/hero-image.png" alt="English Learning" class="img-fluid">
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Hot Posts Section -->
         <section class="blog-area section-padding-120">
             <div class="container">
@@ -124,5 +141,137 @@
 
         <!-- JS -->
         <jsp:include page="../common/user/link_js_common.jsp"></jsp:include>
+
+        <style>
+        .hero-section {
+            padding: 120px 0;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 45%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(108, 92, 231, 0.08), rgba(74, 144, 226, 0.08));
+            border-radius: 0 0 0 100px;
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            padding-right: 60px;
+        }
+
+        .hero-title {
+            font-size: 72px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2D3748 0%, #1a202c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+        }
+
+        .hero-subtitle {
+            font-size: 52px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6C5CE7 0%, #4c3ee3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+            letter-spacing: -0.5px;
+        }
+
+        .hero-text {
+            font-size: 20px;
+            color: #4A5568;
+            margin-bottom: 40px;
+            line-height: 1.7;
+            max-width: 90%;
+        }
+
+        .hero-button {
+            display: inline-block;
+            padding: 18px 36px;
+            background: linear-gradient(135deg, #6C5CE7 0%, #4c3ee3 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.2);
+        }
+
+        .hero-button:hover {
+            background: linear-gradient(135deg, #5344c7 0%, #4133b3 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 92, 231, 0.3);
+        }
+
+        .hero-image {
+            position: relative;
+            z-index: 2;
+            text-align: right;
+            padding-left: 40px;
+        }
+
+        .hero-image img {
+            max-width: 100%;
+            height: auto;
+            animation: float 6s ease-in-out infinite;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        @media (max-width: 991px) {
+            .hero-section {
+                padding: 80px 0;
+            }
+            
+            .hero-content {
+                text-align: center;
+                padding-right: 0;
+                margin-bottom: 50px;
+            }
+            
+            .hero-title {
+                font-size: 52px;
+            }
+            
+            .hero-subtitle {
+                font-size: 40px;
+            }
+
+            .hero-text {
+                font-size: 18px;
+                margin: 0 auto 30px;
+            }
+
+            .hero-image {
+                text-align: center;
+                padding-left: 0;
+            }
+        }
+        </style>
     </body>
 </html> 

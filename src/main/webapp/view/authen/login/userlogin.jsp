@@ -23,101 +23,143 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
                 padding: 20px;
             }
             .login-box {
-                background: white;
+                background: rgba(255, 255, 255, 0.95);
                 padding: 40px;
                 border-radius: 20px;
-                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
                 width: 100%;
                 max-width: 450px;
-                transform: translateY(0);
-                transition: all 0.3s ease;
-            }
-            .login-box:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+                backdrop-filter: blur(10px);
             }
             .login-header {
                 text-align: center;
-                margin-bottom: 40px;
+                margin-bottom: 35px;
             }
             .login-header h2 {
                 font-size: 32px;
                 font-weight: 700;
-                color: #333;
+                color: #2D3748;
                 margin-bottom: 15px;
+                letter-spacing: -0.5px;
             }
             .login-header p {
-                color: #666;
+                color: #718096;
                 font-size: 16px;
                 line-height: 1.6;
             }
+            .google-btn {
+                width: 100%;
+                padding: 14px;
+                border: 2px solid #E2E8F0;
+                border-radius: 12px;
+                background: white;
+                color: #4A5568;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                cursor: pointer;
+                margin-bottom: 24px;
+                transition: all 0.3s ease;
+            }
+            .google-btn:hover {
+                background: #F7FAFC;
+                border-color: #CBD5E0;
+                transform: translateY(-1px);
+            }
+            .google-btn img {
+                width: 24px;
+                height: 24px;
+            }
+            .divider {
+                text-align: center;
+                position: relative;
+                margin: 24px 0;
+                color: #A0AEC0;
+            }
+            .divider::before,
+            .divider::after {
+                content: "";
+                position: absolute;
+                top: 50%;
+                width: 45%;
+                height: 1px;
+                background: #E2E8F0;
+            }
+            .divider::before {
+                left: 0;
+            }
+            .divider::after {
+                right: 0;
+            }
             .form-group {
-                margin-bottom: 25px;
+                margin-bottom: 24px;
             }
             .form-group label {
                 display: block;
-                margin-bottom: 10px;
-                color: #333;
+                margin-bottom: 8px;
+                color: #4A5568;
                 font-weight: 600;
                 font-size: 15px;
             }
             .form-control {
                 width: 100%;
-                padding: 15px;
-                border: 2px solid #eee;
+                padding: 14px 16px;
+                border: 2px solid #E2E8F0;
                 border-radius: 12px;
-                font-size: 15px;
+                font-size: 16px;
                 transition: all 0.3s ease;
-                background: #f8f9fa;
+                color: #2D3748;
             }
             .form-control:focus {
-                border-color: #4A90E2;
-                background: white;
-                box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+                border-color: #6B73FF;
+                box-shadow: 0 0 0 3px rgba(107, 115, 255, 0.1);
+                outline: none;
             }
             .form-control::placeholder {
-                color: #aaa;
+                color: #A0AEC0;
             }
             .form-footer {
                 display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 25px;
+                justify-content: flex-end;
+                margin-bottom: 24px;
             }
             .remember-me {
                 display: flex;
                 align-items: center;
-                gap: 10px;
-                cursor: pointer;
+                gap: 8px;
             }
             .remember-me input[type="checkbox"] {
                 width: 18px;
                 height: 18px;
+                border: 2px solid #E2E8F0;
+                border-radius: 4px;
                 cursor: pointer;
             }
             .remember-me span {
-                color: #555;
-                font-size: 14px;
+                color: #4A5568;
+                font-size: 15px;
             }
             .forgot-password {
-                color: #4A90E2;
+                color: #6B73FF;
                 text-decoration: none;
-                font-size: 14px;
                 font-weight: 600;
+                font-size: 15px;
                 transition: color 0.3s ease;
             }
             .forgot-password:hover {
-                color: #357ABD;
-                text-decoration: underline;
+                color: #000DFF;
+                text-decoration: none;
             }
             .sign-in-btn {
                 width: 100%;
                 padding: 16px;
-                background: #4A90E2;
+                background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
                 color: white;
                 border: none;
                 border-radius: 12px;
@@ -125,44 +167,39 @@
                 font-size: 16px;
                 cursor: pointer;
                 transition: all 0.3s ease;
-                position: relative;
-                overflow: hidden;
+                margin-bottom: 24px;
             }
             .sign-in-btn:hover {
-                background: #357ABD;
                 transform: translateY(-2px);
-            }
-            .sign-in-btn:active {
-                transform: translateY(0);
+                box-shadow: 0 7px 14px rgba(0, 13, 255, 0.1);
             }
             .signup-link {
                 text-align: center;
-                margin-top: 25px;
-                padding-top: 20px;
-                border-top: 1px solid #eee;
+                color: #4A5568;
+                font-size: 15px;
             }
             .signup-link a {
-                color: #4A90E2;
+                color: #6B73FF;
                 text-decoration: none;
                 font-weight: 600;
-                margin-left: 5px;
+                margin-left: 4px;
                 transition: color 0.3s ease;
             }
             .signup-link a:hover {
-                color: #357ABD;
-                text-decoration: underline;
+                color: #000DFF;
+                text-decoration: none;
             }
             .alert {
                 padding: 16px;
                 border-radius: 12px;
-                margin-bottom: 25px;
-                font-size: 14px;
+                margin-bottom: 24px;
+                font-size: 15px;
                 display: flex;
                 align-items: center;
                 gap: 12px;
             }
             .alert::before {
-                content: '';
+                content: "";
                 width: 24px;
                 height: 24px;
                 background-position: center;
@@ -171,7 +208,7 @@
             }
             .alert-danger {
                 background-color: #FEF2F2;
-                border: 1px solid #FEE2E2;
+                border: 1px solid #FCA5A5;
                 color: #DC2626;
             }
             .alert-danger::before {
@@ -179,7 +216,7 @@
             }
             .alert-success {
                 background-color: #F0FDF4;
-                border: 1px solid #DCFCE7;
+                border: 1px solid #86EFAC;
                 color: #16A34A;
             }
             .alert-success::before {
@@ -223,18 +260,15 @@
                     
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                        <input type="password" class="form-control" id="password" name="password" required 
+                               placeholder="Enter your password">
                     </div>
                     
                     <div class="form-footer">
-                        <label class="remember-me">
-                            <input type="checkbox" name="remember">
-                            <span>Remember me</span>
-                        </label>
-                        <a href="#" class="forgot-password">Forgot Password?</a>
+                        <a href="forgot-password" class="forgot-password">Forgot password?</a>
                     </div>
                     
-                    <button type="submit" class="sign-in-btn">Sign In</button>
+                    <button type="submit" class="sign-in-btn">Sign in to your account</button>
                     
                     <div class="signup-link">
                         Don't have an account? <a href="register">Sign up</a>
