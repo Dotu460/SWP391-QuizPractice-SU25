@@ -1,12 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
     <servlet>
+<<<<<<< HEAD
         <servlet-name>SliderDAO</servlet-name>
         <servlet-class>com.quiz.su25.dal.impl.SliderDAO</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>SliderDAO</servlet-name>
         <url-pattern>/slider</url-pattern>
+=======
+        <servlet-name>HomeController</servlet-name>
+        <servlet-class>com.quiz.su25.controller.HomeController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>UserProfileController</servlet-name>
+        <servlet-class>com.quiz.su25.controller.UserProfileController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>HomeController</servlet-name>
+        <url-pattern>/home</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UserProfileController</servlet-name>
+        <url-pattern>/UserProfile</url-pattern>
+>>>>>>> origin/feature-MyRegistration
     </servlet-mapping>
     <session-config>
         <session-timeout>

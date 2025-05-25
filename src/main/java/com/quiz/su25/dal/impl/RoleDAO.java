@@ -11,6 +11,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  *
@@ -45,17 +47,57 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
 
     @Override
     public boolean update(Role t) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        String sql = "UPDATE Role SET role_name = ?, description = ?, created_at = ? WHERE id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, t.getRole_name());
+            statement.setString(2, t.getDescription());
+            statement.setDate(3, t.getCreated_at());
+            statement.setInt(4, t.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error update at class RoleDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return false;
     }
+
 
     @Override
     public boolean delete(Role t) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        String sql = "DELETE FROM Role WHERE id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, t.getId());
+            statement.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Error delete at class RoleDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return false;   
     }
 
     @Override
     public int insert(Role t) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        String sql = "INSERT INTO Role (role_name, description, created_at) VALUES (?, ?, ?)";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, t.getRole_name());
+            statement.setString(2, t.getDescription());
+            statement.setDate(3, t.getCreated_at());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error insert at class RoleDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return 0;
     }
 
     @Override
@@ -73,6 +115,34 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
     @Override
     public Role findById(Integer id) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+//    @Override
+    public Map<Integer, Role> findAllMap() {
+        String sql = "Select * from role";
+        Map<Integer, Role> mapRole = new HashMap<>();
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Role role = getFromResultSet(resultSet);
+                mapRole.put(role.getId(), role);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error findAllMap at class RoleDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return mapRole;
+    }
+
+    public static void main(String[] args) {
+        RoleDAO roleDAO = new RoleDAO();
+        Map<Integer, Role> mapRole = roleDAO.findAllMap();
+        for (Map.Entry<Integer, Role> entry : mapRole.entrySet()) {
+            System.out.println(entry.getKey() + " - " + entry.getValue());
+        }
     }
 
 }

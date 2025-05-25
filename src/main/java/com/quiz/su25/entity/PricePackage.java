@@ -29,6 +29,6 @@ public class PricePackage {
     private String status;
     private String description;
     private Date created_at;
-    private Date update_at;
+    private Date updated_at;
             
 }

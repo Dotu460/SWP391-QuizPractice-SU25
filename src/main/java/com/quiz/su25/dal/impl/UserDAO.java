@@ -25,7 +25,9 @@ public class UserDAO extends DBContext implements I_DAO<User> {
 
     @Override
     public List<User> findAll() {
-        String sql = "SELECT id, full_name, email, password, gender, mobile, avatar_url, role_id, status FROM [User]"; // Giả sử tên bảng là User
+        String sql = "SELECT "
+                + "id, full_name, email, password, gender, mobile, avatar_url, role_id, status"
+                + " FROM users"; // Giả sử tên bảng là User
         List<User> listUser = new ArrayList<>();
         try {
             connection = getConnection();
@@ -45,7 +47,7 @@ public class UserDAO extends DBContext implements I_DAO<User> {
 
     @Override
     public User findById(Integer id) {
-        String sql = "SELECT id, full_name, email, password, gender, mobile, avatar_url, role_id, status FROM [User] WHERE id = ?";
+        String sql = "SELECT id, full_name, email, password, gender, mobile, avatar_url, role_id, status FROM users WHERE id = ?";
         User user = null;
         try {
             connection = getConnection();
@@ -65,7 +67,9 @@ public class UserDAO extends DBContext implements I_DAO<User> {
 
     @Override
     public int insert(User user) {
-        String sql = "INSERT INTO [User] (full_name, email, password, gender, mobile, avatar_url, role_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users "
+                + "(full_name, email, password, gender, mobile, avatar_url, role_id, status)"
+                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         int generatedId = -1;
         try {
             connection = getConnection();
@@ -94,7 +98,12 @@ public class UserDAO extends DBContext implements I_DAO<User> {
 
     @Override
     public boolean update(User user) {
-        String sql = "UPDATE [User] SET full_name = ?, email = ?, password = ?, gender = ?, mobile = ?, avatar_url = ?, role_id = ?, status = ? WHERE id = ?";
+        String sql = "UPDATE users "
+                + "SET full_name = ?, email = ?, password = ?"
+                + ", gender = ?, mobile = ?, avatar_url = ?"
+                + ", role_id = ?, status = ?"
+                + ""
+                + " WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -128,7 +137,7 @@ public class UserDAO extends DBContext implements I_DAO<User> {
     }
 
     public boolean deleteById(Integer id) {
-        String sql = "DELETE FROM [User] WHERE id = ?";
+        String sql = "DELETE FROM sers WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -190,6 +199,62 @@ public User login(String email, String password) {
     }
     return null;
 }
+
+//    @Override
+//    public Map<Integer, User> findAllMap() {
+//        String sql = "Select * from users";
+//        Map<Integer, User> mapUser = new HashMap<>();
+//        try {
+//            connection = getConnection();
+//            statement = connection.prepareStatement(sql);
+//            resultSet = statement.executeQuery();
+//            while (resultSet.next()) {
+//                User user = getFromResultSet(resultSet);
+//                mapUser.put(user.getId(), user);
+//            }
+//        } catch (SQLException e) {
+//            System.out.println("Error findAllMap at class UserDAO: " + e.getMessage());
+//        } finally {
+//            closeResources();
+//        }
+//        return mapUser;
+//    }
+
+    public static void main(String[] args) {
+        UserDAO userDAO = new UserDAO();
+
+        // Test findAll
+        System.out.println("Testing findAll():");
+        List<User> allUsers = userDAO.findAll();
+        if (allUsers.isEmpty()) {
+            System.out.println("No users found.");
+        } else {
+            for (User user : allUsers) {
+                System.out.println(user);
+            }
+        }
+        System.out.println("--------------------");
+
+        // Test findById
+        System.out.println("Testing findById(1):");
+        User userById = userDAO.findById(1); // Assuming a user with ID 1 exists
+        if (userById != null) {
+            System.out.println(userById);
+        } else {
+            System.out.println("User with ID 1 not found.");
+        }
+        System.out.println("--------------------");
+
+        System.out.println("Testing findById(100):"); // Test with a non-existent ID
+        User nonExistentUser = userDAO.findById(100);
+        if (nonExistentUser != null) {
+            System.out.println(nonExistentUser);
+        } else {
+            System.out.println("User with ID 100 not found.");
+        }
+        System.out.println("--------------------");
+    }
+
 }
 
 

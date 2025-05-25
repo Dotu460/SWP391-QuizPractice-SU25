@@ -4,14 +4,15 @@
  */
 package com.quiz.su25.dal.impl;
 
-import com.quiz.su25.dal.DBContext;
-import com.quiz.su25.dal.I_DAO;
-import com.quiz.su25.entity.Subject;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.quiz.su25.dal.DBContext;
+import com.quiz.su25.dal.I_DAO;
+import com.quiz.su25.entity.Subject;
 
 /**
  *
@@ -60,7 +61,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     @Override
     public int insert(Subject subject) {
-        String sql = "INSERT INTO Subject (title, thumbnail_url, tag_line, brief_info, description, featured) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Subject (title, thumbnail_url, tag_line, description, featured, subjectcategories_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
         int generatedId = -1;
         try {
             connection = getConnection();
@@ -68,9 +69,10 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
             statement.setString(1, subject.getTitle());
             statement.setString(2, subject.getThumbnail_url());
             statement.setString(3, subject.getTag_line());
-            statement.setString(4, subject.getBrief_info());
-            statement.setString(5, subject.getDescription());
-            statement.setBoolean(6, subject.getFeatured());
+            statement.setString(4, subject.getDescription());
+            statement.setBoolean(5, subject.getFeatured());
+            statement.setInt(6, subject.getSubjectcategories_id());
+            statement.setString(7, subject.getStatus());
 
             statement.executeUpdate();
             resultSet = statement.getGeneratedKeys();
@@ -87,7 +89,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     @Override
     public boolean update(Subject subject) {
-        String sql = "UPDATE Subject SET title = ?, thumbnail_url = ?, tag_line = ?, brief_info = ?, description = ?, featured = ? WHERE id = ?";
+        String sql = "UPDATE Subject SET title = ?, thumbnail_url = ?, tag_line = ?, description = ?, featured = ?, subjectcategories_id = ?, status = ? WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -95,10 +97,11 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
             statement.setString(1, subject.getTitle());
             statement.setString(2, subject.getThumbnail_url());
             statement.setString(3, subject.getTag_line());
-            statement.setString(4, subject.getBrief_info());
-            statement.setString(5, subject.getDescription());
-            statement.setBoolean(6, subject.getFeatured());
-            statement.setInt(7, subject.getId());
+            statement.setString(4, subject.getDescription());
+            statement.setBoolean(5, subject.getFeatured());
+            statement.setInt(6, subject.getSubjectcategories_id());
+            statement.setString(7, subject.getStatus());
+            statement.setInt(8, subject.getId());
 
             int rowsAffected = statement.executeUpdate();
             success = rowsAffected > 0;
@@ -143,9 +146,10 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
                 .title(resultSet.getString("title"))
                 .thumbnail_url(resultSet.getString("thumbnail_url"))
                 .tag_line(resultSet.getString("tag_line"))
-                .brief_info(resultSet.getString("brief_info"))
                 .description(resultSet.getString("description"))
                 .featured(resultSet.getBoolean("featured"))
+                .subjectcategories_id(resultSet.getInt("subjectcategories_id"))
+                .status(resultSet.getString("status"))
                 .build();
     }
 
