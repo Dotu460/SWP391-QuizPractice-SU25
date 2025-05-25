@@ -61,37 +61,6 @@
                                         <div class="dashboard__content-title">
                                             <h4 class="title">My registration</h4>
                                         </div>
-                                        <!-- Filter and Search Form -->
-                                        <div class="row mb-4">
-                                            <div class="col-12">
-                                                <form action="my-registration" method="get" class="dashboard__filter-form">
-                                                    <div class="row g-3 align-items-end">
-                                                        <div class="col-md-4">
-                                                            <label for="subjectIdFilter" class="form-label">Filter by Subject:</label>
-                                                            <select name="subjectId" id="subjectIdFilter" class="form-select">
-                                                                <option value="0">All Subjects</option>
-                                                                <c:forEach var="subject" items="${allSubjects}">
-                                                                    <option value="${subject.id}" ${subject.id eq selectedSubjectId ? 'selected' : ''}>
-                                                                        ${subject.title}
-                                                                    </option>
-                                                                </c:forEach>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <label for="searchNameInput" class="form-label">Search by Subject Name:</label>
-                                                            <input type="text" name="searchName" id="searchNameInput" class="form-control" value="${currentSearchName}" placeholder="Enter subject name...">
-                                                        </div>
-                                                        <div class="col-md-2">
-                                                            <button type="submit" class="btn btn-primary w-100">Filter/Search</button>
-                                                        </div>
-                                                         <div class="col-md-2">
-                                                            <a href="my-registration" class="btn btn-secondary w-100">Clear</a>
-                                                        </div>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                        <!-- End Filter and Search Form -->
                                         <div class="row">
                                             <div class="col-12">
                                                 <div class="dashboard__review-table">
@@ -152,7 +121,7 @@
                                                     <ul class="pagination justify-content-center">
                                                         <c:if test="${currentPage > 1}">
                                                             <li class="page-item">
-                                                                <a class="page-link" href="my-registration?page=${currentPage - 1}&subjectId=${selectedSubjectId}&searchName=${currentSearchName}">Previous</a>
+                                                                <a class="page-link" href="my-registration?page=${currentPage - 1}">Previous</a>
                                                             </li>
                                                         </c:if>
 
@@ -165,7 +134,7 @@
                                                                 </c:when>
                                                                 <c:otherwise>
                                                                     <li class="page-item">
-                                                                        <a class="page-link" href="my-registration?page=${i}&subjectId=${selectedSubjectId}&searchName=${currentSearchName}">${i}</a>
+                                                                        <a class="page-link" href="my-registration?page=${i}">${i}</a>
                                                                     </li>
                                                                 </c:otherwise>
                                                             </c:choose>
@@ -173,7 +142,7 @@
 
                                                         <c:if test="${currentPage < totalPages}">
                                                             <li class="page-item">
-                                                                <a class="page-link" href="my-registration?page=${currentPage + 1}&subjectId=${selectedSubjectId}&searchName=${currentSearchName}">Next</a>
+                                                                <a class="page-link" href="my-registration?page=${currentPage + 1}">Next</a>
                                                             </li>
                                                         </c:if>
                                                     </ul>

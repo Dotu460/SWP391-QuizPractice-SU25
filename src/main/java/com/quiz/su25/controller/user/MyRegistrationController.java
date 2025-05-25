@@ -4,7 +4,6 @@ import com.quiz.su25.config.GlobalConfig;
 import com.quiz.su25.dal.impl.RegistrationDAO;
 import com.quiz.su25.entity.Registration;
 import com.quiz.su25.entity.User;
-import com.quiz.su25.entity.Subject;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -36,6 +35,7 @@ public class MyRegistrationController extends HttpServlet {
         myRegistrationDAO = new RegistrationDAO();
         packageDAO = new PricePackageDAO();
         subjectDAO = new SubjectDAO();
+
     }
     
     
@@ -61,24 +61,6 @@ public class MyRegistrationController extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
 
-        // Fetch all subjects for the filter dropdown
-        List<Subject> allSubjects = subjectDAO.findAll();
-        request.setAttribute("allSubjects", allSubjects);
-
-        // Get filter/search parameters from request
-        String subjectIdParam = request.getParameter("subjectId");
-        Integer filterSubjectId = null;
-        if (subjectIdParam != null && !subjectIdParam.isEmpty() && !"0".equals(subjectIdParam)) { // Assuming 0 or empty means no filter
-            try {
-                filterSubjectId = Integer.parseInt(subjectIdParam);
-            } catch (NumberFormatException e) {
-                // Log error or handle, ignore invalid subjectId
-            }
-        }
-        String searchSubjectName = request.getParameter("searchName");
-        if (searchSubjectName != null && searchSubjectName.trim().isEmpty()) {
-            searchSubjectName = null; // Treat empty search as no search
-        }
 
         int currentPage = 1;
         String pageParam = request.getParameter("page");
@@ -93,7 +75,7 @@ public class MyRegistrationController extends HttpServlet {
             }
         }
         
-        int totalRecords = myRegistrationDAO.countByCriteria(filterSubjectId, searchSubjectName);
+        int totalRecords = myRegistrationDAO.countAll();
         int totalPages = (int) Math.ceil((double) totalRecords / RECORDS_PER_PAGE);
 
         if (currentPage > totalPages && totalPages > 0) {
@@ -105,17 +87,16 @@ public class MyRegistrationController extends HttpServlet {
 
         int offset = (currentPage - 1) * RECORDS_PER_PAGE;
         
-        List<Registration> listRegistration = myRegistrationDAO.findByCriteriaPaginated(filterSubjectId, searchSubjectName, offset, RECORDS_PER_PAGE);
+        List<Registration> listRegistration = myRegistrationDAO.findAllPaginated(offset, RECORDS_PER_PAGE);
 
         request.setAttribute("listRegistration", listRegistration);
         request.setAttribute("subjectDAO", subjectDAO);
         request.setAttribute("packageDAO", packageDAO);
         request.setAttribute("currentPage", currentPage);
         request.setAttribute("totalPages", totalPages);
-        request.setAttribute("selectedSubjectId", filterSubjectId);
-        request.setAttribute("currentSearchName", searchSubjectName);
 
         request.getRequestDispatcher("view/user/registration/my-registration.jsp").forward(request, response);
+
     }
 
     @Override
