@@ -20,7 +20,7 @@
         <!-- Place favicon.ico in the root directory -->
 
         <!-- CSS here -->
-        <jsp:include page="../../common/user/link_css_common.jsp"></jsp:include>
+        <jsp:include page="../common/user/link_css_common.jsp"></jsp:include>
     </head>
 
     <body>
@@ -31,7 +31,7 @@
         <!-- Scroll-top-end-->
 
         <!-- header-area -->
-        <jsp:include page="../../common/user/header.jsp"></jsp:include>
+        <jsp:include page="../common/user/header.jsp"></jsp:include>
         <!-- header-area-end -->
 
         <!-- main-area -->
@@ -202,7 +202,7 @@
         <!-- main-area-end -->
 
         <!-- footer-area -->
-        <jsp:include page="../../common/user/footer.jsp"></jsp:include>
+        <jsp:include page="../common/user/footer.jsp"></jsp:include>
         <!-- footer-area-end -->
 
         <!-- JS here -->

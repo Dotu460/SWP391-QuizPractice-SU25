@@ -24,7 +24,7 @@ import java.util.List;
  *
  * @author FPT
  */
-@WebServlet("/my-home")
+@WebServlet("/home")
 public class HomeController extends HttpServlet {
    
     private SliderDAO sliderDAO;
@@ -82,7 +82,7 @@ public class HomeController extends HttpServlet {
             request.setAttribute("sliders", sliders);
             request.setAttribute("hotPosts", hotPosts);
             request.setAttribute("subjects", subjects);
-            request.getRequestDispatcher("home.jsp").forward(request, response);
+            request.getRequestDispatcher("view/home/homepage.jsp").forward(request, response);
         } catch (Exception e) {
             System.out.println("Error in HomeController doGet: " + e.getMessage());
             response.sendRedirect("error.jsp");
