@@ -145,8 +145,4 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
                 .status(resultSet.getBoolean("status"))
                 .build();
     }
-
-    public List<Slider> getAllSliders() {
-        return findAll();
-    }
 }
