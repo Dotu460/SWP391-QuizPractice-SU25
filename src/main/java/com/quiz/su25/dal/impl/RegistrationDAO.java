@@ -134,42 +134,155 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
         return null;
     }
     
-    public int countAll() {
-        String sql = "SELECT COUNT(*) FROM registrations";
+    // Overloaded method for filtering by subjectId
+    public int countAll(Integer subjectId) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM registrations");
+        List<Object> params = new ArrayList<>();
+        if (subjectId != null) {
+            sql.append(" WHERE subject_id = ?");
+            params.add(subjectId);
+        }
         try {
             connection = getConnection();
-            statement = connection.prepareStatement(sql);
+            statement = connection.prepareStatement(sql.toString());
+            for (int i = 0; i < params.size(); i++) {
+                statement.setObject(i + 1, params.get(i));
+            }
             resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return resultSet.getInt(1);
             }
         } catch (SQLException e) {
-            System.out.println("Error countAll at class RegistrationDAO: " + e.getMessage());
+            System.out.println("Error countAll(subjectId) at class RegistrationDAO: " + e.getMessage());
         } finally {
             closeResources();
         }
         return 0;
     }
 
-    public List<Registration> findAllPaginated(int offset, int limit) {
-        String sql = "SELECT * FROM registrations ORDER BY registration_time DESC LIMIT ? OFFSET ?";
+    // Original method calls overloaded one
+    public int countAll() {
+        return countAll(null);
+    }
+
+    // Overloaded method for filtering by subjectId
+    public List<Registration> findAllPaginated(int offset, int limit, Integer subjectId) {
+        StringBuilder sql = new StringBuilder("SELECT * FROM registrations");
+        List<Object> params = new ArrayList<>();
+        if (subjectId != null) {
+            sql.append(" WHERE subject_id = ?");
+            params.add(subjectId);
+        }
+        sql.append(" ORDER BY registration_time DESC LIMIT ? OFFSET ?");
+        params.add(limit);
+        params.add(offset);
+        
         List<Registration> listRegistration = new ArrayList<>();
         try {
             connection = getConnection();
-            statement = connection.prepareStatement(sql);
-            statement.setInt(1, limit);
-            statement.setInt(2, offset);
+            statement = connection.prepareStatement(sql.toString());
+            for (int i = 0; i < params.size(); i++) {
+                statement.setObject(i + 1, params.get(i));
+            }
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 Registration registration = getFromResultSet(resultSet);
                 listRegistration.add(registration);
             }
         } catch (SQLException e) {
-            System.out.println("Error findAllPaginated at class RegistrationDAO: " + e.getMessage());
+            System.out.println("Error findAllPaginated(subjectId) at class RegistrationDAO: " + e.getMessage());
         } finally {
             closeResources();
         }
         return listRegistration;
+    }
+
+    // Original method calls overloaded one
+    public List<Registration> findAllPaginated(int offset, int limit) {
+        return findAllPaginated(offset, limit, null);
+    }
+
+    // Overloaded method for filtering by subjectId
+    public int countBySubjectNameSearch(String subjectNameSearch, Integer subjectId) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(DISTINCT r.id) FROM registrations r JOIN subject s ON r.subject_id = s.id");
+        List<Object> params = new ArrayList<>();
+
+        sql.append(" WHERE 1=1");
+
+        if (subjectNameSearch != null && !subjectNameSearch.trim().isEmpty()) {
+            sql.append(" AND s.title LIKE ?");
+            params.add("%" + subjectNameSearch.trim() + "%");
+        }
+        if (subjectId != null) {
+            sql.append(" AND r.subject_id = ?");
+            params.add(subjectId);
+        }
+
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+            for (int i = 0; i < params.size(); i++) {
+                statement.setObject(i + 1, params.get(i));
+            }
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error countBySubjectNameSearch(subjectId) at RegistrationDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return 0;
+    }
+    
+    public int countBySubjectNameSearch(String subjectNameSearch) {
+        return countBySubjectNameSearch(subjectNameSearch, null);
+    }
+
+    // Overloaded method for filtering by subjectId
+    public List<Registration> findBySubjectNameSearchPaginated(String subjectNameSearch, int offset, int limit, Integer subjectId) {
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT r.* FROM registrations r JOIN subject s ON r.subject_id = s.id");
+        List<Object> params = new ArrayList<>();
+
+        sql.append(" WHERE 1=1");
+
+        if (subjectNameSearch != null && !subjectNameSearch.trim().isEmpty()) {
+            sql.append(" AND s.title LIKE ?");
+            params.add("%" + subjectNameSearch.trim() + "%");
+        }
+        if (subjectId != null) {
+            sql.append(" AND r.subject_id = ?");
+            params.add(subjectId);
+        }
+
+        sql.append(" ORDER BY r.registration_time DESC LIMIT ? OFFSET ?");
+        params.add(limit);
+        params.add(offset);
+
+        List<Registration> listRegistration = new ArrayList<>();
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+            for (int i = 0; i < params.size(); i++) {
+                statement.setObject(i + 1, params.get(i));
+            }
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Registration registration = getFromResultSet(resultSet);
+                listRegistration.add(registration);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error findBySubjectNameSearchPaginated(subjectId) at RegistrationDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return listRegistration;
+    }
+
+    // Original method calls overloaded one
+    public List<Registration> findBySubjectNameSearchPaginated(String subjectNameSearch, int offset, int limit) {
+        return findBySubjectNameSearchPaginated(subjectNameSearch, offset, limit, null);
     }
 
     public static void main(String[] args) {

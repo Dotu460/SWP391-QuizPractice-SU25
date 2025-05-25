@@ -106,9 +106,15 @@
                                                                     <p>${r.valid_to}</p>
                                                                 </td>
                                                                 <td>
-                                                                    <div class="dashboard__review-action">
-                                                                        <a href="#" title="Delete"><i class="skillgro-bin"></i></a>
-                                                                    </div>
+                                                                    <c:if test="${r.status eq 'submit'}">
+                                                                        <div class="dashboard__review-action">
+                                                                            <form action="my-registration" method="post" style="display: inline;">
+                                                                                <input type="hidden" name="action" value="delete">
+                                                                                <input type="hidden" name="id" value="${r.id}">
+                                                                                <button type="submit" title="Delete" class="btn btn-link p-0 m-0 align-baseline"><i class="skillgro-bin"></i></button>
+                                                                            </form>
+                                                                        </div>
+                                                                    </c:if>
                                                                 </td>
                                                             </tr>
                                                         </c:forEach>
@@ -121,7 +127,7 @@
                                                     <ul class="pagination justify-content-center">
                                                         <c:if test="${currentPage > 1}">
                                                             <li class="page-item">
-                                                                <a class="page-link" href="my-registration?page=${currentPage - 1}">Previous</a>
+                                                                <a class="page-link" href="my-registration?page=${currentPage - 1}&searchName=${currentSearchName}&subjectId=${currentSubjectId != null ? currentSubjectId : 0}">Previous</a>
                                                             </li>
                                                         </c:if>
 
@@ -134,7 +140,7 @@
                                                                 </c:when>
                                                                 <c:otherwise>
                                                                     <li class="page-item">
-                                                                        <a class="page-link" href="my-registration?page=${i}">${i}</a>
+                                                                        <a class="page-link" href="my-registration?page=${i}&searchName=${currentSearchName}&subjectId=${currentSubjectId != null ? currentSubjectId : 0}">${i}</a>
                                                                     </li>
                                                                 </c:otherwise>
                                                             </c:choose>
@@ -142,7 +148,7 @@
 
                                                         <c:if test="${currentPage < totalPages}">
                                                             <li class="page-item">
-                                                                <a class="page-link" href="my-registration?page=${currentPage + 1}">Next</a>
+                                                                <a class="page-link" href="my-registration?page=${currentPage + 1}&searchName=${currentSearchName}&subjectId=${currentSubjectId != null ? currentSubjectId : 0}">Next</a>
                                                             </li>
                                                         </c:if>
                                                     </ul>

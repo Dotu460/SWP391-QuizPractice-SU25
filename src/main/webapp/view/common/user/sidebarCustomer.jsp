@@ -1,24 +1,30 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <div class="col-lg-3">
     <!-- Dropdown Search Box -->
-    <div class="dashboard__sidebar-title mt-30 mb-20">
-        <h6 class="title"></h6>
+    <div class="dashboard__sidebar-title mt-30 mb-10">
+        <h6 class="title">Search & Filter</h6>
     </div>
     <div style="margin-bottom:50px;">
-        <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 3px; overflow: hidden;">
-            <select style="border: none; padding: 10px; height: 100%; outline: none;">
-                <option>Categories</option>
-                <option>Business</option>
-                <option>Data Science</option>
-                <option>Art & Design</option>
-                <option>Marketing</option>
-                <option>Finance</option>
-            </select>
-            <input type="text" placeholder="Search For Course . . ." style="flex: 1; border: none; padding: 10px; outline: none;" />
-            <button style="background-color: #6c63ff; border: none; padding: 10px; cursor: pointer;">
-                <img src="search-icon.png" alt="Search" style="width: 20px; height: 20px;" />
+        <form action="${pageContext.request.contextPath}/my-registration" method="get" class="dashboard_sidebar_search-form">
+            <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 3px; overflow: hidden; margin-bottom: 10px;">
+                <input type="text" name="searchName" placeholder="Search by Subject Name" value="${currentSearchName}" style="flex: 1; border: none; padding: 10px; outline: none;" />
+            </div>
+            
+            <!-- Subject Filter Dropdown -->
+            <div style="border: 1px solid #ccc; border-radius: 3px; overflow: hidden; margin-bottom:10px;">
+                <select name="subjectId" style="width: 100%; border: none; padding: 10px; outline: none; background-color: white;">
+                    <option value="0">All Subjects</option>
+                    <c:forEach var="subject" items="${allSubjects}">
+                        <option value="${subject.id}" ${subject.id eq currentSubjectId ? 'selected' : ''}>${subject.title}</option>
+                    </c:forEach>
+                </select>
+            </div>
+            
+            <button type="submit" style="background-color: #007bff; color: white; border: none; padding: 10px 15px; cursor: pointer; width:100%; border-radius:3px;">
+                Apply Filters
             </button>
-        </div>
+        </form>
     </div>
 
     <div class="dashboard__sidebar-wrap">
