@@ -12,7 +12,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="x-ua-compatible" content="ie=edge">
-        <title>EngQuiz - Online English Learning Platform</title>
+        <title>SkillGro - Online English Learning Platform</title>
         <meta name="description" content="EngQuiz - Online English Learning Platform">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -21,6 +21,7 @@
 
         <!-- CSS here -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
         <jsp:include page="../common/user/link_css_common.jsp"></jsp:include>
         <style>
             .slider-section {
@@ -29,7 +30,7 @@
             }
             .hero-section {
                 padding: 60px 0;
-                background: #f8f9fa;
+                background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
                 position: relative;
                 overflow: hidden;
             }
@@ -39,16 +40,43 @@
                 z-index: 2;
             }
             .hero-title {
-                font-size: 48px;
-                font-weight: 700;
-                color: #2D3748;
-                margin-bottom: 20px;
-                line-height: 1.2;
+                font-size: 64px;
+                font-weight: 800;
+                background: linear-gradient(135deg, #2D3748 0%, #1a202c 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                line-height: 1.1;
+                margin-bottom: 15px;
             }
             .hero-subtitle {
-                font-size: 32px;
+                font-size: 48px;
+                font-weight: 700;
+                background: linear-gradient(135deg, #6C5CE7 0%, #4c3ee3 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                margin-bottom: 24px;
+            }
+            .hero-text {
+                font-size: 18px;
                 color: #4A5568;
-                margin-bottom: 30px;
+                margin-bottom: 32px;
+                line-height: 1.6;
+            }
+            .hero-button {
+                display: inline-block;
+                padding: 16px 32px;
+                background: linear-gradient(135deg, #6C5CE7 0%, #4c3ee3 100%);
+                color: white !important;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 18px;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(108, 92, 231, 0.2);
+            }
+            .hero-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(108, 92, 231, 0.3);
             }
             .hero-image-wrapper {
                 position: relative;
@@ -62,18 +90,56 @@
                 height: auto;
                 position: relative;
                 z-index: 2;
+                animation: float 6s ease-in-out infinite;
             }
-            .hero-shape {
-                position: absolute;
-                z-index: 1;
+            @keyframes float {
+                0% { transform: translateY(0px); }
+                50% { transform: translateY(-20px); }
+                100% { transform: translateY(0px); }
             }
-            .hero-shape-1 {
-                top: 0;
-                right: 0;
+            .swiper-button-next,
+            .swiper-button-prev {
+                color: #6C5CE7;
+                width: 50px;
+                height: 50px;
+                background: white;
+                border-radius: 50%;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             }
-            .hero-shape-2 {
-                bottom: 0;
-                left: 0;
+            .swiper-button-next:after,
+            .swiper-button-prev:after {
+                font-size: 20px;
+            }
+            .swiper-pagination-bullet {
+                width: 12px;
+                height: 12px;
+                background: #6C5CE7;
+                opacity: 0.5;
+            }
+            .swiper-pagination-bullet-active {
+                opacity: 1;
+                background: #6C5CE7;
+            }
+            @media (max-width: 991px) {
+                .hero-section {
+                    padding: 40px 0;
+                }
+                
+                .hero-content {
+                    text-align: center;
+                    padding: 30px 0;
+                }
+                
+                .hero-title {
+                    font-size: 48px;
+                }
+                
+                .hero-subtitle {
+                    font-size: 36px;
+                }
+                .hero-text {
+                    font-size: 16px;
+                }
             }
             .hot-posts {
                 padding: 60px 0;
@@ -235,22 +301,78 @@
         <main>
             <!-- Hero Section -->
             <section class="hero-section">
-                <div class="container">
-                    <div class="row align-items-center">
-                        <div class="col-lg-6">
-                            <div class="hero-content">
-                                <h1 class="hero-title">Level Up<br>Your English</h1>
-                                <h2 class="hero-subtitle">with Quizzes</h2>
+                <div class="swiper hero-slider">
+                    <div class="swiper-wrapper">
+                        <!-- Slide 1 -->
+                        <div class="swiper-slide">
+                            <div class="container">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-6">
+                                        <div class="hero-content">
+                                            <h1 class="hero-title">Level Up<br>Your English</h1>
+                                            <h2 class="hero-subtitle">with Quizzes</h2>
+                                            <p class="hero-text">Master English through interactive quizzes, track your progress, and achieve your language learning goals.</p>
+                                            <a href="${pageContext.request.contextPath}/quizzes" class="hero-button">Start Learning</a>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="hero-image-wrapper">
+                                            <img src="${pageContext.request.contextPath}/assets/banner/banner_img.png" alt="Education" class="hero-image">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-lg-6">
-                            <div class="hero-image-wrapper">
-                                <img src="${pageContext.request.contextPath}/assets/banner/banner_img.png" alt="Education" class="hero-image">
-                                <img src="${pageContext.request.contextPath}/assets/banner/banner_shape01.png" alt="" class="hero-shape hero-shape-1">
-                                <img src="${pageContext.request.contextPath}/assets/banner/banner_shape02.png" alt="" class="hero-shape hero-shape-2">
+
+                        <!-- Slide 2 -->
+                        <div class="swiper-slide">
+                            <div class="container">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-6">
+                                        <div class="hero-content">
+                                            <h1 class="hero-title">Practice<br>Daily</h1>
+                                            <h2 class="hero-subtitle">with Friends</h2>
+                                            <p class="hero-text">Join our community of learners, compete with friends, and improve your English skills together.</p>
+                                            <a href="${pageContext.request.contextPath}/practice" class="hero-button">Join Practice</a>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="hero-image-wrapper">
+                                            <img src="${pageContext.request.contextPath}/assets/banner/h3_hero_img.png" alt="Practice" class="hero-image">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Slide 3 -->
+                        <div class="swiper-slide">
+                            <div class="container">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-6">
+                                        <div class="hero-content">
+                                            <h1 class="hero-title">Track Your<br>Progress</h1>
+                                            <h2 class="hero-subtitle">with Analytics</h2>
+                                            <p class="hero-text">Monitor your learning journey with detailed analytics and personalized recommendations.</p>
+                                            <a href="${pageContext.request.contextPath}/dashboard" class="hero-button">View Dashboard</a>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="hero-image-wrapper">
+                                            <img src="${pageContext.request.contextPath}/assets/banner/h5_hero_img.png" alt="Analytics" class="hero-image">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Add Navigation -->
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+
+                    <!-- Add Pagination -->
+                    <div class="swiper-pagination"></div>
                 </div>
             </section>
 
@@ -410,5 +532,27 @@
 
         <!-- JS here -->
         <jsp:include page="../common/js/"></jsp:include>
+        <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+        <script>
+            var swiper = new Swiper('.hero-slider', {
+                loop: true,
+                effect: 'fade',
+                fadeEffect: {
+                    crossFade: true
+                },
+                autoplay: {
+                    delay: 5000,
+                    disableOnInteraction: false,
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+            });
+        </script>
     </body>
 </html>
