@@ -1,8 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
-
 package com.quiz.su25.controller;
 import com.quiz.su25.dal.impl.UserDAO;
 import com.quiz.su25.entity.User;
@@ -14,10 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-/**
- *
- * @author LENOVO
- */
 @WebServlet("/login")
 public class AuthenController extends HttpServlet {
     private UserDAO userDAO = new UserDAO();
@@ -27,15 +18,13 @@ public class AuthenController extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
     }
 
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
         String action = request.getParameter("action");
         
         if (action != null && action.equals("google")) {
-            // Handle Google login redirect
-            response.sendRedirect("auth/google"); // You'll need to implement Google OAuth2 flow
+            response.sendRedirect("auth/google");
             return;
         }
         
@@ -57,10 +46,9 @@ public class AuthenController extends HttpServlet {
                 session.setAttribute("user", user);
                 
                 if (remember != null) {
-                    // Implement remember me functionality if needed
                 }
                 
-                response.sendRedirect("home"); // Redirect to home page after successful login
+                response.sendRedirect("home");
             } else {
                 request.setAttribute("error", "Invalid email or password");
                 request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
@@ -70,5 +58,4 @@ public class AuthenController extends HttpServlet {
             request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
         }
     }
-
 }

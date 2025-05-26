@@ -137,7 +137,7 @@ public class UserDAO extends DBContext implements I_DAO<User> {
     }
 
     public boolean deleteById(Integer id) {
-        String sql = "DELETE FROM sers WHERE id = ?";
+        String sql = "DELETE FROM users WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
