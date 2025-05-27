@@ -5,6 +5,8 @@
 package com.quiz.su25.controller;
 
 import com.quiz.su25.dal.impl.UserDAO;
+import com.quiz.su25.dal.impl.RoleDAO;
+import com.quiz.su25.entity.Role;
 import com.quiz.su25.entity.User;
 import java.io.File;
 import java.io.IOException;
@@ -16,15 +18,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
+import jakarta.servlet.annotation.MultipartConfig;
 
 @WebServlet("/my-profile")
+@MultipartConfig(maxFileSize = 1024 * 1024 * 5) // 5MB
 public class UserProfileController extends HttpServlet {
 
     private UserDAO userDAO;
+    private RoleDAO roleDAO;
 
     @Override
     public void init() {
         userDAO = new UserDAO();
+        roleDAO = new RoleDAO();
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -48,7 +54,29 @@ public class UserProfileController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+//        HttpSession session = request.getSession();
+//        User sessionUser = (User) session.getAttribute("user");
         
+        // Kiểm tra xem user đã login hay chưa
+//        if (sessionUser == null) {
+//            response.sendRedirect("login");
+//            return;
+//        }
+        
+        // Lấy thông tin user mới nhất từ database
+//        User currentUser = userDAO.findById(sessionUser.getId());
+//        if (currentUser != null) {
+//            session.setAttribute("user", currentUser);
+//        }
+        
+        User currentUser = userDAO.findById(101);
+        
+                // Lấy role name từ database
+        String roleName = roleDAO.getRoleNameById(currentUser.getRole_id());
+        request.setAttribute("roleName", roleName);
+        
+        
+        request.getSession().setAttribute("user", currentUser);
         request.getRequestDispatcher("view/user/myprofile/my-profile.jsp").forward(request, response);
     }
 
@@ -71,7 +99,7 @@ public class UserProfileController extends HttpServlet {
                     deletePicture(request, response, sessionUser);
                     break;
                 default:
-                    response.sendRedirect("userProfile");
+                    response.sendRedirect("my-profile");
                     break;
             }
         } catch (Exception e) {
@@ -86,6 +114,13 @@ public class UserProfileController extends HttpServlet {
         String fullName = request.getParameter("full_name");
         String mobile = request.getParameter("mobile");
         Integer gender = Integer.parseInt(request.getParameter("gender"));
+
+        // Validate full name
+        if (!isValidName(fullName)) {
+            request.setAttribute("error", "Tên không hợp lệ! Tên chỉ được chứa chữ cái, khoảng trắng, dấu nháy đơn và dấu gạch ngang. Độ dài từ 2-50 ký tự.");
+            doGet(request, response);
+            return;
+        }
 
         // Create updated user object - giữ nguyên email, không lấy từ form
         User updatedUser = User.builder()
@@ -111,7 +146,49 @@ public class UserProfileController extends HttpServlet {
             request.setAttribute("error", "Failed to update profile!");
         }
 
-        response.sendRedirect("userProfile");
+        response.sendRedirect("my-profile");
+    }
+
+    /**
+     * Validate tên người dùng
+     * @param name tên cần validate
+     * @return true nếu tên hợp lệ, false nếu không hợp lệ
+     */
+    private boolean isValidName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return false;
+        }
+        
+        String trimmedName = name.trim();
+        
+        // Kiểm tra độ dài
+        if (trimmedName.length() < 2 || trimmedName.length() > 50) {
+            return false;
+        }
+        
+        // Kiểm tra không được bắt đầu hoặc kết thúc bằng khoảng trắng, dấu nháy đơn, hoặc dấu gạch ngang
+        if (trimmedName.startsWith(" ") || trimmedName.endsWith(" ") ||
+            trimmedName.startsWith("'") || trimmedName.endsWith("'") ||
+            trimmedName.startsWith("-") || trimmedName.endsWith("-")) {
+            return false;
+        }
+        
+        // Kiểm tra không có nhiều khoảng trắng liên tiếp
+        if (trimmedName.contains("  ")) {
+            return false;
+        }
+        
+        // Kiểm tra từng ký tự: chỉ cho phép chữ cái, khoảng trắng, dấu nháy đơn, dấu gạch ngang
+        for (int i = 0; i < trimmedName.length(); i++) {
+            char c = trimmedName.charAt(i);
+            
+            // Cho phép chữ cái (bao gồm cả có dấu), khoảng trắng, dấu nháy đơn, dấu gạch ngang
+            if (!Character.isLetter(c) && c != ' ' && c != '\'' && c != '-') {
+                return false;
+            }
+        }
+        
+        return true;
     }
 
     private void changePicture(HttpServletRequest request, HttpServletResponse response, User sessionUser)
@@ -153,7 +230,7 @@ public class UserProfileController extends HttpServlet {
             }
         }
 
-        response.sendRedirect("userProfile");
+        response.sendRedirect("my-profile");
     }
 
     private void deletePicture(HttpServletRequest request, HttpServletResponse response, User sessionUser)
@@ -188,7 +265,7 @@ public class UserProfileController extends HttpServlet {
             request.setAttribute("error", "Failed to remove profile picture!");
         }
 
-        response.sendRedirect("userProfile");
+        response.sendRedirect("my-profile");
     }
 
     private String getSubmittedFileName(Part part) {
