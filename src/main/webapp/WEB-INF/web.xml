@@ -8,13 +8,29 @@
         <servlet-name>UserProfileController</servlet-name>
         <servlet-class>com.quiz.su25.controller.UserProfileController</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>PracticeListController</servlet-name>
+        <servlet-class>com.quiz.su25.controller.user.PracticeListController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>PracticeDetailController</servlet-name>
+        <servlet-class>com.quiz.su25.controller.user.PracticeDetailController</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>HomeController</servlet-name>
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
-    <servlet-mapping>
+    <!--    <servlet-mapping>
         <servlet-name>UserProfileController</servlet-name>
         <url-pattern>/UserProfile</url-pattern>
+    </servlet-mapping>-->
+    <servlet-mapping>
+        <servlet-name>PracticeListController</servlet-name>
+        <url-pattern>/PracticeList</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PracticeDetailController</servlet-name>
+        <url-pattern>/PracticeDetail</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

@@ -122,6 +122,14 @@ public class UserProfileController extends HttpServlet {
             return;
         }
 
+        // Validate phone number
+        if (!isValidPhoneNumber(mobile)) {
+            request.setAttribute("phoneError", "Số điện thoại không hợp lệ! Vui lòng nhập số điện thoại 10 chữ số, bắt đầu bằng số 0.");
+            request.setAttribute("invalidPhone", mobile);
+            doGet(request, response);
+            return;
+        }
+
         // Create updated user object - giữ nguyên email, không lấy từ form
         User updatedUser = User.builder()
                 .id(sessionUser.getId())
@@ -186,6 +194,24 @@ public class UserProfileController extends HttpServlet {
             if (!Character.isLetter(c) && c != ' ' && c != '\'' && c != '-') {
                 return false;
             }
+        }
+        
+        return true;
+    }
+
+    /**
+     * Validate số điện thoại
+     * @param phone số điện thoại cần validate
+     * @return true nếu số điện thoại hợp lệ, false nếu không hợp lệ
+     */
+    private boolean isValidPhoneNumber(String phone) {
+        if (phone == null || phone.trim().isEmpty()) {
+            return false;
+        }
+        
+        // Kiểm tra độ dài phải là 10 số và bắt đầu bằng số 0
+        if (!phone.matches("^0\\d{9}$")) {
+            return false;
         }
         
         return true;

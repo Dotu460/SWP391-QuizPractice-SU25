@@ -179,7 +179,14 @@
                                                     
                                                     <div class="form-group mb-3">
                                                         <label for="profileMobile">Phone Number</label>
-                                                        <input type="text" class="form-control" id="profileMobile" name="mobile" value="${sessionScope.user.mobile}">
+                                                        <input type="text" class="form-control ${not empty phoneError ? 'is-invalid' : ''}" 
+                                                               id="profileMobile" name="mobile" 
+                                                               value="${not empty invalidPhone ? invalidPhone : sessionScope.user.mobile}">
+                                                        <c:if test="${not empty phoneError}">
+                                                            <div class="invalid-feedback">
+                                                                ${phoneError}
+                                                            </div>
+                                                        </c:if>
                                                     </div>
                                                     
                                                     <div class="form-group mb-3">
