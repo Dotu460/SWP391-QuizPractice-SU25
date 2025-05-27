@@ -23,7 +23,13 @@ public class AuthenController extends HttpServlet {
     throws ServletException, IOException {
         String action = request.getParameter("action");
         
-        if (action != null && action.equals("google")) {
+        if ("logout".equals(action)) {
+            logout(request, response);
+            return;
+        }
+
+        // 👉 Xử lý đăng nhập bằng Google nếu có action=google
+        if ("google".equals(action)) {
             response.sendRedirect("auth/google");
             return;
         }
@@ -44,10 +50,6 @@ public class AuthenController extends HttpServlet {
             if (user != null) {
                 HttpSession session = request.getSession();
                 session.setAttribute("user", user);
-                
-                if (remember != null) {
-                }
-                
                 response.sendRedirect("home");
             } else {
                 request.setAttribute("error", "Invalid email or password");
@@ -58,4 +60,17 @@ public class AuthenController extends HttpServlet {
             request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
         }
     }
+    private void logout(HttpServletRequest request, HttpServletResponse response)
+        throws IOException {
+    HttpSession session = request.getSession(false);
+    if (session != null) {
+        session.invalidate(); // Xóa session
+    }
+    String referer = request.getHeader("Referer"); // Lấy trang trước đó
+    if (referer != null && !referer.isEmpty()) {
+        response.sendRedirect(referer); // Quay về trang cũ
+    } else {
+        response.sendRedirect("home"); // Nếu không có referer thì về home
+    }
+}
 }
