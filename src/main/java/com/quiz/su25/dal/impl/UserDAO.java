@@ -2,17 +2,17 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-
 package com.quiz.su25.dal.impl;
 
 /**
  *
  * @author FPT
  */
-
 import com.quiz.su25.dal.DBContext;
 import com.quiz.su25.dal.I_DAO;
 import com.quiz.su25.entity.User;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -42,6 +42,8 @@ public class UserDAO extends DBContext implements I_DAO<User> {
         }
         return listUser;
     }
+    
+    
 
     @Override
     public User findById(Integer id) {
@@ -128,14 +130,14 @@ public class UserDAO extends DBContext implements I_DAO<User> {
 
     @Override
     public boolean delete(User user) {
-         if (user == null || user.getId() == null) {
+        if (user == null || user.getId() == null) {
             return false;
         }
         return deleteById(user.getId());
     }
 
     public boolean deleteById(Integer id) {
-        String sql = "DELETE FROM sers WHERE id = ?";
+        String sql = "DELETE FROM users WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -152,7 +154,6 @@ public class UserDAO extends DBContext implements I_DAO<User> {
         return success;
     }
 
-
     @Override
     public User getFromResultSet(ResultSet resultSet) throws SQLException {
         return User.builder()
@@ -168,59 +169,35 @@ public class UserDAO extends DBContext implements I_DAO<User> {
                 .build();
     }
 
-//    @Override
-//    public Map<Integer, User> findAllMap() {
-//        String sql = "Select * from users";
-//        Map<Integer, User> mapUser = new HashMap<>();
-//        try {
-//            connection = getConnection();
-//            statement = connection.prepareStatement(sql);
-//            resultSet = statement.executeQuery();
-//            while (resultSet.next()) {
-//                User user = getFromResultSet(resultSet);
-//                mapUser.put(user.getId(), user);
-//            }
-//        } catch (SQLException e) {
-//            System.out.println("Error findAllMap at class UserDAO: " + e.getMessage());
-//        } finally {
-//            closeResources();
-//        }
-//        return mapUser;
-//    }
+    public User login(String email, String password) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
-    public static void main(String[] args) {
-        UserDAO userDAO = new UserDAO();
+            ps.setString(1, email);
+            ps.setString(2, password);
 
-        // Test findAll
-        System.out.println("Testing findAll():");
-        List<User> allUsers = userDAO.findAll();
-        if (allUsers.isEmpty()) {
-            System.out.println("No users found.");
-        } else {
-            for (User user : allUsers) {
-                System.out.println(user);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return User.builder()
+                        .id(rs.getInt("id"))
+                        .full_name(rs.getString("full_name"))
+                        .email(rs.getString("email"))
+                        .password(rs.getString("password"))
+                        .gender(rs.getInt("gender"))
+                        .mobile(rs.getString("mobile"))
+                        .avatar_url(rs.getString("avatar_url"))
+                        .role_id(rs.getInt("role_id"))
+                        .status(rs.getString("status"))
+                        .build();
             }
-        }
-        System.out.println("--------------------");
 
-        // Test findById
-        System.out.println("Testing findById(1):");
-        User userById = userDAO.findById(1); // Assuming a user with ID 1 exists
-        if (userById != null) {
-            System.out.println(userById);
-        } else {
-            System.out.println("User with ID 1 not found.");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        System.out.println("--------------------");
-
-        System.out.println("Testing findById(100):"); // Test with a non-existent ID
-        User nonExistentUser = userDAO.findById(100);
-        if (nonExistentUser != null) {
-            System.out.println(nonExistentUser);
-        } else {
-            System.out.println("User with ID 100 not found.");
-        }
-        System.out.println("--------------------");
+        return null;
     }
-}
 
+
+}
