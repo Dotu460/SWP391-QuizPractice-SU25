@@ -89,7 +89,19 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
 
     @Override
     public boolean delete(PricePackage t) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        String sql = "DELETE FROM pricePackage WHERE id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, t.getId());
+            
+            return statement.executeUpdate() > 0;
+        } catch (Exception e) {
+            System.out.println("Error delete at class PricePackageDAO: " + e.getMessage());
+            return false;
+        } finally {
+            closeResources();
+        }
     }
 
     @Override

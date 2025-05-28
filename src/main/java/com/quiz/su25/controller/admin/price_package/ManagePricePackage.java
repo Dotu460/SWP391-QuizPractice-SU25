@@ -355,8 +355,9 @@ public class ManagePricePackage extends HttpServlet {
         try {
             String idStr = request.getParameter("id");
             if (idStr == null || idStr.trim().isEmpty()) {
-                request.setAttribute("error", "Package ID is required for deletion");
-                doGet(request, response);
+                request.getSession().setAttribute("toastMessage", "Package ID is required for deletion");
+                request.getSession().setAttribute("toastType", "error");
+                response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
                 return;
             }
             
@@ -365,26 +366,29 @@ public class ManagePricePackage extends HttpServlet {
             // Find the package first to ensure it exists
             PricePackage pricePackage = pricePackageDAO.findById(id);
             if (pricePackage == null) {
-                request.setAttribute("error", "Price package not found");
-                doGet(request, response);
+                request.getSession().setAttribute("toastMessage", "Price package not found");
+                request.getSession().setAttribute("toastType", "error");
+                response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
                 return;
             }
             
-            // For now, we'll implement soft delete by changing status to "inactive"
-            // since the DAO delete method is not implemented
-            pricePackage.setStatus("inactive");
-            boolean success = pricePackageDAO.update(pricePackage);
+            // Perform hard delete
+            boolean success = pricePackageDAO.delete(pricePackage);
             
             if (success) {
-                request.setAttribute("success", "Price package deleted successfully");
+                request.getSession().setAttribute("toastMessage", "Price package deleted successfully");
+                request.getSession().setAttribute("toastType", "success");
             } else {
-                request.setAttribute("error", "Failed to delete price package");
+                request.getSession().setAttribute("toastMessage", "Failed to delete price package");
+                request.getSession().setAttribute("toastType", "error");
             }
             
         } catch (NumberFormatException e) {
-            request.setAttribute("error", "Invalid package ID");
+            request.getSession().setAttribute("toastMessage", "Invalid package ID");
+            request.getSession().setAttribute("toastType", "error");
         } catch (Exception e) {
-            request.setAttribute("error", "An error occurred: " + e.getMessage());
+            request.getSession().setAttribute("toastMessage", "An error occurred: " + e.getMessage());
+            request.getSession().setAttribute("toastType", "error");
         }
         
         // Redirect to avoid form resubmission
