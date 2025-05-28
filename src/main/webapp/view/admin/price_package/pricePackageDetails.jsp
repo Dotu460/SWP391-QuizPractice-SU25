@@ -359,7 +359,11 @@
     <!-- footer-area-end -->
 
     <!-- JS here -->
-    <jsp:include page="../../common/js/"></jsp:include>
+    <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
+    
+    <!-- iziToast CSS and JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/css/iziToast.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/js/iziToast.min.js"></script>
 
     <script>
         // Toast message display
