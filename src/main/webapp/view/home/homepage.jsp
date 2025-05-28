@@ -14,6 +14,7 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css"/>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/view/common/css/main.css"/>
+        
     </head>
     <body>
         <!-- Header -->
@@ -49,11 +50,11 @@
 
         <!-- Hot Posts Section -->
         <section class="blog-area section-padding-120">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-xl-6">
-                        <div class="section-title text-center mb-70">
-                            <h2 class="title" style="color: #6C5CE7">HOT POSTS</h2>
+            <div style="max-width: 960px;padding-left: 24px; padding-right: 0;">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="section-title mb-70">
+                            <h2 class="title" style="color: #6C5CE7; text-align: left;">HOT POSTS</h2>
                         </div>
                     </div>
                 </div>
@@ -84,28 +85,35 @@
 
         <!-- Featured Subjects Section -->
         <section class="features-area section-padding-120">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-xl-6">
-                        <div class="section-title text-center mb-70">
-                            <h2 class="title" style="color: #6C5CE7">FEATURED SUBJECTS</h2>
+            <div style="max-width: 960px;padding-left: 24px; padding-right: 0;">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="section-title mb-40">
+                            <h2 class="title" style="color: #6C5CE7; text-align: left;">FEATURED SUBJECTS</h2>
                         </div>
                     </div>
                 </div>
 
                 <div class="row">
                     <c:forEach items="${featuredSubjects}" var="subject">
-                        <div class="col-lg-3 col-md-6">
-                            <div class="features__item text-center mb-30">
-                                <div class="features__icon">
-                                 
+                        <div class="col-xl-6 col-lg-6">
+                            <div class="blog__post-item mb-30">
+                                <!-- Hình ảnh đại diện -->
+                                <div class="blog__post-thumb">
+                                    <a href="${pageContext.request.contextPath}/subject?id=${subject.id}">
+                                        <img src="${pageContext.request.contextPath}${subject.thumbnail_url}" 
+                                             alt="${subject.title}" style="border-radius: 15px; height: 300px; object-fit: cover;">
+                                    </a>
                                 </div>
-                                <div class="features__content">
-                                    <h4>${subject.title}</h4>
-                                    
-                                    <div class="subject-stats">
-                                        
-                                    </div>
+
+                                <!-- Nội dung -->
+                                <div class="blog__post-content">
+                                    <h3 class="title">
+                                        <a href="${pageContext.request.contextPath}/subject?id=${subject.id}">
+                                            ${subject.title}
+                                        </a>
+                                    </h3>
+                                    <p>${subject.tag_line}</p>
                                 </div>
                             </div>
                         </div>
@@ -116,22 +124,27 @@
 
         <!-- Latest Posts Sidebar -->
         <section class="latest-posts section-padding-120">
-            <div class="container">
+            <div style="max-width: 960px;padding-left: 24px; padding-right: 0;">
                 <div class="row">
-                    <div class="col-lg-12">
-                        <div class="sidebar">
-                            <h3 class="sidebar-title">Latest Posts</h3>
-                            <div class="row">
+                    <div class="col-12">
+                        <div class="section-title mb-70">
+                            <h2 class="title" style="color: #6C5CE7; text-align: left;">LATEST POSTS</h2>
+                        </div>
+                    </div>
+                </div>    
+                            <div class="row gx-4">
                                 <c:forEach items="${latestPosts}" var="post">
-                                    <div class="col-lg-3 col-md-6">
+                                    <div class="col-xl-6 col-lg-6">
                                         <a href="${pageContext.request.contextPath}/post?id=${post.id}" class="latest-post">
-                                            <img src="${pageContext.request.contextPath}${post.thumbnail_url}" alt="${post.title}">
-                                            <div class="latest-post-content">
-                                                <h4>${post.title}</h4>
-                                                <p>${post.brief_info}</p>
-                                                <span>${post.created_at}</span>
-                                            </div>
+                                            <img src="${pageContext.request.contextPath}${post.thumbnail_url}" alt="${post.title}"style="border-radius: 15px; height: 300px; object-fit: cover;width: 100%">
                                         </a>
+                                    </div>
+                                    <div class="blog__post-content">
+                                        <h3 class="title">
+                                            <a href="${pageContext.request.contextPath}/post?id=${post.id}">${post.title}</a>
+                                        </h3>
+                                        <p>${post.brief_info}</p>
+                                        <span class="date">${post.created_at}</span>
                                     </div>
                                 </c:forEach>
                             </div>

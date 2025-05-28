@@ -155,7 +155,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     public List<Subject> getFeaturedSubjects() {
         List<Subject> list = new ArrayList<>();
-        String sql = "SELECT * FROM subject WHERE featured_flag = true";
+        String sql = "SELECT * FROM subject WHERE featured_flag = 1";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);

@@ -181,7 +181,7 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
 
     public List<Post> getLatestPosts(int limit) {
         List<Post> list = new ArrayList<>();
-        String sql = "SELECT * FROM post ORDER BY published_at DESC LIMIT ?";
+        String sql = "SELECT * FROM post WHERE featured_flag = 2 ORDER BY published_at DESC LIMIT ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
