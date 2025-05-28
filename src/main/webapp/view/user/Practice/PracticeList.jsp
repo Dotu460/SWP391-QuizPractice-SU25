@@ -104,7 +104,7 @@
                                                         </td>
                                                         <td>
                                                             <div class="dashboard__review-action">
-                                                                <a href="${pageContext.request.contextPath}/view/user/Practice/practice-details.jsp" title="View Detail"><i class="skillgro-edit"></i></a>
+                                                                <a href="${pageContext.request.contextPath}/practice-details" title="View Detail"><i class="skillgro-edit"></i></a>
                                                                
                                                             </div>
                                                         </td>
