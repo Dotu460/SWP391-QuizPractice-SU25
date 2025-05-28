@@ -58,6 +58,38 @@
         .practice-btn:hover {
             background: var(--tg-theme-secondary);
         }
+        
+        /* Thêm style cho phần hiển thị chi tiết */
+        .practice-info {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .info-row {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            width: 150px;
+            flex-shrink: 0;
+        }
+        .info-value {
+            color: #333;
+            flex-grow: 1;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-draft { background-color: #e3e3e3; color: #666; }
+        .status-active { background-color: #e3f2fd; color: #1976d2; }
+        .status-completed { background-color: #e8f5e9; color: #2e7d32; }
     </style>
 </head>
 
@@ -78,7 +110,7 @@
                             <select id="subject" name="subject" required>
                                 <option value="">Select subject</option>
                                 <c:forEach var="subject" items="${availableSubjects}">
-                                    <option value="${subject.id}">${subject.title}</option>
+                                    <option value="${subject.id}" ${not empty practice && practice.subject_id == subject.id ? 'selected' : ''}>${subject.title}</option>
                                 </c:forEach>
                             </select>
                         </div>
@@ -86,15 +118,15 @@
                         <div class="form-group">
                             <label for="numberOfQuestions">Number of practicing questions</label>
                             <input type="number" id="numberOfQuestions" name="numberOfQuestions" 
-                                   value="20" min="1" max="100" required>
+                                   value="${not empty practice ? practice.number_of_questions : 20}" min="1" max="100" required>
                         </div>
 
                         <div class="form-group">
                             <label for="questionSelectionType">Questions are selected by topic(s) or a specific dimension?</label>
                             <select id="questionSelectionType" name="questionSelectionType" required>
-                                <option value="by_topic">By subject topic</option>
-                                <option value="by_dimension">By dimension</option>
-                                <option value="random">Random</option>
+                                <option value="by_topic" ${practice.question_selection_type == 'by_topic' ? 'selected' : ''}>By subject topic</option>
+                                <option value="by_dimension" ${practice.question_selection_type == 'by_dimension' ? 'selected' : ''}>By dimension</option>
+                                <option value="random" ${practice.question_selection_type == 'Random' ? 'selected' : ''}>Random</option>
                             </select>
                         </div>
 

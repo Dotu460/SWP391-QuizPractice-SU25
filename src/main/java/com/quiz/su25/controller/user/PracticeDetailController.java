@@ -5,16 +5,30 @@
 
 package com.quiz.su25.controller.user;
 
+import com.quiz.su25.dal.impl.PracticeDAO;
+import com.quiz.su25.dal.impl.SubjectDAO;
+import com.quiz.su25.entity.Practice;
+import com.quiz.su25.entity.Subject;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.List;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
 
 @WebServlet("/practice-details")
 public class PracticeDetailController extends HttpServlet {
+    
+    private PracticeDAO practiceDAO;
+    private SubjectDAO subjectDAO;
+    
+    @Override
+    public void init() {
+        practiceDAO = new PracticeDAO();
+        subjectDAO = new SubjectDAO();
+    }
    
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -40,12 +54,20 @@ public class PracticeDetailController extends HttpServlet {
         }
     } 
 
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-       
-         request.getRequestDispatcher("view/user/practice/practice-details.jsp").forward(request, response);
+        // Tạm thời lấy practice có id = 1
+        Practice practice = practiceDAO.findById(1);
+        
+        // Get available subjects
+        List<Subject> availableSubjects = subjectDAO.findAll();
+        
+        // Set attributes for JSP
+        request.setAttribute("practice", practice);
+        request.setAttribute("availableSubjects", availableSubjects);
+        
+        request.getRequestDispatcher("view/user/Practice/practice-details.jsp").forward(request, response);
     } 
 
     /** 
@@ -58,16 +80,6 @@ public class PracticeDetailController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-        processRequest(request, response);
+        
     }
-
-    /** 
-     * Returns a short description of the servlet.
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
 }

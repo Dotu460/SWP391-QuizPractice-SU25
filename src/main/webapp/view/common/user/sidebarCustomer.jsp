@@ -8,19 +8,19 @@
         <nav class="dashboard__sidebar-menu">
             <ul class="list-wrap">
                 <li>
-                    <a href="${pageContext.request.contextPath}/view/user/myprofile/my-profile.jsp">
+                    <a href="${pageContext.request.contextPath}/my-profile">
                         <i class="skillgro-avatar"></i>
                         My Profile
                     </a>
                 </li>
                 <li>
-                    <a href="instructor-attempts.html">
+                    <a href="${pageContext.request.contextPath}/practice-list">
                         <i class="skillgro-question"></i>
                         Practice List
                     </a>
                 </li>
                 <li>
-                    <a href="instructor-history.html">
+                    <a href="${pageContext.request.contextPath}/my-registration">
                         <i class="skillgro-satchel"></i>
                         My Registration
                     </a>

@@ -200,4 +200,45 @@ public class UserDAO extends DBContext implements I_DAO<User> {
     }
 
 
+    public static void main(String[] args) {
+        UserDAO userDAO = new UserDAO();
+        
+        // First, get an existing user
+        User existingUser = userDAO.findById(10); // Thay đổi ID này theo ID có trong database của bạn
+        
+        if (existingUser != null) {
+            System.out.println("Before update:");
+            System.out.println("Full name: " + existingUser.getFull_name());
+            System.out.println("Mobile: " + existingUser.getMobile());
+            System.out.println("Gender: " + existingUser.getGender());
+            
+            // Create updated user with some changes
+            User updatedUser = User.builder()
+                    .id(existingUser.getId())
+                    .full_name("Test Update Name")
+                    .email(existingUser.getEmail()) // keep existing email
+                    .password(existingUser.getPassword()) // keep existing password
+                    .gender(1) // change gender
+                    .mobile("0987654321") // change mobile
+                    .avatar_url(existingUser.getAvatar_url()) // keep existing avatar
+                    .role_id(existingUser.getRole_id()) // keep existing role
+                    .status(existingUser.getStatus()) // keep existing status
+                    .build();
+            
+            // Try to update
+            boolean success = userDAO.update(updatedUser);
+            System.out.println("\nUpdate success: " + success);
+            
+            if (success) {
+                // Verify the update by getting the user again
+                User verifyUser = userDAO.findById(10);
+                System.out.println("\nAfter update:");
+                System.out.println("Full name: " + verifyUser.getFull_name());
+                System.out.println("Mobile: " + verifyUser.getMobile());
+                System.out.println("Gender: " + verifyUser.getGender());
+            }
+        } else {
+            System.out.println("User not found!");
+        }
+    }
 }

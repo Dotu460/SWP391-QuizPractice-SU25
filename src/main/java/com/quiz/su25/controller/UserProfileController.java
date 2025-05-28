@@ -69,7 +69,7 @@ public class UserProfileController extends HttpServlet {
 //            session.setAttribute("user", currentUser);
 //        }
         
-        User currentUser = userDAO.findById(101);
+        User currentUser = userDAO.findById(10);
         
                 // Lấy role name từ database
         String roleName = roleDAO.getRoleNameById(currentUser.getRole_id());
@@ -216,6 +216,7 @@ public class UserProfileController extends HttpServlet {
         
         return true;
     }
+
 
     private void changePicture(HttpServletRequest request, HttpServletResponse response, User sessionUser)
             throws ServletException, IOException {

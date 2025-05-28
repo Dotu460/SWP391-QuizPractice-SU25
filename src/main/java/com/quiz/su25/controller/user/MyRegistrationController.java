@@ -98,7 +98,7 @@ public class MyRegistrationController extends HttpServlet {
         // Integer userId = currentUser.getId();
         // request.setAttribute("currentUser", currentUser);      
         // Tạm thời dùng ID cố định để test
-        Integer userId = 102; // Thay đổi ID này tùy theo user ID có trong database của bạn
+        Integer userId = 10; // Thay đổi ID này tùy theo user ID có trong database của bạn
         // Tạo một user object tạm để hiển thị
         com.quiz.su25.entity.User tempUser = new com.quiz.su25.entity.User();
         // tempUser.setId(userId);
