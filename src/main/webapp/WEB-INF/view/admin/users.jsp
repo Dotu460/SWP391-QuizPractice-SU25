@@ -167,22 +167,26 @@
                     <tbody>
                     <c:forEach items="${users}" var="user">
                         <tr>
-                            <td>${user.user_id}</td>
+                            <td>${user.id}</td>
                             <td>${user.full_name}</td>
-                            <td>${user.gender ? 'Male' : 'Female'}</td>
+                            <td>${user.gender == 1 ? 'Male' : 'Female'}</td>
                             <td>${user.email}</td>
                             <td>${user.mobile}</td>
-                            <td>${user.role.role_name}</td>
                             <td>
-                                        <span class="badge ${user.status eq 'active' ? 'bg-success' : (user.status eq 'inactive' ? 'bg-danger' : 'bg-warning')}">
-                                                ${user.status}
-                                        </span>
+                                <c:forEach items="${roles}" var="role">
+                                    <c:if test="${role.id == user.role_id}">${role.role_name}</c:if>
+                                </c:forEach>
                             </td>
                             <td>
-                                <a href="${pageContext.request.contextPath}/admin/user?action=view&id=${user.user_id}" class="btn btn-sm btn-info">
+                                 <span class="badge ${user.status eq 'active' ? 'bg-success' : (user.status eq 'inactive' ? 'bg-danger' : 'bg-warning')}">
+                                         ${user.status}
+                                 </span>
+                            </td>
+                            <td>
+                                <a href="${pageContext.request.contextPath}/admin/user?action=view&id=${user.id}" class="btn btn-sm btn-info">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a href="${pageContext.request.contextPath}/admin/user?action=edit&id=${user.user_id}" class="btn btn-sm btn-primary">
+                                <a href="${pageContext.request.contextPath}/admin/user?action=edit&id=${user.id}" class="btn btn-sm btn-primary">
                                     <i class="fas fa-edit"></i>
                                 </a>
                             </td>

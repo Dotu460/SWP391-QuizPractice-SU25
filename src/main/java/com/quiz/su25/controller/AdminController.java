@@ -1,9 +1,10 @@
 package com.quiz.su25.controller;
 
+import com.quiz.su25.dal.impl.RoleDAO;
+import com.quiz.su25.dal.impl.UserDAO;
 import com.quiz.su25.entity.Role;
 import com.quiz.su25.entity.User;
-import com.quiz.su25.entity.impl.RoleDAO;
-import com.quiz.su25.entity.impl.UserDAO;
+
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -162,7 +163,7 @@ public class AdminController extends HttpServlet {
     private void updateUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User user = getUserFromRequest(request);
 
-        if (user != null && user.getUser_id() != null) {
+        if (user != null && user.getId() != null) {
             boolean success = userDAO.update(user);
 
             if (success) {
@@ -186,7 +187,7 @@ public class AdminController extends HttpServlet {
             // Get user ID for updates
             String userIdParam = request.getParameter("userId");
             if (userIdParam != null && !userIdParam.isEmpty()) {
-                user.setUser_id(Integer.parseInt(userIdParam));
+                user.setId(Integer.parseInt(userIdParam));
             }
 
             user.setFull_name(request.getParameter("fullName"));
@@ -196,14 +197,14 @@ public class AdminController extends HttpServlet {
             String password = request.getParameter("password");
             if (password != null && !password.isEmpty()) {
                 // In a real application, you should hash the password
-                user.setPassword_hash(password);
-            } else if (user.getUser_id() != null) {
+                user.setPassword(password);
+            } else if (user.getId() != null) {
                 // If updating and no password provided, keep existing password
-                User existingUser = userDAO.findById(user.getUser_id());
-                user.setPassword_hash(existingUser.getPassword_hash());
+                User existingUser = userDAO.findById(user.getId());
+                user.setPassword(existingUser.getPassword());
             }
 
-            user.setGender("male".equals(request.getParameter("gender")));
+            user.setGender("male".equals(request.getParameter("gender")) ? 1 : 0);
             user.setMobile(request.getParameter("mobile"));
             user.setAvatar_url(request.getParameter("avatarUrl"));
             user.setStatus(request.getParameter("status"));
@@ -212,7 +213,7 @@ public class AdminController extends HttpServlet {
             int roleId = Integer.parseInt(request.getParameter("roleId"));
             Role role = new Role();
             role.setId(roleId);
-            user.setRole(role);
+            user.setRole_id(roleId);
 
             return user;
         } catch (Exception e) {

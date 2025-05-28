@@ -1,14 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package com.quiz.su25.dal.impl;
 
-/**
- *
- * @author FPT
- */
 
 import com.quiz.su25.dal.DBContext;
 import com.quiz.su25.dal.I_DAO;
@@ -166,6 +157,119 @@ public class UserDAO extends DBContext implements I_DAO<User> {
                 .role_id(resultSet.getInt("role_id"))
                 .status(resultSet.getString("status"))
                 .build();
+    }
+
+    public List<User> getPaginatedUsers(int page, int pageSize, String genderFilter,
+                                        String roleFilter, String statusFilter,
+                                        String searchTerm, String sortBy, String sortOrder) {
+        int offset = (page - 1) * pageSize;
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT id, full_name, email, password, gender, mobile, avatar_url, role_id, status ");
+        sql.append("FROM users WHERE 1=1 ");
+
+        // Add filters
+        List<Object> params = new ArrayList<>();
+        if (genderFilter != null && !genderFilter.isEmpty()) {
+            sql.append("AND gender = ? ");
+            params.add("male".equals(genderFilter) ? 1 : 0);
+        }
+        if (roleFilter != null && !roleFilter.isEmpty()) {
+            sql.append("AND role_id = ? ");
+            params.add(Integer.parseInt(roleFilter));
+        }
+        if (statusFilter != null && !statusFilter.isEmpty()) {
+            sql.append("AND status = ? ");
+            params.add(statusFilter);
+        }
+        if (searchTerm != null && !searchTerm.isEmpty()) {
+            sql.append("AND (full_name LIKE ? OR email LIKE ?) ");
+            params.add("%" + searchTerm + "%");
+            params.add("%" + searchTerm + "%");
+        }
+
+        // Add sorting
+        if (sortBy != null && !sortBy.isEmpty()) {
+            sql.append("ORDER BY ").append(sortBy);
+            if ("desc".equalsIgnoreCase(sortOrder)) {
+                sql.append(" DESC ");
+            } else {
+                sql.append(" ASC ");
+            }
+        } else {
+            sql.append("ORDER BY id ");
+        }
+
+        // Add pagination
+        sql.append("LIMIT ? OFFSET ?");
+        params.add(pageSize);
+        params.add(offset);
+
+        List<User> users = new ArrayList<>();
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+
+            // Set parameters
+            for (int i = 0; i < params.size(); i++) {
+                statement.setObject(i + 1, params.get(i));
+            }
+
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                users.add(getFromResultSet(resultSet));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in getPaginatedUsers: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return users;
+    }
+
+    public int countTotalUsers(String genderFilter, String roleFilter, String statusFilter, String searchTerm) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT COUNT(*) FROM users WHERE 1=1 ");
+
+        // Add filters
+        List<Object> params = new ArrayList<>();
+        if (genderFilter != null && !genderFilter.isEmpty()) {
+            sql.append("AND gender = ? ");
+            params.add("male".equals(genderFilter) ? 1 : 0);
+        }
+        if (roleFilter != null && !roleFilter.isEmpty()) {
+            sql.append("AND role_id = ? ");
+            params.add(Integer.parseInt(roleFilter));
+        }
+        if (statusFilter != null && !statusFilter.isEmpty()) {
+            sql.append("AND status = ? ");
+            params.add(statusFilter);
+        }
+        if (searchTerm != null && !searchTerm.isEmpty()) {
+            sql.append("AND (full_name LIKE ? OR email LIKE ?) ");
+            params.add("%" + searchTerm + "%");
+            params.add("%" + searchTerm + "%");
+        }
+
+        int count = 0;
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+
+            // Set parameters
+            for (int i = 0; i < params.size(); i++) {
+                statement.setObject(i + 1, params.get(i));
+            }
+
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                count = resultSet.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in countTotalUsers: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return count;
     }
 
 //    @Override

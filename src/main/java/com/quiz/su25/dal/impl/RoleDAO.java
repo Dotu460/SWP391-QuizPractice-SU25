@@ -22,7 +22,7 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
 
     @Override
     public List<Role> findAll() {
-        String sql = "select * from role";
+        String sql = "select * from roles";
         List<Role> listRole = new ArrayList<>();
         try {
             //tao connection
@@ -47,7 +47,7 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
 
     @Override
     public boolean update(Role t) {
-        String sql = "UPDATE Role SET role_name = ?, description = ?, created_at = ? WHERE id = ?";
+        String sql = "UPDATE Roles SET role_name = ?, description = ?, created_at = ? WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -67,7 +67,7 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
 
     @Override
     public boolean delete(Role t) {
-        String sql = "DELETE FROM Role WHERE id = ?";
+        String sql = "DELETE FROM Roles WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -84,7 +84,7 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
 
     @Override
     public int insert(Role t) {
-        String sql = "INSERT INTO Role (role_name, description, created_at) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO Roles (role_name, description, created_at) VALUES (?, ?, ?)";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -105,8 +105,8 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
         Role role = Role
                 .builder()
                 .id(resultSet.getInt("id"))
-                .role_name("role_name")
-                .description("description")
+                .role_name(resultSet.getString("role_name"))
+                .description(resultSet.getString("description"))
                 .created_at(resultSet.getDate("created_at"))
                 .build();
         return role;
@@ -119,7 +119,7 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
 
 //    @Override
     public Map<Integer, Role> findAllMap() {
-        String sql = "Select * from role";
+        String sql = "Select * from roles";
         Map<Integer, Role> mapRole = new HashMap<>();
         try {
             connection = getConnection();
