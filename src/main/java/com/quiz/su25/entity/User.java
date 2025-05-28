@@ -1,25 +1,13 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package com.quiz.su25.entity;
 
-import lombok.*;
-
-import java.time.LocalDateTime;
-
-@ToString
-@Builder
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
-
+/**
+ *
+ * @author FPT
+ */
 public class User {
-    private Integer user_id;
-    private String full_name;
-    private String email;
-    private String password_hash;
-    private boolean gender;
-    private String mobile;
-    private String avatar_url;
-    private Role role;
-    private String status;
+    private int id;
 }
