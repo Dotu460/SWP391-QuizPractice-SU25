@@ -12,9 +12,37 @@
         <meta charset="UTF-8">
         <title>Quiz Practice - Home</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css"/>
+        <jsp:include page="../common/user/link_css_common.jsp"/>
+        <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css"/> 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/view/common/css/main.css"/>
         
+        <style>
+            /* Đảm bảo chỉ hiện slide đang active */
+.swiper-slide {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease;
+    /* position: absolute; */
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+.swiper-slide.swiper-slide-active {
+    opacity: 1;
+    visibility: visible;
+    position: relative;
+    z-index: 1;
+}
+
+/* Quan trọng: đặt chiều cao cố định cho slider container */
+.hero-slider {
+    position: relative;
+    overflow: hidden;
+    height: 500px; /* tuỳ chỉnh theo hình ảnh */
+}
+
+        </style>
     </head>
     <body>
         <!-- Header -->
@@ -135,16 +163,20 @@
                             <div class="row gx-4">
                                 <c:forEach items="${latestPosts}" var="post">
                                     <div class="col-xl-6 col-lg-6">
-                                        <a href="${pageContext.request.contextPath}/post?id=${post.id}" class="latest-post">
-                                            <img src="${pageContext.request.contextPath}${post.thumbnail_url}" alt="${post.title}"style="border-radius: 15px; height: 300px; object-fit: cover;width: 100%">
-                                        </a>
-                                    </div>
-                                    <div class="blog__post-content">
-                                        <h3 class="title">
-                                            <a href="${pageContext.request.contextPath}/post?id=${post.id}">${post.title}</a>
-                                        </h3>
-                                        <p>${post.brief_info}</p>
-                                        <span class="date">${post.created_at}</span>
+                                        <div class="blog__post-item mb-30">
+                                            <div class="blog__post-thumb">
+                                                <a href="${pageContext.request.contextPath}/post?id=${post.id}" class="latest-post">
+                                                    <img src="${pageContext.request.contextPath}${post.thumbnail_url}" alt="${post.title}"style="border-radius: 15px; height: 300px; object-fit: cover;width: 100%">
+                                                </a>
+                                            </div>
+                                            <div class="blog__post-content">
+                                                <h3 class="title">
+                                                    <a href="${pageContext.request.contextPath}/post?id=${post.id}">${post.title}</a>
+                                                </h3>
+                                                <p>${post.brief_info}</p>
+                                                <span class="date">${post.created_at}</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </c:forEach>
                             </div>
@@ -162,5 +194,28 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
         <script src="${pageContext.request.contextPath}/view/common/js/main.js"></script>
+        <jsp:include page="../common/user/link_js_common.jsp"/>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var heroSwiper = new Swiper(".hero-slider", {
+                    spaceBetween: 0,
+                    effect: "slide", /* Or "slide", "cube", "coverflow", "flip" depending on desired effect */
+                    loop: true,
+                    autoplay: {
+                        delay: 7000, /* Adjust delay as needed */
+                        disableOnInteraction: false,
+                    },
+                    pagination: {
+                        el: ".swiper-pagination",
+                        clickable: true,
+                    },
+                    navigation: {
+                        nextEl: ".swiper-button-next",
+                        prevEl: ".swiper-button-prev",
+                    },
+                });
+            });
+        </script>
     </body>
 </html>
