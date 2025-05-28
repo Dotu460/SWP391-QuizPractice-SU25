@@ -26,15 +26,12 @@ import lombok.Setter;
 public class Slider {
     private Integer id;
     private String title;
-    private String thumbnail_url;
+    private String image_url;
     private String backlink_url;
-    private String content;
-    private Integer category_id;
-    private String author;
-    private Integer author_id;
     private String status;
-    private Boolean featured_flag;
-    private Date published_at;
+    private Boolean display_order;
+    private String notes;
     private Date created_at;
     private Date update_at;
+    private Integer created_by;
 }

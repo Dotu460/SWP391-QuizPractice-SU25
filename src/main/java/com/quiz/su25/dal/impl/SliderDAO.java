@@ -66,7 +66,7 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
             connection = getConnection();
             statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS); // Lấy ID sinh tự động
             statement.setString(1, slider.getTitle());
-            statement.setString(2, slider.getThumbnail_url());
+            statement.setString(2, slider.getImage_url());
             statement.setString(3, slider.getBacklink_url());
             statement.setString(4, slider.getStatus());
 
@@ -91,7 +91,7 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setString(1, slider.getTitle());
-            statement.setString(2, slider.getThumbnail_url());
+            statement.setString(2, slider.getImage_url());
             statement.setString(3, slider.getBacklink_url());
             statement.setString(4, slider.getStatus());
             statement.setInt(5, slider.getId());
@@ -137,7 +137,7 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
         return Slider.builder()
                 .id(resultSet.getInt("id"))
                 .title(resultSet.getString("title"))
-                .thumbnail_url(resultSet.getString("thumbanil"))
+                .image_url(resultSet.getString("image"))
                 .backlink_url(resultSet.getString("backlink"))
                 .status(resultSet.getString("status"))
                 .build(); // Tạo Slider từ ResultSet
