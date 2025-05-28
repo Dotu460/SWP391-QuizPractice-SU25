@@ -143,9 +143,9 @@
                                     <div class="dashboard__content-title d-flex justify-content-between align-items-center mb-4">
                                         <h4 class="title">Price Package Management</h4>
                                         <div>
-                                            <button type="button" class="add-btn" data-bs-toggle="modal" data-bs-target="#addPackageModal">
+                                            <a href="${pageContext.request.contextPath}/admin/pricepackage?action=add" class="add-btn">
                                                 <i class="fas fa-plus"></i> Add New Package
-                                            </button>
+                                            </a>
                                             <button type="button" class="settings-btn ml-2" data-bs-toggle="modal" data-bs-target="#settingModal">
                                                 <i class="fa fa-cog"></i> Display Settings
                                             </button>
@@ -332,71 +332,6 @@
         </main>
         <!-- main-area-end -->
 
-        <!-- Add Package Modal -->
-        <div class="modal fade" id="addPackageModal" tabindex="-1" aria-labelledby="addPackageModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addPackageModalLabel">Add New Price Package</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form method="post">
-                        <div class="modal-body">
-                            <input type="hidden" name="action" value="create">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="name" class="form-label">Package Name *</label>
-                                        <input type="text" class="form-control" id="name" name="name" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="access_duration_months" class="form-label">Duration (Months) *</label>
-                                        <input type="number" class="form-control" id="access_duration_months" name="access_duration_months" min="1" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="status" class="form-label">Status *</label>
-                                        <select class="form-control" id="status" name="status" required>
-                                            <option value="">Select Status</option>
-                                            <option value="active">Active</option>
-                                            <option value="inactive">Inactive</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="list_price" class="form-label">List Price *</label>
-                                        <input type="number" class="form-control" id="list_price" name="list_price" min="1" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="sale_price" class="form-label">Sale Price *</label>
-                                        <input type="number" class="form-control" id="sale_price" name="sale_price" min="1" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="description" class="form-label">Description</label>
-                                <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Create Package</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
         <!-- Settings Modal -->
         <div class="modal fade" id="settingModal" tabindex="-1" role="dialog" aria-labelledby="settingModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
@@ -469,26 +404,33 @@
         
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Validate that sale price doesn't exceed list price for add modal
-                function validatePrices(listPriceId, salePriceId) {
-                    const listPrice = document.getElementById(listPriceId);
-                    const salePrice = document.getElementById(salePriceId);
-                    
-                    function validate() {
-                        if (listPrice.value && salePrice.value) {
-                            if (parseFloat(salePrice.value) > parseFloat(listPrice.value)) {
-                                salePrice.setCustomValidity('Sale price cannot be greater than list price');
-                            } else {
-                                salePrice.setCustomValidity('');
-                            }
+                // Toast message display
+                var toastMessage = "${sessionScope.toastMessage}";
+                var toastType = "${sessionScope.toastType}";
+                if (toastMessage) {
+                    iziToast.show({
+                        title: toastType === 'success' ? 'Success' : 'Error',
+                        message: toastMessage,
+                        position: 'topRight',
+                        color: toastType === 'success' ? 'green' : 'red',
+                        timeout: 5000,
+                        onClosing: function () {
+                            // Remove toast attributes from the session after displaying
+                            fetch('${pageContext.request.contextPath}/remove-toast', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                },
+                            }).then(response => {
+                                if (!response.ok) {
+                                    console.error('Failed to remove toast attributes');
+                                }
+                            }).catch(error => {
+                                console.error('Error:', error);
+                            });
                         }
-                    }
-                    
-                    listPrice.addEventListener('input', validate);
-                    salePrice.addEventListener('input', validate);
+                    });
                 }
-                
-                validatePrices('list_price', 'sale_price');
                 
                 // Select all columns button
                 document.getElementById('selectAllColumns').addEventListener('click', function() {

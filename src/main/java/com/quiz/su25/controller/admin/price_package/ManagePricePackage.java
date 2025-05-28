@@ -28,6 +28,8 @@ public class ManagePricePackage extends HttpServlet {
             handleEdit(request, response);
         } else if ("details".equals(action)) {
             handleDetails(request, response);
+        } else if ("add".equals(action)) {
+            handleAdd(request, response);
         } else {
             handleListWithFilters(request, response);
         }
@@ -166,7 +168,7 @@ public class ManagePricePackage extends HttpServlet {
                 status == null || status.trim().isEmpty()) {
                 
                 request.setAttribute("error", "All required fields must be filled");
-                doGet(request, response);
+                request.getRequestDispatcher("/view/admin/price_package/addPricePackage.jsp").forward(request, response);
                 return;
             }
             
@@ -178,19 +180,19 @@ public class ManagePricePackage extends HttpServlet {
             // Validate business rules
             if (accessDuration <= 0) {
                 request.setAttribute("error", "Access duration must be greater than 0");
-                doGet(request, response);
+                request.getRequestDispatcher("/view/admin/price_package/addPricePackage.jsp").forward(request, response);
                 return;
             }
             
             if (listPrice <= 0 || salePrice <= 0) {
                 request.setAttribute("error", "Prices must be greater than 0");
-                doGet(request, response);
+                request.getRequestDispatcher("/view/admin/price_package/addPricePackage.jsp").forward(request, response);
                 return;
             }
             
             if (salePrice > listPrice) {
                 request.setAttribute("error", "Sale price cannot be greater than list price");
-                doGet(request, response);
+                request.getRequestDispatcher("/view/admin/price_package/addPricePackage.jsp").forward(request, response);
                 return;
             }
             
@@ -208,19 +210,21 @@ public class ManagePricePackage extends HttpServlet {
             boolean success = pricePackageDAO.create(pricePackage);
             
             if (success) {
-                request.setAttribute("success", "Price package created successfully");
+                request.getSession().setAttribute("toastMessage", "Price package created successfully");
+                request.getSession().setAttribute("toastType", "success");
+                response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
             } else {
                 request.setAttribute("error", "Failed to create price package");
+                request.getRequestDispatcher("/view/admin/price_package/addPricePackage.jsp").forward(request, response);
             }
             
         } catch (NumberFormatException e) {
             request.setAttribute("error", "Invalid numeric values provided");
+            request.getRequestDispatcher("/view/admin/price_package/addPricePackage.jsp").forward(request, response);
         } catch (Exception e) {
             request.setAttribute("error", "An error occurred: " + e.getMessage());
+            request.getRequestDispatcher("/view/admin/price_package/addPricePackage.jsp").forward(request, response);
         }
-        
-        // Redirect to avoid form resubmission
-        response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
     }
     
     private void updatePricePackage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -469,6 +473,10 @@ public class ManagePricePackage extends HttpServlet {
         }
         
         response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+    }
+
+    private void handleAdd(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.getRequestDispatcher("/view/admin/price_package/addPricePackage.jsp").forward(request, response);
     }
 }
 
