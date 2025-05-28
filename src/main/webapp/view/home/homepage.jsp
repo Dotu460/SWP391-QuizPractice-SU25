@@ -13,9 +13,7 @@
         <title>Quiz Practice - Home</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css"/>
-        <style>
-            <%@ include file="/view/common/css/main.css" %>
-        </style>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/view/common/css/main.css"/>
     </head>
     <body>
         <!-- Header -->
@@ -27,17 +25,14 @@
                 <div class="swiper-wrapper">
                     <c:forEach items="${sliders}" var="slider">
                         <div class="swiper-slide">
-                            <a href="${pageContext.request.contextPath}${slider.buttonLink}" class="slide-link">
+                            <a href="${pageContext.request.contextPath}${slider.backlink_url}" class="slide-link">
                                 <div class="container">
                                     <div class="row align-items-center">
                                         <div class="col-lg-6 hero-content">
                                             <h1 class="hero-title">${slider.title}</h1>
-                                            <h2 class="hero-subtitle">${slider.subtitle}</h2>
-                                            <p class="hero-text">${slider.description}</p>
-                                            <span class="hero-button">${slider.buttonText}</span>
                                         </div>
                                         <div class="col-lg-6 hero-image">
-                                            <img src="${pageContext.request.contextPath}${slider.imageUrl}" 
+                                            <img src="${pageContext.request.contextPath}${slider.image_url}" 
                                                  alt="${slider.title}" class="img-fluid">
                                         </div>
                                     </div>
@@ -69,7 +64,7 @@
                             <div class="blog__post-item mb-30">
                                 <div class="blog__post-thumb">
                                     <a href="${pageContext.request.contextPath}/post?id=${post.id}">
-                                        <img src="${pageContext.request.contextPath}${post.thumbnailUrl}" 
+                                        <img src="${pageContext.request.contextPath}${post.thumbnail_url}" 
                                              alt="${post.title}" style="border-radius: 15px; height: 300px; object-fit: cover;">
                                     </a>
                                 </div>
@@ -77,7 +72,8 @@
                                     <h3 class="title">
                                         <a href="${pageContext.request.contextPath}/post?id=${post.id}">${post.title}</a>
                                     </h3>
-                                    <p>${post.createdAt} | Views: ${post.viewCount}</p>
+                                    <p>${post.brief_info}</p>
+                                    <span class="date">${post.created_at}</span>
                                 </div>
                             </div>
                         </div>
@@ -102,14 +98,13 @@
                         <div class="col-lg-3 col-md-6">
                             <div class="features__item text-center mb-30">
                                 <div class="features__icon">
-                                    <img src="${pageContext.request.contextPath}${subject.thumbnailUrl}" 
-                                         alt="${subject.name}" style="width: 80px; height: 80px;">
+                                 
                                 </div>
                                 <div class="features__content">
-                                    <h4>${subject.name}</h4>
-                                    <p>"${subject.tagline}"</p>
+                                    <h4>${subject.title}</h4>
+                                    
                                     <div class="subject-stats">
-                                        <small>${subject.totalQuizzes} Quizzes | ${subject.totalEnrollments} Students</small>
+                                        
                                     </div>
                                 </div>
                             </div>
@@ -130,10 +125,11 @@
                                 <c:forEach items="${latestPosts}" var="post">
                                     <div class="col-lg-3 col-md-6">
                                         <a href="${pageContext.request.contextPath}/post?id=${post.id}" class="latest-post">
-                                            <img src="${pageContext.request.contextPath}${post.thumbnailUrl}" alt="${post.title}">
+                                            <img src="${pageContext.request.contextPath}${post.thumbnail_url}" alt="${post.title}">
                                             <div class="latest-post-content">
                                                 <h4>${post.title}</h4>
-                                                <span>${post.createdAt}</span>
+                                                <p>${post.brief_info}</p>
+                                                <span>${post.created_at}</span>
                                             </div>
                                         </a>
                                     </div>
@@ -152,8 +148,6 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-        <script>
-            <%@ include file="/view/common/js/main.js" %>
-        </script>
+        <script src="${pageContext.request.contextPath}/view/common/js/main.js"></script>
     </body>
 </html>
