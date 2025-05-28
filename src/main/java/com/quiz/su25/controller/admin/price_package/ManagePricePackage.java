@@ -26,6 +26,8 @@ public class ManagePricePackage extends HttpServlet {
         
         if ("edit".equals(action)) {
             handleEdit(request, response);
+        } else if ("details".equals(action)) {
+            handleDetails(request, response);
         } else {
             handleListWithFilters(request, response);
         }
@@ -49,7 +51,27 @@ public class ManagePricePackage extends HttpServlet {
         // Load all packages for listing
         List<PricePackage> pricePackages = pricePackageDAO.findAll();
         request.setAttribute("pricePackages", pricePackages);
-        request.getRequestDispatcher("/view/admin/price_package/pricePackage.jsp").forward(request, response);
+        request.getRequestDispatcher("/view/admin/price_package/listPricePackage.jsp").forward(request, response);
+    }
+    
+    private void handleDetails(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String idParam = request.getParameter("id");
+        if (idParam != null && !idParam.isEmpty()) {
+            try {
+                int id = Integer.parseInt(idParam);
+                PricePackage pricePackage = pricePackageDAO.findById(id);
+                if (pricePackage != null) {
+                    request.setAttribute("pricePackage", pricePackage);
+                    request.getRequestDispatcher("/view/admin/price_package/pricePackageDetails.jsp").forward(request, response);
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                request.setAttribute("error", "Invalid package ID");
+            }
+        }
+        
+        // If package not found or invalid ID, redirect to list
+        response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
     }
     
     private void handleListWithFilters(HttpServletRequest request, HttpServletResponse response) 
@@ -105,7 +127,7 @@ public class ManagePricePackage extends HttpServlet {
         request.setAttribute("minPriceFilter", minPriceFilter);
         request.setAttribute("maxPriceFilter", maxPriceFilter);
         
-        request.getRequestDispatcher("/view/admin/price_package/pricePackage.jsp").forward(request, response);
+        request.getRequestDispatcher("/view/admin/price_package/listPricePackage.jsp").forward(request, response);
     }
 
     @Override
@@ -118,6 +140,10 @@ public class ManagePricePackage extends HttpServlet {
             updatePricePackage(request, response);
         } else if ("delete".equals(action)) {
             deletePricePackage(request, response);
+        } else if ("activate".equals(action)) {
+            activatePricePackage(request, response);
+        } else if ("deactivate".equals(action)) {
+            deactivatePricePackage(request, response);
         } else {
             response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
         }
@@ -132,7 +158,6 @@ public class ManagePricePackage extends HttpServlet {
             String salePriceStr = request.getParameter("sale_price");
             String status = request.getParameter("status");
             String description = request.getParameter("description");
-            String subjectIdStr = request.getParameter("subject_id");
             
             // Validate required fields
             if (name == null || name.trim().isEmpty() ||
@@ -150,8 +175,6 @@ public class ManagePricePackage extends HttpServlet {
             int accessDuration = Integer.parseInt(accessDurationStr);
             int listPrice = Integer.parseInt(listPriceStr);
             int salePrice = Integer.parseInt(salePriceStr);
-            Integer subjectId = (subjectIdStr != null && !subjectIdStr.trim().isEmpty()) ? 
-                               Integer.parseInt(subjectIdStr) : null;
             
             // Validate business rules
             if (accessDuration <= 0) {
@@ -174,7 +197,6 @@ public class ManagePricePackage extends HttpServlet {
             
             // Create PricePackage object
             PricePackage pricePackage = PricePackage.builder()
-                    .subject_id(subjectId)
                     .name(name.trim())
                     .access_duration_months(accessDuration)
                     .list_price(listPrice)
@@ -221,7 +243,6 @@ public class ManagePricePackage extends HttpServlet {
             String salePriceStr = request.getParameter("sale_price");
             String status = request.getParameter("status");
             String description = request.getParameter("description");
-            String subjectIdStr = request.getParameter("subject_id");
             
             // Validate required fields
             if (name == null || name.trim().isEmpty() ||
@@ -239,8 +260,6 @@ public class ManagePricePackage extends HttpServlet {
             int accessDuration = Integer.parseInt(accessDurationStr);
             int listPrice = Integer.parseInt(listPriceStr);
             int salePrice = Integer.parseInt(salePriceStr);
-            Integer subjectId = (subjectIdStr != null && !subjectIdStr.trim().isEmpty()) ? 
-                               Integer.parseInt(subjectIdStr) : null;
             
             // Validate business rules
             if (accessDuration <= 0) {
@@ -264,7 +283,6 @@ public class ManagePricePackage extends HttpServlet {
             // Create PricePackage object with ID
             PricePackage pricePackage = PricePackage.builder()
                     .id(id)
-                    .subject_id(subjectId)
                     .name(name.trim())
                     .access_duration_months(accessDuration)
                     .list_price(listPrice)
@@ -329,6 +347,90 @@ public class ManagePricePackage extends HttpServlet {
         }
         
         // Redirect to avoid form resubmission
+        response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+    }
+
+    private void activatePricePackage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            String idStr = request.getParameter("id");
+            if (idStr == null || idStr.trim().isEmpty()) {
+                request.getSession().setAttribute("toastMessage", "Package ID is required");
+                request.getSession().setAttribute("toastType", "error");
+                response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+                return;
+            }
+            
+            int id = Integer.parseInt(idStr);
+            PricePackage pricePackage = pricePackageDAO.findById(id);
+            if (pricePackage == null) {
+                request.getSession().setAttribute("toastMessage", "Price package not found");
+                request.getSession().setAttribute("toastType", "error");
+                response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+                return;
+            }
+            
+            // Update status to active
+            pricePackage.setStatus("active");
+            boolean success = pricePackageDAO.update(pricePackage);
+            
+            if (success) {
+                request.getSession().setAttribute("toastMessage", "Price package activated successfully");
+                request.getSession().setAttribute("toastType", "success");
+            } else {
+                request.getSession().setAttribute("toastMessage", "Failed to activate price package");
+                request.getSession().setAttribute("toastType", "error");
+            }
+            
+        } catch (NumberFormatException e) {
+            request.getSession().setAttribute("toastMessage", "Invalid package ID");
+            request.getSession().setAttribute("toastType", "error");
+        } catch (Exception e) {
+            request.getSession().setAttribute("toastMessage", "An error occurred: " + e.getMessage());
+            request.getSession().setAttribute("toastType", "error");
+        }
+        
+        response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+    }
+
+    private void deactivatePricePackage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            String idStr = request.getParameter("id");
+            if (idStr == null || idStr.trim().isEmpty()) {
+                request.getSession().setAttribute("toastMessage", "Package ID is required");
+                request.getSession().setAttribute("toastType", "error");
+                response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+                return;
+            }
+            
+            int id = Integer.parseInt(idStr);
+            PricePackage pricePackage = pricePackageDAO.findById(id);
+            if (pricePackage == null) {
+                request.getSession().setAttribute("toastMessage", "Price package not found");
+                request.getSession().setAttribute("toastType", "error");
+                response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+                return;
+            }
+            
+            // Update status to inactive
+            pricePackage.setStatus("inactive");
+            boolean success = pricePackageDAO.update(pricePackage);
+            
+            if (success) {
+                request.getSession().setAttribute("toastMessage", "Price package deactivated successfully");
+                request.getSession().setAttribute("toastType", "success");
+            } else {
+                request.getSession().setAttribute("toastMessage", "Failed to deactivate price package");
+                request.getSession().setAttribute("toastType", "error");
+            }
+            
+        } catch (NumberFormatException e) {
+            request.getSession().setAttribute("toastMessage", "Invalid package ID");
+            request.getSession().setAttribute("toastType", "error");
+        } catch (Exception e) {
+            request.getSession().setAttribute("toastMessage", "An error occurred: " + e.getMessage());
+            request.getSession().setAttribute("toastType", "error");
+        }
+        
         response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
     }
 }

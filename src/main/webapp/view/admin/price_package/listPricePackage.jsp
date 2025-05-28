@@ -234,7 +234,6 @@
                                                 <tr>
                                                     <th>ID</th>
                                                     <th>Name</th>
-                                                    <th>Subject ID</th>
                                                     <th>Duration (Months)</th>
                                                     <th>List Price</th>
                                                     <th>Sale Price</th>
@@ -248,7 +247,6 @@
                                                     <tr>
                                                         <td>${pkg.id}</td>
                                                         <td><strong>${pkg.name}</strong></td>
-                                                        <td>${pkg.subject_id != null ? pkg.subject_id : 'N/A'}</td>
                                                         <td>${pkg.access_duration_months}</td>
                                                         <td><fmt:formatNumber value="${pkg.list_price}" type="currency" currencySymbol="$" /></td>
                                                         <td><fmt:formatNumber value="${pkg.sale_price}" type="currency" currencySymbol="$" /></td>
@@ -268,18 +266,6 @@
                                                                      href="${pageContext.request.contextPath}/admin/pricepackage?action=details&id=${pkg.id}">
                                                                     <i class="fas fa-eye"></i> Details
                                                                 </a>
-                                                                <!-- <button type="button" class="action-edit edit-btn" 
-                                                                        data-id="${pkg.id}"
-                                                                        data-name="${pkg.name}"
-                                                                        data-subject-id="${pkg.subject_id}"
-                                                                        data-duration="${pkg.access_duration_months}"
-                                                                        data-list-price="${pkg.list_price}"
-                                                                        data-sale-price="${pkg.sale_price}"
-                                                                        data-status="${pkg.status}"
-                                                                        data-description="${pkg.description}"
-                                                                        data-bs-toggle="modal" data-bs-target="#editPackageModal">
-                                                                    <i class="fas fa-edit"></i> Edit
-                                                                </button> -->
                                                                 <form method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this package?');">
                                                                     <input type="hidden" name="action" value="delete">
                                                                     <input type="hidden" name="id" value="${pkg.id}">
@@ -293,7 +279,7 @@
                                                 </c:forEach>
                                                 <c:if test="${empty pricePackages}">
                                                     <tr>
-                                                        <td colspan="9" class="text-center">No price packages found</td>
+                                                        <td colspan="8" class="text-center">No price packages found</td>
                                                     </tr>
                                                 </c:if>
                                             </tbody>
@@ -362,18 +348,12 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="subject_id" class="form-label">Subject ID</label>
-                                        <input type="number" class="form-control" id="subject_id" name="subject_id">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
                                         <label for="access_duration_months" class="form-label">Duration (Months) *</label>
                                         <input type="number" class="form-control" id="access_duration_months" name="access_duration_months" min="1" required>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="status" class="form-label">Status *</label>
@@ -434,18 +414,12 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="edit_subject_id" class="form-label">Subject ID</label>
-                                        <input type="number" class="form-control" id="edit_subject_id" name="subject_id">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
                                         <label for="edit_access_duration_months" class="form-label">Duration (Months) *</label>
                                         <input type="number" class="form-control" id="edit_access_duration_months" name="access_duration_months" min="1" required>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="edit_status" class="form-label">Status *</label>
@@ -516,12 +490,6 @@
                             </div>
                             <div class="column-option">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="subject" id="subjectColumn" checked>
-                                    <label class="form-check-label" for="subjectColumn">Subject ID</label>
-                                </div>
-                            </div>
-                            <div class="column-option">
-                                <div class="form-check">
                                     <input class="form-check-input" type="checkbox" value="duration" id="durationColumn" checked>
                                     <label class="form-check-label" for="durationColumn">Duration</label>
                                 </div>
@@ -568,7 +536,6 @@
                     btn.addEventListener('click', function() {
                         const id = this.getAttribute('data-id');
                         const name = this.getAttribute('data-name');
-                        const subjectId = this.getAttribute('data-subject-id');
                         const duration = this.getAttribute('data-duration');
                         const listPrice = this.getAttribute('data-list-price');
                         const salePrice = this.getAttribute('data-sale-price');
@@ -577,7 +544,6 @@
                         
                         document.getElementById('edit_id').value = id;
                         document.getElementById('edit_name').value = name || '';
-                        document.getElementById('edit_subject_id').value = subjectId === 'null' || !subjectId ? '' : subjectId;
                         document.getElementById('edit_access_duration_months').value = duration;
                         document.getElementById('edit_list_price').value = listPrice;
                         document.getElementById('edit_sale_price').value = salePrice;

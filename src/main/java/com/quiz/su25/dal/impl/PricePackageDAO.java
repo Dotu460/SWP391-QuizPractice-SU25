@@ -45,22 +45,17 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
 
     @Override
     public boolean update(PricePackage t) {
-        String sql = "UPDATE pricePackage SET subject_id=?, name=?, access_duration_months=?, list_price=?, sale_price=?, status=?, description=? WHERE id=?";
+        String sql = "UPDATE pricePackage SET name=?, access_duration_months=?, list_price=?, sale_price=?, status=?, description=? WHERE id=?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            if (t.getSubject_id() != null) {
-                statement.setInt(1, t.getSubject_id());
-            } else {
-                statement.setNull(1, java.sql.Types.INTEGER);
-            }
-            statement.setString(2, t.getName());
-            statement.setInt(3, t.getAccess_duration_months());
-            statement.setInt(4, t.getList_price());
-            statement.setInt(5, t.getSale_price());
-            statement.setString(6, t.getStatus());
-            statement.setString(7, t.getDescription());
-            statement.setInt(8, t.getId());
+            statement.setString(1, t.getName());
+            statement.setInt(2, t.getAccess_duration_months());
+            statement.setInt(3, t.getList_price());
+            statement.setInt(4, t.getSale_price());
+            statement.setString(5, t.getStatus());
+            statement.setString(6, t.getDescription());
+            statement.setInt(7, t.getId());
             
             return statement.executeUpdate() > 0;
         } catch (Exception e) {
@@ -72,21 +67,16 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
     }
 
     public boolean create(PricePackage t) {
-        String sql = "INSERT INTO pricePackage (subject_id, name, access_duration_months, list_price, sale_price, status, description) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO pricePackage (name, access_duration_months, list_price, sale_price, status, description) VALUES (?, ?, ?, ?, ?, ?)";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            if (t.getSubject_id() != null) {
-                statement.setInt(1, t.getSubject_id());
-            } else {
-                statement.setNull(1, java.sql.Types.INTEGER);
-            }
-            statement.setString(2, t.getName());
-            statement.setInt(3, t.getAccess_duration_months());
-            statement.setInt(4, t.getList_price());
-            statement.setInt(5, t.getSale_price());
-            statement.setString(6, t.getStatus());
-            statement.setString(7, t.getDescription());
+            statement.setString(1, t.getName());
+            statement.setInt(2, t.getAccess_duration_months());
+            statement.setInt(3, t.getList_price());
+            statement.setInt(4, t.getSale_price());
+            statement.setString(5, t.getStatus());
+            statement.setString(6, t.getDescription());
             
             return statement.executeUpdate() > 0;
         } catch (Exception e) {
@@ -109,15 +99,9 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
 
     @Override
     public PricePackage getFromResultSet(ResultSet resultSet) throws SQLException {
-        Integer subjectId = resultSet.getInt("subject_id");
-        if (resultSet.wasNull()) {
-            subjectId = null;
-        }
-        
         PricePackage pricePackage = PricePackage
                 .builder()
                 .id(resultSet.getInt("id"))
-                .subject_id(subjectId)
                 .name(resultSet.getString("name"))
                 .access_duration_months(resultSet.getInt("access_duration_months"))
                 .status(resultSet.getString("status"))

@@ -23,7 +23,6 @@ import lombok.ToString;
 
 public class PricePackage {
     private Integer id;
-    private Integer subject_id;
     private String name;
     private Integer access_duration_months;
     private Integer list_price;
