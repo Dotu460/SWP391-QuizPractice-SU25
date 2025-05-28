@@ -1,7 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <div class="col-lg-3">
     <!-- Dropdown Search Box -->
-    <div class="dashboard__sidebar-title mt-30 mb-20">
+    <!-- <div class="dashboard__sidebar-title mt-30 mb-20">
         <h6 class="title"></h6>
     </div>
     <div style="margin-bottom:50px;">
@@ -19,7 +19,7 @@
                 <img src="search-icon.png" alt="Search" style="width: 20px; height: 20px;" />
             </button>
         </div>
-    </div>
+    </div> -->
 
     <div class="dashboard__sidebar-wrap">
         <div class="dashboard__sidebar-title mb-20">
