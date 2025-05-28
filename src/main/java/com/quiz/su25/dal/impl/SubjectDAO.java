@@ -92,7 +92,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject>{
 
     public static void main(String[] args) {
         SubjectDAO subjectDAO = new SubjectDAO();
-        System.out.println(subjectDAO.findById(1));
+        System.out.println(subjectDAO.findById(2));
     }
     
 }

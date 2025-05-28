@@ -41,12 +41,14 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage> {
     public PricePackage getFromResultSet(ResultSet resultSet) throws SQLException {
         return PricePackage.builder()
                 .id(resultSet.getInt("subject_id"))
+                .name(resultSet.getString("name"))
                 .list_price(resultSet.getDouble("list_price"))
                 .sale_price(resultSet.getDouble("sale_price"))
                 .description(resultSet.getString("description"))
                 .status(resultSet.getString("status"))
                 .created_at(resultSet.getDate("created_at"))
                 .updated_at(resultSet.getDate("updated_at"))
+                .access_duration_month(resultSet.getInt("access_duration_month"))
                 .build();
     }
 

@@ -24,11 +24,12 @@ import lombok.ToString;
 public class PricePackage {
     private Integer id;
     private Integer subject_id;
+    private String name;
     private double list_price;
     private double sale_price;
     private String status;
     private String description;
     private Date created_at;
     private Date updated_at;
-            
+    private Integer access_duration_month;
 }

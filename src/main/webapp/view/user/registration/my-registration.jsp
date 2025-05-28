@@ -74,8 +74,8 @@
                                             <form action="${pageContext.request.contextPath}/my-registration" method="get" class="dashboard_sidebar_search-form">
                                                 <div class="row gy-2 gx-3 align-items-end">
                                                     <div class="col-md-2">
-                                                        <label for="courseId" class="form-label">Course</label>
-                                                        <select name="courseId" id="courseId" class="form-select">
+                                                        <label for="subjectId" class="form-label">Course</label>
+                                                        <select name="subjectId" id="subjectId" class="form-select">
                                                             <option value="0">All Courses</option>
                                                             <c:forEach var="subject" items="${allSubjects}">
                                                                 <option value="${subject.id}" ${subject.id eq currentSubjectId ? 'selected' : ''}>${subject.title}</option>
@@ -88,7 +88,7 @@
                                                         <select name="status" id="status" class="form-select">
                                                             <option value="">All Status</option>
                                                             <option value="approved" ${currentStatus eq 'approved' ? 'selected' : ''}>Approved</option>
-                                                            <option value="rejected" ${currentStatus eq 'rejected' ? 'selected' : ''}>Rejected</option>
+                                                            <option value="submit" ${currentStatus eq 'submit' ? 'selected' : ''}>Rejected</option>
                                                         </select>
                                                     </div>
                                                     
@@ -124,7 +124,7 @@
                                                         <thead>
                                                             <tr>
                                                                 <th>ID</th>
-                                                                <th>SubjectSubject Name</th>
+                                                                <th>Subject Name</th>
                                                                 <th>Package</th>
                                                                 <th>Registration time</th>
                                                                 <th>Price</th>
@@ -144,13 +144,13 @@
                                                                     <p>${subjectDAO.findById(r.subject_id).title}</p>
                                                                 </td>
                                                                 <td>
-                                                                    <p>${packageDAO.findById(r.package_id).sale_price}</p>
+                                                                    <p>${packageDAO.findById(r.package_id).name}</p>
                                                                 </td>
                                                                 <td>
                                                                     <p>${r.registration_time}</p>
                                                                 </td>
                                                                 <td>
-                                                                    <p>${r.total_cost}</p>
+                                                                    <p>${packageDAO.findById(r.package_id).sale_price}</p>
                                                                 </td>
                                                                                                                                 <td>
                                                                     <span class="dashboard__quiz-result">${r.status}</span>
@@ -183,7 +183,7 @@
                                                     <ul class="pagination justify-content-center">
                                                         <c:if test="${currentPage > 1}">
                                                             <li class="page-item">
-                                                                <a class="page-link" href="my-registration?page=${currentPage - 1}&searchName=${currentSearchName}&courseId=${currentCourseId != null ? currentCourseId : 0}&status=${currentStatus != null ? currentStatus : ''}&fromDate=${currentFromDate != null ? currentFromDate : ''}&toDate=${currentToDate != null ? currentToDate : ''}">Previous</a>
+                                                                <a class="page-link" href="my-registration?page=${currentPage - 1}&searchName=${currentSearchName}&subjectId=${currentSubjectId != null ? currentSubjectId : 0}&status=${currentStatus != null ? currentStatus : ''}&fromDate=${currentFromDate != null ? currentFromDate : ''}&toDate=${currentToDate != null ? currentToDate : ''}">Previous</a>
                                                             </li>
                                                         </c:if>
 
@@ -196,7 +196,7 @@
                                                                 </c:when>
                                                                 <c:otherwise>
                                                                     <li class="page-item">
-                                                                        <a class="page-link" href="my-registration?page=${i}&searchName=${currentSearchName}&courseId=${currentCourseId != null ? currentCourseId : 0}&status=${currentStatus != null ? currentStatus : ''}&fromDate=${currentFromDate != null ? currentFromDate : ''}&toDate=${currentToDate != null ? currentToDate : ''}">${i}</a>
+                                                                        <a class="page-link" href="my-registration?page=${i}&searchName=${currentSearchName}&subjectId=${currentSubjectId != null ? currentSubjectId : 0}&status=${currentStatus != null ? currentStatus : ''}&fromDate=${currentFromDate != null ? currentFromDate : ''}&toDate=${currentToDate != null ? currentToDate : ''}">${i}</a>
                                                                     </li>
                                                                 </c:otherwise>
                                                             </c:choose>
@@ -204,7 +204,7 @@
 
                                                         <c:if test="${currentPage < totalPages}">
                                                             <li class="page-item">
-                                                                <a class="page-link" href="my-registration?page=${currentPage + 1}&searchName=${currentSearchName}&courseId=${currentCourseId != null ? currentCourseId : 0}&status=${currentStatus != null ? currentStatus : ''}&fromDate=${currentFromDate != null ? currentFromDate : ''}&toDate=${currentToDate != null ? currentToDate : ''}">Next</a>
+                                                                <a class="page-link" href="my-registration?page=${currentPage + 1}&searchName=${currentSearchName}&subjectId=${currentSubjectId != null ? currentSubjectId : 0}&status=${currentStatus != null ? currentStatus : ''}&fromDate=${currentFromDate != null ? currentFromDate : ''}&toDate=${currentToDate != null ? currentToDate : ''}">Next</a>
                                                             </li>
                                                         </c:if>
                                                     </ul>
