@@ -42,7 +42,7 @@
                     <div class="tgmenu__wrap">
                         <nav class="tgmenu__nav">
                             <div class="logo">
-                                <a href="index.html"><img src="${pageContext.request.contextPath}/view/common/img/logo/logo.svg" alt="Logo"></a>
+                                <a href="home"><img src="${pageContext.request.contextPath}/view/common/img/logo/logo.svg" alt="Logo"></a>
                             </div>
                             <div class="tgmenu__navbar-wrap tgmenu__main-menu d-none d-xl-flex">
                                 <ul class="navigation">
@@ -135,7 +135,7 @@
                                             <li><a href="contact.html">contact</a></li>
                                         </ul>
                                     </li>
-                                    <li class="active menu-item-has-children"><a href="#">Dashboard</a>
+                                    <li class="menu-item-has-children"><a href="#">Dashboard</a>
                                         <ul class="sub-menu">
                                             <li class="active menu-item-has-children">
                                                 <a href="instructor-dashboard.html">Instructor Dashboard</a>
@@ -185,7 +185,7 @@
                                 </ul>
                             </div>
                             <div class="mobile-login-btn">
-                                <a href="login.html"><img src="${pageContext.request.contextPath}/view/common/img/icons/user.svg" alt="" class="injectable"></a>
+                                <a href="login"><img src="${pageContext.request.contextPath}/view/common/img/icons/user.svg" alt="" class="injectable"></a>
                             </div>
                             <div class="mobile-nav-toggler"><i class="tg-flaticon-menu-1"></i></div>
                         </nav>
@@ -195,7 +195,7 @@
                         <nav class="tgmobile__menu-box">
                             <div class="close-btn"><i class="tg-flaticon-close-1"></i></div>
                             <div class="nav-logo">
-                                <a href="index.html"><img src="${pageContext.request.contextPath}/view/common/img/logo/logo.svg" alt="Logo"></a>
+                                <a href="home"><img src="${pageContext.request.contextPath}/view/common/img/logo/logo.svg" alt="Logo"></a>
                             </div>
                             <div class="tgmobile__search">
                                 <form action="#">

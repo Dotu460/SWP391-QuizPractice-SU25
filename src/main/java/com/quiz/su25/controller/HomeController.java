@@ -19,18 +19,18 @@ import java.util.List;
 @WebServlet("/home")
 public class HomeController extends HttpServlet {
    
-    private SliderDAO sliderDAO;
-    private PostDAO postDAO;
-    private SubjectDAO subjectDAO;
-    private List<Slider> sliders;
-    private List<Post> hotPosts;
-    private List<Subject> subjects;
-    
+    private SliderDAO sliderDAO;// DAO để lấy danh sách slider
+    private PostDAO postDAO;// DAO để lấy danh sách bài viết
+    private SubjectDAO subjectDAO;// DAO để lấy danh sách môn học
+    private List<Slider> sliders;// Danh sách slider (banner)
+    private List<Post> hotPosts; // Danh sách bài viết nổi bật
+    private List<Subject> subjects;// Danh sách môn học
+    // Phương thức init() chạy khi Servlet được khởi tạo
     @Override
     public void init() throws ServletException {
-        sliderDAO = new SliderDAO();
-        postDAO = new PostDAO();
-        subjectDAO = new SubjectDAO();
+        sliderDAO = new SliderDAO();// Khởi tạo DAO slider
+        postDAO = new PostDAO();// Khởi tạo DAO bài viết
+        subjectDAO = new SubjectDAO();// Khởi tạo DAO môn học
     }
    
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -53,11 +53,13 @@ public class HomeController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
         try {
+            // Gán danh sách slider, hotPosts, subjects vào request để truyền sang JSP
             request.setAttribute("sliders", sliders);
             request.setAttribute("hotPosts", hotPosts);
             request.setAttribute("subjects", subjects);
+            // Chuyển tiếp đến trang JSP giao diện chính
             request.getRequestDispatcher("view/home/homepage.jsp").forward(request, response);
-        } catch (Exception e) {
+        } catch (Exception e) {// Bắt lỗi, in log và chuyển hướng đến trang lỗi
             System.out.println("Error in HomeController doGet: " + e.getMessage());
             response.sendRedirect("error.jsp");
         }
@@ -66,7 +68,7 @@ public class HomeController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-        doGet(request, response);
+        doGet(request, response);// Gọi lại doGet để xử lý giống nhau
     }
 
     @Override

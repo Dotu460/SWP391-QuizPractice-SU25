@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpSession;
 
 @WebServlet("/login")
 public class AuthenController extends HttpServlet {
-    private UserDAO userDAO = new UserDAO();
+    private UserDAO userDAO = new UserDAO();// Tạo đối tượng userDAO để xử lý logic đăng nhập
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
@@ -21,48 +21,48 @@ public class AuthenController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-        String action = request.getParameter("action");
+        String action = request.getParameter("action");// Lấy giá trị action từ URL
         
-        if ("logout".equals(action)) {
+        if ("logout".equals(action)) {// Nếu action=logout thì gọi hàm logout
             logout(request, response);
-            return;
+            return;// Dừng xử lý tiếp
         }
 
-        // 👉 Xử lý đăng nhập bằng Google nếu có action=google
+        // Xử lý đăng nhập bằng Google nếu có action=google
         if ("google".equals(action)) {
-            response.sendRedirect("auth/google");
+            response.sendRedirect("auth/google");// Chuyển hướng đến đường dẫn auth/google
             return;
         }
-        
+        // Nếu không có action, forward (chuyển tiếp) đến trang login (form nhập email & password)
         request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
     } 
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
+        // Lấy dữ liệu từ form gửi lên
         String email = request.getParameter("email");
         String password = request.getParameter("password");
-        String remember = request.getParameter("remember");
         
         try {
-            User user = userDAO.login(email, password);
+            User user = userDAO.login(email, password); // Gọi DAO để kiểm tra đăng nhập (email + password)
             
             if (user != null) {
-                HttpSession session = request.getSession();
-                session.setAttribute("user", user);
-                response.sendRedirect("home");
+                HttpSession session = request.getSession(); // Nếu đăng nhập thành công -> tạo session
+                session.setAttribute("user", user);// Lưu user vào session
+                response.sendRedirect("home");//Chuyển đến trang home
             } else {
-                request.setAttribute("error", "Invalid email or password");
+                request.setAttribute("error", "Invalid email or password");// Nếu thông tin đăng nhập không hợp lệ
                 request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
             }
-        } catch (Exception e) {
+        } catch (Exception e) {// Xử lý lỗi nếu có exception trong quá trình login
             request.setAttribute("error", "An error occurred during login. Please try again.");
             request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
         }
     }
     private void logout(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
-    HttpSession session = request.getSession(false);
+    HttpSession session = request.getSession(false);// Lấy session hiện tại (nếu có)
     if (session != null) {
         session.invalidate(); // Xóa session
     }

@@ -22,8 +22,15 @@ import java.sql.Date;
 public class Post {
     private Integer id;
     private String title;
-    private String thumbnail;
-    private Date postDate;
-    private String author;
+    private String thumbnail_url;
+    private String brief_info;
     private String content;
+    private Integer category_id;
+    private String author;
+    private Integer author_id;
+    private String status;
+    private Boolean featured_flag;
+    private Date published_at;
+    private Date created_at;
+    private Date update_at;
 }

@@ -152,22 +152,22 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
                 .status(resultSet.getString("status"))
                 .build();
     }
-
-    public List<Subject> getFeaturedSubjects() {
+   //Lấy danh sách các môn học được đánh dấu là nổi bật (featured_flag = true) từ dtb
+    public List<Subject> getFeaturedSubjects() {// Tạo danh sách trống để chứa các môn học nổi bật
         List<Subject> list = new ArrayList<>();
-        String sql = "SELECT * FROM Subject WHERE featured = true";
+        String sql = "SELECT * FROM subject WHERE featured_flag = true";
         try {
-            connection = getConnection();
-            statement = connection.prepareStatement(sql);
-            resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                list.add(getFromResultSet(resultSet));
+            connection = getConnection(); // Mở kết nối đến dtb
+            statement = connection.prepareStatement(sql);// Chuẩn bị câu lệnh SQL để thực thi
+            resultSet = statement.executeQuery(); // Thực thi câu lệnh và lưu kết quả vào resultSet
+            while (resultSet.next()) {// Duyệt qua từng bản ghi trong resultSet
+                list.add(getFromResultSet(resultSet));// Chuyển đổi mỗi bản ghi thành một đối tượng Subject và thêm vào danh sách
             }
-        } catch (SQLException e) {
+        } catch (SQLException e) {// Ghi ra thông báo lỗi nếu có lỗi xảy ra khi truy vấn cơ sở dữ liệu
             System.out.println("Error getFeaturedSubjects at class SubjectDAO: " + e.getMessage());
-        } finally {
+        } finally {// Đóng các tài nguyên (kết nối, statement, resultSet) để tránh rò rỉ bộ nhớ
             closeResources();
         }
-        return list;
+        return list;// Trả về danh sách các môn học nổi bật
     }
 }

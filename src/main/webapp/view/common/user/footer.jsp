@@ -99,7 +99,7 @@
             <div class="row align-items-center">
                 <div class="col-md-7">
                     <div class="copy-right-text">
-                        <p>© 2010-2024 skillgro.com. All rights reserved.</p>
+                        <p>© 2010-2025 skillgro.com. All rights reserved.</p>
                     </div>
                 </div>
                 <div class="col-md-5">
