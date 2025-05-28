@@ -25,25 +25,86 @@ public class ManagePricePackage extends HttpServlet {
         String action = request.getParameter("action");
         
         if ("edit".equals(action)) {
-            // Handle edit action - get package by ID for editing
-            String idParam = request.getParameter("id");
-            if (idParam != null && !idParam.isEmpty()) {
-                try {
-                    int id = Integer.parseInt(idParam);
-                    PricePackage pricePackage = pricePackageDAO.findById(id);
-                    if (pricePackage != null) {
-                        request.setAttribute("pricePackage", pricePackage);
-                        request.setAttribute("action", "edit");
-                    }
-                } catch (NumberFormatException e) {
-                    request.setAttribute("error", "Invalid package ID");
+            handleEdit(request, response);
+        } else {
+            handleListWithFilters(request, response);
+        }
+    }
+    
+    private void handleEdit(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String idParam = request.getParameter("id");
+        if (idParam != null && !idParam.isEmpty()) {
+            try {
+                int id = Integer.parseInt(idParam);
+                PricePackage pricePackage = pricePackageDAO.findById(id);
+                if (pricePackage != null) {
+                    request.setAttribute("pricePackage", pricePackage);
+                    request.setAttribute("action", "edit");
                 }
+            } catch (NumberFormatException e) {
+                request.setAttribute("error", "Invalid package ID");
             }
         }
         
-        // Always load all price packages for listing
+        // Load all packages for listing
         List<PricePackage> pricePackages = pricePackageDAO.findAll();
         request.setAttribute("pricePackages", pricePackages);
+        request.getRequestDispatcher("/view/admin/price_package/pricePackage.jsp").forward(request, response);
+    }
+    
+    private void handleListWithFilters(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        // Get filter parameters
+        String statusFilter = request.getParameter("status");
+        String searchFilter = request.getParameter("search");
+        String minPriceFilter = request.getParameter("minPrice");
+        String maxPriceFilter = request.getParameter("maxPrice");
+        
+        // Get pagination parameters
+        int page = 1;
+        int pageSize = 10;
+        String pageStr = request.getParameter("page");
+        String pageSizeStr = request.getParameter("pageSize");
+        
+        if (pageStr != null && !pageStr.isEmpty()) {
+            try {
+                page = Integer.parseInt(pageStr);
+                if (page < 1) page = 1;
+            } catch (NumberFormatException e) {
+                page = 1;
+            }
+        }
+        
+        if (pageSizeStr != null && !pageSizeStr.isEmpty()) {
+            try {
+                pageSize = Integer.parseInt(pageSizeStr);
+                if (pageSize < 1) pageSize = 10;
+                if (pageSize > 100) pageSize = 100; // Max limit
+            } catch (NumberFormatException e) {
+                pageSize = 10;
+            }
+        }
+        
+        List<PricePackage> pricePackages = pricePackageDAO.findPricePackagesWithFilters(
+                statusFilter, searchFilter, minPriceFilter, maxPriceFilter, page, pageSize);
+        
+        int totalPackages = pricePackageDAO.getTotalFilteredPricePackages(
+                statusFilter, searchFilter, minPriceFilter, maxPriceFilter);
+        int totalPages = (int) Math.ceil((double) totalPackages / pageSize);
+        
+        // Set attributes for JSP
+        request.setAttribute("pricePackages", pricePackages);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalPackages", totalPackages);
+        request.setAttribute("pageSize", pageSize);
+        
+        // Set filter values for maintaining state
+        request.setAttribute("statusFilter", statusFilter);
+        request.setAttribute("searchFilter", searchFilter);
+        request.setAttribute("minPriceFilter", minPriceFilter);
+        request.setAttribute("maxPriceFilter", maxPriceFilter);
+        
         request.getRequestDispatcher("/view/admin/price_package/pricePackage.jsp").forward(request, response);
     }
 
@@ -58,7 +119,7 @@ public class ManagePricePackage extends HttpServlet {
         } else if ("delete".equals(action)) {
             deletePricePackage(request, response);
         } else {
-            response.sendRedirect(request.getContextPath() + "/admin/price-package");
+            response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
         }
     }
     
@@ -138,7 +199,7 @@ public class ManagePricePackage extends HttpServlet {
         }
         
         // Redirect to avoid form resubmission
-        response.sendRedirect(request.getContextPath() + "/admin/price-package");
+        response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
     }
     
     private void updatePricePackage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -228,7 +289,7 @@ public class ManagePricePackage extends HttpServlet {
         }
         
         // Redirect to avoid form resubmission
-        response.sendRedirect(request.getContextPath() + "/admin/price-package");
+        response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
     }
     
     private void deletePricePackage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -268,7 +329,7 @@ public class ManagePricePackage extends HttpServlet {
         }
         
         // Redirect to avoid form resubmission
-        response.sendRedirect(request.getContextPath() + "/admin/price-package");
+        response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
     }
 }
 
