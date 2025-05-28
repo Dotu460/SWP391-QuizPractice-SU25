@@ -331,12 +331,12 @@
                                                         <i class="fa fa-edit"></i> Edit Package
                                                     </a>
                                                     <c:if test="${pricePackage.status eq 'active'}">
-                                                        <button type="button" class="btn btn-danger action-button" onclick="confirmDeactivate(${pricePackage.id})">
+                                                        <button type="button" class="btn btn-danger action-button" onclick="confirmDeactivate('${pricePackage.id}')">
                                                             <i class="fa fa-ban"></i> Deactivate Package
                                                         </button>
                                                     </c:if>
                                                     <c:if test="${pricePackage.status eq 'inactive'}">
-                                                        <button type="button" class="btn btn-success action-button" onclick="confirmActivate(${pricePackage.id})">
+                                                        <button type="button" class="btn btn-success action-button" onclick="confirmActivate('${pricePackage.id}')">
                                                             <i class="fa fa-check"></i> Activate Package
                                                         </button>
                                                     </c:if>

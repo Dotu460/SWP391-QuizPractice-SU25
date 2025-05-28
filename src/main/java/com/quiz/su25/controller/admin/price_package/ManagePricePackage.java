@@ -41,17 +41,16 @@ public class ManagePricePackage extends HttpServlet {
                 PricePackage pricePackage = pricePackageDAO.findById(id);
                 if (pricePackage != null) {
                     request.setAttribute("pricePackage", pricePackage);
-                    request.setAttribute("action", "edit");
+                    request.getRequestDispatcher("/view/admin/price_package/editPricePackage.jsp").forward(request, response);
+                    return;
                 }
             } catch (NumberFormatException e) {
                 request.setAttribute("error", "Invalid package ID");
             }
         }
         
-        // Load all packages for listing
-        List<PricePackage> pricePackages = pricePackageDAO.findAll();
-        request.setAttribute("pricePackages", pricePackages);
-        request.getRequestDispatcher("/view/admin/price_package/listPricePackage.jsp").forward(request, response);
+        // If package not found or invalid ID, redirect to list
+        response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
     }
     
     private void handleDetails(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -230,7 +229,7 @@ public class ManagePricePackage extends HttpServlet {
             String idStr = request.getParameter("id");
             if (idStr == null || idStr.trim().isEmpty()) {
                 request.setAttribute("error", "Package ID is required for update");
-                doGet(request, response);
+                response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
                 return;
             }
             
@@ -251,8 +250,11 @@ public class ManagePricePackage extends HttpServlet {
                 salePriceStr == null || salePriceStr.trim().isEmpty() ||
                 status == null || status.trim().isEmpty()) {
                 
+                // Get the package for redisplaying the form
+                PricePackage pricePackage = pricePackageDAO.findById(id);
+                request.setAttribute("pricePackage", pricePackage);
                 request.setAttribute("error", "All required fields must be filled");
-                doGet(request, response);
+                request.getRequestDispatcher("/view/admin/price_package/editPricePackage.jsp").forward(request, response);
                 return;
             }
             
@@ -263,20 +265,26 @@ public class ManagePricePackage extends HttpServlet {
             
             // Validate business rules
             if (accessDuration <= 0) {
+                PricePackage pricePackage = pricePackageDAO.findById(id);
+                request.setAttribute("pricePackage", pricePackage);
                 request.setAttribute("error", "Access duration must be greater than 0");
-                doGet(request, response);
+                request.getRequestDispatcher("/view/admin/price_package/editPricePackage.jsp").forward(request, response);
                 return;
             }
             
             if (listPrice <= 0 || salePrice <= 0) {
+                PricePackage pricePackage = pricePackageDAO.findById(id);
+                request.setAttribute("pricePackage", pricePackage);
                 request.setAttribute("error", "Prices must be greater than 0");
-                doGet(request, response);
+                request.getRequestDispatcher("/view/admin/price_package/editPricePackage.jsp").forward(request, response);
                 return;
             }
             
             if (salePrice > listPrice) {
+                PricePackage pricePackage = pricePackageDAO.findById(id);
+                request.setAttribute("pricePackage", pricePackage);
                 request.setAttribute("error", "Sale price cannot be greater than list price");
-                doGet(request, response);
+                request.getRequestDispatcher("/view/admin/price_package/editPricePackage.jsp").forward(request, response);
                 return;
             }
             
@@ -295,19 +303,48 @@ public class ManagePricePackage extends HttpServlet {
             boolean success = pricePackageDAO.update(pricePackage);
             
             if (success) {
-                request.setAttribute("success", "Price package updated successfully");
+                request.getSession().setAttribute("toastMessage", "Price package updated successfully");
+                request.getSession().setAttribute("toastType", "success");
+                response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
             } else {
+                request.setAttribute("pricePackage", pricePackage);
                 request.setAttribute("error", "Failed to update price package");
+                request.getRequestDispatcher("/view/admin/price_package/editPricePackage.jsp").forward(request, response);
             }
             
         } catch (NumberFormatException e) {
+            // Get the package for redisplaying the form
+            String idStr = request.getParameter("id");
+            if (idStr != null && !idStr.trim().isEmpty()) {
+                try {
+                    int id = Integer.parseInt(idStr);
+                    PricePackage pricePackage = pricePackageDAO.findById(id);
+                    request.setAttribute("pricePackage", pricePackage);
+                } catch (NumberFormatException ex) {
+                    // If we can't get the package, redirect to list
+                    response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+                    return;
+                }
+            }
             request.setAttribute("error", "Invalid numeric values provided");
+            request.getRequestDispatcher("/view/admin/price_package/editPricePackage.jsp").forward(request, response);
         } catch (Exception e) {
+            // Get the package for redisplaying the form
+            String idStr = request.getParameter("id");
+            if (idStr != null && !idStr.trim().isEmpty()) {
+                try {
+                    int id = Integer.parseInt(idStr);
+                    PricePackage pricePackage = pricePackageDAO.findById(id);
+                    request.setAttribute("pricePackage", pricePackage);
+                } catch (NumberFormatException ex) {
+                    // If we can't get the package, redirect to list
+                    response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+                    return;
+                }
+            }
             request.setAttribute("error", "An error occurred: " + e.getMessage());
+            request.getRequestDispatcher("/view/admin/price_package/editPricePackage.jsp").forward(request, response);
         }
-        
-        // Redirect to avoid form resubmission
-        response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
     }
     
     private void deletePricePackage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

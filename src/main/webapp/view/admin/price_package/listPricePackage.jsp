@@ -266,6 +266,10 @@
                                                                      href="${pageContext.request.contextPath}/admin/pricepackage?action=details&id=${pkg.id}">
                                                                     <i class="fas fa-eye"></i> Details
                                                                 </a>
+                                                                <a type="button" class="action-edit edit-btn"
+                                                                     href="${pageContext.request.contextPath}/admin/pricepackage?action=edit&id=${pkg.id}">
+                                                                    <i class="fas fa-edit"></i> Edit
+                                                                </a>
                                                                 <form method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this package?');">
                                                                     <input type="hidden" name="action" value="delete">
                                                                     <input type="hidden" name="id" value="${pkg.id}">
@@ -393,72 +397,6 @@
             </div>
         </div>
 
-        <!-- Edit Package Modal -->
-        <div class="modal fade" id="editPackageModal" tabindex="-1" aria-labelledby="editPackageModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="editPackageModalLabel">Edit Price Package</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form method="post">
-                        <div class="modal-body">
-                            <input type="hidden" name="action" value="update">
-                            <input type="hidden" name="id" id="edit_id">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="edit_name" class="form-label">Package Name *</label>
-                                        <input type="text" class="form-control" id="edit_name" name="name" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="edit_access_duration_months" class="form-label">Duration (Months) *</label>
-                                        <input type="number" class="form-control" id="edit_access_duration_months" name="access_duration_months" min="1" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="edit_status" class="form-label">Status *</label>
-                                        <select class="form-control" id="edit_status" name="status" required>
-                                            <option value="">Select Status</option>
-                                            <option value="active">Active</option>
-                                            <option value="inactive">Inactive</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="edit_list_price" class="form-label">List Price *</label>
-                                        <input type="number" class="form-control" id="edit_list_price" name="list_price" min="1" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="edit_sale_price" class="form-label">Sale Price *</label>
-                                        <input type="number" class="form-control" id="edit_sale_price" name="sale_price" min="1" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="edit_description" class="form-label">Description</label>
-                                <textarea class="form-control" id="edit_description" name="description" rows="3"></textarea>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Update Package</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
         <!-- Settings Modal -->
         <div class="modal fade" id="settingModal" tabindex="-1" role="dialog" aria-labelledby="settingModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
@@ -530,29 +468,8 @@
         <jsp:include page="../../common/js/"></jsp:include>
         
         <script>
-            // Handle edit button clicks
             document.addEventListener('DOMContentLoaded', function() {
-                document.querySelectorAll('.edit-btn').forEach(function(btn) {
-                    btn.addEventListener('click', function() {
-                        const id = this.getAttribute('data-id');
-                        const name = this.getAttribute('data-name');
-                        const duration = this.getAttribute('data-duration');
-                        const listPrice = this.getAttribute('data-list-price');
-                        const salePrice = this.getAttribute('data-sale-price');
-                        const status = this.getAttribute('data-status');
-                        const description = this.getAttribute('data-description');
-                        
-                        document.getElementById('edit_id').value = id;
-                        document.getElementById('edit_name').value = name || '';
-                        document.getElementById('edit_access_duration_months').value = duration;
-                        document.getElementById('edit_list_price').value = listPrice;
-                        document.getElementById('edit_sale_price').value = salePrice;
-                        document.getElementById('edit_status').value = status;
-                        document.getElementById('edit_description').value = description === 'null' || !description ? '' : description;
-                    });
-                });
-                
-                // Validate that sale price doesn't exceed list price
+                // Validate that sale price doesn't exceed list price for add modal
                 function validatePrices(listPriceId, salePriceId) {
                     const listPrice = document.getElementById(listPriceId);
                     const salePrice = document.getElementById(salePriceId);
@@ -572,7 +489,6 @@
                 }
                 
                 validatePrices('list_price', 'sale_price');
-                validatePrices('edit_list_price', 'edit_sale_price');
                 
                 // Select all columns button
                 document.getElementById('selectAllColumns').addEventListener('click', function() {
