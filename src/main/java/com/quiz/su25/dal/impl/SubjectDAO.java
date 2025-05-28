@@ -23,7 +23,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
     @Override
     public List<Subject> findAll() {
         List<Subject> list = new ArrayList<>();
-        String sql = "SELECT * FROM Subject";
+        String sql = "SELECT * FROM subject";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -41,7 +41,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     @Override
     public Subject findById(Integer id) {
-        String sql = "SELECT * FROM Subject WHERE id = ?";
+        String sql = "SELECT * FROM subject WHERE id = ?";
         Subject subject = null;
         try {
             connection = getConnection();
@@ -61,7 +61,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     @Override
     public int insert(Subject subject) {
-        String sql = "INSERT INTO Subject (title, thumbnail_url, tag_line, description, featured, subjectcategories_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO subject (title, thumbnail_url, tag_line, description, featured_flag, category_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
         int generatedId = -1;
         try {
             connection = getConnection();
@@ -70,8 +70,8 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
             statement.setString(2, subject.getThumbnail_url());
             statement.setString(3, subject.getTag_line());
             statement.setString(4, subject.getDescription());
-            statement.setBoolean(5, subject.getFeatured());
-            statement.setInt(6, subject.getSubjectcategories_id());
+            statement.setBoolean(5, subject.getFeatured_flag());
+            statement.setInt(6, subject.getCategory_id());
             statement.setString(7, subject.getStatus());
 
             statement.executeUpdate();
@@ -89,7 +89,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     @Override
     public boolean update(Subject subject) {
-        String sql = "UPDATE Subject SET title = ?, thumbnail_url = ?, tag_line = ?, description = ?, featured = ?, subjectcategories_id = ?, status = ? WHERE id = ?";
+        String sql = "UPDATE subject SET title = ?, thumbnail_url = ?, tag_line = ?, description = ?, featured_flag = ?, category_id = ?, status = ? WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -98,8 +98,8 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
             statement.setString(2, subject.getThumbnail_url());
             statement.setString(3, subject.getTag_line());
             statement.setString(4, subject.getDescription());
-            statement.setBoolean(5, subject.getFeatured());
-            statement.setInt(6, subject.getSubjectcategories_id());
+            statement.setBoolean(5, subject.getFeatured_flag());
+            statement.setInt(6, subject.getCategory_id());
             statement.setString(7, subject.getStatus());
             statement.setInt(8, subject.getId());
 
@@ -122,7 +122,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
     }
 
     public boolean deleteById(Integer id) {
-        String sql = "DELETE FROM Subject WHERE id = ?";
+        String sql = "DELETE FROM subject WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -147,27 +147,27 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
                 .thumbnail_url(resultSet.getString("thumbnail_url"))
                 .tag_line(resultSet.getString("tag_line"))
                 .description(resultSet.getString("description"))
-                .featured(resultSet.getBoolean("featured"))
-                .subjectcategories_id(resultSet.getInt("subjectcategories_id"))
+                .featured_flag(resultSet.getBoolean("featured_flag"))
+                .category_id(resultSet.getInt("category_id"))
                 .status(resultSet.getString("status"))
                 .build();
     }
-   //Lấy danh sách các môn học được đánh dấu là nổi bật (featured_flag = true) từ dtb
-    public List<Subject> getFeaturedSubjects() {// Tạo danh sách trống để chứa các môn học nổi bật
+
+    public List<Subject> getFeaturedSubjects() {
         List<Subject> list = new ArrayList<>();
         String sql = "SELECT * FROM subject WHERE featured_flag = true";
         try {
-            connection = getConnection(); // Mở kết nối đến dtb
-            statement = connection.prepareStatement(sql);// Chuẩn bị câu lệnh SQL để thực thi
-            resultSet = statement.executeQuery(); // Thực thi câu lệnh và lưu kết quả vào resultSet
-            while (resultSet.next()) {// Duyệt qua từng bản ghi trong resultSet
-                list.add(getFromResultSet(resultSet));// Chuyển đổi mỗi bản ghi thành một đối tượng Subject và thêm vào danh sách
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                list.add(getFromResultSet(resultSet));
             }
-        } catch (SQLException e) {// Ghi ra thông báo lỗi nếu có lỗi xảy ra khi truy vấn cơ sở dữ liệu
+        } catch (SQLException e) {
             System.out.println("Error getFeaturedSubjects at class SubjectDAO: " + e.getMessage());
-        } finally {// Đóng các tài nguyên (kết nối, statement, resultSet) để tránh rò rỉ bộ nhớ
+        } finally {
             closeResources();
         }
-        return list;// Trả về danh sách các môn học nổi bật
+        return list;
     }
 }

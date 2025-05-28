@@ -11,6 +11,9 @@ package com.quiz.su25.dal.impl;
 import com.quiz.su25.entity.Slider;
 import com.quiz.su25.dal.DBContext;
 import com.quiz.su25.dal.I_DAO;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -18,60 +21,60 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SliderDAO extends DBContext implements I_DAO<Slider> {
-   // Lấy toàn bộ danh sách Slider từ database
+
     @Override
     public List<Slider> findAll() {
         List<Slider> list = new ArrayList<>();
-        String sql = "SELECT id, title, image_url, backlink_url, status FROM Sliders";
+        String sql = "SELECT id, title, image, backlink, status FROM slider";
         try {
-            connection = getConnection();// Kết nối DB
-            statement = connection.prepareStatement(sql); // Chuẩn bị câu SQL
-            resultSet = statement.executeQuery();// Thực thi câu SQL
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                list.add(getFromResultSet(resultSet));// Lấy Slider từ ResultSet
+                list.add(getFromResultSet(resultSet));
             }
         } catch (SQLException e) {
-            System.out.println("Error findAll at class SliderDAO: " + e.getMessage());// In lỗi nếu có
+            System.out.println("Error findAll at class SliderDAO: " + e.getMessage());
         } finally {
-            closeResources();// Đóng tài nguyên (kết nối, statement, resultset)
+            closeResources();
         }
-        return list;// Trả về danh sách Slider
+        return list;
     }
-    // Tìm Slider theo ID
+
     @Override
     public Slider findById(Integer id) {
-        String sql = "SELECT id, title, image, backlink, status FROM Slider WHERE id = ?";
+        String sql = "SELECT id, title, image_url, backlink_url, status FROM slider WHERE id = ?";
         Slider slider = null;
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setInt(1, id);// Gán giá trị id vào câu SQL
+            statement.setInt(1, id);
             resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                slider = getFromResultSet(resultSet);// Nếu có kết quả thì trả về Slider
+                slider = getFromResultSet(resultSet);
             }
         } catch (SQLException e) {
             System.out.println("Error findById at class SliderDAO: " + e.getMessage());
         } finally {
             closeResources();
         }
-        return slider;// Trả về Slider hoặc null
+        return slider;
     }
-    // Thêm mới Slider vào DB
+
     @Override
     public int insert(Slider slider) {
-        String sql = "INSERT INTO Sliders (title, image_url, backlink_url, status) VALUES ('Slider Title', 'http://example.com/image.jpg', 'http://example.com', 1)";
+        String sql = "INSERT INTO slider (title, image_url, backlink_url, status) VALUES (?, ?, ?, ?)";
         int generatedId = -1;
         try {
             connection = getConnection();
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS); // Lấy ID sinh tự động
+            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, slider.getTitle());
             statement.setString(2, slider.getImage_url());
             statement.setString(3, slider.getBacklink_url());
-            statement.setString(4, slider.getStatus());
+            statement.setBoolean(4, slider.getStatus());
 
-            statement.executeUpdate();// Thực thi insert
-            resultSet = statement.getGeneratedKeys();// Lấy ID vừa tạo
+            statement.executeUpdate();
+            resultSet = statement.getGeneratedKeys();
             if (resultSet.next()) {
                 generatedId = resultSet.getInt(1);
             }
@@ -80,12 +83,12 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
         } finally {
             closeResources();
         }
-        return generatedId;// Trả về ID của Slider mới insert hoặc -1 nếu lỗi
+        return generatedId;
     }
-    // Cập nhật Slider
+
     @Override
     public boolean update(Slider slider) {
-        String sql = "UPDATE Sliders SET title = 'New Title', image_url = 'http://example.com/newimage.jpg', backlink_url = 'http://example.com/newlink', status = 1 WHERE id = 5;";
+        String sql = "UPDATE slider SET title = ?, image_url = ?, backlink_url = ?, status = ? WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -93,53 +96,71 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
             statement.setString(1, slider.getTitle());
             statement.setString(2, slider.getImage_url());
             statement.setString(3, slider.getBacklink_url());
-            statement.setString(4, slider.getStatus());
+            statement.setBoolean(4, slider.getStatus());
             statement.setInt(5, slider.getId());
 
-            int rowsAffected = statement.executeUpdate();// Số dòng bị ảnh hưởng
-            success = rowsAffected > 0;// Nếu có dòng bị ảnh hưởng thì update thành công
+            int rowsAffected = statement.executeUpdate();
+            success = rowsAffected > 0;
         } catch (SQLException e) {
             System.out.println("Error update at class SliderDAO: " + e.getMessage());
         } finally {
             closeResources();
         }
-        return success;// Trả về true nếu update thành công
+        return success;
     }
-    // Xoá Slider (theo object Slider)
+
     @Override
     public boolean delete(Slider slider) {
         if (slider == null || slider.getId() == null) {
-            return false;// Nếu slider null hoặc không có id thì không xoá
+            return false;
         }
-        return deleteById(slider.getId());// Xoá theo id
+        return deleteById(slider.getId());
     }
-    // Xoá Slider theo id
+
     public boolean deleteById(Integer id) {
-        String sql = "DELETE FROM Sliders WHERE id = 5;";
+        String sql = "DELETE FROM slider WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setInt(1, id);// Gán id vào câu SQL
+            statement.setInt(1, id);
 
-            int rowsAffected = statement.executeUpdate();// Số dòng bị xoá
-            success = rowsAffected > 0;// Nếu có dòng bị xoá thì xoá thành công
+            int rowsAffected = statement.executeUpdate();
+            success = rowsAffected > 0;
         } catch (SQLException e) {
             System.out.println("Error deleteById at class SliderDAO: " + e.getMessage());
         } finally {
             closeResources();
         }
-        return success;// Trả về true nếu xoá thành công
+        return success;
     }
-   // Chuyển từ ResultSet sang object Slider
+
     @Override
     public Slider getFromResultSet(ResultSet resultSet) throws SQLException {
         return Slider.builder()
                 .id(resultSet.getInt("id"))
                 .title(resultSet.getString("title"))
-                .image_url(resultSet.getString("image"))
-                .backlink_url(resultSet.getString("backlink"))
-                .status(resultSet.getString("status"))
-                .build(); // Tạo Slider từ ResultSet
+                .image_url(resultSet.getString("image_url"))
+                .backlink_url(resultSet.getString("backlink_url"))
+                .status(resultSet.getBoolean("status"))
+                .build();
+    }
+
+    public List<Slider> getActiveSliders() {
+        List<Slider> list = new ArrayList<>();
+        String sql = "SELECT * FROM slider WHERE status = 1";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                list.add(getFromResultSet(resultSet));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getActiveSliders at class SliderDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return list;
     }
 }

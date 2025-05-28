@@ -27,7 +27,7 @@ public class Subject {
     private String thumbnail_url;
     private String tag_line;
     private String description;
-    private Boolean featured;
-    private Integer subjectcategories_id;
+    private Boolean featured_flag;
+    private Integer category_id;
     private String status;
 }

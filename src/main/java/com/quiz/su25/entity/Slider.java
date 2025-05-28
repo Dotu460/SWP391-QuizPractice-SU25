@@ -9,7 +9,6 @@ package com.quiz.su25.entity;
  * @author LENOVO
  */
 
-import java.sql.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,10 +27,5 @@ public class Slider {
     private String title;
     private String image_url;
     private String backlink_url;
-    private String status;
-    private Boolean display_order;
-    private String notes;
-    private Date created_at;
-    private Date update_at;
-    private Integer created_by;
+    private Boolean status;
 }

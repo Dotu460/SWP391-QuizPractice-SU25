@@ -15,61 +15,67 @@ import com.quiz.su25.dal.DBContext;
 import com.quiz.su25.dal.I_DAO;
 
 public class PostDAO extends DBContext implements I_DAO<Post> {
-    // Tìm tất cả bài Post trong DB
+    
     @Override
     public List<Post> findAll() {
         List<Post> list = new ArrayList<>();
-        String sql = "SELECT * FROM Post";
+        String sql = "SELECT * FROM post";
         try {
-            connection = getConnection();// Mở kết nối DB
-            statement = connection.prepareStatement(sql);// Chuẩn bị statement
-            resultSet = statement.executeQuery();// Thực thi query
-            while (resultSet.next()) {// Lặp qua kết quả
-                list.add(getFromResultSet(resultSet));// Chuyển mỗi dòng thành đối tượng Post
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                list.add(getFromResultSet(resultSet));
             }
         } catch (SQLException e) {
             System.out.println("Error findAll at class PostDAO: " + e.getMessage());
         } finally {
-            closeResources();// Đóng kết nối và statement
+            closeResources();
         }
-        return list;// Trả về danh sách Post
+        return list;
     }
-    // Tìm Post theo ID
+
     @Override
     public Post findById(Integer id) {
-        String sql = "SELECT * FROM Post WHERE id = ?";
+        String sql = "SELECT * FROM post WHERE id = ?";
         Post post = null;
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setInt(1, id);// Gán giá trị ID vào câu SQL
+            statement.setInt(1, id);
             resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                post = getFromResultSet(resultSet); // Tìm thấy Post và chuyển thành đối tượng
+                post = getFromResultSet(resultSet);
             }
         } catch (SQLException e) {
             System.out.println("Error findById at class PostDAO: " + e.getMessage());
         } finally {
             closeResources();
         }
-        return post;// Trả về Post tìm thấy hoặc null
+        return post;
     }
-    // Thêm mới Post vào DB
+
     @Override
     public int insert(Post post) {
-        String sql = "INSERT INTO Post (title, thumbnail, postDate, author, content) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO post (title, thumbnail_url, brief_info, content, category_id, author_id, published_at, updated_at, created_at, status, featured_flag) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         int generatedId = -1;
         try {
             connection = getConnection();
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);// Lấy ID tự tăng
+            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, post.getTitle());
             statement.setString(2, post.getThumbnail_url());
-            statement.setDate(3, new java.sql.Date(post.getPublished_at().getTime()));
-            statement.setString(4, post.getAuthor());
-            statement.setString(5, post.getContent());
+            statement.setString(3, post.getBrief_info());
+            statement.setString(4, post.getContent());
+            statement.setInt(5, post.getCategory_id());
+            statement.setInt(6, post.getAuthor_id());
+            statement.setDate(7, post.getPublished_at());
+            statement.setDate(8, post.getUpdated_at());
+            statement.setDate(9, post.getCreated_at());
+            statement.setString(10, post.getStatus());
+            statement.setBoolean(11, post.getFeatured_flag());
 
             statement.executeUpdate();
-            resultSet = statement.getGeneratedKeys();// Lấy ID mới tạo
+            resultSet = statement.getGeneratedKeys();
             if (resultSet.next()) {
                 generatedId = resultSet.getInt(1);
             }
@@ -78,25 +84,31 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
         } finally {
             closeResources();
         }
-        return generatedId; // Trả về ID mới thêm hoặc -1 nếu lỗi
+        return generatedId;
     }
-    // Cập nhật Post trong DB
+
     @Override
     public boolean update(Post post) {
-        String sql = "UPDATE Post SET title = ?, thumbnail = ?, postDate = ?, author = ?, content = ? WHERE id = ?";
+        String sql = "UPDATE post SET title = ?, thumbnail_url = ?, brief_info = ?, content = ?, category_id = ?, author_id = ?, published_at = ?, updated_at = ?, created_at = ?, status = ?, featured_flag = ? WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setString(1, post.getTitle());
             statement.setString(2, post.getThumbnail_url());
-            statement.setDate(3, new java.sql.Date(post.getPublished_at().getTime()));
-            statement.setString(4, post.getAuthor());
-            statement.setString(5, post.getContent());
-            statement.setInt(6, post.getId());
+            statement.setString(3, post.getBrief_info());
+            statement.setString(4, post.getContent());
+            statement.setInt(5, post.getCategory_id());
+            statement.setInt(6, post.getAuthor_id());
+            statement.setDate(7, post.getPublished_at());
+            statement.setDate(8, post.getUpdated_at());
+            statement.setDate(9, post.getCreated_at());
+            statement.setString(10, post.getStatus());
+            statement.setBoolean(11, post.getFeatured_flag());
+            statement.setInt(12, post.getId());
 
-            int rowsAffected = statement.executeUpdate();// Số dòng bị ảnh hưởng
-            success = rowsAffected > 0; // Nếu > 0 tức là update thành công
+            int rowsAffected = statement.executeUpdate();
+            success = rowsAffected > 0;
         } catch (SQLException e) {
             System.out.println("Error update at class PostDAO: " + e.getMessage());
         } finally {
@@ -104,17 +116,17 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
         }
         return success;
     }
-    // Xóa Post bằng đối tượng
+
     @Override
     public boolean delete(Post post) {
         if (post == null || post.getId() == null) {
-            return false;// Nếu post null hoặc chưa có ID thì không xóa
+            return false;
         }
-        return deleteById(post.getId());// Gọi hàm xóa theo ID
+        return deleteById(post.getId());
     }
-    // Xóa Post theo ID
+
     public boolean deleteById(Integer id) {
-        String sql = "DELETE FROM Post WHERE id = ?";
+        String sql = "DELETE FROM post WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -130,22 +142,28 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
         }
         return success;
     }
-    // Chuyển từ ResultSet sang đối tượng Post
+
     @Override
     public Post getFromResultSet(ResultSet resultSet) throws SQLException {
         return Post.builder()
                 .id(resultSet.getInt("id"))
                 .title(resultSet.getString("title"))
-                .thumbnail_url(resultSet.getString("thumbnail"))
-                .published_at(resultSet.getDate("published_at"))
-                .author(resultSet.getString("author"))
+                .thumbnail_url(resultSet.getString("thumbnail_url"))
+                .brief_info(resultSet.getString("brief_info"))
                 .content(resultSet.getString("content"))
+                .category_id(resultSet.getInt("category_id"))
+                .author_id(resultSet.getInt("author_id"))
+                .published_at(resultSet.getDate("published_at"))
+                .updated_at(resultSet.getDate("updated_at"))
+                .created_at(resultSet.getDate("created_at"))
+                .status(resultSet.getString("status"))
+                .featured_flag(resultSet.getBoolean("featured_flag"))
                 .build();
     }
-    // Lấy 5 Post mới nhất (hot)
+
     public List<Post> getHotPosts() {
         List<Post> list = new ArrayList<>();
-        String sql = "SELECT * FROM Posts ORDER BY created_at DESC LIMIT 5";// Lấy top 5 bài mới nhất
+        String sql = "SELECT * FROM post WHERE featured_flag = true ORDER BY published_at DESC LIMIT 5";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -155,6 +173,25 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
             }
         } catch (SQLException e) {
             System.out.println("Error getHotPosts at class PostDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return list;
+    }
+
+    public List<Post> getLatestPosts(int limit) {
+        List<Post> list = new ArrayList<>();
+        String sql = "SELECT * FROM post ORDER BY published_at DESC LIMIT ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, limit);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                list.add(getFromResultSet(resultSet));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getLatestPosts at class PostDAO: " + e.getMessage());
         } finally {
             closeResources();
         }
