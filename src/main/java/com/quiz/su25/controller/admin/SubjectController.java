@@ -1,19 +1,20 @@
-package com.quiz.su25.dal.impl;
+package com.quiz.su25.controller.admin;
 
 import com.quiz.su25.dal.impl.PricePackageDAO;
 import com.quiz.su25.dal.impl.SubjectCategoriesDAO;
 import com.quiz.su25.dal.impl.SubjectDAO;
+import com.quiz.su25.dal.impl.UserDAO;
 import com.quiz.su25.entity.PricePackage;
 import com.quiz.su25.entity.Subject;
 import com.quiz.su25.entity.SubjectCategories;
 
+import com.quiz.su25.entity.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ public class SubjectController extends HttpServlet {
     private final SubjectDAO subjectDAO = new SubjectDAO();
     private final SubjectCategoriesDAO categoryDAO = new SubjectCategoriesDAO();
     private final PricePackageDAO packageDAO = new PricePackageDAO();
+    private final UserDAO userDAO = new UserDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -59,16 +61,31 @@ public class SubjectController extends HttpServlet {
 
         // Get filter parameters
         String categoryFilter = request.getParameter("category");
-        String statusFilter = "active"; // Only show active subjects
+        String statusFilter = request.getParameter("status");
+        if (statusFilter == null || statusFilter.isEmpty()) {
+            statusFilter = "active"; // Default to active subjects if not specified
+        }
         String searchTerm = request.getParameter("search");
 
-        // Set default sort to updated_at descending
+        // Set default sort
         String sortBy = "updated_at";
         String sortOrder = "desc";
 
-        // Get paginated subjects from database
+        // Get paginated subjects using the filters
         List<Subject> subjects = subjectDAO.getPaginatedSubjects(
                 page, pageSize, categoryFilter, statusFilter, searchTerm, sortBy, sortOrder);
+
+        // Get owner names for the subjects
+        Map<Integer, String> ownerNames = new HashMap<>();
+        for (Subject subject : subjects) {
+            if (subject.getOwnerId() != null && !ownerNames.containsKey(subject.getOwnerId())) {
+                User owner = userDAO.findById(subject.getOwnerId());
+                if (owner != null) {
+                    ownerNames.put(subject.getOwnerId(), owner.getFull_name());
+                }
+            }
+        }
+        request.setAttribute("ownerNames", ownerNames);
 
         // Get total count for pagination
         int totalSubjects = subjectDAO.countTotalSubjects(categoryFilter, statusFilter, searchTerm);
@@ -90,13 +107,14 @@ public class SubjectController extends HttpServlet {
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("totalSubjects", totalSubjects);
         request.setAttribute("categoryFilter", categoryFilter);
+        request.setAttribute("statusFilter", statusFilter);
         request.setAttribute("searchTerm", searchTerm);
         request.setAttribute("categories", categories);
         request.setAttribute("featuredSubjects", featuredSubjects);
         request.setAttribute("lowestPricePackages", lowestPricePackages);
 
         // Forward to the view
-        request.getRequestDispatcher("/WEB-INF/view/subjects/list.jsp").forward(request, response);
+        request.getRequestDispatcher("/view/admin/list.jsp").forward(request, response);
     }
 
     private void viewSubject(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -116,7 +134,7 @@ public class SubjectController extends HttpServlet {
                 request.setAttribute("packages", packages);
                 request.setAttribute("category", category);
 
-                request.getRequestDispatcher("/WEB-INF/view/subjects/details.jsp").forward(request, response);
+                request.getRequestDispatcher("/view/admin/details.jsp").forward(request, response);
             } else {
                 response.sendRedirect(request.getContextPath() + "/subjects?error=subjectNotFound");
             }
@@ -150,7 +168,7 @@ public class SubjectController extends HttpServlet {
                 request.setAttribute("packages", packages);
                 request.setAttribute("selectedPackage", selectedPackage);
 
-                request.getRequestDispatcher("/WEB-INF/view/subjects/registration.jsp").forward(request, response);
+                request.getRequestDispatcher("/view/admin/registration.jsp").forward(request, response);
             } else {
                 response.sendRedirect(request.getContextPath() + "/subjects?error=subjectNotFound");
             }

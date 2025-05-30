@@ -88,7 +88,7 @@ public class AdminController extends HttpServlet {
         request.setAttribute("roles", roles);
 
         // Forward to the view
-        request.getRequestDispatcher("/WEB-INF/view/admin/users.jsp").forward(request, response);
+        request.getRequestDispatcher("/view/admin/users.jsp").forward(request, response);
     }
 
     private void viewUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -99,7 +99,7 @@ public class AdminController extends HttpServlet {
 
             if (user != null) {
                 request.setAttribute("user", user);
-                request.getRequestDispatcher("/WEB-INF/view/admin/user-view.jsp").forward(request, response);
+                request.getRequestDispatcher("/view/admin/user-view.jsp").forward(request, response);
             } else {
                 response.sendRedirect(request.getContextPath() + "/admin/users?error=userNotFound");
             }
@@ -124,7 +124,7 @@ public class AdminController extends HttpServlet {
                 if (user != null) {
                     request.setAttribute("user", user);
                     request.setAttribute("action", "update");
-                    request.getRequestDispatcher("/WEB-INF/view/admin/user-form.jsp").forward(request, response);
+                    request.getRequestDispatcher("/view/admin/user-form.jsp").forward(request, response);
                 } else {
                     response.sendRedirect(request.getContextPath() + "/admin/users?error=userNotFound");
                 }
@@ -133,7 +133,7 @@ public class AdminController extends HttpServlet {
             }
         } else { // "add" action
             request.setAttribute("action", "add");
-            request.getRequestDispatcher("/WEB-INF/view/admin/user-form.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/admin/user-form.jsp").forward(request, response);
         }
     }
 
@@ -150,13 +150,13 @@ public class AdminController extends HttpServlet {
                 request.setAttribute("user", user);
                 request.setAttribute("action", "add");
                 request.setAttribute("roles", roleDAO.findAll());
-                request.getRequestDispatcher("/WEB-INF/view/admin/user-form.jsp").forward(request, response);
+                request.getRequestDispatcher("/view/admin/user-form.jsp").forward(request, response);
             }
         } else {
             request.setAttribute("error", "Invalid user data");
             request.setAttribute("action", "add");
             request.setAttribute("roles", roleDAO.findAll());
-            request.getRequestDispatcher("/WEB-INF/view/admin/user-form.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/admin/user-form.jsp").forward(request, response);
         }
     }
 
@@ -173,7 +173,7 @@ public class AdminController extends HttpServlet {
                 request.setAttribute("user", user);
                 request.setAttribute("action", "update");
                 request.setAttribute("roles", roleDAO.findAll());
-                request.getRequestDispatcher("/WEB-INF/view/admin/user-form.jsp").forward(request, response);
+                request.getRequestDispatcher("/view/admin/user-form.jsp").forward(request, response);
             }
         } else {
             response.sendRedirect(request.getContextPath() + "/admin/users?error=invalidData");

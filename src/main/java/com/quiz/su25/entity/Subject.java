@@ -1,10 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package com.quiz.su25.entity;
 
-import java.sql.Date;
+package com.quiz.su25.entity;
 import java.time.LocalDateTime;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -15,7 +10,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import com.quiz.su25.entity.User;
 
 @Entity
 @ToString
