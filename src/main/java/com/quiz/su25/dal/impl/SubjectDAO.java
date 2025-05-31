@@ -61,7 +61,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     @Override
     public int insert(Subject subject) {
-        String sql = "INSERT INTO subject (title, thumbnail_url, tag_line, description, featured, category_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO subject (title, thumbnail_url, tag_line, description, featured_flag, category_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
         int generatedId = -1;
         try {
             connection = getConnection();
@@ -70,7 +70,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
             statement.setString(2, subject.getThumbnail_url());
             statement.setString(3, subject.getTag_line());
             statement.setString(4, subject.getDescription());
-            statement.setBoolean(5, subject.getFeatured());
+            statement.setBoolean(5, subject.getFeatured_flag());
             statement.setInt(6, subject.getCategory_id());
             statement.setString(7, subject.getStatus());
 
@@ -89,7 +89,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     @Override
     public boolean update(Subject subject) {
-        String sql = "UPDATE subject SET title = ?, thumbnail_url = ?, tag_line = ?, description = ?, featured = ?, category_id = ?, status = ? WHERE id = ?";
+        String sql = "UPDATE subject SET title = ?, thumbnail_url = ?, tag_line = ?, description = ?, featured_flag = ?, category_id = ?, status = ? WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -98,7 +98,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
             statement.setString(2, subject.getThumbnail_url());
             statement.setString(3, subject.getTag_line());
             statement.setString(4, subject.getDescription());
-            statement.setBoolean(5, subject.getFeatured());
+            statement.setBoolean(5, subject.getFeatured_flag());
             statement.setInt(6, subject.getCategory_id());
             statement.setString(7, subject.getStatus());
             statement.setInt(8, subject.getId());
@@ -147,7 +147,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
                 .thumbnail_url(resultSet.getString("thumbnail_url"))
                 .tag_line(resultSet.getString("tag_line"))
                 .description(resultSet.getString("description"))
-                .featured(resultSet.getBoolean("featured_flag"))
+                .featured_flag(resultSet.getBoolean("featured_flag"))
                 .category_id(resultSet.getInt("category_id"))
                 .status(resultSet.getString("status"))
                 .build();
@@ -155,7 +155,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     public List<Subject> getFeaturedSubjects() {
         List<Subject> list = new ArrayList<>();
-        String sql = "SELECT * FROM subject WHERE featured = true";
+        String sql = "SELECT * FROM subject WHERE featured_flag = 1";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);

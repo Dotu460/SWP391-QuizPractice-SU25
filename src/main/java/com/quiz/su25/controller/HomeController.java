@@ -22,10 +22,7 @@ public class HomeController extends HttpServlet {
     private SliderDAO sliderDAO;
     private PostDAO postDAO;
     private SubjectDAO subjectDAO;
-    private List<Slider> sliders;
-    private List<Post> hotPosts;
-    private List<Subject> subjects;
-    
+
     @Override
     public void init() throws ServletException {
         sliderDAO = new SliderDAO();
@@ -53,12 +50,26 @@ public class HomeController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
         try {
+            // Get active sliders
+            List<Slider> sliders = sliderDAO.getActiveSliders();
             request.setAttribute("sliders", sliders);
+
+            // Get hot posts (top 2)
+            List<Post> hotPosts = postDAO.getHotPosts();
             request.setAttribute("hotPosts", hotPosts);
-            request.setAttribute("subjects", subjects);
+
+            // Get latest posts (top 4)
+            List<Post> latestPosts = postDAO.getLatestPosts(4);
+            request.setAttribute("latestPosts", latestPosts);
+
+            // Get featured subjects
+            List<Subject> featuredSubjects = subjectDAO.getFeaturedSubjects();
+            request.setAttribute("featuredSubjects", featuredSubjects);
+
             request.getRequestDispatcher("view/home/homepage.jsp").forward(request, response);
         } catch (Exception e) {
-            System.out.println("Error in HomeController doGet: " + e.getMessage());
+            System.out.println("Error in HomeController: " + e.getMessage());
+            e.printStackTrace(); // Add stack trace for better debugging
             response.sendRedirect("error.jsp");
         }
     } 

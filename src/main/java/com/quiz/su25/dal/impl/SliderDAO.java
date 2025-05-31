@@ -25,7 +25,7 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
     @Override
     public List<Slider> findAll() {
         List<Slider> list = new ArrayList<>();
-        String sql = "SELECT id, title, image, backlink, status FROM Slider";
+        String sql = "SELECT id, title, image, backlink, status FROM slider";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -43,7 +43,7 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
 
     @Override
     public Slider findById(Integer id) {
-        String sql = "SELECT id, title, image, backlink, status FROM Slider WHERE id = ?";
+        String sql = "SELECT id, title, image_url, backlink_url, status FROM slider WHERE id = ?";
         Slider slider = null;
         try {
             connection = getConnection();
@@ -63,14 +63,14 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
 
     @Override
     public int insert(Slider slider) {
-        String sql = "INSERT INTO Slider (title, image, backlink, status) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO slider (title, image_url, backlink_url, status) VALUES (?, ?, ?, ?)";
         int generatedId = -1;
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, slider.getTitle());
-            statement.setString(2, slider.getImage());
-            statement.setString(3, slider.getBacklink());
+            statement.setString(2, slider.getImage_url());
+            statement.setString(3, slider.getBacklink_url());
             statement.setBoolean(4, slider.getStatus());
 
             statement.executeUpdate();
@@ -88,14 +88,14 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
 
     @Override
     public boolean update(Slider slider) {
-        String sql = "UPDATE Slider SET title = ?, image = ?, backlink = ?, status = ? WHERE id = ?";
+        String sql = "UPDATE slider SET title = ?, image_url = ?, backlink_url = ?, status = ? WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setString(1, slider.getTitle());
-            statement.setString(2, slider.getImage());
-            statement.setString(3, slider.getBacklink());
+            statement.setString(2, slider.getImage_url());
+            statement.setString(3, slider.getBacklink_url());
             statement.setBoolean(4, slider.getStatus());
             statement.setInt(5, slider.getId());
 
@@ -118,7 +118,7 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
     }
 
     public boolean deleteById(Integer id) {
-        String sql = "DELETE FROM Slider WHERE id = ?";
+        String sql = "DELETE FROM slider WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -140,9 +140,27 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
         return Slider.builder()
                 .id(resultSet.getInt("id"))
                 .title(resultSet.getString("title"))
-                .image(resultSet.getString("image"))
-                .backlink(resultSet.getString("backlink"))
+                .image_url(resultSet.getString("image_url"))
+                .backlink_url(resultSet.getString("backlink_url"))
                 .status(resultSet.getBoolean("status"))
                 .build();
+    }
+
+    public List<Slider> getActiveSliders() {
+        List<Slider> list = new ArrayList<>();
+        String sql = "SELECT * FROM slider WHERE status = 1";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                list.add(getFromResultSet(resultSet));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getActiveSliders at class SliderDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return list;
     }
 }

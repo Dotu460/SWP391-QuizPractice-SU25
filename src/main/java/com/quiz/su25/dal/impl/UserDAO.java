@@ -238,4 +238,26 @@ public class UserDAO extends DBContext implements I_DAO<User> {
             System.out.println("User not found!");
         }
     }
+
+    public User findByEmailAndPassword(String email, String password) {
+        String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, email);
+            statement.setString(2, password);
+
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return getFromResultSet(resultSet);
+            }
+            
+        } catch (SQLException e) {
+            System.out.println("Error findByEmailAndPassword at class UserDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return null;
+    }
+
 }
