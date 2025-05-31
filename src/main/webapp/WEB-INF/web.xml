@@ -20,18 +20,6 @@
         <servlet-name>HomeController</servlet-name>
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
-    <!--    <servlet-mapping>
-        <servlet-name>UserProfileController</servlet-name>
-        <url-pattern>/UserProfile</url-pattern>
-    </servlet-mapping>-->
-    <servlet-mapping>
-        <servlet-name>PracticeListController</servlet-name>
-        <url-pattern>/PracticeList</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>PracticeDetailController</servlet-name>
-        <url-pattern>/PracticeDetail</url-pattern>
-    </servlet-mapping>
     <session-config>
         <session-timeout>
             30

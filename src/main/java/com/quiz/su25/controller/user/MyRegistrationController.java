@@ -1,25 +1,25 @@
 package com.quiz.su25.controller.user;
 
-import com.quiz.su25.dal.impl.RegistrationDAO;
-import com.quiz.su25.entity.Registration;
-import com.quiz.su25.entity.Subject;
 import java.io.IOException;
 import java.io.PrintWriter;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
+import java.net.URLEncoder;
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.lang.StringBuilder;
-import java.net.URLEncoder; // For encoding URL parameters
-import java.sql.Date; // Import java.sql.Date
-import java.text.SimpleDateFormat; // Import for date parsing
-import java.text.ParseException; // Import for date parsing exception
+import java.util.List;
 
 import com.quiz.su25.dal.impl.PricePackageDAO;
+import com.quiz.su25.dal.impl.RegistrationDAO;
 import com.quiz.su25.dal.impl.SubjectDAO;
+import com.quiz.su25.entity.Registration;
+import com.quiz.su25.entity.Subject;
+
+import jakarta.servlet.ServletException; // For encoding URL parameters
+import jakarta.servlet.annotation.WebServlet; // Import java.sql.Date
+import jakarta.servlet.http.HttpServlet; // Import for date parsing
+import jakarta.servlet.http.HttpServletRequest; // Import for date parsing exception
+import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet("/my-registration")
 public class MyRegistrationController extends HttpServlet {

@@ -53,12 +53,18 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage> {
     }
 
     @Override
+    // Lấy thông tin từ database
     public PricePackage findById(Integer id) {
+        //Câu lệnh lấy dữ liệu
         String sql = "SELECT * FROM pricePackage WHERE id = ?";
         try {
+            // tạo 1 bảng trắng
             connection = getConnection();
+            // viết thông tin câu lệnh lênh bảng trắng đó
             statement = connection.prepareStatement(sql);
+            // Lấy id muốn lấy
             statement.setInt(1, id);
+            // thực hiện câu lệnh lấy kết quả
             resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return getFromResultSet(resultSet);
@@ -72,10 +78,5 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage> {
         return null;
     }
 
-    public static void main(String[] args) {
-        PricePackageDAO pricePackageDAO = new PricePackageDAO();
-        PricePackage pricePackage = pricePackageDAO.findById(1);
-        System.out.println(pricePackage);
-    }
     
 }

@@ -99,18 +99,18 @@
 
                                                     <div class="col-md-2">
                                                         <label for="fromDate" class="form-label">From Date</label>
-                                                        <input type="date" name="fromDate" id="fromDate" value="${currentFromDate}" class="form-control" placeholder="mm/dd/yyyy"/>
+                                                        <input type="date" name="fromDate" id="fromDate" value="${currentFromDate}" class="form-control" placeholder="yyyy/mm/dd"/>
                                                     </div>
 
                                                     <div class="col-md-2">
                                                         <label for="toDate" class="form-label">To Date</label>
-                                                        <input type="date" name="toDate" id="toDate" value="${currentToDate}" class="form-control" placeholder="mm/dd/yyyy"/>
+                                                        <input type="date" name="toDate" id="toDate" value="${currentToDate}" class="form-control" placeholder="yyyy/mm/dd"/>
                                                     </div>
                                                     
                                                     <!-- New Button Structure -->
                                                     <div class="col-md-2 d-flex justify-content-end align-items-end gap-1">
-                                                        <button type="submit" class="text-center">Filter</button>
-                                                        <button type="reset" class=" text-center">Reset</button>
+                                                        <button type="submit" >Filter</button>
+                                                         <a href="${pageContext.request.contextPath}/my-registration" >Reset</a> 
                                                     </div>
                                                 </div>
                                             </form>
@@ -231,7 +231,36 @@
             <!-- footer-area-end -->
 
             <!-- JS here -->
-        <jsp:include page="../../common/js/"></jsp:include>
+        <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
+        
+        <!-- Date validation script -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const fromDate = document.getElementById('fromDate');
+                const toDate = document.getElementById('toDate');
+                
+                function validateDates() {
+                    if (fromDate.value && toDate.value) {
+                        if (new Date(fromDate.value) > new Date(toDate.value)) {
+                            alert('From Date cannot be greater than To Date');
+                            toDate.value = '';
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+                
+                fromDate.addEventListener('change', validateDates);
+                toDate.addEventListener('change', validateDates);
+                
+                // Validate on form submit
+                document.querySelector('form').addEventListener('submit', function(e) {
+                    if (!validateDates()) {
+                        e.preventDefault();
+                    }
+                });
+            });
+        </script>
     </body>
 
 </html>

@@ -188,53 +188,55 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Đếm số bản ghi của một user cụ thể
+     * Đếm số bản ghi đăng ký của một user theo các bộ lọc
      */
     public int countByUserId(Integer userId, Integer subjectId, String status, Date fromDate, Date toDate) {
+        // Xây dựng câu SQL cơ bản
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM registrations r WHERE r.user_id = ?");
-        List<Object> params = new ArrayList<>();
-        params.add(userId);
+        List<Object> params = new ArrayList<>(); // Danh sách tham số truy vấn
+        params.add(userId); // Thêm userId vào danh sách tham số
 
         if (subjectId != null) {
-            sql.append(" AND r.subject_id = ?");
+            sql.append(" AND r.subject_id = ?"); // Thêm điều kiện lọc theo subjectId nếu có
             params.add(subjectId);
         }
 
         if (status != null && !status.trim().isEmpty()) {
-            sql.append(" AND r.status = ?");
+            sql.append(" AND r.status = ?"); // Thêm điều kiện lọc theo status nếu có
             params.add(status);
         }
 
         if (fromDate != null) {
-            sql.append(" AND r.valid_from >= ?");
+            sql.append(" AND r.valid_from >= ?"); // Lọc các bản ghi có valid_from từ fromDate
             params.add(fromDate);
         }
 
         if (toDate != null) {
-            sql.append(" AND r.valid_to <= ?");
+            sql.append(" AND r.valid_to <= ?"); // Lọc các bản ghi có valid_to đến toDate
             params.add(toDate);
         }
 
         try {
-            connection = getConnection();
-            statement = connection.prepareStatement(sql.toString());
+            connection = getConnection(); // Lấy kết nối CSDL
+            statement = connection.prepareStatement(sql.toString()); // Chuẩn bị câu lệnh SQL
             for (int i = 0; i < params.size(); i++) {
-                statement.setObject(i + 1, params.get(i));
+                statement.setObject(i + 1, params.get(i)); // Gán từng tham số vào PreparedStatement
             }
-            resultSet = statement.executeQuery();
+            resultSet = statement.executeQuery(); // Thực thi câu lệnh
             if (resultSet.next()) {
-                return resultSet.getInt(1);
+                return resultSet.getInt(1); // Trả về số lượng bản ghi
             }
         } catch (SQLException e) {
-            System.out.println("Error countByUserId at class RegistrationDAO: " + e.getMessage());
+            System.out.println("Error countByUserId at class RegistrationDAO: " + e.getMessage()); // In lỗi nếu có
         } finally {
-            closeResources();
+            closeResources(); // Đóng tài nguyên
         }
-        return 0;
+        return 0; // Trả về 0 nếu có lỗi
     }
 
     /**
-     * Lấy danh sách đăng ký của một user cụ thể với phân trang và các bộ lọc: subjectId, status, fromDate, toDate.
+     * Lấy danh sách đăng ký của một user cụ thể với phân trang và các bộ lọc:
+     * subjectId, status, fromDate, toDate.
      *
      * @param userId ID của user
      * @param offset Vị trí bắt đầu.
@@ -245,6 +247,7 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
      * @param toDate Ngày kết thúc (null nếu không lọc).
      * @return Danh sách Registration.
      */
+    // Truy vấn danh sách bản ghi của một user có phân trang và lọc
     public List<Registration> findByUserIdPaginated(Integer userId, int offset, int limit, Integer subjectId, String status, Date fromDate, Date toDate) {
         StringBuilder sql = new StringBuilder("SELECT r.* FROM registrations r WHERE r.user_id = ?");
         List<Object> params = new ArrayList<>();
@@ -261,12 +264,12 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
         }
 
         if (fromDate != null) {
-            sql.append(" AND r.valid_from >= ?");
+            sql.append(" AND (DATE(r.valid_from) >= ? OR r.valid_from IS NULL)");
             params.add(fromDate);
         }
 
         if (toDate != null) {
-            sql.append(" AND r.valid_to <= ?");
+            sql.append(" AND (DATE(r.valid_to) <= ? OR r.valid_to IS NULL)");
             params.add(toDate);
         }
 
@@ -278,16 +281,27 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql.toString());
+            System.out.println("Executing SQL: " + sql.toString()); // Debug log
+            System.out.println("Parameters: " + params); // Debug log
+            
             for (int i = 0; i < params.size(); i++) {
-                statement.setObject(i + 1, params.get(i));
+                Object param = params.get(i);
+                if (param instanceof Date) {
+                    statement.setDate(i + 1, (Date) param);
+                    System.out.println("Setting date parameter " + (i + 1) + ": " + param); // Debug log
+                } else {
+                    statement.setObject(i + 1, param);
+                }
             }
+            
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 Registration registration = getFromResultSet(resultSet);
                 listRegistration.add(registration);
             }
         } catch (SQLException e) {
-            System.out.println("Error findByUserIdPaginated at class RegistrationDAO: " + e.getMessage());
+            System.err.println("Error in findByUserIdPaginated: " + e.getMessage());
+            e.printStackTrace();
         } finally {
             closeResources();
         }
@@ -295,7 +309,8 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Đếm số lượng bản ghi đăng ký của một user cụ thể dựa trên tìm kiếm tên môn học và các bộ lọc khác.
+     * Đếm số lượng bản ghi đăng ký của một user cụ thể dựa trên tìm kiếm tên
+     * môn học và các bộ lọc khác.
      *
      * @param userId ID của user
      * @param subjectNameSearch Từ khóa tìm tên môn học (có thể null hoặc rỗng).
@@ -305,13 +320,14 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
      * @param toDate Ngày kết thúc (null nếu không lọc).
      * @return Tổng số bản ghi.
      */
+    // Đếm số bản ghi đăng ký của user, có thể tìm theo tên môn học
     public int countByUserIdAndSubjectNameSearch(Integer userId, String subjectNameSearch, Integer subjectId, String status, Date fromDate, Date toDate) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(DISTINCT r.id) FROM registrations r");
         List<Object> params = new ArrayList<>();
         boolean joinedWithSubject = false;
 
         if (subjectNameSearch != null && !subjectNameSearch.trim().isEmpty()) {
-            sql.append(" JOIN subject s ON r.subject_id = s.id");
+            sql.append(" JOIN subject s ON r.subject_id = s.id"); // Nối bảng nếu cần tìm theo tên môn học
             joinedWithSubject = true;
         }
 
@@ -319,7 +335,7 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
         params.add(userId);
 
         if (subjectNameSearch != null && !subjectNameSearch.trim().isEmpty()) {
-            sql.append(" AND s.title LIKE ?");
+            sql.append(" AND s.title LIKE ?"); // Lọc theo tên môn học (tìm kiếm mờ)
             params.add("%" + subjectNameSearch.trim() + "%");
         }
 
@@ -351,7 +367,7 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
             }
             resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                return resultSet.getInt(1);
+                return resultSet.getInt(1); // Trả về số lượng
             }
         } catch (SQLException e) {
             System.out.println("Error countByUserIdAndSubjectNameSearch: " + e.getMessage());
@@ -362,7 +378,8 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Lấy danh sách bản ghi đăng ký của một user cụ thể với phân trang và tìm kiếm tên môn học.
+     * Lấy danh sách bản ghi đăng ký của một user cụ thể với phân trang và tìm
+     * kiếm tên môn học.
      *
      * @param userId ID của user
      * @param subjectNameSearch Từ khóa tìm tên môn học (có thể null hoặc rỗng).
@@ -374,6 +391,7 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
      * @param toDate Ngày kết thúc (null nếu không lọc).
      * @return Danh sách Registration.
      */
+    // Tìm danh sách bản ghi đăng ký của user với phân trang và tìm kiếm tên môn học
     public List<Registration> findByUserIdAndSubjectNameSearchPaginated(
             Integer userId, String subjectNameSearch, int offset, int limit,
             Integer subjectId, String status, Date fromDate, Date toDate) {
@@ -383,7 +401,7 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
         boolean joinedWithSubject = false;
 
         if (subjectNameSearch != null && !subjectNameSearch.trim().isEmpty()) {
-            sql.append(" JOIN subject s ON r.subject_id = s.id");
+            sql.append(" JOIN subject s ON r.subject_id = s.id"); // Nối bảng nếu tìm theo tên môn học
             joinedWithSubject = true;
         }
 
