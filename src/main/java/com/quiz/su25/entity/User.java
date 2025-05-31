@@ -10,7 +10,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-
 @ToString
 @Builder
 @Data
@@ -27,6 +26,6 @@ public class User {
     private String mobile;
     private String avatar_url;
     private Integer role_id;
-    private String status;
+    private String status; 
     
 }

@@ -26,23 +26,20 @@ public class MyRegistrationController extends HttpServlet {
 
     private static final int RECORDS_PER_PAGE = 5; // Or any number you prefer
 
-    private RegistrationDAO myRegistrationDAO;
+    private RegistrationDAO registrationDAO;
     private PricePackageDAO packageDAO;
     private SubjectDAO subjectDAO;
 
     @Override
     public void init() throws ServletException {
-        myRegistrationDAO = new RegistrationDAO();
+        registrationDAO = new RegistrationDAO();
         packageDAO = new PricePackageDAO();
         subjectDAO = new SubjectDAO();
-
     }
-
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
@@ -163,9 +160,9 @@ public class MyRegistrationController extends HttpServlet {
         List<Registration> listRegistration;
         // Đếm số bản ghi của user hiện tại dựa trên điều kiện tìm kiếm
         if (searchName != null) {
-            totalRecords = myRegistrationDAO.countByUserIdAndSubjectNameSearch(userId, searchName, selectedSubjectId, statusFilter, fromDate, toDate);
+            totalRecords = registrationDAO.countByUserIdAndSubjectNameSearch(userId, searchName, selectedSubjectId, statusFilter, fromDate, toDate);
         } else {
-            totalRecords = myRegistrationDAO.countByUserId(userId, selectedSubjectId, statusFilter, fromDate, toDate);
+            totalRecords = registrationDAO.countByUserId(userId, selectedSubjectId, statusFilter, fromDate, toDate);
         }
         // Tính tổng số trang cần hiển thị
         int totalPages = (int) Math.ceil((double) totalRecords / RECORDS_PER_PAGE);
@@ -179,10 +176,10 @@ public class MyRegistrationController extends HttpServlet {
 
         // Lấy danh sách đăng ký của user hiện tại theo phân trang và điều kiện lọc
         if (searchName != null) {
-            listRegistration = myRegistrationDAO.findByUserIdAndSubjectNameSearchPaginated(
+            listRegistration = registrationDAO.findByUserIdAndSubjectNameSearchPaginated(
                     userId, searchName, offset, RECORDS_PER_PAGE, selectedSubjectId, statusFilter, fromDate, toDate);
         } else {
-            listRegistration = myRegistrationDAO.findByUserIdPaginated(
+            listRegistration = registrationDAO.findByUserIdPaginated(
                     userId, offset, RECORDS_PER_PAGE, selectedSubjectId, statusFilter, fromDate, toDate);
         }
         // Gán dữ liệu vào request để truyền sang JSP
@@ -212,11 +209,11 @@ public class MyRegistrationController extends HttpServlet {
                 int registrationId = Integer.parseInt(idParam);
 
                 // Tìm bản đăng ký trong cơ sở dữ liệu theo ID
-                Registration registrationToDelete = myRegistrationDAO.findById(registrationId);
+                Registration registrationToDelete = registrationDAO.findById(registrationId);
 
                 if (registrationToDelete != null) {
                     // Nếu tìm thấy, tiến hành xóa bản đăng ký khỏi cơ sở dữ liệu
-                    myRegistrationDAO.delete(registrationToDelete);
+                    registrationDAO.delete(registrationToDelete);
                 } else {
                     // Nếu không tìm thấy, ghi log để lập trình viên biết
                     System.err.println("Registration with ID " + registrationId + " not found for deletion.");

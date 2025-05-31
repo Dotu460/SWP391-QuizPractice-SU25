@@ -42,8 +42,6 @@ public class UserDAO extends DBContext implements I_DAO<User> {
         }
         return listUser;
     }
-    
-    
 
     @Override
     public User findById(Integer id) {
@@ -199,19 +197,18 @@ public class UserDAO extends DBContext implements I_DAO<User> {
         return null;
     }
 
-
     public static void main(String[] args) {
         UserDAO userDAO = new UserDAO();
-        
+
         // First, get an existing user
         User existingUser = userDAO.findById(10); // Thay đổi ID này theo ID có trong database của bạn
-        
+
         if (existingUser != null) {
             System.out.println("Before update:");
             System.out.println("Full name: " + existingUser.getFull_name());
             System.out.println("Mobile: " + existingUser.getMobile());
             System.out.println("Gender: " + existingUser.getGender());
-            
+
             // Create updated user with some changes
             User updatedUser = User.builder()
                     .id(existingUser.getId())
@@ -224,11 +221,11 @@ public class UserDAO extends DBContext implements I_DAO<User> {
                     .role_id(existingUser.getRole_id()) // keep existing role
                     .status(existingUser.getStatus()) // keep existing status
                     .build();
-            
+
             // Try to update
             boolean success = userDAO.update(updatedUser);
             System.out.println("\nUpdate success: " + success);
-            
+
             if (success) {
                 // Verify the update by getting the user again
                 User verifyUser = userDAO.findById(10);
