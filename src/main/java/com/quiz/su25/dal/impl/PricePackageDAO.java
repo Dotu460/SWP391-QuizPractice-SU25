@@ -1,4 +1,7 @@
-
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package com.quiz.su25.dal.impl;
 
 import com.quiz.su25.dal.DBContext;
@@ -6,320 +9,285 @@ import com.quiz.su25.dal.I_DAO;
 import com.quiz.su25.entity.PricePackage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.sql.Date;
 
-public class PricePackageDAO extends DBContext implements I_DAO<PricePackage> {
+/**
+ *
+ * @author Admin
+ */
+public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
 
     @Override
     public List<PricePackage> findAll() {
-        String sql = "SELECT id, subject_id, package_name, list_price, sale_price, status, description, created_at, updated_at FROM price_package";
+        String sql = "select * from pricePackage";
         List<PricePackage> listPricePackage = new ArrayList<>();
         try {
+            //tao connection
             connection = getConnection();
+            //chuan bi cho statement
             statement = connection.prepareStatement(sql);
+            //set param
+
+            //thuc thi cau lenh
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 PricePackage pricePackage = getFromResultSet(resultSet);
                 listPricePackage.add(pricePackage);
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             System.out.println("Error findAll at class PricePackageDAO: " + e.getMessage());
-        } finally {
+        } finally{
             closeResources();
         }
         return listPricePackage;
     }
 
     @Override
-    public PricePackage findById(Integer id) {
-        String sql = "SELECT id, subject_id, package_name, list_price, sale_price, status, description, created_at, updated_at FROM price_package WHERE id = ?";
-        PricePackage pricePackage = null;
+    public boolean update(PricePackage t) {
+        String sql = "UPDATE pricePackage SET name=?, access_duration_months=?, list_price=?, sale_price=?, status=?, description=? WHERE id=?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setInt(1, id);
-            resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                pricePackage = getFromResultSet(resultSet);
-            }
-        } catch (SQLException e) {
-            System.out.println("Error findById at class PricePackageDAO: " + e.getMessage());
-        } finally {
-            closeResources();
-        }
-        return pricePackage;
-    }
+            statement.setString(1, t.getName());
+            statement.setInt(2, t.getAccess_duration_months());
+            statement.setDouble(3, t.getList_price());
+            statement.setDouble(4, t.getSale_price());
+            statement.setString(5, t.getStatus());
+            statement.setString(6, t.getDescription());
+            statement.setInt(7, t.getId());
 
-    @Override
-    public int insert(PricePackage pricePackage) {
-        String sql = "INSERT INTO price_package "
-                + "(subject_id, package_name, list_price, sale_price, status, description, created_at, updated_at) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        int generatedId = -1;
-        try {
-            connection = getConnection();
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            statement.setInt(1, pricePackage.getSubject_id());
-            statement.setString(2, pricePackage.getPackage_name());
-            statement.setDouble(3, pricePackage.getList_price());
-            statement.setDouble(4, pricePackage.getSale_price());
-            statement.setString(5, pricePackage.getStatus());
-            statement.setString(6, pricePackage.getDescription());
-            statement.setDate(7, pricePackage.getCreated_at());
-            statement.setDate(8, pricePackage.getUpdated_at());
-
-            statement.executeUpdate();
-            resultSet = statement.getGeneratedKeys();
-            if (resultSet.next()) {
-                generatedId = resultSet.getInt(1);
-            }
-        } catch (SQLException e) {
-            System.out.println("Error insert at class PricePackageDAO: " + e.getMessage());
-        } finally {
-            closeResources();
-        }
-        return generatedId;
-    }
-
-    @Override
-    public boolean update(PricePackage pricePackage) {
-        String sql = "UPDATE price_package "
-                + "SET subject_id = ?, package_name = ?, list_price = ?, sale_price = ?, "
-                + "status = ?, description = ?, updated_at = ? "
-                + "WHERE id = ?";
-        boolean success = false;
-        try {
-            connection = getConnection();
-            statement = connection.prepareStatement(sql);
-            statement.setInt(1, pricePackage.getSubject_id());
-            statement.setString(2, pricePackage.getPackage_name());
-            statement.setDouble(3, pricePackage.getList_price());
-            statement.setDouble(4, pricePackage.getSale_price());
-            statement.setString(5, pricePackage.getStatus());
-            statement.setString(6, pricePackage.getDescription());
-            statement.setDate(7, pricePackage.getUpdated_at());
-            statement.setInt(8, pricePackage.getId());
-
-            int rowsAffected = statement.executeUpdate();
-            success = rowsAffected > 0;
-        } catch (SQLException e) {
+            return statement.executeUpdate() > 0;
+        } catch (Exception e) {
             System.out.println("Error update at class PricePackageDAO: " + e.getMessage());
+            return false;
         } finally {
             closeResources();
         }
-        return success;
     }
 
-    @Override
-    public boolean delete(PricePackage pricePackage) {
-        if (pricePackage == null || pricePackage.getId() == null) {
-            return false;
-        }
-        return deleteById(pricePackage.getId());
-    }
-
-    public boolean deleteById(Integer id) {
-        String sql = "DELETE FROM price_package WHERE id = ?";
-        boolean success = false;
+    public boolean create(PricePackage t) {
+        String sql = "INSERT INTO pricePackage (name, access_duration_months, list_price, sale_price, status, description) VALUES (?, ?, ?, ?, ?, ?)";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setInt(1, id);
+            statement.setString(1, t.getName());
+            statement.setInt(2, t.getAccess_duration_months());
+            statement.setDouble(3, t.getList_price());
+            statement.setDouble(4, t.getSale_price());
+            statement.setString(5, t.getStatus());
+            statement.setString(6, t.getDescription());
 
-            int rowsAffected = statement.executeUpdate();
-            success = rowsAffected > 0;
-        } catch (SQLException e) {
-            System.out.println("Error deleteById at class PricePackageDAO: " + e.getMessage());
+            return statement.executeUpdate() > 0;
+        } catch (Exception e) {
+            System.out.println("Error create at class PricePackageDAO: " + e.getMessage());
+            return false;
         } finally {
             closeResources();
         }
-        return success;
+    }
+
+    @Override
+    public boolean delete(PricePackage t) {
+        String sql = "DELETE FROM pricePackage WHERE id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, t.getId());
+
+            return statement.executeUpdate() > 0;
+        } catch (Exception e) {
+            System.out.println("Error delete at class PricePackageDAO: " + e.getMessage());
+            return false;
+        } finally {
+            closeResources();
+        }
+    }
+
+    @Override
+    public int insert(PricePackage t) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
     public PricePackage getFromResultSet(ResultSet resultSet) throws SQLException {
-        return PricePackage.builder()
+        PricePackage pricePackage = PricePackage
+                .builder()
                 .id(resultSet.getInt("id"))
-                .subject_id(resultSet.getInt("subject_id"))
-                .package_name(resultSet.getString("package_name"))
+                .name(resultSet.getString("name"))
+                .access_duration_months(resultSet.getInt("access_duration_months"))
+                .status(resultSet.getString("status"))
                 .list_price(resultSet.getDouble("list_price"))
                 .sale_price(resultSet.getDouble("sale_price"))
-                .status(resultSet.getString("status"))
                 .description(resultSet.getString("description"))
-                .created_at(resultSet.getDate("created_at"))
                 .updated_at(resultSet.getDate("updated_at"))
+                .created_at(resultSet.getDate("created_at"))
                 .build();
+        return pricePackage;
     }
 
-    public List<PricePackage> findBySubjectId(Integer subjectId) {
-        String sql = "SELECT id, subject_id, package_name, list_price, sale_price, status, description, created_at, updated_at "
-                + "FROM price_package WHERE subject_id = ?";
-        List<PricePackage> packages = new ArrayList<>();
+    @Override
+    // Lấy thông tin từ database
+    public PricePackage findById(Integer id) {
+        //Câu lệnh lấy dữ liệu
+        String sql = "SELECT * FROM pricePackage WHERE id = ?";
         try {
+            // tạo 1 bảng trắng
             connection = getConnection();
+            // viết thông tin câu lệnh lênh bảng trắng đó
             statement = connection.prepareStatement(sql);
-            statement.setInt(1, subjectId);
-            resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                packages.add(getFromResultSet(resultSet));
-            }
-        } catch (SQLException e) {
-            System.out.println("Error findBySubjectId at class PricePackageDAO: " + e.getMessage());
-        } finally {
-            closeResources();
-        }
-        return packages;
-    }
-
-    public PricePackage findLowestPricePackageBySubjectId(Integer subjectId) {
-        String sql = "SELECT id, subject_id, package_name, list_price, sale_price, status, description, created_at, updated_at "
-                + "FROM price_package WHERE subject_id = ? AND status = 'active' ORDER BY sale_price ASC LIMIT 1";
-        PricePackage lowestPricePackage = null;
-        try {
-            connection = getConnection();
-            statement = connection.prepareStatement(sql);
-            statement.setInt(1, subjectId);
+            // Lấy id muốn lấy
+            statement.setInt(1, id);
+            // thực hiện câu lệnh lấy kết quả
             resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                lowestPricePackage = getFromResultSet(resultSet);
+                return getFromResultSet(resultSet);
             }
-        } catch (SQLException e) {
-            System.out.println("Error findLowestPricePackageBySubjectId at class PricePackageDAO: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error findById at class PricePackageDAO: " + e.getMessage());
         } finally {
             closeResources();
         }
-        return lowestPricePackage;
-    }
-
-    public List<PricePackage> getPaginatedPricePackages(int page, int pageSize, Integer subjectIdFilter,
-                                            String statusFilter, String searchTerm,
-                                            String sortBy, String sortOrder) {
-        int offset = (page - 1) * pageSize;
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT id, subject_id, package_name, list_price, sale_price, status, description, created_at, updated_at ");
-        sql.append("FROM price_package WHERE 1=1 ");
-
-        // Add filters
-        List<Object> params = new ArrayList<>();
-        if (subjectIdFilter != null) {
-            sql.append("AND subject_id = ? ");
-            params.add(subjectIdFilter);
-        }
-        if (statusFilter != null && !statusFilter.isEmpty()) {
-            sql.append("AND status = ? ");
-            params.add(statusFilter);
-        }
-        if (searchTerm != null && !searchTerm.isEmpty()) {
-            sql.append("AND (package_name LIKE ? OR description LIKE ?) ");
-            params.add("%" + searchTerm + "%");
-            params.add("%" + searchTerm + "%");
-        }
-
-        // Add sorting
-        if (sortBy != null && !sortBy.isEmpty()) {
-            sql.append("ORDER BY ").append(sortBy);
-            if ("desc".equalsIgnoreCase(sortOrder)) {
-                sql.append(" DESC ");
-            } else {
-                sql.append(" ASC ");
-            }
-        } else {
-            sql.append("ORDER BY id ");
-        }
-
-        // Add pagination
-        sql.append("LIMIT ? OFFSET ?");
-        params.add(pageSize);
-        params.add(offset);
-
-        List<PricePackage> packages = new ArrayList<>();
-        try {
-            connection = getConnection();
-            statement = connection.prepareStatement(sql.toString());
-
-            // Set parameters
-            for (int i = 0; i < params.size(); i++) {
-                statement.setObject(i + 1, params.get(i));
-            }
-
-            resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                packages.add(getFromResultSet(resultSet));
-            }
-        } catch (SQLException e) {
-            System.out.println("Error in getPaginatedPricePackages: " + e.getMessage());
-        } finally {
-            closeResources();
-        }
-        return packages;
-    }
-
-    public int countTotalPricePackages(Integer subjectIdFilter, String statusFilter, String searchTerm) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT COUNT(*) FROM price_package WHERE 1=1 ");
-
-        // Add filters
-        List<Object> params = new ArrayList<>();
-        if (subjectIdFilter != null) {
-            sql.append("AND subject_id = ? ");
-            params.add(subjectIdFilter);
-        }
-        if (statusFilter != null && !statusFilter.isEmpty()) {
-            sql.append("AND status = ? ");
-            params.add(statusFilter);
-        }
-        if (searchTerm != null && !searchTerm.isEmpty()) {
-            sql.append("AND (package_name LIKE ? OR description LIKE ?) ");
-            params.add("%" + searchTerm + "%");
-            params.add("%" + searchTerm + "%");
-        }
-
-        int count = 0;
-        try {
-            connection = getConnection();
-            statement = connection.prepareStatement(sql.toString());
-
-            // Set parameters
-            for (int i = 0; i < params.size(); i++) {
-                statement.setObject(i + 1, params.get(i));
-            }
-
-            resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                count = resultSet.getInt(1);
-            }
-        } catch (SQLException e) {
-            System.out.println("Error in countTotalPricePackages: " + e.getMessage());
-        } finally {
-            closeResources();
-        }
-        return count;
+        return null;
     }
 
     public static void main(String[] args) {
         PricePackageDAO pricePackageDAO = new PricePackageDAO();
+        pricePackageDAO.findAll().forEach(item -> {
+            System.out.println(item);
+        });
+    }
 
-        // Test findAll
-        System.out.println("Testing findAll():");
-        List<PricePackage> allPackages = pricePackageDAO.findAll();
-        if (allPackages.isEmpty()) {
-            System.out.println("No price packages found.");
-        } else {
-            for (PricePackage pkg : allPackages) {
-                System.out.println(pkg);
+    /**
+     * Find price packages with filters and pagination
+     */
+    public List<PricePackage> findPricePackagesWithFilters(String statusFilter, String searchFilter,
+                                                           String minPriceFilter, String maxPriceFilter, int page, int pageSize) {
+        StringBuilder sql = new StringBuilder("SELECT * FROM pricePackage WHERE 1=1");
+        List<Object> parameters = new ArrayList<>();
+
+        // Add filters
+        if (statusFilter != null && !statusFilter.trim().isEmpty()) {
+            sql.append(" AND status = ?");
+            parameters.add(statusFilter.trim());
+        }
+
+        if (searchFilter != null && !searchFilter.trim().isEmpty()) {
+            sql.append(" AND (name LIKE ? OR description LIKE ?)");
+            String searchPattern = "%" + searchFilter.trim() + "%";
+            parameters.add(searchPattern);
+            parameters.add(searchPattern);
+        }
+
+        if (minPriceFilter != null && !minPriceFilter.trim().isEmpty()) {
+            try {
+                int minPrice = Integer.parseInt(minPriceFilter.trim());
+                sql.append(" AND sale_price >= ?");
+                parameters.add(minPrice);
+            } catch (NumberFormatException e) {
+                // Ignore invalid price
             }
         }
-        System.out.println("--------------------");
 
-        // Test findById
-        System.out.println("Testing findById(1):");
-        PricePackage packageById = pricePackageDAO.findById(1);
-        if (packageById != null) {
-            System.out.println(packageById);
-        } else {
-            System.out.println("Package with ID 1 not found.");
+        if (maxPriceFilter != null && !maxPriceFilter.trim().isEmpty()) {
+            try {
+                int maxPrice = Integer.parseInt(maxPriceFilter.trim());
+                sql.append(" AND sale_price <= ?");
+                parameters.add(maxPrice);
+            } catch (NumberFormatException e) {
+                // Ignore invalid price
+            }
         }
+
+        // Add pagination
+        sql.append(" ORDER BY id DESC LIMIT ? OFFSET ?");
+        parameters.add(pageSize);
+        parameters.add((page - 1) * pageSize);
+
+        List<PricePackage> listPricePackage = new ArrayList<>();
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+
+            // Set parameters
+            for (int i = 0; i < parameters.size(); i++) {
+                statement.setObject(i + 1, parameters.get(i));
+            }
+
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                PricePackage pricePackage = getFromResultSet(resultSet);
+                listPricePackage.add(pricePackage);
+            }
+        } catch (Exception e) {
+            System.out.println("Error findPricePackagesWithFilters at class PricePackageDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return listPricePackage;
     }
+
+    /**
+     * Get total count of filtered price packages
+     */
+    public int getTotalFilteredPricePackages(String statusFilter, String searchFilter,
+                                             String minPriceFilter, String maxPriceFilter) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM pricePackage WHERE 1=1");
+        List<Object> parameters = new ArrayList<>();
+
+        // Add filters
+        if (statusFilter != null && !statusFilter.trim().isEmpty()) {
+            sql.append(" AND status = ?");
+            parameters.add(statusFilter.trim());
+        }
+
+        if (searchFilter != null && !searchFilter.trim().isEmpty()) {
+            sql.append(" AND (name LIKE ? OR description LIKE ?)");
+            String searchPattern = "%" + searchFilter.trim() + "%";
+            parameters.add(searchPattern);
+            parameters.add(searchPattern);
+        }
+
+        if (minPriceFilter != null && !minPriceFilter.trim().isEmpty()) {
+            try {
+                int minPrice = Integer.parseInt(minPriceFilter.trim());
+                sql.append(" AND sale_price >= ?");
+                parameters.add(minPrice);
+            } catch (NumberFormatException e) {
+                // Ignore invalid price
+            }
+        }
+
+        if (maxPriceFilter != null && !maxPriceFilter.trim().isEmpty()) {
+            try {
+                int maxPrice = Integer.parseInt(maxPriceFilter.trim());
+                sql.append(" AND sale_price <= ?");
+                parameters.add(maxPrice);
+            } catch (NumberFormatException e) {
+                // Ignore invalid price
+            }
+        }
+
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+
+            // Set parameters
+            for (int i = 0; i < parameters.size(); i++) {
+                statement.setObject(i + 1, parameters.get(i));
+            }
+
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+        } catch (Exception e) {
+            System.out.println("Error getTotalFilteredPricePackages at class PricePackageDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return 0;
+    }
+
 }

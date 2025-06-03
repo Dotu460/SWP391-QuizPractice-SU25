@@ -6,6 +6,7 @@ import com.quiz.su25.entity.Registration;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
@@ -283,6 +284,146 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     // Original method calls overloaded one
     public List<Registration> findBySubjectNameSearchPaginated(String subjectNameSearch, int offset, int limit) {
         return findBySubjectNameSearchPaginated(subjectNameSearch, offset, limit, null);
+    }
+
+    public List<Registration> findRegistrationsWithFilters(String subjectSearch, String email, String status,
+                                                         Date fromDate, Date toDate, String sortBy, String sortOrder,
+                                                         int page, int pageSize) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT DISTINCT r.* FROM registrations r ");
+        sql.append("JOIN subject s ON r.subject_id = s.id ");
+        sql.append("JOIN users u ON r.user_id = u.id ");
+        sql.append("WHERE 1=1 ");
+
+        List<Object> params = new ArrayList<>();
+
+        // Add filters
+        if (subjectSearch != null && !subjectSearch.trim().isEmpty()) {
+            sql.append("AND s.title LIKE ? ");
+            params.add("%" + subjectSearch.trim() + "%");
+        }
+
+        if (email != null && !email.trim().isEmpty()) {
+            sql.append("AND u.email LIKE ? ");
+            params.add("%" + email.trim() + "%");
+        }
+
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append("AND r.status = ? ");
+            params.add(status.trim());
+        }
+
+        if (fromDate != null) {
+            sql.append("AND r.registration_time >= ? ");
+            params.add(fromDate);
+        }
+
+        if (toDate != null) {
+            sql.append("AND r.registration_time <= ? ");
+            params.add(toDate);
+        }
+
+        // Add sorting
+        if (sortBy != null && !sortBy.trim().isEmpty()) {
+            sql.append("ORDER BY ");
+            switch (sortBy) {
+                case "email":
+                    sql.append("u.email");
+                    break;
+                case "subject":
+                    sql.append("s.title");
+                    break;
+                default:
+                    sql.append("r.").append(sortBy);
+            }
+            sql.append(sortOrder != null && sortOrder.equalsIgnoreCase("desc") ? " DESC" : " ASC");
+        } else {
+            sql.append("ORDER BY r.id DESC");
+        }
+
+        // Add pagination
+        sql.append(" LIMIT ? OFFSET ?");
+        params.add(pageSize);
+        params.add((page - 1) * pageSize);
+
+        List<Registration> registrations = new ArrayList<>();
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+
+            // Set parameters
+            for (int i = 0; i < params.size(); i++) {
+                statement.setObject(i + 1, params.get(i));
+            }
+
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                registrations.add(getFromResultSet(resultSet));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in findRegistrationsWithFilters: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return registrations;
+    }
+
+    public int countTotalRegistrations(String subjectSearch, String email, String status,
+                                     Date fromDate, Date toDate) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT COUNT(DISTINCT r.id) FROM registrations r ");
+        sql.append("JOIN subject s ON r.subject_id = s.id ");
+        sql.append("JOIN users u ON r.user_id = u.id ");
+        sql.append("WHERE 1=1 ");
+
+        List<Object> params = new ArrayList<>();
+
+        // Add filters
+        if (subjectSearch != null && !subjectSearch.trim().isEmpty()) {
+            sql.append("AND s.title LIKE ? ");
+            params.add("%" + subjectSearch.trim() + "%");
+        }
+
+        if (email != null && !email.trim().isEmpty()) {
+            sql.append("AND u.email LIKE ? ");
+            params.add("%" + email.trim() + "%");
+        }
+
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append("AND r.status = ? ");
+            params.add(status.trim());
+        }
+
+        if (fromDate != null) {
+            sql.append("AND r.registration_time >= ? ");
+            params.add(fromDate);
+        }
+
+        if (toDate != null) {
+            sql.append("AND r.registration_time <= ? ");
+            params.add(toDate);
+        }
+
+        int count = 0;
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+
+            // Set parameters
+            for (int i = 0; i < params.size(); i++) {
+                statement.setObject(i + 1, params.get(i));
+            }
+
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                count = resultSet.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in countTotalRegistrations: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return count;
     }
 
     public static void main(String[] args) {

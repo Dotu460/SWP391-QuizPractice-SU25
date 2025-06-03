@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package com.quiz.su25.entity;
 
 import java.sql.Date;
@@ -16,15 +20,16 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter
 @Setter
+
 public class PricePackage {
     private Integer id;
-    private Integer subject_id;
-    private String package_name;
-    private double list_price;
-    private double sale_price;
+    private String name;
+    private Integer access_duration_months;
+    private Double list_price;
+    private Double sale_price;
     private String status;
     private String description;
     private Date created_at;
     private Date updated_at;
-            
+
 }
