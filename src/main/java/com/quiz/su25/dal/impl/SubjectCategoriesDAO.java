@@ -13,7 +13,7 @@ public class SubjectCategoriesDAO extends DBContext implements I_DAO<SubjectCate
 
     @Override
     public List<SubjectCategories> findAll() {
-        String sql = "SELECT id, name, description FROM subject_categories";
+        String sql = "SELECT id, name, description FROM SubjectCategories";
         List<SubjectCategories> listCategories = new ArrayList<>();
         try {
             connection = getConnection();
@@ -33,7 +33,7 @@ public class SubjectCategoriesDAO extends DBContext implements I_DAO<SubjectCate
 
     @Override
     public SubjectCategories findById(Integer id) {
-        String sql = "SELECT id, name, description FROM subject_categories WHERE id = ?";
+        String sql = "SELECT id, name, description FROM SubjectCategories WHERE id = ?";
         SubjectCategories category = null;
         try {
             connection = getConnection();
@@ -53,7 +53,7 @@ public class SubjectCategoriesDAO extends DBContext implements I_DAO<SubjectCate
 
     @Override
     public int insert(SubjectCategories category) {
-        String sql = "INSERT INTO subject_categories (name, description) VALUES (?, ?)";
+        String sql = "INSERT INTO SubjectCategories (name, description) VALUES (?, ?)";
         int generatedId = -1;
         try {
             connection = getConnection();
@@ -76,7 +76,7 @@ public class SubjectCategoriesDAO extends DBContext implements I_DAO<SubjectCate
 
     @Override
     public boolean update(SubjectCategories category) {
-        String sql = "UPDATE subject_categories SET name = ?, description = ? WHERE id = ?";
+        String sql = "UPDATE SubjectCategories SET name = ?, description = ? WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -104,7 +104,7 @@ public class SubjectCategoriesDAO extends DBContext implements I_DAO<SubjectCate
     }
 
     public boolean deleteById(Integer id) {
-        String sql = "DELETE FROM subject_categories WHERE id = ?";
+        String sql = "DELETE FROM SubjectCategories WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -135,7 +135,7 @@ public class SubjectCategoriesDAO extends DBContext implements I_DAO<SubjectCate
         int offset = (page - 1) * pageSize;
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT id, name, description ");
-        sql.append("FROM subject_categories WHERE 1=1 ");
+        sql.append("FROM SubjectCategories WHERE 1=1 ");
 
         // Add filters
         List<Object> params = new ArrayList<>();
@@ -186,7 +186,7 @@ public class SubjectCategoriesDAO extends DBContext implements I_DAO<SubjectCate
 
     public int countTotalCategories(String searchTerm) {
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT COUNT(*) FROM subject_categories WHERE 1=1 ");
+        sql.append("SELECT COUNT(*) FROM SubjectCategories WHERE 1=1 ");
 
         // Add filters
         List<Object> params = new ArrayList<>();

@@ -1,6 +1,5 @@
 package com.quiz.su25.controller.admin;
 
-import com.quiz.su25.dal.impl.PricePackageDAO;
 import com.quiz.su25.dal.impl.SubjectCategoriesDAO;
 import com.quiz.su25.dal.impl.SubjectDAO;
 import com.quiz.su25.dal.impl.UserDAO;
@@ -25,7 +24,7 @@ public class SubjectController extends HttpServlet {
     private static final int DEFAULT_PAGE_SIZE = 8;
     private final SubjectDAO subjectDAO = new SubjectDAO();
     private final SubjectCategoriesDAO categoryDAO = new SubjectCategoriesDAO();
-    private final PricePackageDAO packageDAO = new PricePackageDAO();
+//    private final PricePackageDAO packageDAO = new PricePackageDAO();
     private final UserDAO userDAO = new UserDAO();
 
     @Override
@@ -98,7 +97,7 @@ public class SubjectController extends HttpServlet {
         List<Subject> featuredSubjects = getFeaturedSubjects();
 
         // Get lowest price package for each subject
-        Map<Integer, PricePackage> lowestPricePackages = getLowestPricePackages(subjects);
+//        Map<Integer, PricePackage> lowestPricePackages = getLowestPricePackages(subjects);
 
         // Set attributes for the view
         request.setAttribute("subjects", subjects);
@@ -111,7 +110,7 @@ public class SubjectController extends HttpServlet {
         request.setAttribute("searchTerm", searchTerm);
         request.setAttribute("categories", categories);
         request.setAttribute("featuredSubjects", featuredSubjects);
-        request.setAttribute("lowestPricePackages", lowestPricePackages);
+//        request.setAttribute("lowestPricePackages", lowestPricePackages);
 
         // Forward to the view
         request.getRequestDispatcher("/view/admin/list.jsp").forward(request, response);
@@ -125,13 +124,13 @@ public class SubjectController extends HttpServlet {
 
             if (subject != null) {
                 // Get all packages for this subject
-                List<PricePackage> packages = packageDAO.findBySubjectId(subjectId);
+//                List<PricePackage> packages = packageDAO.findBySubjectId(subjectId);
 
                 // Get the subject's category
                 SubjectCategories category = categoryDAO.findById(subject.getCategoryId());
 
                 request.setAttribute("subject", subject);
-                request.setAttribute("packages", packages);
+//                request.setAttribute("packages", packages);
                 request.setAttribute("category", category);
 
                 request.getRequestDispatcher("/view/admin/details.jsp").forward(request, response);
@@ -151,21 +150,21 @@ public class SubjectController extends HttpServlet {
             Subject subject = subjectDAO.findById(subjectId);
 
             if (subject != null) {
-                List<PricePackage> packages = packageDAO.findBySubjectId(subjectId);
+//                List<PricePackage> packages = packageDAO.findBySubjectId(subjectId);
 
                 // If packageId is provided, pre-select that package
                 PricePackage selectedPackage = null;
-                if (packageId > 0) {
-                    for (PricePackage pkg : packages) {
-                        if (pkg.getId() == packageId) {
-                            selectedPackage = pkg;
-                            break;
-                        }
-                    }
-                }
+//                if (packageId > 0) {
+//                    for (PricePackage pkg : packages) {
+//                        if (pkg.getId() == packageId) {
+//                            selectedPackage = pkg;
+//                            break;
+//                        }
+//                    }
+//                }
 
                 request.setAttribute("subject", subject);
-                request.setAttribute("packages", packages);
+//                request.setAttribute("packages", packages);
                 request.setAttribute("selectedPackage", selectedPackage);
 
                 request.getRequestDispatcher("/view/admin/registration.jsp").forward(request, response);
@@ -203,18 +202,18 @@ public class SubjectController extends HttpServlet {
         return subjectDAO.getFeaturedSubjects(5);
     }
 
-    private Map<Integer, PricePackage> getLowestPricePackages(List<Subject> subjects) {
-        Map<Integer, PricePackage> lowestPricePackages = new HashMap<>();
-
-        for (Subject subject : subjects) {
-            PricePackage lowestPricePackage = packageDAO.findLowestPricePackageBySubjectId(subject.getSubjectId());
-            if (lowestPricePackage != null) {
-                lowestPricePackages.put(subject.getSubjectId(), lowestPricePackage);
-            }
-        }
-
-        return lowestPricePackages;
-    }
+//    private Map<Integer, PricePackage> getLowestPricePackages(List<Subject> subjects) {
+//        Map<Integer, PricePackage> lowestPricePackages = new HashMap<>();
+//
+//        for (Subject subject : subjects) {
+//            PricePackage lowestPricePackage = packageDAO.findLowestPricePackageBySubjectId(subject.getId());
+//            if (lowestPricePackage != null) {
+//                lowestPricePackages.put(subject.getId(), lowestPricePackage);
+//            }
+//        }
+//
+//        return lowestPricePackages;
+//    }
 
     private int getIntParameter(HttpServletRequest request, String paramName, int defaultValue) {
         String paramValue = request.getParameter(paramName);

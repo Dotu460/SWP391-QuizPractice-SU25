@@ -15,7 +15,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     @Override
     public List<Subject> findAll() {
-        String sql = "SELECT subject_id, title, thumbnail_url, tag_line, brief_info, description, "
+        String sql = "SELECT id, title, thumbnail_url, tag_line, brief_info, description, "
                 + "category_id, owner_id, status, featured_flag, created_at, updated_at, created_by, updated_by "
                 + "FROM subject";
         List<Subject> listSubject = new ArrayList<>();
@@ -37,9 +37,9 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     @Override
     public Subject findById(Integer id) {
-        String sql = "SELECT subject_id, title, thumbnail_url, tag_line, brief_info, description, "
+        String sql = "SELECT id, title, thumbnail_url, tag_line, brief_info, description, "
                 + "category_id, owner_id, status, featured_flag, created_at, updated_at, created_by, updated_by "
-                + "FROM subject WHERE subject_id = ?";
+                + "FROM subject WHERE id = ?";
         Subject subject = null;
         try {
             connection = getConnection();
@@ -100,7 +100,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
                 + "title = ?, thumbnail_url = ?, tag_line = ?, brief_info = ?, description = ?, "
                 + "category_id = ?, owner_id = ?, status = ?, featured_flag = ?, "
                 + "updated_at = ?, updated_by = ? "
-                + "WHERE subject_id = ?";
+                + "WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -116,7 +116,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
             statement.setBoolean(9, subject.getFeaturedFlag());
             statement.setObject(10, subject.getUpdatedAt());
             statement.setInt(11, subject.getUpdatedById());
-            statement.setInt(12, subject.getSubjectId());
+            statement.setInt(12, subject.getId());
 
             int rowsAffected = statement.executeUpdate();
             success = rowsAffected > 0;
@@ -130,14 +130,14 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     @Override
     public boolean delete(Subject subject) {
-        if (subject == null || subject.getSubjectId() == null) {
+        if (subject == null || subject.getId() == null) {
             return false;
         }
-        return deleteById(subject.getSubjectId());
+        return deleteById(subject.getId());
     }
 
     public boolean deleteById(Integer id) {
-        String sql = "DELETE FROM subject WHERE subject_id = ?";
+        String sql = "DELETE FROM subject WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -157,7 +157,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
     @Override
     public Subject getFromResultSet(ResultSet resultSet) throws SQLException {
         return Subject.builder()
-                .subjectId(resultSet.getInt("subject_id"))
+                .id(resultSet.getInt("id"))
                 .title(resultSet.getString("title"))
                 .thumbnailUrl(resultSet.getString("thumbnail_url"))
                 .tagLine(resultSet.getString("tag_line"))
@@ -179,7 +179,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
                                               String sortBy, String sortOrder) {
         int offset = (page - 1) * pageSize;
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT subject_id, title, thumbnail_url, tag_line, brief_info, description, ");
+        sql.append("SELECT id, title, thumbnail_url, tag_line, brief_info, description, ");
         sql.append("category_id, owner_id, status, featured_flag, created_at, updated_at, created_by, updated_by ");
         sql.append("FROM subject WHERE 1=1 ");
 
@@ -209,7 +209,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
                 sql.append(" ASC ");
             }
         } else {
-            sql.append("ORDER BY subject_id ");
+            sql.append("ORDER BY id ");
         }
 
         // Add pagination
@@ -285,7 +285,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     public List<Subject> getFeaturedSubjects(int limit) {
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT subject_id, title, thumbnail_url, tag_line, brief_info, description, ");
+        sql.append("SELECT id, title, thumbnail_url, tag_line, brief_info, description, ");
         sql.append("category_id, owner_id, status, featured_flag, created_at, updated_at, created_by, updated_by ");
         sql.append("FROM subject WHERE featured_flag = true AND status = 'active' ");
         sql.append("ORDER BY updated_at DESC LIMIT ?");
@@ -331,4 +331,6 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
             System.out.println("Subject with ID 1 not found.");
         }
     }
+
+
 }

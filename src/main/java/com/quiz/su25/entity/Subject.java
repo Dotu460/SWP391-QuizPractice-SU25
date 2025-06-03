@@ -33,8 +33,8 @@ public class Subject {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "subject_id")
-    private Integer subjectId;
+    @Column(name = "id")
+    private Integer id;
 
     private String title;
 

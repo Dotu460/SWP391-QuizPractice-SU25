@@ -341,7 +341,7 @@
                                     <tbody>
                                     <c:forEach var="subject" items="${subjects}">
                                         <tr>
-                                            <td>${subject.subjectId}</td>
+                                            <td>${subject.id}</td>
                                             <td>
                                                 <div class="dashboard__quiz-info">
                                                     <h6 class="title">${subject.title}</h6>
@@ -355,7 +355,7 @@
                                                 </c:forEach>
                                             </td>
 <%--                                            <td>--%>
-<%--                                                <span class="badge bg-light text-dark">${lessonCounts[subject.subjectId]}</span>--%>
+<%--                                                <span class="badge bg-light text-dark">${lessonCounts[subject.]}</span>--%>
 <%--                                            </td>--%>
                                             <td>
                                                 <span class="badge bg-light text-dark">
@@ -379,8 +379,8 @@
                                             </td>
                                             <td>
                                                 <div class="dashboard__review-action">
-                                                    <a href="${pageContext.request.contextPath}/subject/details?id=${subject.subjectId}" class="subject-action-link edit-link" title="Edit"><i class="skillgro-edit"></i> Edit</a>
-                                                    <a href="${pageContext.request.contextPath}/subject/view?id=${subject.subjectId}" class="subject-action-link view-link" title="View"><i class="skillgro-book-2"></i> View</a>
+                                                    <a href="${pageContext.request.contextPath}/subject/details?id=${subject.id}" class="subject-action-link edit-link" title="Edit"><i class="skillgro-edit"></i> Edit</a>
+                                                    <a href="${pageContext.request.contextPath}/subject/view?id=${subject.id}" class="subject-action-link view-link" title="View"><i class="skillgro-book-2"></i> View</a>
                                                 </div>
                                             </td>
                                         </tr>
