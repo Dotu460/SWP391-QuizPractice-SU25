@@ -28,5 +28,5 @@ public class Subject {
     private String description;
     private Boolean featured_flag;
     private Integer category_id;
-    private String status;
+    private String status;              
 }
