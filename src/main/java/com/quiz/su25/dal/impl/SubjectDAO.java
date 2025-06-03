@@ -61,7 +61,10 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     @Override
     public int insert(Subject subject) {
-        String sql = "INSERT INTO subject (title, thumbnail_url, tag_line, description, featured_flag, category_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO subject (title, thumbnail_url, tag_line, "
+                + "description, featured_flag, "
+                + "category_id, status)"
+                + " VALUES (?, ?, ?, ?, ?, ?, ?)";
         int generatedId = -1;
         try {
             connection = getConnection();
@@ -89,7 +92,9 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     @Override
     public boolean update(Subject subject) {
-        String sql = "UPDATE subject SET title = ?, thumbnail_url = ?, tag_line = ?, description = ?, featured_flag = ?, category_id = ?, status = ? WHERE id = ?";
+        String sql = "UPDATE subject SET title = ?, thumbnail_url = ?, tag_line = ?,"
+                + " description = ?, featured_flag = ?, category_id = ?, status = ? "
+                + "WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
