@@ -21,16 +21,16 @@ import lombok.ToString;
 @Getter
 @Setter
 
-public class Lesson {
+public class Question {
     private Integer id;
     private Integer subject_id;
-    private String title;
-    private String content_text;
-    private String content_url;
-    private String type;
-    private Integer order_in_subject;
+    private Integer lesson_id;
+    private Integer dimension_id;
+    private String content;
+    private String media_url;
+    private String level;
     private String status;
-    private Date created_at;
-    private Date updated_at;
-
+    private String explanation;
+    private Integer created_by;
+       
 }
