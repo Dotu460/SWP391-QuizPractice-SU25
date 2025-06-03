@@ -31,5 +31,4 @@ public class Registration {
     private String status;
     private Date valid_from;
     private Date valid_to;
-            
 }

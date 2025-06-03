@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 
 /**
  *
@@ -114,7 +116,30 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
 
     @Override
     public Role findById(Integer id) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        String sql = "SELECT id, role_name, description FROM role WHERE id = ?";
+        Role role = null;
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, id);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                role = new Role();
+                role.setId(resultSet.getInt("id"));
+                role.setRole_name(resultSet.getString("role_name"));
+                role.setDescription(resultSet.getString("description"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error findById at class RoleDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return role;
+    }
+
+    public String getRoleNameById(Integer roleId) {
+        Role role = findById(roleId);
+        return role != null ? role.getRole_name() : "Unknown";
     }
 
 //    @Override

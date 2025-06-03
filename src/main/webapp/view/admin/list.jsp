@@ -256,7 +256,7 @@
                                             </td>
                                             <td>
                                                 <c:forEach var="category" items="${categories}">
-                                                    <c:if test="${category.id == subject.categoryId}">
+                                                    <c:if test="${category.id == subject.category_id}">
                                                         ${category.name}
                                                     </c:if>
                                                 </c:forEach>
@@ -270,7 +270,7 @@
                                                     <%= (int)(Math.floor(Math.random() * 13) + 3) %>
                                                 </span>
                                             </td>
-                                            <td>${ownerNames[subject.ownerId]}</td>
+                                            <td>${ownerNames[subject.owner_id]}</td>
                                             <td>
                                                 <c:choose>
                                                     <c:when test="${subject.status == 'active'}">

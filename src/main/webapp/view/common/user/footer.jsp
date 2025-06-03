@@ -15,10 +15,10 @@
                             <a href="index.html"><img src="${pageContext.request.contextPath}/view/common/img/logo/secondary_logo.svg" alt="img"></a>
                         </div>
                         <div class="footer__content">
-                            <p>when an unknown printer took galley of type and scrambled it to make pspecimen bookt has.</p>
+                            <p>This is a place that people can enjoy learning and playing, start to learn today.</p>
                             <ul class="list-wrap">
-                                <li>463 7th Ave, NY 10018, USA</li>
-                                <li>+123 88 9900 456</li>
+                                <li>Hoa Lac Hi-tech Park, Km29, Thang Long Boulevard, Thach Hoa, Thach That, Ha Noi, Vietnam</li>
+                                <li>+84 123 456 789</li>
                             </ul>
                         </div>
                     </div>
@@ -99,7 +99,7 @@
             <div class="row align-items-center">
                 <div class="col-md-7">
                     <div class="copy-right-text">
-                        <p>© 2010-2024 skillgro.com. All rights reserved.</p>
+                        <p>© 5-2025 Group2-SU25-SE1931 All rights reserved.</p>
                     </div>
                 </div>
                 <div class="col-md-5">

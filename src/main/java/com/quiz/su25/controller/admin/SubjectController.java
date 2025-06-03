@@ -77,10 +77,10 @@ public class SubjectController extends HttpServlet {
         // Get owner names for the subjects
         Map<Integer, String> ownerNames = new HashMap<>();
         for (Subject subject : subjects) {
-            if (subject.getOwnerId() != null && !ownerNames.containsKey(subject.getOwnerId())) {
-                User owner = userDAO.findById(subject.getOwnerId());
+            if (subject.getOwner_id() != null && !ownerNames.containsKey(subject.getOwner_id())) {
+                User owner = userDAO.findById(subject.getOwner_id());
                 if (owner != null) {
-                    ownerNames.put(subject.getOwnerId(), owner.getFull_name());
+                    ownerNames.put(subject.getOwner_id(), owner.getFull_name());
                 }
             }
         }
@@ -127,7 +127,7 @@ public class SubjectController extends HttpServlet {
 //                List<PricePackage> packages = packageDAO.findBySubjectId(subjectId);
 
                 // Get the subject's category
-                SubjectCategories category = categoryDAO.findById(subject.getCategoryId());
+                SubjectCategories category = categoryDAO.findById(subject.getId());
 
                 request.setAttribute("subject", subject);
 //                request.setAttribute("packages", packages);
@@ -199,7 +199,7 @@ public class SubjectController extends HttpServlet {
 
     // In SubjectController
     private List<Subject> getFeaturedSubjects() {
-        return subjectDAO.getFeaturedSubjects(5);
+        return subjectDAO.getFeaturedSubjects();
     }
 
 //    private Map<Integer, PricePackage> getLowestPricePackages(List<Subject> subjects) {

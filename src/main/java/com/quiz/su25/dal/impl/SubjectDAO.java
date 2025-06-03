@@ -1,9 +1,12 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package com.quiz.su25.dal.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,31 +18,26 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     @Override
     public List<Subject> findAll() {
-        String sql = "SELECT id, title, thumbnail_url, tag_line, brief_info, description, "
-                + "category_id, owner_id, status, featured_flag, created_at, updated_at, created_by, updated_by "
-                + "FROM subject";
-        List<Subject> listSubject = new ArrayList<>();
+        List<Subject> list = new ArrayList<>();
+        String sql = "SELECT * FROM subject";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                Subject subject = getFromResultSet(resultSet);
-                listSubject.add(subject);
+                list.add(getFromResultSet(resultSet));
             }
         } catch (SQLException e) {
             System.out.println("Error findAll at class SubjectDAO: " + e.getMessage());
         } finally {
             closeResources();
         }
-        return listSubject;
+        return list;
     }
 
     @Override
     public Subject findById(Integer id) {
-        String sql = "SELECT id, title, thumbnail_url, tag_line, brief_info, description, "
-                + "category_id, owner_id, status, featured_flag, created_at, updated_at, created_by, updated_by "
-                + "FROM subject WHERE id = ?";
+        String sql = "SELECT * FROM subject WHERE id = ?";
         Subject subject = null;
         try {
             connection = getConnection();
@@ -59,27 +57,18 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     @Override
     public int insert(Subject subject) {
-        String sql = "INSERT INTO subject "
-                + "(title, thumbnail_url, tag_line, brief_info, description, category_id, "
-                + "owner_id, status, featured_flag, created_at, updated_at, created_by, updated_by) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO subject (title, thumbnail_url, tag_line, description, featured_flag, category_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
         int generatedId = -1;
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, subject.getTitle());
-            statement.setString(2, subject.getThumbnailUrl());
-            statement.setString(3, subject.getTagLine());
-            statement.setString(4, subject.getBriefInfo());
-            statement.setString(5, subject.getDescription());
-            statement.setInt(6, subject.getCategoryId());
-            statement.setInt(7, subject.getOwnerId());
-            statement.setString(8, subject.getStatus());
-            statement.setBoolean(9, subject.getFeaturedFlag());
-            statement.setObject(10, subject.getCreatedAt());
-            statement.setObject(11, subject.getUpdatedAt());
-            statement.setInt(12, subject.getCreatedById());
-            statement.setInt(13, subject.getUpdatedById());
+            statement.setString(2, subject.getThumbnail_url());
+            statement.setString(3, subject.getTag_line());
+            statement.setString(4, subject.getDescription());
+            statement.setBoolean(5, subject.getFeatured_flag());
+            statement.setInt(6, subject.getCategory_id());
+            statement.setString(7, subject.getStatus());
 
             statement.executeUpdate();
             resultSet = statement.getGeneratedKeys();
@@ -96,27 +85,19 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     @Override
     public boolean update(Subject subject) {
-        String sql = "UPDATE subject SET "
-                + "title = ?, thumbnail_url = ?, tag_line = ?, brief_info = ?, description = ?, "
-                + "category_id = ?, owner_id = ?, status = ?, featured_flag = ?, "
-                + "updated_at = ?, updated_by = ? "
-                + "WHERE id = ?";
+        String sql = "UPDATE subject SET title = ?, thumbnail_url = ?, tag_line = ?, description = ?, featured_flag = ?, category_id = ?, status = ? WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setString(1, subject.getTitle());
-            statement.setString(2, subject.getThumbnailUrl());
-            statement.setString(3, subject.getTagLine());
-            statement.setString(4, subject.getBriefInfo());
-            statement.setString(5, subject.getDescription());
-            statement.setInt(6, subject.getCategoryId());
-            statement.setInt(7, subject.getOwnerId());
-            statement.setString(8, subject.getStatus());
-            statement.setBoolean(9, subject.getFeaturedFlag());
-            statement.setObject(10, subject.getUpdatedAt());
-            statement.setInt(11, subject.getUpdatedById());
-            statement.setInt(12, subject.getId());
+            statement.setString(2, subject.getThumbnail_url());
+            statement.setString(3, subject.getTag_line());
+            statement.setString(4, subject.getDescription());
+            statement.setBoolean(5, subject.getFeatured_flag());
+            statement.setInt(6, subject.getCategory_id());
+            statement.setString(7, subject.getStatus());
+            statement.setInt(8, subject.getId());
 
             int rowsAffected = statement.executeUpdate();
             success = rowsAffected > 0;
@@ -159,73 +140,71 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
         return Subject.builder()
                 .id(resultSet.getInt("id"))
                 .title(resultSet.getString("title"))
-                .thumbnailUrl(resultSet.getString("thumbnail_url"))
-                .tagLine(resultSet.getString("tag_line"))
-                .briefInfo(resultSet.getString("brief_info"))
+                .thumbnail_url(resultSet.getString("thumbnail_url"))
+                .tag_line(resultSet.getString("tag_line"))
                 .description(resultSet.getString("description"))
-                .categoryId(resultSet.getInt("category_id"))
-                .ownerId(resultSet.getInt("owner_id"))
+                .featured_flag(resultSet.getBoolean("featured_flag"))
+                .category_id(resultSet.getInt("category_id"))
                 .status(resultSet.getString("status"))
-                .featuredFlag(resultSet.getBoolean("featured_flag"))
-                .createdAt(resultSet.getObject("created_at", LocalDateTime.class))
-                .updatedAt(resultSet.getObject("updated_at", LocalDateTime.class))
-                .createdById(resultSet.getInt("created_by"))
-                .updatedById(resultSet.getInt("updated_by"))
                 .build();
     }
 
     public List<Subject> getPaginatedSubjects(int page, int pageSize, String categoryFilter,
                                               String statusFilter, String searchTerm,
                                               String sortBy, String sortOrder) {
-        int offset = (page - 1) * pageSize;
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT id, title, thumbnail_url, tag_line, brief_info, description, ");
-        sql.append("category_id, owner_id, status, featured_flag, created_at, updated_at, created_by, updated_by ");
-        sql.append("FROM subject WHERE 1=1 ");
+        List<Subject> subjects = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM subject WHERE 1=1");
 
         // Add filters
-        List<Object> params = new ArrayList<>();
         if (categoryFilter != null && !categoryFilter.isEmpty()) {
-            sql.append("AND category_id = ? ");
-            params.add(Integer.parseInt(categoryFilter));
+            sql.append(" AND category_id = ?");
         }
+
         if (statusFilter != null && !statusFilter.isEmpty()) {
-            sql.append("AND status = ? ");
-            params.add(statusFilter);
+            sql.append(" AND status = ?");
         }
+
         if (searchTerm != null && !searchTerm.isEmpty()) {
-            sql.append("AND (title LIKE ? OR description LIKE ? OR brief_info LIKE ?) ");
-            params.add("%" + searchTerm + "%");
-            params.add("%" + searchTerm + "%");
-            params.add("%" + searchTerm + "%");
+            sql.append(" AND (title LIKE ? OR description LIKE ?)");
         }
 
         // Add sorting
         if (sortBy != null && !sortBy.isEmpty()) {
-            sql.append("ORDER BY ").append(sortBy);
-            if ("desc".equalsIgnoreCase(sortOrder)) {
-                sql.append(" DESC ");
+            sql.append(" ORDER BY ").append(sortBy);
+            if (sortOrder != null && sortOrder.equalsIgnoreCase("desc")) {
+                sql.append(" DESC");
             } else {
-                sql.append(" ASC ");
+                sql.append(" ASC");
             }
-        } else {
-            sql.append("ORDER BY id ");
         }
 
         // Add pagination
-        sql.append("LIMIT ? OFFSET ?");
-        params.add(pageSize);
-        params.add(offset);
+        sql.append(" LIMIT ? OFFSET ?");
 
-        List<Subject> subjects = new ArrayList<>();
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql.toString());
 
-            // Set parameters
-            for (int i = 0; i < params.size(); i++) {
-                statement.setObject(i + 1, params.get(i));
+            int paramIndex = 1;
+
+            // Set filter parameters
+            if (categoryFilter != null && !categoryFilter.isEmpty()) {
+                statement.setString(paramIndex++, categoryFilter);
             }
+
+            if (statusFilter != null && !statusFilter.isEmpty()) {
+                statement.setString(paramIndex++, statusFilter);
+            }
+
+            if (searchTerm != null && !searchTerm.isEmpty()) {
+                String searchPattern = "%" + searchTerm + "%";
+                statement.setString(paramIndex++, searchPattern);
+                statement.setString(paramIndex++, searchPattern);
+            }
+
+            // Set pagination parameters
+            statement.setInt(paramIndex++, pageSize);
+            statement.setInt(paramIndex++, (page - 1) * pageSize);
 
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -236,28 +215,24 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
         } finally {
             closeResources();
         }
+
         return subjects;
     }
 
     public int countTotalSubjects(String categoryFilter, String statusFilter, String searchTerm) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT COUNT(*) FROM subject WHERE 1=1 ");
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM subject WHERE 1=1");
 
         // Add filters
-        List<Object> params = new ArrayList<>();
         if (categoryFilter != null && !categoryFilter.isEmpty()) {
-            sql.append("AND category_id = ? ");
-            params.add(Integer.parseInt(categoryFilter));
+            sql.append(" AND category_id = ?");
         }
+
         if (statusFilter != null && !statusFilter.isEmpty()) {
-            sql.append("AND status = ? ");
-            params.add(statusFilter);
+            sql.append(" AND status = ?");
         }
+
         if (searchTerm != null && !searchTerm.isEmpty()) {
-            sql.append("AND (title LIKE ? OR description LIKE ? OR brief_info LIKE ?) ");
-            params.add("%" + searchTerm + "%");
-            params.add("%" + searchTerm + "%");
-            params.add("%" + searchTerm + "%");
+            sql.append(" AND (title LIKE ? OR description LIKE ?)");
         }
 
         int count = 0;
@@ -265,9 +240,21 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
             connection = getConnection();
             statement = connection.prepareStatement(sql.toString());
 
-            // Set parameters
-            for (int i = 0; i < params.size(); i++) {
-                statement.setObject(i + 1, params.get(i));
+            int paramIndex = 1;
+
+            // Set filter parameters
+            if (categoryFilter != null && !categoryFilter.isEmpty()) {
+                statement.setString(paramIndex++, categoryFilter);
+            }
+
+            if (statusFilter != null && !statusFilter.isEmpty()) {
+                statement.setString(paramIndex++, statusFilter);
+            }
+
+            if (searchTerm != null && !searchTerm.isEmpty()) {
+                String searchPattern = "%" + searchTerm + "%";
+                statement.setString(paramIndex++, searchPattern);
+                statement.setString(paramIndex++, searchPattern);
             }
 
             resultSet = statement.executeQuery();
@@ -279,58 +266,25 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
         } finally {
             closeResources();
         }
+
         return count;
     }
 
-
-    public List<Subject> getFeaturedSubjects(int limit) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT id, title, thumbnail_url, tag_line, brief_info, description, ");
-        sql.append("category_id, owner_id, status, featured_flag, created_at, updated_at, created_by, updated_by ");
-        sql.append("FROM subject WHERE featured_flag = true AND status = 'active' ");
-        sql.append("ORDER BY updated_at DESC LIMIT ?");
-
-        List<Subject> subjects = new ArrayList<>();
+    public List<Subject> getFeaturedSubjects() {
+        List<Subject> list = new ArrayList<>();
+        String sql = "SELECT * FROM subject WHERE featured_flag = 1";
         try {
             connection = getConnection();
-            statement = connection.prepareStatement(sql.toString());
-            statement.setInt(1, limit);
+            statement = connection.prepareStatement(sql);
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                subjects.add(getFromResultSet(resultSet));
+                list.add(getFromResultSet(resultSet));
             }
         } catch (SQLException e) {
-            System.out.println("Error in getFeaturedSubjects: " + e.getMessage());
+            System.out.println("Error getFeaturedSubjects at class SubjectDAO: " + e.getMessage());
         } finally {
             closeResources();
         }
-        return subjects;
+        return list;
     }
-
-    public static void main(String[] args) {
-        SubjectDAO subjectDAO = new SubjectDAO();
-
-        // Test findAll
-        System.out.println("Testing findAll():");
-        List<Subject> allSubjects = subjectDAO.findAll();
-        if (allSubjects.isEmpty()) {
-            System.out.println("No subjects found.");
-        } else {
-            for (Subject subject : allSubjects) {
-                System.out.println(subject);
-            }
-        }
-        System.out.println("--------------------");
-
-        // Test findById
-        System.out.println("Testing findById(1):");
-        Subject subjectById = subjectDAO.findById(1);
-        if (subjectById != null) {
-            System.out.println(subjectById);
-        } else {
-            System.out.println("Subject with ID 1 not found.");
-        }
-    }
-
-
 }

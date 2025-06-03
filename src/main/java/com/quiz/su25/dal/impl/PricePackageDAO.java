@@ -29,13 +29,13 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
             //chuan bi cho statement
             statement = connection.prepareStatement(sql);
             //set param
-
+            
             //thuc thi cau lenh
             resultSet = statement.executeQuery();
-            while (resultSet.next()) {
+            while (resultSet.next()) {                
                 PricePackage pricePackage = getFromResultSet(resultSet);
                 listPricePackage.add(pricePackage);
-            }
+            }                      
         } catch (Exception e) {
             System.out.println("Error findAll at class PricePackageDAO: " + e.getMessage());
         } finally{
@@ -57,7 +57,7 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
             statement.setString(5, t.getStatus());
             statement.setString(6, t.getDescription());
             statement.setInt(7, t.getId());
-
+            
             return statement.executeUpdate() > 0;
         } catch (Exception e) {
             System.out.println("Error update at class PricePackageDAO: " + e.getMessage());
@@ -78,7 +78,7 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
             statement.setDouble(4, t.getSale_price());
             statement.setString(5, t.getStatus());
             statement.setString(6, t.getDescription());
-
+            
             return statement.executeUpdate() > 0;
         } catch (Exception e) {
             System.out.println("Error create at class PricePackageDAO: " + e.getMessage());
@@ -95,7 +95,7 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setInt(1, t.getId());
-
+            
             return statement.executeUpdate() > 0;
         } catch (Exception e) {
             System.out.println("Error delete at class PricePackageDAO: " + e.getMessage());
@@ -151,35 +151,35 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
         }
         return null;
     }
-
+    
     public static void main(String[] args) {
         PricePackageDAO pricePackageDAO = new PricePackageDAO();
         pricePackageDAO.findAll().forEach(item -> {
             System.out.println(item);
         });
     }
-
+    
     /**
      * Find price packages with filters and pagination
      */
-    public List<PricePackage> findPricePackagesWithFilters(String statusFilter, String searchFilter,
-                                                           String minPriceFilter, String maxPriceFilter, int page, int pageSize) {
+    public List<PricePackage> findPricePackagesWithFilters(String statusFilter, String searchFilter, 
+            String minPriceFilter, String maxPriceFilter, int page, int pageSize) {
         StringBuilder sql = new StringBuilder("SELECT * FROM pricePackage WHERE 1=1");
         List<Object> parameters = new ArrayList<>();
-
+        
         // Add filters
         if (statusFilter != null && !statusFilter.trim().isEmpty()) {
             sql.append(" AND status = ?");
             parameters.add(statusFilter.trim());
         }
-
+        
         if (searchFilter != null && !searchFilter.trim().isEmpty()) {
             sql.append(" AND (name LIKE ? OR description LIKE ?)");
             String searchPattern = "%" + searchFilter.trim() + "%";
             parameters.add(searchPattern);
             parameters.add(searchPattern);
         }
-
+        
         if (minPriceFilter != null && !minPriceFilter.trim().isEmpty()) {
             try {
                 int minPrice = Integer.parseInt(minPriceFilter.trim());
@@ -189,7 +189,7 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
                 // Ignore invalid price
             }
         }
-
+        
         if (maxPriceFilter != null && !maxPriceFilter.trim().isEmpty()) {
             try {
                 int maxPrice = Integer.parseInt(maxPriceFilter.trim());
@@ -199,22 +199,22 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
                 // Ignore invalid price
             }
         }
-
+        
         // Add pagination
         sql.append(" ORDER BY id DESC LIMIT ? OFFSET ?");
         parameters.add(pageSize);
         parameters.add((page - 1) * pageSize);
-
+        
         List<PricePackage> listPricePackage = new ArrayList<>();
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql.toString());
-
+            
             // Set parameters
             for (int i = 0; i < parameters.size(); i++) {
                 statement.setObject(i + 1, parameters.get(i));
             }
-
+            
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 PricePackage pricePackage = getFromResultSet(resultSet);
@@ -227,28 +227,28 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
         }
         return listPricePackage;
     }
-
+    
     /**
      * Get total count of filtered price packages
      */
-    public int getTotalFilteredPricePackages(String statusFilter, String searchFilter,
-                                             String minPriceFilter, String maxPriceFilter) {
+    public int getTotalFilteredPricePackages(String statusFilter, String searchFilter, 
+            String minPriceFilter, String maxPriceFilter) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM pricePackage WHERE 1=1");
         List<Object> parameters = new ArrayList<>();
-
+        
         // Add filters
         if (statusFilter != null && !statusFilter.trim().isEmpty()) {
             sql.append(" AND status = ?");
             parameters.add(statusFilter.trim());
         }
-
+        
         if (searchFilter != null && !searchFilter.trim().isEmpty()) {
             sql.append(" AND (name LIKE ? OR description LIKE ?)");
             String searchPattern = "%" + searchFilter.trim() + "%";
             parameters.add(searchPattern);
             parameters.add(searchPattern);
         }
-
+        
         if (minPriceFilter != null && !minPriceFilter.trim().isEmpty()) {
             try {
                 int minPrice = Integer.parseInt(minPriceFilter.trim());
@@ -258,7 +258,7 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
                 // Ignore invalid price
             }
         }
-
+        
         if (maxPriceFilter != null && !maxPriceFilter.trim().isEmpty()) {
             try {
                 int maxPrice = Integer.parseInt(maxPriceFilter.trim());
@@ -268,16 +268,16 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
                 // Ignore invalid price
             }
         }
-
+        
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql.toString());
-
+            
             // Set parameters
             for (int i = 0; i < parameters.size(); i++) {
                 statement.setObject(i + 1, parameters.get(i));
             }
-
+            
             resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return resultSet.getInt(1);
@@ -289,5 +289,5 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
         }
         return 0;
     }
-
+    
 }

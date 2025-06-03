@@ -2,29 +2,24 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <div class="col-lg-3">
     <!-- Dropdown Search Box -->
-    <div class="dashboard__sidebar-title mt-30 mb-10">
-        <h6 class="title">Search & Filter</h6>
+    <div class="dashboard__sidebar-title mt-30 mb-20">
+        <h6 class="title"></h6>
     </div>
     <div style="margin-bottom:50px;">
-        <form action="${pageContext.request.contextPath}/my-registration" method="get" class="dashboard_sidebar_search-form">
-            <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 3px; overflow: hidden; margin-bottom: 10px;">
-                <input type="text" name="searchName" placeholder="Search by Subject Name" value="${currentSearchName}" style="flex: 1; border: none; padding: 10px; outline: none;" />
-            </div>
-            
-            <!-- Subject Filter Dropdown -->
-            <div style="border: 1px solid #ccc; border-radius: 3px; overflow: hidden; margin-bottom:10px;">
-                <select name="subjectId" style="width: 100%; border: none; padding: 10px; outline: none; background-color: white;">
-                    <option value="0">All Subjects</option>
-                    <c:forEach var="subject" items="${allSubjects}">
-                        <option value="${subject.id}" ${subject.id eq currentSubjectId ? 'selected' : ''}>${subject.title}</option>
-                    </c:forEach>
-                </select>
-            </div>
-            
-            <button type="submit" style="background-color: #007bff; color: white; border: none; padding: 10px 15px; cursor: pointer; width:100%; border-radius:3px;">
-                Apply Filters
+        <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 3px; overflow: hidden;">
+            <select style="border: none; padding: 10px; height: 100%; outline: none;">
+                <option>Categories</option>
+                <option>Business</option>
+                <option>Data Science</option>
+                <option>Art & Design</option>
+                <option>Marketing</option>
+                <option>Finance</option>
+            </select>
+            <input type="text" placeholder="Search For Course . . ." style="flex: 1; border: none; padding: 10px; outline: none;" />
+            <button style="background-color: #6c63ff; border: none; padding: 10px; cursor: pointer;">
+                <img src="search-icon.png" alt="Search" style="width: 20px; height: 20px;" />
             </button>
-        </form>
+        </div>
     </div>
 
     <div class="dashboard__sidebar-wrap">
@@ -34,19 +29,19 @@
         <nav class="dashboard__sidebar-menu">
             <ul class="list-wrap">
                 <li>
-                    <a href="instructor-profile.html">
+                    <a href="${pageContext.request.contextPath}/my-profile">
                         <i class="skillgro-avatar"></i>
                         My Profile
                     </a>
                 </li>
                 <li>
-                    <a href="instructor-attempts.html">
+                    <a href="${pageContext.request.contextPath}/practice-list">
                         <i class="skillgro-question"></i>
-                        My Quiz Attempts
+                        Practice List
                     </a>
                 </li>
-                <li class = "active">
-                    <a href="instructor-history.html">
+                <li>
+                    <a href="${pageContext.request.contextPath}/my-registration">
                         <i class="skillgro-satchel"></i>
                         My Registration
                     </a>

@@ -5,6 +5,8 @@
 package com.quiz.su25.controller;
 
 import com.quiz.su25.dal.impl.UserDAO;
+import com.quiz.su25.dal.impl.RoleDAO;
+import com.quiz.su25.entity.Role;
 import com.quiz.su25.entity.User;
 import java.io.File;
 import java.io.IOException;
@@ -16,15 +18,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
+import jakarta.servlet.annotation.MultipartConfig;
 
 @WebServlet("/my-profile")
+@MultipartConfig(maxFileSize = 1024 * 1024 * 5) // 5MB
 public class UserProfileController extends HttpServlet {
 
     private UserDAO userDAO;
+    private RoleDAO roleDAO;
 
     @Override
     public void init() {
         userDAO = new UserDAO();
+        roleDAO = new RoleDAO();
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -47,8 +53,26 @@ public class UserProfileController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-        
+
+//        HttpSession session = request.getSession();
+//        User sessionUser = (User) session.getAttribute("user");
+        // Kiểm tra xem user đã login hay chưa
+//        if (sessionUser == null) {
+//            response.sendRedirect("login");
+//            return;
+//        }
+        // Lấy thông tin user mới nhất từ database
+//        User currentUser = userDAO.findById(sessionUser.getId());
+//        if (currentUser != null) {
+//            session.setAttribute("user", currentUser);
+//        }
+        User currentUser = userDAO.findById(10);
+
+        // Lấy role name từ database
+        String roleName = roleDAO.getRoleNameById(currentUser.getRole_id());
+        request.setAttribute("roleName", roleName);
+
+        request.getSession().setAttribute("user", currentUser);
         request.getRequestDispatcher("view/user/myprofile/my-profile.jsp").forward(request, response);
     }
 
@@ -71,7 +95,7 @@ public class UserProfileController extends HttpServlet {
                     deletePicture(request, response, sessionUser);
                     break;
                 default:
-                    response.sendRedirect("userProfile");
+                    response.sendRedirect("my-profile");
                     break;
             }
         } catch (Exception e) {
@@ -86,6 +110,21 @@ public class UserProfileController extends HttpServlet {
         String fullName = request.getParameter("full_name");
         String mobile = request.getParameter("mobile");
         Integer gender = Integer.parseInt(request.getParameter("gender"));
+
+        // Validate full name
+        if (!isValidName(fullName)) {
+            request.setAttribute("error", "Tên không hợp lệ! Tên chỉ được chứa chữ cái, khoảng trắng, dấu nháy đơn và dấu gạch ngang. Độ dài từ 2-50 ký tự.");
+            doGet(request, response);
+            return;
+        }
+
+        // Validate phone number
+        if (!isValidPhoneNumber(mobile)) {
+            request.setAttribute("phoneError", "Số điện thoại không hợp lệ! Vui lòng nhập số điện thoại 10 chữ số, bắt đầu bằng số 0.");
+            request.setAttribute("invalidPhone", mobile);
+            doGet(request, response);
+            return;
+        }
 
         // Create updated user object - giữ nguyên email, không lấy từ form
         User updatedUser = User.builder()
@@ -111,26 +150,102 @@ public class UserProfileController extends HttpServlet {
             request.setAttribute("error", "Failed to update profile!");
         }
 
-        response.sendRedirect("userProfile");
+        response.sendRedirect("my-profile");
+    }
+
+    /**
+     * Validate tên người dùng
+     *
+     * @param name tên cần validate
+     * @return true nếu tên hợp lệ, false nếu không hợp lệ
+     */
+    private boolean isValidName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return false;
+        }
+
+        String trimmedName = name.trim();
+
+        // Kiểm tra độ dài
+        if (trimmedName.length() < 2 || trimmedName.length() > 50) {
+            return false;
+        }
+
+        // Kiểm tra không được bắt đầu hoặc kết thúc bằng khoảng trắng, dấu nháy đơn, hoặc dấu gạch ngang
+        if (trimmedName.startsWith(" ") || trimmedName.endsWith(" ")
+                || trimmedName.startsWith("'") || trimmedName.endsWith("'")
+                || trimmedName.startsWith("-") || trimmedName.endsWith("-")) {
+            return false;
+        }
+
+        // Kiểm tra không có nhiều khoảng trắng liên tiếp
+        if (trimmedName.contains("  ")) {
+            return false;
+        }
+
+        // Kiểm tra từng ký tự: chỉ cho phép chữ cái, khoảng trắng, dấu nháy đơn, dấu gạch ngang
+        for (int i = 0; i < trimmedName.length(); i++) {
+            char c = trimmedName.charAt(i);
+
+            // Cho phép chữ cái (bao gồm cả có dấu), khoảng trắng, dấu nháy đơn, dấu gạch ngang
+            if (!Character.isLetter(c) && c != ' ' && c != '\'' && c != '-') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Validate số điện thoại
+     *
+     * @param phone số điện thoại cần validate
+     * @return true nếu số điện thoại hợp lệ, false nếu không hợp lệ
+     */
+    private boolean isValidPhoneNumber(String phone) {
+        if (phone == null || phone.trim().isEmpty()) {
+            return false;
+        }
+
+        // Kiểm tra độ dài phải là 10 số và bắt đầu bằng số 0
+        if (!phone.matches("^0\\d{9}$")) {
+            return false;
+        }
+
+        return true;
     }
 
     private void changePicture(HttpServletRequest request, HttpServletResponse response, User sessionUser)
             throws ServletException, IOException {
+
+        // Lấy file ảnh đại diện được gửi từ form có name="avatar"
         Part filePart = request.getPart("avatar");
+
+        // Lấy tên file gốc mà người dùng upload
         String fileName = getSubmittedFileName(filePart);
 
+        // Kiểm tra xem file có tồn tại không
         if (fileName != null && !fileName.isEmpty()) {
+
+            // Lấy đường dẫn thực tế tới thư mục lưu ảnh trên server
             String uploadPath = getServletContext().getRealPath("/uploads/avatars/");
+
+            // Tạo thư mục nếu chưa tồn tại
             File uploadDir = new File(uploadPath);
             if (!uploadDir.exists()) {
-                uploadDir.mkdirs();
+                uploadDir.mkdirs(); // Tạo tất cả thư mục cha nếu cần
             }
 
+            // Tạo tên file mới đảm bảo duy nhất (dựa trên thời gian)
             String uniqueFileName = System.currentTimeMillis() + "_" + fileName;
+
+            // Đường dẫn đầy đủ để lưu file vào ổ đĩa
             String filePath = uploadPath + uniqueFileName;
 
+            // Ghi file vào ổ đĩa (server)
             filePart.write(filePath);
 
+            // Tạo đối tượng User mới từ sessionUser với avatar_url mới
             User updatedUser = User.builder()
                     .id(sessionUser.getId())
                     .full_name(sessionUser.getFull_name())
@@ -138,35 +253,49 @@ public class UserProfileController extends HttpServlet {
                     .password(sessionUser.getPassword())
                     .gender(sessionUser.getGender())
                     .mobile(sessionUser.getMobile())
-                    .avatar_url("/uploads/avatars/" + uniqueFileName)
+                    .avatar_url("/uploads/avatars/" + uniqueFileName) // Đường dẫn ảnh để hiển thị trên web
                     .role_id(sessionUser.getRole_id())
                     .status(sessionUser.getStatus())
                     .build();
 
+            // Cập nhật thông tin người dùng trong database
             boolean success = userDAO.update(updatedUser);
 
+            // Nếu cập nhật thành công
             if (success) {
+                // Gửi thông báo thành công
                 request.setAttribute("message", "Profile picture updated successfully!");
+                // Cập nhật thông tin user trong session
                 request.getSession().setAttribute("user", updatedUser);
             } else {
+                // Gửi thông báo lỗi
                 request.setAttribute("error", "Failed to update profile picture!");
             }
         }
 
-        response.sendRedirect("userProfile");
+        // Điều hướng lại trang hồ sơ cá nhân
+        response.sendRedirect("my-profile");
     }
 
     private void deletePicture(HttpServletRequest request, HttpServletResponse response, User sessionUser)
             throws ServletException, IOException {
-        // Delete existing avatar file if exists
+
+        // Kiểm tra nếu người dùng đang có avatar (khác null và không rỗng)
         if (sessionUser.getAvatar_url() != null && !sessionUser.getAvatar_url().isEmpty()) {
+
+            // Lấy đường dẫn thực tế tới file ảnh trên ổ đĩa
             String filePath = getServletContext().getRealPath(sessionUser.getAvatar_url());
+
+            // Tạo đối tượng File từ đường dẫn
             File avatarFile = new File(filePath);
+
+            // Nếu file tồn tại, thì xóa
             if (avatarFile.exists()) {
                 avatarFile.delete();
             }
         }
 
+        // Tạo đối tượng User mới với avatar là ảnh mặc định
         User updatedUser = User.builder()
                 .id(sessionUser.getId())
                 .full_name(sessionUser.getFull_name())
@@ -174,21 +303,27 @@ public class UserProfileController extends HttpServlet {
                 .password(sessionUser.getPassword())
                 .gender(sessionUser.getGender())
                 .mobile(sessionUser.getMobile())
-                .avatar_url("/images/default-avatar.jpg") // Set default avatar
+                .avatar_url("/images/default-avatar.jpg") // Gán ảnh đại diện mặc định
                 .role_id(sessionUser.getRole_id())
                 .status(sessionUser.getStatus())
                 .build();
 
+        // Cập nhật thông tin người dùng trong database
         boolean success = userDAO.update(updatedUser);
 
+        // Nếu cập nhật thành công
         if (success) {
+            // Gửi thông báo thành công
             request.setAttribute("message", "Profile picture removed successfully!");
+            // Cập nhật thông tin user trong session
             request.getSession().setAttribute("user", updatedUser);
         } else {
+            // Gửi thông báo lỗi
             request.setAttribute("error", "Failed to remove profile picture!");
         }
 
-        response.sendRedirect("userProfile");
+        // Điều hướng lại trang hồ sơ cá nhân
+        response.sendRedirect("my-profile");
     }
 
     private String getSubmittedFileName(Part part) {
