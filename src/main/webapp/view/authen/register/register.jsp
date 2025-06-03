@@ -1,6 +1,6 @@
 <%-- 
-    Document   : userlogin
-    Created on : May 25, 2025, 6:15:21 PM
+    Document   : register
+    Created on : Jun 3, 2025, 6:10:15 PM
     Author     : LENOVO
 --%>
 
@@ -12,13 +12,13 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="x-ua-compatible" content="ie=edge">
-        <title>Login - SkillGro</title>
+        <title>Register - SkillGro</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/view/common/img/favicon.png">
         <!-- CSS here -->
         <jsp:include page="../../common/user/link_css_common.jsp"></jsp:include>
         <style>
-            .login-container {
+            .register-container {
                 min-height: 100vh;
                 display: flex;
                 align-items: center;
@@ -26,7 +26,7 @@
                 background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
                 padding: 20px;
             }
-            .login-box {
+            .register-box {
                 background: rgba(255, 255, 255, 0.95);
                 padding: 40px;
                 border-radius: 20px;
@@ -35,67 +35,21 @@
                 max-width: 450px;
                 backdrop-filter: blur(10px);
             }
-            .login-header {
+            .register-header {
                 text-align: center;
                 margin-bottom: 35px;
             }
-            .login-header h2 {
+            .register-header h2 {
                 font-size: 32px;
                 font-weight: 700;
                 color: #2D3748;
                 margin-bottom: 15px;
                 letter-spacing: -0.5px;
             }
-            .login-header p {
+            .register-header p {
                 color: #718096;
                 font-size: 16px;
                 line-height: 1.6;
-            }
-            .google-btn {
-                width: 100%;
-                padding: 14px;
-                border: 2px solid #E2E8F0;
-                border-radius: 12px;
-                background: white;
-                color: #4A5568;
-                font-weight: 600;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 12px;
-                cursor: pointer;
-                margin-bottom: 24px;
-                transition: all 0.3s ease;
-            }
-            .google-btn:hover {
-                background: #F7FAFC;
-                border-color: #CBD5E0;
-                transform: translateY(-1px);
-            }
-            .google-btn img {
-                width: 24px;
-                height: 24px;
-            }
-            .divider {
-                text-align: center;
-                position: relative;
-                margin: 24px 0;
-                color: #A0AEC0;
-            }
-            .divider::before,
-            .divider::after {
-                content: "";
-                position: absolute;
-                top: 50%;
-                width: 45%;
-                height: 1px;
-                background: #E2E8F0;
-            }
-            .divider::before {
-                left: 0;
-            }
-            .divider::after {
-                right: 0;
             }
             .form-group {
                 margin-bottom: 24px;
@@ -124,39 +78,25 @@
             .form-control::placeholder {
                 color: #A0AEC0;
             }
-            .form-footer {
+            .gender-options {
                 display: flex;
-                justify-content: flex-end;
-                margin-bottom: 24px;
+                gap: 20px;
             }
-            .remember-me {
+            .gender-option {
                 display: flex;
                 align-items: center;
                 gap: 8px;
             }
-            .remember-me input[type="checkbox"] {
+            .gender-option input[type="radio"] {
                 width: 18px;
                 height: 18px;
-                border: 2px solid #E2E8F0;
-                border-radius: 4px;
                 cursor: pointer;
             }
-            .remember-me span {
+            .gender-option span {
                 color: #4A5568;
                 font-size: 15px;
             }
-            .forgot-password {
-                color: #6B73FF;
-                text-decoration: none;
-                font-weight: 600;
-                font-size: 15px;
-                transition: color 0.3s ease;
-            }
-            .forgot-password:hover {
-                color: #000DFF;
-                text-decoration: none;
-            }
-            .sign-in-btn {
+            .sign-up-btn {
                 width: 100%;
                 padding: 16px;
                 background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
@@ -169,23 +109,23 @@
                 transition: all 0.3s ease;
                 margin-bottom: 24px;
             }
-            .sign-in-btn:hover {
+            .sign-up-btn:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 7px 14px rgba(0, 13, 255, 0.1);
             }
-            .signup-link {
+            .register-link {
                 text-align: center;
                 color: #4A5568;
                 font-size: 15px;
             }
-            .signup-link a {
+            .register-link a {
                 color: #6B73FF;
                 text-decoration: none;
                 font-weight: 600;
                 margin-left: 4px;
                 transition: color 0.3s ease;
             }
-            .signup-link a:hover {
+            .register-link a:hover {
                 color: #000DFF;
                 text-decoration: none;
             }
@@ -232,25 +172,45 @@
                     transform: translateY(0);
                 }
             }
-            .login-box {
+            .register-box {
                 animation: fadeIn 0.6s ease-out;
             }
         </style>
     </head>
 
     <body>
-        <div class="login-container">
-            <div class="login-box">
-                <div class="login-header">
-                    <p>Please sign in to continue</p>
+        <div class="register-container">
+            <div class="register-box">
+                <div class="register-header">
+                    <h2>Create Account</h2>
+                    <p>Please fill in your information to register</p>
                 </div>
                 
-                <form action="login" method="post">
+                <form action="register" method="post">
                     <c:if test="${message != null}">
                         <div class="alert alert-${type}">
                             ${message}
                         </div>
                     </c:if>
+                    
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" class="form-control" id="fullName" name="fullName" placeholder="Enter your full name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Gender</label>
+                        <div class="gender-options">
+                            <div class="gender-option">
+                                <input type="radio" id="male" name="gender" value="male" required>
+                                <span>Male</span>
+                            </div>
+                            <div class="gender-option">
+                                <input type="radio" id="female" name="gender" value="female" required>
+                                <span>Female</span>
+                            </div>
+                        </div>
+                    </div>
                     
                     <div class="form-group">
                         <label for="email">Email</label>
@@ -259,18 +219,18 @@
                     
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required 
-                               placeholder="Enter your password">
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
                     </div>
                     
-                    <div class="form-footer">
-                        <a href="forgot-password" class="forgot-password">Forgot password?</a>
+                    <div class="form-group">
+                        <label for="mobile">Mobile</label>
+                        <input type="tel" class="form-control" id="mobile" name="mobile" placeholder="Enter your mobile number" required>
                     </div>
                     
-                    <button type="submit" class="sign-in-btn">Sign in to your account</button>
+                    <button type="submit" class="sign-up-btn">Register</button>
                     
-                    <div class="signup-link">
-                        Don't have an account? <a href="register">Sign up</a>
+                    <div class="register-link">
+                        Already have an account? <a href="login">Sign in</a>
                     </div>
                 </form>
             </div>
