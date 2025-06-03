@@ -4,7 +4,6 @@
  */
 package com.quiz.su25.entity;
 
-import java.sql.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,16 +20,9 @@ import lombok.ToString;
 @Getter
 @Setter
 
-public class Lesson {
+public class QuizQuestion {
     private Integer id;
-    private Integer subject_id;
-    private String title;
-    private String content_text;
-    private String content_url;
-    private String type;
-    private Integer order_in_subject;
-    private String status;
-    private Date created_at;
-    private Date updated_at;
-
-}
+    private Integer quiz_id;
+    private Integer Question_id;
+    private Integer order_in_quiz;
+} 
