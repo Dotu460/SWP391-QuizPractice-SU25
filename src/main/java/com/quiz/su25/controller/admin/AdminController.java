@@ -212,7 +212,7 @@ public class AdminController extends HttpServlet {
             // Set role
             int roleId = Integer.parseInt(request.getParameter("roleId"));
             Role role = new Role();
-            role.setId(roleId);
+            //role.setId(roleId);
             user.setRole_id(roleId);
 
             return user;

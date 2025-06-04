@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.quiz.su25.dal.impl;
 
 import java.sql.ResultSet;
@@ -13,6 +9,7 @@ import java.util.List;
 import com.quiz.su25.dal.DBContext;
 import com.quiz.su25.dal.I_DAO;
 import com.quiz.su25.entity.Subject;
+import java.sql.Date;
 
 public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
@@ -57,7 +54,10 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     @Override
     public int insert(Subject subject) {
-        String sql = "INSERT INTO subject (title, thumbnail_url, tag_line, description, featured_flag, category_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO subject "
+                + "(title, thumbnail_url, tag_line, brief_info, description, category_id, "
+                + "owner_id, status, featured_flag, created_at, updated_at, created_by, updated_by) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         int generatedId = -1;
         try {
             connection = getConnection();
@@ -65,10 +65,16 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
             statement.setString(1, subject.getTitle());
             statement.setString(2, subject.getThumbnail_url());
             statement.setString(3, subject.getTag_line());
-            statement.setString(4, subject.getDescription());
-            statement.setBoolean(5, subject.getFeatured_flag());
+            statement.setString(4, subject.getBrief_info());
+            statement.setString(5, subject.getDescription());
             statement.setInt(6, subject.getCategory_id());
-            statement.setString(7, subject.getStatus());
+            statement.setInt(7, subject.getOwner_id());
+            statement.setString(8, subject.getStatus());
+            statement.setBoolean(9, subject.getFeatured_flag());
+            statement.setDate(10, (Date) subject.getCreated_at());
+            statement.setDate(11, (Date) subject.getUpdated_at());
+            statement.setInt(12, subject.getCreated_by());
+            statement.setInt(13, subject.getUpdated_by());
 
             statement.executeUpdate();
             resultSet = statement.getGeneratedKeys();
@@ -85,7 +91,11 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
 
     @Override
     public boolean update(Subject subject) {
-        String sql = "UPDATE subject SET title = ?, thumbnail_url = ?, tag_line = ?, description = ?, featured_flag = ?, category_id = ?, status = ? WHERE id = ?";
+        String sql = "UPDATE subject SET "
+                + "title = ?, thumbnail_url = ?, tag_line = ?, brief_info = ?, description = ?, "
+                + "category_id = ?, owner_id = ?, status = ?, featured_flag = ?, "
+                + "updated_at = ?, updated_by = ? "
+                + "WHERE subject_id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -93,11 +103,15 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
             statement.setString(1, subject.getTitle());
             statement.setString(2, subject.getThumbnail_url());
             statement.setString(3, subject.getTag_line());
-            statement.setString(4, subject.getDescription());
-            statement.setBoolean(5, subject.getFeatured_flag());
+            statement.setString(4, subject.getBrief_info());
+            statement.setString(5, subject.getDescription());
             statement.setInt(6, subject.getCategory_id());
-            statement.setString(7, subject.getStatus());
-            statement.setInt(8, subject.getId());
+            statement.setInt(7, subject.getOwner_id());
+            statement.setString(8, subject.getStatus());
+            statement.setBoolean(9, subject.getFeatured_flag());
+            statement.setObject(10, subject.getUpdated_at());
+            statement.setInt(11, subject.getUpdated_by());
+            statement.setInt(12, subject.getId());
 
             int rowsAffected = statement.executeUpdate();
             success = rowsAffected > 0;
@@ -118,7 +132,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
     }
 
     public boolean deleteById(Integer id) {
-        String sql = "DELETE FROM subject WHERE id = ?";
+        String sql = "DELETE FROM subject WHERE subject_id = ?";
         boolean success = false;
         try {
             connection = getConnection();
