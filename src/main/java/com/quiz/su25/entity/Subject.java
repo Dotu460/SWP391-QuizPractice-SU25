@@ -20,14 +20,20 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter
 @Setter
+
 public class Subject {
     private Integer id;
-    private Integer owner_id;
     private String title;
     private String thumbnail_url;
     private String tag_line;
+    private String brief_info;
     private String description;
     private Boolean featured_flag;
     private Integer category_id;
     private String status;
+    private Integer owner_id;
+    private Date created_at;
+    private Date updated_at;
+    private Integer created_by;
+    private Integer updated_by;
 }

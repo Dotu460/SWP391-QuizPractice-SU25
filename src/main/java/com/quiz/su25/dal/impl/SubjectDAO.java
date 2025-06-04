@@ -142,10 +142,16 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
                 .title(resultSet.getString("title"))
                 .thumbnail_url(resultSet.getString("thumbnail_url"))
                 .tag_line(resultSet.getString("tag_line"))
+                .brief_info(resultSet.getString("brief_info"))
                 .description(resultSet.getString("description"))
-                .featured_flag(resultSet.getBoolean("featured_flag"))
                 .category_id(resultSet.getInt("category_id"))
+                .owner_id(resultSet.getInt("owner_id"))
                 .status(resultSet.getString("status"))
+                .featured_flag(resultSet.getBoolean("featured_flag"))
+                .created_at(resultSet.getDate("created_at"))
+                .updated_at(resultSet.getDate("updated_at"))
+                .created_by(resultSet.getInt("created_by"))
+                .updated_by(resultSet.getInt("updated_by"))
                 .build();
     }
 
@@ -286,5 +292,108 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
             closeResources();
         }
         return list;
+    }
+
+    public static void main(String[] args) {
+        // Create DAO instance
+        SubjectDAO dao = new SubjectDAO();
+
+        // Test findAll
+        System.out.println("\n----- Testing findAll() -----");
+        List<Subject> allSubjects = dao.findAll();
+        printSubjects(allSubjects);
+
+        // Test insert
+        System.out.println("\n----- Testing insert() -----");
+        Subject newSubject = Subject.builder()
+                .title("Test Subject")
+                .thumbnail_url("https://example.com/test.jpg")
+                .tag_line("This is a test subject")
+                .description("Detailed description for testing")
+                .featured_flag(true)
+                .category_id(1)
+                .status("ACTIVE")
+                .build();
+        int newId = dao.insert(newSubject);
+        System.out.println("Inserted new subject with ID: " + newId);
+
+        // Test findById
+        System.out.println("\n----- Testing findById() -----");
+        Subject retrievedSubject = dao.findById(newId);
+        printSubject(retrievedSubject);
+
+        // Test update
+        System.out.println("\n----- Testing update() -----");
+        retrievedSubject.setTitle("Updated Test Subject");
+        retrievedSubject.setDescription("Updated description");
+        boolean updateSuccess = dao.update(retrievedSubject);
+        System.out.println("Update successful: " + updateSuccess);
+        printSubject(dao.findById(newId));
+
+        // Test getPaginatedSubjects
+        System.out.println("\n----- Testing getPaginatedSubjects() -----");
+        List<Subject> paginatedSubjects = dao.getPaginatedSubjects(
+                1, 5, null, "ACTIVE", "Test", "title", "asc");
+        printSubjects(paginatedSubjects);
+
+        // Test countTotalSubjects
+        System.out.println("\n----- Testing countTotalSubjects() -----");
+        int count = dao.countTotalSubjects(null, "ACTIVE", "Test");
+        System.out.println("Total matching subjects: " + count);
+
+        // Test getFeaturedSubjects
+        System.out.println("\n----- Testing getFeaturedSubjects() -----");
+        List<Subject> featuredSubjects = dao.getFeaturedSubjects();
+        printSubjects(featuredSubjects);
+
+        // Test delete
+        System.out.println("\n----- Testing delete() -----");
+        boolean deleteSuccess = dao.delete(retrievedSubject);
+        System.out.println("Delete successful: " + deleteSuccess);
+        System.out.println("Subject after deletion: " + dao.findById(newId));
+
+        // Test deleteById
+        System.out.println("\n----- Testing deleteById() -----");
+        // First create another subject to delete
+        Subject anotherSubject = Subject.builder()
+                .title("Another Test Subject")
+                .thumbnail_url("https://example.com/another.jpg")
+                .tag_line("Another test subject")
+                .description("Another description")
+                .featured_flag(false)
+                .category_id(2)
+                .status("INACTIVE")
+                .build();
+        int anotherId = dao.insert(anotherSubject);
+        System.out.println("Created subject with ID: " + anotherId);
+        boolean deleteByIdSuccess = dao.deleteById(anotherId);
+        System.out.println("DeleteById successful: " + deleteByIdSuccess);
+    }
+
+    private static void printSubject(Subject subject) {
+        if (subject == null) {
+            System.out.println("Subject not found");
+            return;
+        }
+        System.out.println("ID: " + subject.getId());
+        System.out.println("Title: " + subject.getTitle());
+        System.out.println("Thumbnail: " + subject.getThumbnail_url());
+        System.out.println("Tag Line: " + subject.getTag_line());
+        System.out.println("Description: " + subject.getDescription());
+        System.out.println("Featured: " + subject.getFeatured_flag());
+        System.out.println("Category ID: " + subject.getCategory_id());
+        System.out.println("Status: " + subject.getStatus());
+    }
+
+    private static void printSubjects(List<Subject> subjects) {
+        if (subjects == null || subjects.isEmpty()) {
+            System.out.println("No subjects found");
+            return;
+        }
+        System.out.println("Found " + subjects.size() + " subjects:");
+        for (int i = 0; i < subjects.size(); i++) {
+            System.out.println("--- Subject " + (i+1) + " ---");
+            printSubject(subjects.get(i));
+        }
     }
 }

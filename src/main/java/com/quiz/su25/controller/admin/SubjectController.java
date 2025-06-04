@@ -227,6 +227,47 @@ public class SubjectController extends HttpServlet {
         return defaultValue;
     }
 
+    public static void main(String[] args) {
+        // Create test instances
+        SubjectDAO subjectDAO = new SubjectDAO();
+        UserDAO userDAO = new UserDAO();
+
+        // Get some subjects to test with (or create mock subjects)
+        List<Subject> subjects = subjectDAO.findAll();
+
+        // Create and populate the ownerNames map
+        Map<Integer, String> ownerNames = new HashMap<>();
+        for (Subject subject : subjects) {
+            if (subject.getOwner_id() != null && !ownerNames.containsKey(subject.getOwner_id())) {
+                User owner = userDAO.findById(subject.getOwner_id());
+                if (owner != null) {
+                    ownerNames.put(subject.getOwner_id(), owner.getFull_name());
+                    System.out.println("Added owner: ID=" + subject.getOwner_id() +
+                            ", Name=" + owner.getFull_name());
+                } else {
+                    System.out.println("Owner not found for ID: " + subject.getOwner_id());
+                }
+            } else if (subject.getOwner_id() != null) {
+                System.out.println("Owner ID " + subject.getOwner_id() +
+                        " already in map with name: " + ownerNames.get(subject.getOwner_id()));
+            } else {
+                System.out.println("Subject has null owner_id: " + subject.getTitle());
+            }
+        }
+
+        // Print the final map contents
+        System.out.println("\n--- Final Owner Names Map ---");
+        if (ownerNames.isEmpty()) {
+            System.out.println("Map is empty!");
+        } else {
+            for (Map.Entry<Integer, String> entry : ownerNames.entrySet()) {
+                System.out.println("Owner ID: " + entry.getKey() + ", Name: " + entry.getValue());
+            }
+        }
+
+        // Print how many unique owners were found
+        System.out.println("\nTotal unique owners: " + ownerNames.size());
+    }
 
 
 
