@@ -1,4 +1,4 @@
-package com.quiz.su25.controller;
+package com.quiz.su25.controller.admin;
 
 import com.quiz.su25.dal.impl.RoleDAO;
 import com.quiz.su25.dal.impl.UserDAO;

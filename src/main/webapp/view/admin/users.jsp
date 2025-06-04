@@ -222,115 +222,16 @@
 <main class="main-area">
     <!-- dashboard-area -->
     <section class="dashboard__area section-pb-120">
-        <div class="dashboard__bg"><img src="assets/img/bg/dashboard_bg.jpg" alt=""></div>
-        <div class="container">
-            <div class="dashboard__top-wrap">
-                <div class="dashboard__top-bg" data-background="assets/img/bg/instructor_dashboard_bg.jpg"></div>
-                <div class="dashboard__instructor-info">
-                    <div class="dashboard__instructor-info-left">
-                        <div class="thumb">
-                            <img src="assets/img/courses/details_instructors01.jpg" alt="img">
-                        </div>
-                        <div class="content">
-<%--                            <h4 class="title">${sessionScope.user.full_name != null ? sessionScope.user.full_name : 'tienhoangit'}</h4>--%>
-                            <div class="review__wrap review__wrap-two">
-                                <div class="rating">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </div>
-                                <span>Administrator</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="dashboard__instructor-info-right">
-                        <a href="${pageContext.request.contextPath}/admin/user?action=add" class="btn btn-two arrow-btn">Create a New User <img src="assets/img/icons/right_arrow.svg" alt="img" class="injectable"></a>
-                    </div>
-                </div>
-            </div>
+        <div class="dashboard__bg"><img src="../common/assets/img/bg/dashboard_bg.jpg" alt=""></div>
+        <div class="container-fluid">
             <div class="dashboard__inner-wrap">
                 <div class="row">
-                    <div class="col-lg-3">
-                        <div class="dashboard__sidebar-wrap">
-                            <div class="dashboard__sidebar-title mb-20">
-                                <h6 class="title">Welcome, ${sessionScope.user.full_name != null ? sessionScope.user.full_name : 'tienhoangit'}</h6>
-                            </div>
-                            <nav class="dashboard__sidebar-menu">
-                                <ul class="list-wrap">
-                                    <li>
-                                        <a href="instructor-dashboard.html">
-                                            <i class="fas fa-home"></i>
-                                            Dashboard
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="instructor-profile.html">
-                                            <i class="skillgro-avatar"></i>
-                                            My Profile
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="${pageContext.request.contextPath}/subjects">
-                                            <i class="skillgro-book"></i>
-                                            Subjects
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="instructor-courses.html">
-                                            <i class="skillgro-video-tutorial"></i>
-                                            Courses
-                                        </a>
-                                    </li>
-                                    <li class="active">
-                                        <a href="${pageContext.request.contextPath}/admin/users">
-                                            <i class="fas fa-users"></i>
-                                            Users
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="instructor-review.html">
-                                            <i class="skillgro-book-2"></i>
-                                            Reviews
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="instructor-announcement.html">
-                                            <i class="skillgro-marketing"></i>
-                                            Announcements
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="instructor-quiz.html">
-                                            <i class="skillgro-chat"></i>
-                                            Quiz Attempts
-                                        </a>
-                                    </li>
-                                </ul>
-                            </nav>
-                            <div class="dashboard__sidebar-title mt-40 mb-20">
-                                <h6 class="title">USER</h6>
-                            </div>
-                            <nav class="dashboard__sidebar-menu">
-                                <ul class="list-wrap">
-                                    <li>
-                                        <a href="instructor-setting.html">
-                                            <i class="skillgro-settings"></i>
-                                            Settings
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="index.html">
-                                            <i class="skillgro-logout"></i>
-                                            Logout
-                                        </a>
-                                    </li>
-                                </ul>
-                            </nav>
-                        </div>
+                    <div class="col-lg-2">
+                        <jsp:include page="adminSidebar.jsp">
+                            <jsp:param name="active" value="users"/>
+                        </jsp:include>
                     </div>
-                    <div class="col-lg-9">
+                    <div class="col-lg-10">
                         <div class="dashboard__content-wrap">
                             <div class="dashboard__content-title">
                                 <h4 class="title">User Management</h4>
@@ -413,8 +314,8 @@
                             </div>
 
                             <!-- Users Table -->
-                            <div class="dashboard__review-table">
-                                <table class="table table-borderless">
+                            <div class="dashboard__review-table table-responsive">
+                                <table class="table">
                                     <thead>
                                     <tr>
                                         <th class="table-header-sortable" onclick="sortTable('id')">

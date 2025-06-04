@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Entity
+
 @ToString
 @Builder
 @Data
@@ -18,6 +18,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter
 @Setter
+
 
 //public class Subject {
 //    private Integer id;
@@ -38,7 +39,7 @@ public class Subject {
     private String description;
     private Boolean featured_flag;
     private Integer category_id;
-    private String status; 
+    private String status;
     private Integer owner_id;
     private Date created_at;
     private Date updated_at;
