@@ -23,7 +23,7 @@ import lombok.ToString;
 public class Quizzes {
     private Integer id;
     private String name;
-    private Integer subject_id;
+    private Integer lession_id;
     private String level;
     private Integer number_of_questions_target;
     private Integer duration_minutes;
