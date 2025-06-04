@@ -72,14 +72,17 @@ public class LessonDAO extends DBContext implements I_DAO<Lesson> {
 
     @Override
     public int insert(Lesson lesson) {
-        String sql = "INSERT INTO Lessons (subject_id, title, order_in_subject, status) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO Lessons (subject_id, title, content_text, content_url, type, order_in_subject, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             statement.setInt(1, lesson.getSubject_id());
             statement.setString(2, lesson.getTitle());
-            statement.setInt(3, lesson.getOrder_in_subject());
-            statement.setString(4, lesson.getStatus());
+            statement.setString(3, lesson.getContent_text());
+            statement.setString(4, lesson.getContent_url());
+            statement.setString(5, lesson.getType());
+            statement.setInt(6, lesson.getOrder_in_subject());
+            statement.setString(7, lesson.getStatus());
 
             int affectedRows = statement.executeUpdate();
 
@@ -103,15 +106,18 @@ public class LessonDAO extends DBContext implements I_DAO<Lesson> {
 
     @Override
     public boolean update(Lesson lesson) {
-        String sql = "UPDATE Lessons SET subject_id = ?, title = ?, order_in_subject = ?, status = ? WHERE id = ?";
+        String sql = "UPDATE Lessons SET subject_id = ?, title = ?, content_text = ?, content_url = ?, type = ?, order_in_subject = ?, status = ?, updated_at = NOW() WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setInt(1, lesson.getSubject_id());
             statement.setString(2, lesson.getTitle());
-            statement.setInt(3, lesson.getOrder_in_subject());
-            statement.setString(4, lesson.getStatus());
-            statement.setInt(5, lesson.getId());
+            statement.setString(3, lesson.getContent_text());
+            statement.setString(4, lesson.getContent_url());
+            statement.setString(5, lesson.getType());
+            statement.setInt(6, lesson.getOrder_in_subject());
+            statement.setString(7, lesson.getStatus());
+            statement.setInt(8, lesson.getId());
 
             return statement.executeUpdate() > 0;
         } catch (Exception e) {
@@ -176,8 +182,13 @@ public class LessonDAO extends DBContext implements I_DAO<Lesson> {
                 .id(rs.getInt("id"))
                 .subject_id(rs.getInt("subject_id"))
                 .title(rs.getString("title"))
+                .content_text(rs.getString("content_text"))
+                .content_url(rs.getString("content_url"))
+                .type(rs.getString("type"))
                 .order_in_subject(rs.getInt("order_in_subject"))
                 .status(rs.getString("status"))
+                .created_at(rs.getDate("created_at"))
+                .updated_at(rs.getDate("updated_at"))
                 .build();
     }
 

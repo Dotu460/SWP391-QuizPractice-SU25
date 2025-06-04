@@ -23,9 +23,7 @@ import lombok.ToString;
 
 public class Question {
     private Integer id;
-    private Integer subject_id;
-    private Integer lesson_id;
-    private Integer dimension_id;
+    private Integer quiz_id;
     private String content;
     private String media_url;
     private String level;

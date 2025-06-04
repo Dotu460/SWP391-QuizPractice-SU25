@@ -47,7 +47,7 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setString(1, t.getName());
-            statement.setInt(2, t.getSubject_id());
+            statement.setInt(2, t.getLesson_id());
             statement.setString(3, t.getLevel());
             statement.setInt(4, t.getNumber_of_questions_target());
             statement.setInt(5, t.getDuration_minutes());
@@ -91,7 +91,7 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setString(1, t.getName());
-            statement.setInt(2, t.getSubject_id());
+            statement.setInt(2, t.getLesson_id());
             statement.setString(3, t.getLevel());
             statement.setInt(4, t.getNumber_of_questions_target());
             statement.setInt(5, t.getDuration_minutes());
@@ -113,7 +113,7 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
         return Quizzes.builder()
                 .id(resultSet.getInt("id"))
                 .name(resultSet.getString("name"))
-                .subject_id(resultSet.getInt("subject_id"))
+                .lesson_id(resultSet.getInt("lesson_id"))
                 .level(resultSet.getString("level"))
                 .number_of_questions_target(resultSet.getInt("number_of_questions_target"))
                 .duration_minutes(resultSet.getInt("duration_minutes"))
