@@ -129,8 +129,8 @@
         <c:if test="${not empty param.subjectId}">
             <c:param name="subjectId" value="${param.subjectId}" />
         </c:if>
-        <c:if test="${not empty param.quizType}">
-            <c:param name="quizType" value="${param.quizType}" />
+        <c:if test="${not empty param.lessionId}">
+            <c:param name="lessionId" value="${param.lessionId}" />
         </c:if>
         <c:if test="${not empty param.pageSize}">
             <c:param name="pageSize" value="${param.pageSize}" />
@@ -191,7 +191,7 @@
                                         </div>
                                         <div class="col-md-3">
                                             <label for="subjectId">Môn học:</label>
-                                            <select class="form-control" id="subjectId" name="subjectId">
+                                            <select class="form-control" id="subjectId" name="subjectId" onchange="loadLessons()">
                                                 <option value="">-- Tất cả môn học --</option>
                                                 <c:forEach items="${subjectsList}" var="subject">
                                                     <option value="${subject.id}" ${param.subjectId == subject.id ? 'selected' : ''}>
@@ -201,11 +201,15 @@
                                             </select>
                                         </div>
                                         <div class="col-md-3">
-                                            <label for="quizType">Loại Quiz:</label>
-                                            <select class="form-control" id="quizType" name="quizType">
-                                                <option value="">-- Tất cả loại --</option>
-                                                <option value="Multiple Choice" ${param.quiz_type == 'Practice' ? 'selected' : ''}>Practice</option>
-                                                <option value="Essay" ${param.quiz_type == 'Exam' ? 'selected' : ''}>ExamExam</option>
+                                            <label for="lessionId">Bài học:</label>
+                                            <select class="form-control" id="lessionId" name="lessionId">
+                                                <option value="">-- Tất cả bài học --</option>
+                                                <c:forEach items="${lessionList}" var="lession">
+                                                    <option value="${lession.id}" ${param.lessionId == lession.id ? 'selected' : ''} 
+                                                            data-subject="${lession.subject_id}">
+                                                        ${lession.name}
+                                                    </option>
+                                                </c:forEach>
                                             </select>
                                         </div>
                                         <div class="col-md-2 d-flex align-items-end">
@@ -405,6 +409,33 @@
             $('#columnSettingsModal').modal('hide');
             alert('Đã áp dụng cài đặt cột!');
         }
+
+        function loadLessons() {
+            var subjectId = $('#subjectId').val();
+            var lessionSelect = $('#lessionId');
+            
+            // Hide all lessons first
+            lessionSelect.find('option[data-subject]').hide();
+            
+            if (subjectId === '') {
+                // If no subject selected, show "All lessons" option only
+                lessionSelect.val('');
+                lessionSelect.find('option[value=""]').show();
+            } else {
+                // Show lessons for selected subject
+                lessionSelect.find('option[data-subject="' + subjectId + '"]').show();
+                
+                // If current selection is not in shown options, reset to default
+                if (lessionSelect.find('option:selected').is(':hidden')) {
+                    lessionSelect.val('');
+                }
+            }
+        }
+
+        // Run on page load
+        $(document).ready(function() {
+            loadLessons();
+        });
     </script>
 </body>
 

@@ -40,14 +40,14 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
 
     @Override
     public boolean update(Quizzes t) {
-        String sql = "UPDATE Quizzes SET name = ?, subject_id = ?, level = ?,"
+        String sql = "UPDATE Quizzes SET name = ?, lession_id = ?, level = ?,"
                 + " number_of_questions_target = ?, duration_minutes = ?, pass_rate = ?, "
                 + "quiz_type = ?, status = ? WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setString(1, t.getName());
-            statement.setInt(2, t.getSubject_id());
+            statement.setInt(2, t.getLession_id());
             statement.setString(3, t.getLevel());
             statement.setInt(4, t.getNumber_of_questions_target());
             statement.setInt(5, t.getDuration_minutes());
@@ -84,14 +84,14 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
 
     @Override
     public int insert(Quizzes t) {
-        String sql = "INSERT INTO Quizzes (name, subject_id, level, number_of_questions_target,"
-                + " duration_minutes, pass_rate, quiz_type, status ) "
+        String sql = "INSERT INTO Quizzes (name, lession_id, level, number_of_questions_target,"
+                + " duration_minutes, pass_rate, quiz_type, status) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setString(1, t.getName());
-            statement.setInt(2, t.getSubject_id());
+            statement.setInt(2, t.getLession_id());
             statement.setString(3, t.getLevel());
             statement.setInt(4, t.getNumber_of_questions_target());
             statement.setInt(5, t.getDuration_minutes());
@@ -113,7 +113,7 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
         return Quizzes.builder()
                 .id(resultSet.getInt("id"))
                 .name(resultSet.getString("name"))
-                .subject_id(resultSet.getInt("subject_id"))
+                .lession_id(resultSet.getInt("lession_id"))
                 .level(resultSet.getString("level"))
                 .number_of_questions_target(resultSet.getInt("number_of_questions_target"))
                 .duration_minutes(resultSet.getInt("duration_minutes"))
@@ -145,38 +145,36 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
         return null;
     }
 
-
-    public List<Quizzes> findQuizzesWithFilters(String quizName, String subjectId, 
-            String quizType, int page, int pageSize) {
-        StringBuilder sql = new StringBuilder("SELECT * FROM Quizzes WHERE 1=1");
+    public List<Quizzes> findQuizzesWithFilters(String quizName, String subjectName, 
+            String lessionName, int page, int pageSize) {
+        StringBuilder sql = new StringBuilder(
+            "SELECT q.* FROM Quizzes q "
+            + "INNER JOIN Lessions l ON q.lession_id = l.id "
+            + "INNER JOIN Subjects s ON l.subject_id = s.id "
+            + "WHERE 1=1"
+        );
         List<Object> parameters = new ArrayList<>();
         
-        // Add name filter
+        // Add quiz name filter
         if (quizName != null && !quizName.trim().isEmpty()) {
-            sql.append(" AND name LIKE ?");
-            String searchPattern = "%" + quizName.trim() + "%";
-            parameters.add(searchPattern);
+            sql.append(" AND q.name LIKE ?");
+            parameters.add("%" + quizName.trim() + "%");
         }
         
-        // Add subject filter
-        if (subjectId != null && !subjectId.trim().isEmpty()) {
-            try {
-                int subjectIdInt = Integer.parseInt(subjectId.trim());
-                sql.append(" AND subject_id = ?");
-                parameters.add(subjectIdInt);
-            } catch (NumberFormatException e) {
-                // Ignore invalid subject id
-            }
+        // Add subject name filter
+        if (subjectName != null && !subjectName.trim().isEmpty()) {
+            sql.append(" AND s.name LIKE ?");
+            parameters.add("%" + subjectName.trim() + "%");
         }
         
-        // Add quiz type filter
-        if (quizType != null && !quizType.trim().isEmpty()) {
-            sql.append(" AND quiz_type = ?");
-            parameters.add(quizType.trim());
+        // Add lesson name filter
+        if (lessionName != null && !lessionName.trim().isEmpty()) {
+            sql.append(" AND l.name LIKE ?");
+            parameters.add("%" + lessionName.trim() + "%");
         }
         
         // Add pagination
-        sql.append(" ORDER BY id DESC LIMIT ? OFFSET ?");
+        sql.append(" ORDER BY q.id DESC LIMIT ? OFFSET ?");
         parameters.add(pageSize);
         parameters.add((page - 1) * pageSize);
         
@@ -203,35 +201,31 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
         return listQuizzes;
     }
     
-    /**
-     * Get total count of filtered quizzes
-     */
-    public int getTotalFilteredQuizzes(String quizName, String subjectId, String quizType) {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Quizzes WHERE 1=1");
+    public int getTotalFilteredQuizzes(String quizName, String subjectName, String lessionName) {
+        StringBuilder sql = new StringBuilder(
+            "SELECT COUNT(*) FROM Quizzes q "
+            + "INNER JOIN Lessions l ON q.lession_id = l.id "
+            + "INNER JOIN Subjects s ON l.subject_id = s.id "
+            + "WHERE 1=1"
+        );
         List<Object> parameters = new ArrayList<>();
         
-        // Add name filter
+        // Add quiz name filter
         if (quizName != null && !quizName.trim().isEmpty()) {
-            sql.append(" AND name LIKE ?");
-            String searchPattern = "%" + quizName.trim() + "%";
-            parameters.add(searchPattern);
+            sql.append(" AND q.name LIKE ?");
+            parameters.add("%" + quizName.trim() + "%");
         }
         
-        // Add subject filter
-        if (subjectId != null && !subjectId.trim().isEmpty()) {
-            try {
-                int subjectIdInt = Integer.parseInt(subjectId.trim());
-                sql.append(" AND subject_id = ?");
-                parameters.add(subjectIdInt);
-            } catch (NumberFormatException e) {
-                // Ignore invalid subject id
-            }
+        // Add subject name filter
+        if (subjectName != null && !subjectName.trim().isEmpty()) {
+            sql.append(" AND s.name LIKE ?");
+            parameters.add("%" + subjectName.trim() + "%");
         }
         
-        // Add quiz type filter
-        if (quizType != null && !quizType.trim().isEmpty()) {
-            sql.append(" AND quiz_type = ?");
-            parameters.add(quizType.trim());
+        // Add lesson name filter
+        if (lessionName != null && !lessionName.trim().isEmpty()) {
+            sql.append(" AND l.name LIKE ?");
+            parameters.add("%" + lessionName.trim() + "%");
         }
         
         try {
