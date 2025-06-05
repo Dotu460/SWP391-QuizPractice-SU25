@@ -175,4 +175,10 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
         }
         return list;
     }
-}
+
+    public static void main(String[] args) {
+        SubjectDAO subjectDAO = new SubjectDAO();
+        System.out.println(subjectDAO.findAll());
+        }
+    }
+    
