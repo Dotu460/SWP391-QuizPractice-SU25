@@ -112,7 +112,7 @@
                     width: 40px;
                     height: 40px;
                     border-radius: 50%;
-                    background: #8B7FD2;
+                    background: #5751E1;
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -268,7 +268,7 @@
                     width: 40px;
                     height: 40px;
                     border-radius: 50%;
-                    background: #8B7FD2;
+                    background: #5751E1;
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -615,14 +615,14 @@
                                 <div class="settings-menu">
                                     <div class="settings-icon" onclick="toggleSettingsDropdown()">
                                         <i class="fas fa-cog"></i>
-                                    </div>
+                    </div>
                                     <div class="settings-dropdown">
                                         <a href="#" class="dropdown-item" onclick="exitQuiz()">
                                             <i class="fas fa-sign-out-alt"></i>
                                             <span>Exit Quiz</span>
                                         </a>
-                                    </div>
-                                </div>
+                </div>
+            </div>
                                 <div class="user-menu">
                                     <div class="user-icon" onclick="toggleDropdown()">
                                         <i class="fas fa-user"></i>
@@ -682,7 +682,7 @@
                                                     </a>
                                                 </c:otherwise>
                                             </c:choose>
-                                        </div>
+                                    </div>
                                     </div>
                                 </div>
                             </div>
@@ -1105,6 +1105,32 @@
                             <img src="${question.media_url}" alt="Question Media" class="img-fluid">
                         </div>
                     </c:if>
+
+                    <!-- Answer Options -->
+                    <div class="answers-container mt-4">
+                        <form id="answerForm" method="POST" action="${pageContext.request.contextPath}/quiz-handle">
+                            <input type="hidden" name="action" value="saveAnswer">
+                            <input type="hidden" name="questionNumber" value="${currentNumber}">
+                            <input type="hidden" name="questionId" value="${question.id}">
+                            <input type="hidden" name="nextAction" id="nextAction" value="">
+                            
+                            <c:forEach items="${question.questionOptions}" var="option">
+                                <div class="answer-option mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" 
+                                               type="${question.questionOptions.size() > 1 ? 'checkbox' : 'radio'}"
+                                               name="answer" 
+                                               id="option${option.id}" 
+                                               value="${option.id}"
+                                               <c:if test="${not empty selectedAnswers && selectedAnswers.contains(option.id)}">checked</c:if>>
+                                        <label class="form-check-label" for="option${option.id}">
+                                            ${option.option_text}
+                                        </label>
+                                    </div>
+                                </div>
+                            </c:forEach>
+                        </form>
+                    </div>
                 </div>
 
                 <!-- Navigation Footer Section: Chứa các nút điều hướng -->
@@ -1171,19 +1197,19 @@
                         <div class="nav-buttons">
                             <div class="nav-group">
                                 <c:if test="${currentNumber > 1}">
-                                    <button class="btn-nav btn-prev" onclick="handleNavigation('previous')">
+                                    <button type="button" class="btn-nav btn-prev" onclick="handleNavigation('previous')">
                                         <i class="fas fa-arrow-left"></i>
                                         Previous
                                     </button>
                                 </c:if>
                                 <c:if test="${currentNumber < totalQuestions}">
-                                    <button class="btn-nav btn-next" onclick="handleNavigation('next')">
+                                    <button type="button" class="btn-nav btn-next" onclick="handleNavigation('next')">
                                         Next
                                         <i class="fas fa-arrow-right"></i>
                                     </button>
                                 </c:if>
                                 <c:if test="${currentNumber == totalQuestions}">
-                                    <button class="btn-nav btn-score" onclick="handleNavigation('score')">
+                                    <button type="button" class="btn-nav btn-score" onclick="handleNavigation('score')">
                                         Score Exam
                                         <i class="fas fa-check"></i>
                                     </button>
@@ -1250,7 +1276,7 @@
             
             /* Style cho nút Review Progress */
             .btn-review {
-                background: #8B7FD2;
+                background: #5751E1;
                 color: white;
                 border: none;
                 border-radius: 8px;
@@ -1679,28 +1705,19 @@
         </script>
 
         <script>
-            /**
-             * Hàm xử lý việc chuyển câu hỏi
-             * @param {string} action - 'next' hoặc 'previous'
-             */
             function handleNavigation(action) {
-                // Lấy số câu hỏi hiện tại từ URL, mặc định là 1
-                var currentNumber = parseInt('${param.questionNumber}' || '1');
-                var nextNumber;
+                console.log('Handling navigation:', action); // Debug log
                 
-                // Xác định số câu hỏi tiếp theo dựa vào action
-                if (action === 'next' && currentNumber < 10) {
-                    nextNumber = currentNumber + 1;
-                } else if (action === 'previous' && currentNumber > 1) {
-                    nextNumber = currentNumber - 1;
-                } else {
-                    nextNumber = currentNumber;
-                }
+                // Set nextAction value
+                document.getElementById('nextAction').value = action;
+                console.log('Next action set to:', action); // Debug log
                 
-                // Thêm timestamp để tránh cache của trình duyệt
-                var timestamp = new Date().getTime();
-                // Chuyển hướng đến URL mới với số câu hỏi đã cập nhật
-                window.location.href = 'quiz-handle?action=' + action + '&questionNumber=' + nextNumber + '&t=' + timestamp;
+                // Get the form
+                const form = document.getElementById('answerForm');
+                console.log('Form action:', form.action); // Debug log
+                
+                // Submit form
+                form.submit();
             }
         </script>
 

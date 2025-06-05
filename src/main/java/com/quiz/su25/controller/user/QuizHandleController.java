@@ -5,15 +5,21 @@
 package com.quiz.su25.controller.user;
 
 import com.quiz.su25.dal.impl.QuestionDAO;
+import com.quiz.su25.dal.impl.QuestionOptionDAO;
 import com.quiz.su25.entity.Question;
+import com.quiz.su25.entity.QuestionOption;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -67,12 +73,26 @@ public class QuizHandleController extends HttpServlet {
             
             // Lấy danh sách câu hỏi từ database
             QuestionDAO questionDAO = new QuestionDAO();
-            List<Question> questions = questionDAO.findAll(); // Hoặc findByQuizId() nếu bạn muốn lọc theo quiz
+            List<Question> questions = questionDAO.findAll();
             
             // Kiểm tra nếu có câu hỏi
             if (!questions.isEmpty() && currentNumber <= questions.size()) {
-                // Lấy câu hỏi hiện tại (trừ 1 vì index bắt đầu từ 0)
+                // Lấy câu hỏi hiện tại
                 Question currentQuestion = questions.get(currentNumber - 1);
+                
+                // Lấy các options cho câu hỏi hiện tại
+                QuestionOptionDAO optionDAO = new QuestionOptionDAO();
+                List<QuestionOption> options = optionDAO.findByQuestionId(currentQuestion.getId());
+                currentQuestion.setQuestionOptions(options);
+                
+                // Lấy câu trả lời đã chọn từ session
+                HttpSession session = request.getSession();
+                Map<Integer, List<Integer>> userAnswers = (Map<Integer, List<Integer>>) session.getAttribute("userAnswers");
+                
+                if (userAnswers != null && userAnswers.containsKey(currentQuestion.getId())) {
+                    List<Integer> selectedAnswers = userAnswers.get(currentQuestion.getId());
+                    request.setAttribute("selectedAnswers", selectedAnswers);
+                }
                 
                 // Set attributes cho JSP
                 request.setAttribute("question", currentQuestion);
@@ -80,10 +100,8 @@ public class QuizHandleController extends HttpServlet {
                 request.setAttribute("totalQuestions", questions.size());
             }
             
-            // Forward to JSP
             request.getRequestDispatcher("view/user/quizHandle/quiz-handle.jsp").forward(request, response);
         } catch (NumberFormatException e) {
-            // Xử lý lỗi nếu questionNumber không phải số
             response.sendRedirect(request.getContextPath() + "/quiz-handle?questionNumber=1");
         }
     }
@@ -99,17 +117,57 @@ public class QuizHandleController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Xử lý POST request (lưu câu trả lời, etc.)
         String action = request.getParameter("action");
+        System.out.println("Action received: " + action); // Debug log
         
         if ("saveAnswer".equals(action)) {
-            // TODO: Implement save answer logic
-            String questionNumber = request.getParameter("questionNumber");
-            String selectedAnswer = request.getParameter("answer");
-            
-            // Sau khi lưu, redirect về GET với câu hỏi tiếp theo
-            response.sendRedirect(request.getContextPath() + "/quiz-handle?questionNumber=" + 
-                    (Integer.parseInt(questionNumber) + 1));
+            try {
+                // Lấy thông tin câu hỏi và câu trả lời
+                int questionId = Integer.parseInt(request.getParameter("questionId"));
+                String[] selectedAnswerIds = request.getParameterValues("answer");
+                String nextAction = request.getParameter("nextAction");
+                int currentNumber = Integer.parseInt(request.getParameter("questionNumber"));
+                
+                System.out.println("Question ID: " + questionId); // Debug log
+                System.out.println("Current Number: " + currentNumber); // Debug log
+                System.out.println("Next Action: " + nextAction); // Debug log
+                
+                // Lấy hoặc tạo mới map lưu câu trả lời trong session
+                HttpSession session = request.getSession();
+                Map<Integer, List<Integer>> userAnswers = (Map<Integer, List<Integer>>) session.getAttribute("userAnswers");
+                if (userAnswers == null) {
+                    userAnswers = new HashMap<>();
+                }
+                
+                // Lưu câu trả lời vào map
+                List<Integer> answers = new ArrayList<>();
+                if (selectedAnswerIds != null) {
+                    for (String answerId : selectedAnswerIds) {
+                        answers.add(Integer.parseInt(answerId));
+                    }
+                }
+                userAnswers.put(questionId, answers);
+                
+                // Cập nhật session
+                session.setAttribute("userAnswers", userAnswers);
+                
+                // Xác định số câu hỏi tiếp theo
+                int nextNumber = currentNumber;
+                if ("next".equals(nextAction)) {
+                    nextNumber++;
+                } else if ("previous".equals(nextAction)) {
+                    nextNumber--;
+                }
+                
+                System.out.println("Redirecting to question: " + nextNumber); // Debug log
+                
+                // Chuyển hướng đến câu hỏi tiếp theo
+                response.sendRedirect(request.getContextPath() + "/quiz-handle?questionNumber=" + nextNumber);
+            } catch (Exception e) {
+                System.out.println("Error in doPost: " + e.getMessage());
+                e.printStackTrace();
+                response.sendRedirect(request.getContextPath() + "/quiz-handle?questionNumber=1");
+            }
         }
     }
 
