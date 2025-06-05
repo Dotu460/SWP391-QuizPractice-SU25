@@ -70,12 +70,7 @@
                 }
 
                 .settings-btn {
-                    background-color: #6c757d;
-                    color: white;
-                    border: none;
-                    padding: 5px 10px;
-                    border-radius: 4px;
-                    cursor: pointer;
+                    display: none;
                 }
 
                 .add-btn {
@@ -93,7 +88,7 @@
                 }
 
                 .column-option {
-                    margin-bottom: 10px;
+                    display: none;
                 }
 
                 .dashboard__content-area {
@@ -1588,70 +1583,6 @@
         </style>
         <!-- main-area-end -->
 
-        <!-- Settings-Modal -->
-        <div class="modal fade" id="settingModal" tabindex="-1" role="dialog" aria-labelledby="settingModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="settingModalLabel">Display Settings</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label class="font-weight-bold mb-3">Select columns to display:</label>
-                            <div class="d-flex justify-content-end mb-3">
-                                <button type="button" class="btn btn-sm btn-outline-primary mr-2" id="selectAllColumns">Select All</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" id="deselectAllColumns">Deselect All</button>
-                            </div>
-                            <div class="column-option">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="id" id="idColumn" checked>
-                                    <label class="form-check-label" for="idColumn">ID</label>
-                                </div>
-                            </div>
-                            <div class="column-option">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="name" id="nameColumn" checked>
-                                    <label class="form-check-label" for="nameColumn">Name</label>
-                                </div>
-                            </div>
-                            <div class="column-option">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="duration" id="durationColumn" checked>
-                                    <label class="form-check-label" for="durationColumn">Duration</label>
-                                </div>
-                            </div>
-                            <div class="column-option">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="prices" id="pricesColumn" checked>
-                                    <label class="form-check-label" for="pricesColumn">Prices</label>
-                                </div>
-                            </div>
-                            <div class="column-option">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="status" id="statusColumn" checked>
-                                    <label class="form-check-label" for="statusColumn">Status</label>
-                                </div>
-                            </div>
-                            <div class="column-option">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="description" id="descriptionColumn" checked>
-                                    <label class="form-check-label" for="descriptionColumn">Description</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Apply</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Setting-Modal-End -->
-
         <!-- footer-area -->
         <jsp:include page="../../common/user/footer.jsp"></jsp:include>
             <!-- footer-area-end -->
@@ -1833,6 +1764,7 @@
                     saveAnsweredStates();
                     
                     console.log('Answered Questions:', Array.from(questionStates.answered));
+                    console.log('Marked Questions:', Array.from(questionStates.marked));
                 } catch (error) {
                     console.error('Error parsing user answers:', error);
                 }
@@ -1840,38 +1772,68 @@
                 // Cập nhật trạng thái ban đầu của các ô câu hỏi
                 updateQuestionBoxStates();
                 
+                // Cập nhật trạng thái nút Mark cho câu hỏi hiện tại
+                updateMarkButtonState();
+                
                 // Thêm click handlers cho các nút filter
                 setupFilterButtons();
             });
 
-            // Cập nhật hàm xử lý khi người dùng thay đổi đáp án
-            document.addEventListener('DOMContentLoaded', function() {
-                const answerForm = document.getElementById('answerForm');
-                const answerInputs = answerForm.querySelectorAll('input[name="answer"]');
+            // Hàm cập nhật trạng thái nút Mark
+            function updateMarkButtonState() {
+                const currentQuestionId = parseInt(document.querySelector('input[name="questionId"]').value);
+                const markButton = document.querySelector('.btn-mark');
                 
-                answerInputs.forEach(input => {
-                    input.addEventListener('change', function() {
-                        const questionId = parseInt(document.querySelector('input[name="questionId"]').value);
-                        
-                        // Kiểm tra xem có đáp án nào được chọn không
-                        const hasSelectedAnswer = Array.from(answerInputs).some(input => input.checked);
-                        
-                        if (hasSelectedAnswer) {
-                            questionStates.answered.add(questionId);
-                        } else {
-                            questionStates.answered.delete(questionId);
-                        }
-                        
-                        // Lưu trạng thái mới vào localStorage
-                        saveAnsweredStates();
-                        
-                        // Cập nhật hiển thị của các ô câu hỏi
-                        updateQuestionBoxStates();
-                    });
-                });
-            });
+                if (questionStates.marked.has(currentQuestionId)) {
+                    markButton.classList.add('marked');
+                } else {
+                    markButton.classList.remove('marked');
+                }
+            }
 
-            // Cập nhật hàm handleNavigation
+            // Hàm xử lý đánh dấu câu hỏi
+            function toggleMarkForReview(button) {
+                const currentQuestionId = parseInt(document.querySelector('input[name="questionId"]').value);
+                
+                if (questionStates.marked.has(currentQuestionId)) {
+                    questionStates.marked.delete(currentQuestionId);
+                    button.classList.remove('marked');
+                } else {
+                    questionStates.marked.add(currentQuestionId);
+                    button.classList.add('marked');
+                }
+                
+                // Lưu vào localStorage
+                const markedQuestions = {};
+                questionStates.marked.forEach(id => markedQuestions[id] = true);
+                localStorage.setItem('markedQuestions', JSON.stringify(markedQuestions));
+                
+                // Cập nhật hiển thị
+                updateQuestionBoxStates();
+            }
+
+            // Hàm điều hướng đến câu hỏi
+            function navigateToQuestion(questionNumber) {
+                // Lưu trạng thái hiện tại trước khi chuyển trang
+                const currentQuestionId = parseInt(document.querySelector('input[name="questionId"]').value);
+                const markButton = document.querySelector('.btn-mark');
+                
+                if (markButton.classList.contains('marked')) {
+                    questionStates.marked.add(currentQuestionId);
+                } else {
+                    questionStates.marked.delete(currentQuestionId);
+                }
+                
+                // Lưu vào localStorage trước khi chuyển trang
+                const markedQuestions = {};
+                questionStates.marked.forEach(id => markedQuestions[id] = true);
+                localStorage.setItem('markedQuestions', JSON.stringify(markedQuestions));
+                
+                // Chuyển trang
+                window.location.href = 'quiz-handle?action=navigate&questionNumber=' + questionNumber;
+            }
+
+            // Hàm xử lý điều hướng
             function handleNavigation(action) {
                 console.log('Handling navigation:', action);
                 
@@ -1886,8 +1848,19 @@
                     questionStates.answered.delete(currentQuestionId);
                 }
                 
-                // Lưu trạng thái mới vào localStorage
+                // Lưu trạng thái marked
+                const markButton = document.querySelector('.btn-mark');
+                if (markButton.classList.contains('marked')) {
+                    questionStates.marked.add(currentQuestionId);
+                } else {
+                    questionStates.marked.delete(currentQuestionId);
+                }
+                
+                // Lưu các trạng thái vào localStorage
                 saveAnsweredStates();
+                const markedQuestions = {};
+                questionStates.marked.forEach(id => markedQuestions[id] = true);
+                localStorage.setItem('markedQuestions', JSON.stringify(markedQuestions));
                 
                 // Cập nhật hiển thị
                 updateQuestionBoxStates();
@@ -1896,8 +1869,6 @@
                 document.getElementById('nextAction').value = action;
                 document.getElementById('answerForm').submit();
             }
-
-            // ... rest of the existing code ...
         </script>
 
         <!-- Thêm input hidden để lưu dữ liệu câu trả lời -->
@@ -1938,33 +1909,6 @@
             }
         </script>
 
-        <!-- Thêm event listener cho form submit và input change -->
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // Lắng nghe sự kiện khi người dùng thay đổi đáp án
-                const answerForm = document.getElementById('answerForm');
-                const answerInputs = answerForm.querySelectorAll('input[name="answer"]');
-                
-                answerInputs.forEach(input => {
-                    input.addEventListener('change', function() {
-                        const questionId = parseInt(document.querySelector('input[name="questionId"]').value);
-                        
-                        // Kiểm tra xem có đáp án nào được chọn không
-                        const hasSelectedAnswer = Array.from(answerInputs).some(input => input.checked);
-                        
-                        if (hasSelectedAnswer) {
-                            questionStates.answered.add(questionId);
-                        } else {
-                            questionStates.answered.delete(questionId);
-                        }
-                        
-                        // Cập nhật hiển thị của các ô câu hỏi
-                        updateQuestionBoxStates();
-                    });
-                });
-            });
-        </script>
-
         <script>
             // Các hàm xử lý popup
             function openReviewPopup() {
@@ -1986,17 +1930,17 @@
             // Hàm xử lý đánh dấu câu hỏi
             function toggleMarkForReview(button) {
                 button.classList.toggle('marked');
-                const currentNumber = parseInt('${param.questionNumber}' || '1');
+                const currentQuestionId = parseInt(document.querySelector('input[name="questionId"]').value);
                 
                 if (button.classList.contains('marked')) {
-                    questionStates.marked.add(currentNumber);
+                    questionStates.marked.add(currentQuestionId);
                 } else {
-                    questionStates.marked.delete(currentNumber);
+                    questionStates.marked.delete(currentQuestionId);
                 }
                 
                 // Lưu vào localStorage
                 const markedQuestions = {};
-                questionStates.marked.forEach(num => markedQuestions[num] = true);
+                questionStates.marked.forEach(id => markedQuestions[id] = true);
                 localStorage.setItem('markedQuestions', JSON.stringify(markedQuestions));
                 
                 // Cập nhật hiển thị
@@ -2005,28 +1949,45 @@
 
             // Hàm điều hướng đến câu hỏi
             function navigateToQuestion(questionNumber) {
+                // Lưu trạng thái hiện tại trước khi chuyển trang
+                const currentQuestionId = parseInt(document.querySelector('input[name="questionId"]').value);
+                const markButton = document.querySelector('.btn-mark');
+                
+                if (markButton.classList.contains('marked')) {
+                    questionStates.marked.add(currentQuestionId);
+                } else {
+                    questionStates.marked.delete(currentQuestionId);
+                }
+                
+                // Lưu vào localStorage trước khi chuyển trang
+                const markedQuestions = {};
+                questionStates.marked.forEach(id => markedQuestions[id] = true);
+                localStorage.setItem('markedQuestions', JSON.stringify(markedQuestions));
+                
+                // Chuyển trang
                 window.location.href = 'quiz-handle?action=navigate&questionNumber=' + questionNumber;
             }
 
             // Hàm thiết lập các nút filter
             function setupFilterButtons() {
-                document.querySelector('.btn-unanswered').addEventListener('click', () => {
-                    console.log('Filtering unanswered questions');
-                    filterQuestions('unanswered');
-                    highlightActiveButton('btn-unanswered');
-                });
-                document.querySelector('.btn-answered').addEventListener('click', () => {
-                    console.log('Filtering answered questions');
-                    filterQuestions('answered');
-                    highlightActiveButton('btn-answered');
-                });
-                document.querySelector('.btn-marked').addEventListener('click', () => {
-                    filterQuestions('marked');
-                    highlightActiveButton('btn-marked');
-                });
-                document.querySelector('.btn-all').addEventListener('click', () => {
-                    filterQuestions('all');
-                    highlightActiveButton('btn-all');
+                const filterButtons = {
+                    'btn-unanswered': 'unanswered',
+                    'btn-answered': 'answered',
+                    'btn-marked': 'marked',
+                    'btn-all': 'all'
+                };
+
+                Object.entries(filterButtons).forEach(([buttonClass, filterType]) => {
+                    const button = document.querySelector('.' + buttonClass);
+                    if (button) {
+                        button.addEventListener('click', () => {
+                            console.log('Filter button clicked:', filterType);
+                            filterQuestions(filterType);
+                            highlightActiveButton(buttonClass);
+                        });
+                    } else {
+                        console.error('Button not found:', buttonClass);
+                    }
                 });
             }
 
@@ -2035,13 +1996,12 @@
                 const boxes = document.querySelectorAll('.question-box');
                 boxes.forEach(box => {
                     const questionId = parseInt(box.getAttribute('data-question-id'));
-                    const questionNumber = parseInt(box.querySelector('.question-number').textContent);
                     
                     // Reset classes
                     box.classList.remove('answered', 'unanswered', 'marked', 'current');
                     
                     // Thêm class phù hợp
-                    if (questionStates.marked.has(questionNumber)) {
+                    if (questionStates.marked.has(questionId)) {
                         box.classList.add('marked');
                     }
                     if (questionStates.answered.has(questionId)) {
@@ -2051,9 +2011,40 @@
                     }
                     
                     // Đánh dấu câu hiện tại
-                    if (questionNumber === parseInt('${param.questionNumber}')) {
+                    const currentQuestionId = parseInt(document.querySelector('input[name="questionId"]').value);
+                    if (questionId === currentQuestionId) {
                         box.classList.add('current');
                     }
+                });
+            }
+
+            // Hàm lọc câu hỏi theo trạng thái
+            function filterQuestions(type) {
+                console.log('Filtering by type:', type);
+                console.log('Current answered states:', Array.from(questionStates.answered));
+                console.log('Current marked states:', Array.from(questionStates.marked));
+                
+                const boxes = document.querySelectorAll('.question-box');
+                boxes.forEach(box => {
+                    const questionId = parseInt(box.getAttribute('data-question-id'));
+                    
+                    let shouldShow = false;
+                    switch(type) {
+                        case 'unanswered':
+                            shouldShow = !questionStates.answered.has(questionId);
+                            break;
+                        case 'answered':
+                            shouldShow = questionStates.answered.has(questionId);
+                            break;
+                        case 'marked':
+                            shouldShow = questionStates.marked.has(questionId);
+                            break;
+                        case 'all':
+                            shouldShow = true;
+                            break;
+                    }
+                    
+                    box.style.display = shouldShow ? 'flex' : 'none';
                 });
             }
 
@@ -2077,68 +2068,31 @@
         </script>
 
         <script>
-            // Hàm lọc câu hỏi theo trạng thái
-            function filterQuestions(type) {
-                console.log('Filtering by type:', type);
-                console.log('Current answered states:', Array.from(questionStates.answered));
-                console.log('Current marked states:', Array.from(questionStates.marked));
-                
-                const boxes = document.querySelectorAll('.question-box');
-                boxes.forEach(box => {
-                    const questionId = parseInt(box.getAttribute('data-question-id'));
-                    const questionNumber = parseInt(box.querySelector('.question-number').textContent);
-                    
-                    let shouldShow = false;
-                    switch(type) {
-                        case 'unanswered':
-                            shouldShow = !questionStates.answered.has(questionId);
-                            break;
-                        case 'answered':
-                            shouldShow = questionStates.answered.has(questionId);
-                            break;
-                        case 'marked':
-                            shouldShow = questionStates.marked.has(questionNumber);
-                            break;
-                        case 'all':
-                            shouldShow = true;
-                            break;
-                    }
-                    
-                    box.style.display = shouldShow ? 'flex' : 'none';
-                });
-            }
-
-            // Hàm highlight nút đang active
-            function highlightActiveButton(activeClass) {
-                const buttons = document.querySelectorAll('.review-btn');
-                buttons.forEach(button => {
-                    button.classList.remove('active');
-                    if (button.classList.contains(activeClass)) {
-                        button.classList.add('active');
-                    }
-                });
-            }
-
-            // Thêm event listeners cho các nút filter khi trang load
+            // Thêm event listener cho form submit và input change
             document.addEventListener('DOMContentLoaded', function() {
-                const filterButtons = {
-                    'btn-unanswered': 'unanswered',
-                    'btn-answered': 'answered',
-                    'btn-marked': 'marked',
-                    'btn-all': 'all'
-                };
-
-                Object.entries(filterButtons).forEach(([buttonClass, filterType]) => {
-                    const button = document.querySelector('.' + buttonClass);
-                    if (button) {
-                        button.addEventListener('click', () => {
-                            console.log('Filter button clicked:', filterType);
-                            filterQuestions(filterType);
-                            highlightActiveButton(buttonClass);
-                        });
-                    } else {
-                        console.error('Button not found:', buttonClass);
-                    }
+                // Lắng nghe sự kiện khi người dùng thay đổi đáp án
+                const answerForm = document.getElementById('answerForm');
+                const answerInputs = answerForm.querySelectorAll('input[name="answer"]');
+                
+                answerInputs.forEach(input => {
+                    input.addEventListener('change', function() {
+                        const questionId = parseInt(document.querySelector('input[name="questionId"]').value);
+                        
+                        // Kiểm tra xem có đáp án nào được chọn không
+                        const hasSelectedAnswer = Array.from(answerInputs).some(input => input.checked);
+                        
+                        if (hasSelectedAnswer) {
+                            questionStates.answered.add(questionId);
+                        } else {
+                            questionStates.answered.delete(questionId);
+                        }
+                        
+                        // Lưu trạng thái mới vào localStorage
+                        saveAnsweredStates();
+                        
+                        // Cập nhật hiển thị của các ô câu hỏi
+                        updateQuestionBoxStates();
+                    });
                 });
             });
         </script>
