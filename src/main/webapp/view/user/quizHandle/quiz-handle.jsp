@@ -610,7 +610,7 @@
                         <div class="header-top">
                             <div class="logo header-logo">
                                 <a href="home"><img src="${pageContext.request.contextPath}/view/common/img/logo/logo.svg" alt="Logo"></a>
-                            </div>
+                        </div>
                             <div class="header-right">
                                 <div class="settings-menu">
                                     <div class="settings-icon" onclick="toggleSettingsDropdown()">
@@ -647,7 +647,7 @@
                                                     </div>
                                                 </c:otherwise>
                                             </c:choose>
-                                        </div>
+                                    </div>
                                         <div class="dropdown-body">
                                             <c:choose>
                                                 <c:when test="${not empty sessionScope.user}">
@@ -1088,12 +1088,8 @@
                 <!-- Question Header Section: Hiển thị số thứ tự câu hỏi và ID -->
                 <div class="question-header">
                     <div class="question-info">
-                        <!-- Lấy số câu hỏi từ URL parameter, nếu không có thì mặc định là 1 -->
-                        <c:set var="currentNumber" value="${empty param.questionNumber ? 1 : param.questionNumber}" />
-                        <!-- Hiển thị số thứ tự câu hỏi dạng "Question X/10" -->
-                        <div class="question-number">Question ${currentNumber}/10</div>
-                        <!-- Hiển thị ID câu hỏi từ database -->
-                        <div class="question-id">Question ID: ${empty question.questionId ? '1' : question.questionId}</div>
+                        <div class="question-number">Question ${currentNumber}/${totalQuestions}</div>
+                        <div class="question-id">Question ID: ${question.id}</div>
                     </div>
                 </div>
 
@@ -1103,21 +1099,12 @@
                         ${question.content}
                     </div>
                     
-                    <!-- Answer Options -->
-                    <div class="answers-container">
-                        <c:forEach items="${question.questionOptions}" var="option" varStatus="status">
-                            <div class="answer-option">
-                                <input type="radio" 
-                                       name="answer" 
-                                       id="option${status.index}" 
-                                       value="${option.id}"
-                                       ${userAnswer == option.id ? 'checked' : ''}>
-                                <label for="option${status.index}">
-                                    ${option.option_text}
-                                </label>
-                            </div>
-                        </c:forEach>
-                    </div>
+                    <!-- Media URL nếu có -->
+                    <c:if test="${not empty question.media_url}">
+                        <div class="media-content mt-3">
+                            <img src="${question.media_url}" alt="Question Media" class="img-fluid">
+                        </div>
+                    </c:if>
                 </div>
 
                 <!-- Navigation Footer Section: Chứa các nút điều hướng -->
@@ -1156,8 +1143,9 @@
                                 
                                 <!-- Question Grid -->
                                 <div class="question-grid">
-                                    <c:forEach begin="1" end="10" var="i">
-                                        <div class="question-box" onclick="navigateToQuestion(${i})">
+                                    <c:forEach begin="1" end="${totalQuestions}" var="i">
+                                        <div class="question-box ${i == currentNumber ? 'current' : ''}" 
+                                             onclick="navigateToQuestion('${i}')">
                                             <span class="question-number">${i}</span>
                                         </div>
                                     </c:forEach>
@@ -1179,7 +1167,7 @@
                                 Mark
                             </button>
                         </div>
-                        <!-- Nút Previous và Next -->
+                        <!-- Nút Previous và Next/Score Exam -->
                         <div class="nav-buttons">
                             <div class="nav-group">
                                 <c:if test="${currentNumber > 1}">
@@ -1188,10 +1176,16 @@
                                         Previous
                                     </button>
                                 </c:if>
-                                <c:if test="${currentNumber < 10}">
+                                <c:if test="${currentNumber < totalQuestions}">
                                     <button class="btn-nav btn-next" onclick="handleNavigation('next')">
                                         Next
                                         <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </c:if>
+                                <c:if test="${currentNumber == totalQuestions}">
+                                    <button class="btn-nav btn-score" onclick="handleNavigation('score')">
+                                        Score Exam
+                                        <i class="fas fa-check"></i>
                                     </button>
                                 </c:if>
                             </div>

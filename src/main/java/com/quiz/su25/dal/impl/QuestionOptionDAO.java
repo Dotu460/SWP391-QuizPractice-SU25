@@ -71,7 +71,7 @@ public class QuestionOptionDAO extends DBContext implements I_DAO<QuestionOption
 
     @Override
     public int insert(QuestionOption t) {
-        String sql = "INSERT INTO QuestionOption (question_id, option_text, is_correct_key, display_order) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO QuestionOption (question_id, option_text, correct_key, display_order) VALUES (?, ?, ?, ?)";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -91,7 +91,7 @@ public class QuestionOptionDAO extends DBContext implements I_DAO<QuestionOption
 
     @Override
     public boolean update(QuestionOption t) {
-        String sql = "UPDATE QuestionOption SET question_id=?, option_text=?, is_correct_key=?, display_order=? WHERE id=?";
+        String sql = "UPDATE QuestionOption SET question_id=?, option_text=?, correct_key=?, display_order=? WHERE id=?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -149,7 +149,7 @@ public class QuestionOptionDAO extends DBContext implements I_DAO<QuestionOption
                 .id(resultSet.getInt("id"))
                 .question_id(resultSet.getInt("question_id"))
                 .option_text(resultSet.getString("option_text"))
-                .correct_key(resultSet.getBoolean("is_correct_key"))
+                .correct_key(resultSet.getBoolean("correct_key"))
                 .display_order(resultSet.getInt("display_order"))
                 .build();
     }
