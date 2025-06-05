@@ -77,7 +77,7 @@ public class QuestionOptionDAO extends DBContext implements I_DAO<QuestionOption
             statement = connection.prepareStatement(sql);
             statement.setInt(1, t.getQuestion_id());
             statement.setString(2, t.getOption_text());
-            statement.setInt(3, t.getIs_correct_key());
+            statement.setBoolean(3, t.isCorrect_key());
             statement.setInt(4, t.getDisplay_order());
             
             return statement.executeUpdate();
@@ -97,7 +97,7 @@ public class QuestionOptionDAO extends DBContext implements I_DAO<QuestionOption
             statement = connection.prepareStatement(sql);
             statement.setInt(1, t.getQuestion_id());
             statement.setString(2, t.getOption_text());
-            statement.setInt(3, t.getIs_correct_key());
+            statement.setBoolean(3, t.isCorrect_key());
             statement.setInt(4, t.getDisplay_order());
             statement.setInt(5, t.getId());
             
@@ -149,7 +149,7 @@ public class QuestionOptionDAO extends DBContext implements I_DAO<QuestionOption
                 .id(resultSet.getInt("id"))
                 .question_id(resultSet.getInt("question_id"))
                 .option_text(resultSet.getString("option_text"))
-                .is_correct_key(resultSet.getInt("is_correct_key"))
+                .correct_key(resultSet.getBoolean("is_correct_key"))
                 .display_order(resultSet.getInt("display_order"))
                 .build();
     }

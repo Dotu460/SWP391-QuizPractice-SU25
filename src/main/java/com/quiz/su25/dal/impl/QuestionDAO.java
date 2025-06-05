@@ -7,6 +7,7 @@ package com.quiz.su25.dal.impl;
 import com.quiz.su25.dal.DBContext;
 import com.quiz.su25.dal.I_DAO;
 import com.quiz.su25.entity.Question;
+import com.quiz.su25.entity.QuestionOption;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -20,27 +21,24 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
 
     @Override
     public List<Question> findAll() {
-        String sql = "select * from Question";
-        List<Question> listQuestion = new ArrayList<>();
+        String sql = "SELECT * FROM Question";
+        List<Question> listQuestions = new ArrayList<>();
         try {
-            //tao connection
             connection = getConnection();
-            //chuan bi cho statement
             statement = connection.prepareStatement(sql);
-            //set param
-            
-            //thuc thi cau lenh
             resultSet = statement.executeQuery();
             while (resultSet.next()) {                
                 Question question = getFromResultSet(resultSet);
-                listQuestion.add(question);
-            }                      
+                listQuestions.add(question);
+            }
+            // Load options cho tất cả questions
+            loadOptionsForQuestions(listQuestions);
         } catch (Exception e) {
             System.out.println("Error findAll at class QuestionDAO: " + e.getMessage());
-        } finally{
+        } finally {
             closeResources();
         }
-        return listQuestion;
+        return listQuestions;
     }
 
     @Override
@@ -130,7 +128,10 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
             statement.setInt(1, id);
             resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                return getFromResultSet(resultSet);
+                Question question = getFromResultSet(resultSet);
+                // Load options cho question
+                loadOptionsForQuestion(question);
+                return question;
             }
         } catch (Exception e) {
             System.out.println("Error findById at class QuestionDAO: " + e.getMessage());
@@ -138,6 +139,32 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
             closeResources();
         }
         return null;
+    }
+
+    /**
+     * Load options cho một question
+     * @param question Question cần load options
+     */
+    private void loadOptionsForQuestion(Question question) {
+        if (question != null) {
+            QuestionOptionDAO optionDAO = new QuestionOptionDAO();
+            List<QuestionOption> options = optionDAO.findByQuestionId(question.getId());
+            question.setQuestionOptions(options);
+        }
+    }
+
+    /**
+     * Load options cho một list questions
+     * @param questions List questions cần load options
+     */
+    private void loadOptionsForQuestions(List<Question> questions) {
+        if (questions != null && !questions.isEmpty()) {
+            QuestionOptionDAO optionDAO = new QuestionOptionDAO();
+            for (Question question : questions) {
+                List<QuestionOption> options = optionDAO.findByQuestionId(question.getId());
+                question.setQuestionOptions(options);
+            }
+        }
     }
 
     /**
@@ -157,6 +184,8 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
                 Question question = getFromResultSet(resultSet);
                 list.add(question);
             }
+            // Load options cho tất cả questions
+            loadOptionsForQuestions(list);
         } catch (Exception e) {
             System.out.println("Error findByQuizId at class QuestionDAO: " + e.getMessage());
         } finally {
@@ -184,6 +213,8 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
                 Question question = getFromResultSet(resultSet);
                 list.add(question);
             }
+            // Load options cho tất cả questions
+            loadOptionsForQuestions(list);
         } catch (Exception e) {
             System.out.println("Error findByQuizIdAndStatus at class QuestionDAO: " + e.getMessage());
         } finally {

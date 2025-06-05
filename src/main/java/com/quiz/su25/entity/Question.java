@@ -5,6 +5,7 @@
 package com.quiz.su25.entity;
 
 import java.sql.Date;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,5 +31,5 @@ public class Question {
     private String status;
     private String explanation;
     private Integer created_by;
-       
+    private List<QuestionOption> questionOptions;
 }

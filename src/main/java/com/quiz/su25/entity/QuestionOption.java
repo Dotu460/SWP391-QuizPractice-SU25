@@ -24,6 +24,6 @@ public class QuestionOption {
     private Integer id;
     private Integer question_id;
     private String option_text;
-    private Integer is_correct_key;
+    private boolean correct_key;
     private Integer display_order;
 } 
