@@ -2,71 +2,56 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-
 package com.quiz.su25.controller.Quizz;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import com.quiz.su25.dal.impl.QuizzesDAO;
+import com.quiz.su25.dal.impl.SubjectDAO;
+import com.quiz.su25.dal.impl.LessonDAO;
+import com.quiz.su25.entity.Quizzes;
+import com.quiz.su25.entity.Subject;
+import com.quiz.su25.entity.Lesson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet("/QuizzesList")
+import java.io.IOException;
+import java.util.List;
+
+@WebServlet("/quizzes-list")
 public class QuizzesListController extends HttpServlet {
 
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet QuizzesListController</title>");  
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet QuizzesListController at " + request.getContextPath () + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    } 
+    private static final int RECORDS_PER_PAGE = 10;
+    private QuizzesDAO quizzesDAO;
+    private SubjectDAO subjectDAO;
+    private LessonDAO lessonDAO;
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /** 
-     * Handles the HTTP <code>GET</code> method.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-        request.getRequestDispatcher("view/Expert/Quiz/QuizzesList.jsp").forward(request, response);
-    } 
-
-    /** 
-     * Handles the HTTP <code>POST</code> method.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-        processRequest(request, response);
+    public void init() throws ServletException {
+        quizzesDAO = new QuizzesDAO();
+        subjectDAO = new SubjectDAO();
+        lessonDAO = new LessonDAO();
     }
 
-    /** 
-     * Returns a short description of the servlet.
-     * @return a String containing servlet description
-     */
     @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        // Get all subjects and lessons for dropdowns
+        //  List<Subject> subjectsList = subjectDAO.findAll();
+        //List<Lesson> lessonsList = lessonDAO.findAll();
+        List<Quizzes> quizzesList = quizzesDAO.findAll();
+        // Set attributes for the view
+        request.setAttribute("quizzesList", quizzesList);
+        //request.setAttribute("subjectsList", subjectsList);
+        //request.setAttribute("lessonsList", lessonsList);
+        
+        request.getRequestDispatcher("view/Expert/Quiz/quizzes-list.jsp").forward(request, response);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+    }
 
 }

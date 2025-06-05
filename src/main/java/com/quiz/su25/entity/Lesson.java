@@ -23,14 +23,11 @@ import lombok.ToString;
 
 public class Lesson {
     private Integer id;
-    private String subject_id;
+    private Integer subject_id;
     private String title;
     private String content_text;
     private String content_url;
-    private String type;
     private Integer order_in_subject;
     private String status;
-    private Date created_at;
-    private Date updated_at;
 
 }

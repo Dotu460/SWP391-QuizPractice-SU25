@@ -43,14 +43,27 @@
             margin: 2px;
             border: none;
             border-radius: 4px;
-            color: white;
+            color: white !important;
             text-decoration: none;
-            font-size: 12px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            transition: all 0.3s ease;
         }
         
         .btn-view { background-color: #17a2b8; }
+        .btn-view:hover { background-color: #138496; }
+        
         .btn-edit { background-color: #007bff; }
+        .btn-edit:hover { background-color: #0056b3; }
+        
         .btn-delete { background-color: #dc3545; }
+        .btn-delete:hover { background-color: #c82333; }
+
+        .btn-question { background-color: #6f42c1; }
+        .btn-question:hover { background-color: #553098; }
         
         .quiz-status {
             padding: 4px 8px;
@@ -107,6 +120,11 @@
             background-color: #f8f9fa;
             border-bottom: 1px solid #dee2e6;
         }
+        
+        .action-column {
+            white-space: nowrap;
+            min-width: 160px;
+        }
     </style>
 </head>
 
@@ -121,21 +139,6 @@
     <!-- header-area -->
     <jsp:include page="../../common/user/header.jsp"></jsp:include>
     <!-- header-area-end -->
-
-    <c:url value="/QuizzesList" var="paginationUrl">
-        <c:if test="${not empty param.quizName}">
-            <c:param name="quizName" value="${param.quizName}" />
-        </c:if>
-        <c:if test="${not empty param.subjectId}">
-            <c:param name="subjectId" value="${param.subjectId}" />
-        </c:if>
-        <c:if test="${not empty param.lessionId}">
-            <c:param name="lessionId" value="${param.lessionId}" />
-        </c:if>
-        <c:if test="${not empty param.pageSize}">
-            <c:param name="pageSize" value="${param.pageSize}" />
-        </c:if>
-    </c:url>
 
     <!-- main-area -->
     <main class="main-area">
@@ -172,7 +175,7 @@
                         <div class="quiz-management">
                             <!-- Page Title with Settings Button -->
                             <div class="d-flex justify-content-between align-items-center mb-4">
-                                <h4 class="title">Quản lý Quiz</h4>
+                                <h4 class="title">Quizzes List</h4>
                                 <div>
                                     <a href="${pageContext.request.contextPath}/view/Expert/Quiz/addQuiz.jsp" class="btn btn-success">
                                         <i class="fa fa-plus"></i> Tạo Quiz Mới
@@ -182,15 +185,15 @@
 
                             <!-- Filter Section -->
                             <div class="filter-section">
-                                <form action="${pageContext.request.contextPath}/QuizzesList" method="get">
+                                <form action="${pageContext.request.contextPath}/quizzes-list" method="get">
                                     <div class="row">
                                         <div class="col-md-4">
-                                            <label for="quizName">Tên Quiz:</label>
+                                            <label for="quizName">Quiz name:</label>
                                             <input type="text" class="form-control" id="quizName" name="quizName" 
                                                    placeholder="Nhập tên quiz..." value="${param.quizName}">
                                         </div>
                                         <div class="col-md-3">
-                                            <label for="subjectId">Môn học:</label>
+                                            <label for="subjectId">Subject:</label>
                                             <select class="form-control" id="subjectId" name="subjectId" onchange="loadLessons()">
                                                 <option value="">-- Tất cả môn học --</option>
                                                 <c:forEach items="${subjectsList}" var="subject">
@@ -200,6 +203,16 @@
                                                 </c:forEach>
                                             </select>
                                         </div>
+                                        <div class="col-md-3">
+                                            <label for="quizType">Quiz types:</label>
+                                            <select class="form-control" id="quizType" name="quizType">
+                                                <option value="">-- Tất cả loại --</option>
+                                                <option value="practice" ${param.quizType == 'practice' ? 'selected' : ''}>Luyện tập</option>
+                                                <option value="test" ${param.quizType == 'test' ? 'selected' : ''}>Kiểm tra</option>
+                                                <option value="exam" ${param.quizType == 'exam' ? 'selected' : ''}>Thi thử</option>
+                                            </select>
+                                        </div>
+                                        <%-- Comment out lesson filter
                                         <div class="col-md-3">
                                             <label for="lessionId">Bài học:</label>
                                             <select class="form-control" id="lessionId" name="lessionId">
@@ -212,6 +225,7 @@
                                                 </c:forEach>
                                             </select>
                                         </div>
+                                        --%>
                                         <div class="col-md-2 d-flex align-items-end">
                                             <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
                                         </div>
@@ -228,58 +242,53 @@
 
                             <!-- Quiz List -->
                             <div class="quiz-table">
-                                <div class="table-responsive">
+                                <div class="table-responsive" style="min-width: 1200px; overflow-x: auto;">
                                     <table class="table table-hover mb-0" id="quizTable">
                                         <thead class="thead-light">
                                             <tr>
                                                 <th class="column-id" data-column="id">ID</th>
                                                 <th class="column-name" data-column="name">Quiz Name</th>
+                                                <th class="column-type" data-column="type">Quiz Type</th>
+                                                <th class="column-level" data-column="level">Level</th>
                                                 <th class="column-subject" data-column="subject">Subject</th>
+                                                <%-- Comment out lesson column
                                                 <th class="column-lesson" data-column="lesson">Lesson</th>
+                                                --%>
                                                 <th class="column-questions" data-column="questions">Number of Questions</th>
                                                 <th class="column-duration" data-column="duration">Duration</th>
-                                                <th class="column-actions" data-column="actions">Actions</th>
+                                                <th class="column-actions" data-column="actions" style="min-width: 160px;">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <c:choose>
-                                                <c:when test="${not empty quizzesList}">
                                                     <c:forEach items="${quizzesList}" var="quiz" varStatus="status">
                                                         <tr>
                                                             <td class="column-id" data-column="id">${quiz.id}</td>
                                                             <td class="column-name" data-column="name"><strong>${quiz.name}</strong></td>
-                                                            <td class="column-subject" data-column="subject">
-                                                                <c:forEach items="${subjectsList}" var="subject">
-                                                                    <c:if test="${subject.id == quiz.subject_id}">
-                                                                        ${subject.name}
-                                                                    </c:if>
-                                                                </c:forEach>
+                                                            <td class="column-type" data-column="type"> ${quiz.quiz_type}
                                                             </td>
+                                                            <td class="column-level" data-column="level">${quiz.level}
+                                                            </td>
+                                                            <td class="column-subject" data-column="subject"> </td>
+                                                            <%-- Comment out lesson cell
                                                             <td class="column-lesson" data-column="lesson">
                                                                 ${quiz.lesson_name}
                                                             </td>
+                                                            --%>
                                                             <td class="column-questions" data-column="questions">${quiz.number_of_questions_target}</td>
-                                                            <td class="column-duration" data-column="duration">${quiz.duration_minutes} phút</td>
+                                                            <td class="column-duration" data-column="duration">${quiz.duration_minutes} </td>
                                                             <td class="column-actions" data-column="actions">
-                                                                <a href="${pageContext.request.contextPath}/view/Expert/Quiz/QuizDetails.jsp?id=${quiz.id}" class="btn-action btn-view" title="Detail">
-                                                                    <i class="fa fa-eye"></i>
+                                                                <a href="${pageContext.request.contextPath}/QuizDetail?id=${quiz.id}" 
+                                                                   class="btn-action btn-view" title="Details">
+                                                                    <i class="fas fa-eye"></i>
                                                                 </a>
-                                                                <a href="javascript:void(0)" class="btn-action btn-delete" title="Xóa" 
-                                                                   onclick="return confirm('Bạn có chắc muốn xóa quiz này?')">
-                                                                    <i class="fa fa-trash"></i>
+                                                                <a href="javascript:void(0)" 
+                                                                   onclick="deleteQuiz(${quiz.id})" 
+                                                                   class="btn-action btn-delete" title="Delete">
+                                                                    <i class="fas fa-trash"></i>
                                                                 </a>
                                                             </td>
                                                         </tr>
                                                     </c:forEach>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <tr>
-                                                        <td colspan="8" class="text-center py-4">
-                                                            <em>Chưa có quiz nào được tạo</em>
-                                                        </td>
-                                                    </tr>
-                                                </c:otherwise>
-                                            </c:choose>
                                         </tbody>
                                     </table>
                                 </div>
@@ -320,13 +329,23 @@
                             <label for="col-name">Tên Quiz</label>
                         </div>
                         <div class="column-checkbox">
+                            <input type="checkbox" id="col-type" value="type" checked>
+                            <label for="col-type">Loại Quiz</label>
+                        </div>
+                        <div class="column-checkbox">
+                            <input type="checkbox" id="col-level" value="level" checked>
+                            <label for="col-level">Độ khó</label>
+                        </div>
+                        <div class="column-checkbox">
                             <input type="checkbox" id="col-subject" value="subject" checked>
                             <label for="col-subject">Môn học</label>
                         </div>
+                        <%-- Comment out lesson checkbox
                         <div class="column-checkbox">
                             <input type="checkbox" id="col-lesson" value="lesson" checked>
                             <label for="col-lesson">Bài học</label>
                         </div>
+                        --%>
                         <div class="column-checkbox">
                             <input type="checkbox" id="col-questions" value="questions" checked>
                             <label for="col-questions">Số câu hỏi</label>
@@ -383,7 +402,7 @@
         // Hàm áp dụng cài đặt cột
         function applySettings() {
             // Ẩn tất cả cột trước
-            $('.column-id, .column-name, .column-subject, .column-lesson, .column-questions, .column-duration').hide();
+            $('.column-id, .column-name, .column-type, .column-level, .column-subject, .column-questions, .column-duration').hide();
             
             // Hiện các cột được chọn
             if ($('#col-id').is(':checked')) {
@@ -392,12 +411,19 @@
             if ($('#col-name').is(':checked')) {
                 $('.column-name').show();
             }
+            if ($('#col-type').is(':checked')) {
+                $('.column-type').show();
+            }
+            if ($('#col-level').is(':checked')) {
+                $('.column-level').show();
+            }
             if ($('#col-subject').is(':checked')) {
                 $('.column-subject').show();
             }
-            if ($('#col-lesson').is(':checked')) {
-                $('.column-lesson').show();
-            }
+            // Comment out lesson show/hide
+            // if ($('#col-lesson').is(':checked')) {
+            //     $('.column-lesson').show();
+            // }
             if ($('#col-questions').is(':checked')) {
                 $('.column-questions').show();
             }
@@ -436,6 +462,12 @@
         $(document).ready(function() {
             loadLessons();
         });
+
+        function deleteQuiz(quizId) {
+            if (confirm('Bạn có chắc chắn muốn xóa quiz này không?')) {
+                window.location.href = '${pageContext.request.contextPath}/DeleteQuiz?id=' + quizId;
+            }
+        }
     </script>
 </body>
 

@@ -232,6 +232,17 @@
                                                                     </select>
                                                                 </div>
                                                             </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="level" class="form-label">Độ khó <span class="required">*</span></label>
+                                                                    <select class="form-control" id="level" name="level" required>
+                                                                        <option value="">Chọn độ khó</option>
+                                                                        <option value="easy" ${quiz.level == 'easy' ? 'selected' : ''}>Dễ</option>
+                                                                        <option value="medium" ${quiz.level == 'medium' ? 'selected' : ''}>Trung bình</option>
+                                                                        <option value="hard" ${quiz.level == 'hard' ? 'selected' : ''}>Khó</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     
@@ -251,15 +262,6 @@
                                                                     <label for="number_of_questions" class="form-label">Number of Questions <span class="required">*</span></label>
                                                                     <input type="number" class="form-control" id="number_of_questions" name="number_of_questions" 
                                                                            value="${quiz.number_of_questions}" min="1" required>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label for="pass_percentage" class="form-label">Pass Percentage <span class="required">*</span></label>
-                                                                    <input type="number" class="form-control" id="pass_percentage" name="pass_percentage" 
-                                                                           value="${quiz.pass_percentage}" min="0" max="100" required>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -366,11 +368,6 @@
         });
 
         // Delete confirmation
-        function confirmDelete() {
-            if (confirm('Are you sure you want to delete this quiz? This action cannot be undone.')) {
-                window.location.href = '${pageContext.request.contextPath}/delete-quiz?id=${quiz.id}';
-            }
-        }
 
         // Toast message display
         var toastMessage = "${sessionScope.toastMessage}";

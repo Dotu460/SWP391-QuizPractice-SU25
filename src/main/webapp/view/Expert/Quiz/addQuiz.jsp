@@ -192,8 +192,19 @@
                                                                     <label for="quiz_type" class="form-label">Quiz Type <span class="required">*</span></label>
                                                                     <select class="form-control" id="quiz_type" name="quiz_type" required>
                                                                         <option value="">Select Type</option>
-                                                                        <option value="Multiple Choice" ${param.quiz_type == 'Practice' ? 'selected' : ''}>Practice</option>
-                                                                        <option value="Essay" ${param.quiz_type == 'Exam' ? 'selected' : ''}>ExamExam</option>
+                                                                        <option value="Practice" ${param.quiz_type == 'Practice' ? 'selected' : ''}>Practice</option>
+                                                                        <option value="Exam" ${param.quiz_type == 'Exam' ? 'selected' : ''}>Exam</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="level" class="form-label">Độ khó <span class="required">*</span></label>
+                                                                    <select class="form-control" id="level" name="level" required>
+                                                                        <option value="">Chọn độ khó</option>
+                                                                        <option value="easy" ${param.level == 'easy' ? 'selected' : ''}>Dễ</option>
+                                                                        <option value="medium" ${param.level == 'medium' ? 'selected' : ''}>Trung bình</option>
+                                                                        <option value="hard" ${param.level == 'hard' ? 'selected' : ''}>Khó</option>
                                                                     </select>
                                                                 </div>
                                                             </div>
@@ -219,19 +230,10 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div class="row">
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label for="pass_percentage" class="form-label">Pass Percentage <span class="required">*</span></label>
-                                                                    <input type="number" class="form-control" id="pass_percentage" name="pass_percentage" 
-                                                                           value="${param.pass_percentage != null ? param.pass_percentage : ''}" min="0" max="100" required>
-                                                                </div>
-                                                            </div>
-                                                        </div>
                                                     </div>                                                    
                                                     <!-- Action Buttons -->
                                                     <div class="text-end btn-group">
-                                                        <a href="${pageContext.request.contextPath}/QuizzesList" class="btn btn-secondary">
+                                                        <a href="${pageContext.request.contextPath}/quizzes-list" class="btn btn-secondary">
                                                             <i class="fa fa-times"></i> Cancel
                                                         </a>
                                                         <button type="submit" class="btn btn-success">
