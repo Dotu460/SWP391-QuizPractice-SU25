@@ -98,6 +98,7 @@ public class QuizHandleController extends HttpServlet {
                 request.setAttribute("question", currentQuestion);
                 request.setAttribute("currentNumber", currentNumber);
                 request.setAttribute("totalQuestions", questions.size());
+                request.setAttribute("questions", questions);
             }
             
             request.getRequestDispatcher("view/user/quizHandle/quiz-handle.jsp").forward(request, response);

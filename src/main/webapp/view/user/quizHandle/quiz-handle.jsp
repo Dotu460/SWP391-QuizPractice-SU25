@@ -369,12 +369,12 @@
                     justify-content: center;
                     cursor: pointer;
                     transition: all 0.3s ease;
+                    position: relative;
                 }
 
                 .question-box:hover {
-                    border-color: #8B7FD2;
-                    background: #f8f7ff;
                     transform: translateY(-2px);
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
                 }
 
                 .question-number {
@@ -392,11 +392,17 @@
                 .question-box.answered {
                     border-color: #28a745;
                     background: #f0fff4;
+                    font-weight: 700;
                 }
 
                 .question-box.marked {
                     border-color: #ffd700;
                     background: #fffbeb;
+                }
+
+                .question-box.marked.answered {
+                    border-color: #ffd700;
+                    background: linear-gradient(135deg, #fffbeb 50%, #f0fff4 50%);
                 }
 
                 .question-box.current {
@@ -407,6 +413,7 @@
 
                 @media (max-width: 576px) {
                     .question-grid {
+                        grid-template-columns: repeat(4, 1fr);
                         gap: 8px;
                         padding: 12px;
                     }
@@ -591,6 +598,85 @@
                         font-size: 14px;
                         padding: 12px;
                     }
+                }
+
+                /* Review buttons styles */
+                .review-buttons {
+                    display: flex;
+                    gap: 12px;
+                    flex-wrap: wrap;
+                    margin-bottom: 20px;
+                }
+
+                .review-btn {
+                    flex: 1;
+                    min-width: 120px;
+                    padding: 12px;
+                    border: 2px solid #e0e0e0;
+                    border-radius: 8px;
+                    background: white;
+                    color: #1A1B3D;
+                    font-size: 14px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                }
+
+                .btn-unanswered {
+                    border-color: #dc3545;
+                    color: #dc3545;
+                }
+
+                .btn-unanswered:hover {
+                    background: #fff5f5;
+                }
+
+                .btn-answered {
+                    border-color: #28a745;
+                    color: #28a745;
+                }
+
+                .btn-answered:hover {
+                    background: #f0fff4;
+                }
+
+                .btn-marked {
+                    border-color: #ffd700;
+                    color: #8a7703;
+                }
+
+                .btn-marked:hover {
+                    background: #fffbeb;
+                }
+
+                .btn-all {
+                    border-color: #8B7FD2;
+                    color: #8B7FD2;
+                }
+
+                .btn-all:hover {
+                    background: #f8f7ff;
+                }
+
+                .review-btn.active {
+                    color: white;
+                }
+
+                .btn-unanswered.active {
+                    background-color: #dc3545;
+                }
+
+                .btn-answered.active {
+                    background-color: #28a745;
+                }
+
+                .btn-marked.active {
+                    background-color: #ffd700;
+                    color: #8a7703;
+                }
+
+                .btn-all.active {
+                    background-color: #8B7FD2;
                 }
             </style>
     </head>
@@ -1171,6 +1257,7 @@
                                 <div class="question-grid">
                                     <c:forEach begin="1" end="${totalQuestions}" var="i">
                                         <div class="question-box ${i == currentNumber ? 'current' : ''}" 
+                                             data-question-id="${questions[i-1].id}"
                                              onclick="navigateToQuestion('${i}')">
                                             <span class="question-number">${i}</span>
                                         </div>
@@ -1462,7 +1549,6 @@
                 font-weight: 500;
                 cursor: pointer;
                 transition: all 0.3s ease;
-                text-align: center;
             }
 
             .btn-unanswered:hover {
@@ -1705,56 +1791,182 @@
         </script>
 
         <script>
+            // Khởi tạo trạng thái câu hỏi
+            let questionStates = {
+                answered: new Set(),
+                marked: new Set()
+            };
+
+            // Hàm lưu trạng thái answered vào localStorage
+            function saveAnsweredStates() {
+                const answeredQuestions = {};
+                questionStates.answered.forEach(id => {
+                    answeredQuestions[id] = true;
+                });
+                localStorage.setItem('answeredQuestions', JSON.stringify(answeredQuestions));
+            }
+
+            // Khởi tạo trạng thái từ localStorage và session
+            document.addEventListener('DOMContentLoaded', function() {
+                // Lấy câu hỏi đã đánh dấu từ localStorage
+                const markedQuestions = JSON.parse(localStorage.getItem('markedQuestions') || '{}');
+                questionStates.marked = new Set(Object.keys(markedQuestions).map(Number));
+
+                // Lấy câu trả lời đã lưu từ localStorage
+                const savedAnswered = JSON.parse(localStorage.getItem('answeredQuestions') || '{}');
+                questionStates.answered = new Set(Object.keys(savedAnswered).map(Number));
+
+                // Lấy câu trả lời từ session và cập nhật thêm vào trạng thái
+                const userAnswersJson = document.getElementById('userAnswersData').value;
+                try {
+                    const userAnswers = JSON.parse(userAnswersJson || '{}');
+                    console.log('User Answers:', userAnswers);
+                    
+                    // Duyệt qua tất cả câu trả lời và thêm vào Set answered
+                    Object.entries(userAnswers).forEach(([questionId, answers]) => {
+                        if (answers && answers.length > 0) {
+                            questionStates.answered.add(parseInt(questionId));
+                        }
+                    });
+                    
+                    // Lưu lại trạng thái mới vào localStorage
+                    saveAnsweredStates();
+                    
+                    console.log('Answered Questions:', Array.from(questionStates.answered));
+                } catch (error) {
+                    console.error('Error parsing user answers:', error);
+                }
+
+                // Cập nhật trạng thái ban đầu của các ô câu hỏi
+                updateQuestionBoxStates();
+                
+                // Thêm click handlers cho các nút filter
+                setupFilterButtons();
+            });
+
+            // Cập nhật hàm xử lý khi người dùng thay đổi đáp án
+            document.addEventListener('DOMContentLoaded', function() {
+                const answerForm = document.getElementById('answerForm');
+                const answerInputs = answerForm.querySelectorAll('input[name="answer"]');
+                
+                answerInputs.forEach(input => {
+                    input.addEventListener('change', function() {
+                        const questionId = parseInt(document.querySelector('input[name="questionId"]').value);
+                        
+                        // Kiểm tra xem có đáp án nào được chọn không
+                        const hasSelectedAnswer = Array.from(answerInputs).some(input => input.checked);
+                        
+                        if (hasSelectedAnswer) {
+                            questionStates.answered.add(questionId);
+                        } else {
+                            questionStates.answered.delete(questionId);
+                        }
+                        
+                        // Lưu trạng thái mới vào localStorage
+                        saveAnsweredStates();
+                        
+                        // Cập nhật hiển thị của các ô câu hỏi
+                        updateQuestionBoxStates();
+                    });
+                });
+            });
+
+            // Cập nhật hàm handleNavigation
             function handleNavigation(action) {
-                console.log('Handling navigation:', action); // Debug log
+                console.log('Handling navigation:', action);
                 
-                // Set nextAction value
+                // Lưu trạng thái câu trả lời hiện tại
+                const currentQuestionId = parseInt(document.querySelector('input[name="questionId"]').value);
+                const answerInputs = document.querySelectorAll('input[name="answer"]');
+                const hasSelectedAnswer = Array.from(answerInputs).some(input => input.checked);
+                
+                if (hasSelectedAnswer) {
+                    questionStates.answered.add(currentQuestionId);
+                } else {
+                    questionStates.answered.delete(currentQuestionId);
+                }
+                
+                // Lưu trạng thái mới vào localStorage
+                saveAnsweredStates();
+                
+                // Cập nhật hiển thị
+                updateQuestionBoxStates();
+                
+                // Set nextAction value và submit form
                 document.getElementById('nextAction').value = action;
-                console.log('Next action set to:', action); // Debug log
-                
-                // Get the form
-                const form = document.getElementById('answerForm');
-                console.log('Form action:', form.action); // Debug log
-                
-                // Submit form
-                form.submit();
+                document.getElementById('answerForm').submit();
+            }
+
+            // ... rest of the existing code ...
+        </script>
+
+        <!-- Thêm input hidden để lưu dữ liệu câu trả lời -->
+        <input type="hidden" id="userAnswersData" 
+               value='${fn:replace(not empty sessionScope.userAnswers ? sessionScope.userAnswers : "{}", "'", "\\'")}'>
+
+        <script>
+            // Thêm event listeners cho các nút filter
+            document.addEventListener('DOMContentLoaded', function() {
+                // Thêm click handlers cho các nút filter
+                document.querySelector('.btn-unanswered').addEventListener('click', () => {
+                    filterQuestions('unanswered');
+                    highlightActiveButton('btn-unanswered');
+                });
+                document.querySelector('.btn-answered').addEventListener('click', () => {
+                    filterQuestions('answered');
+                    highlightActiveButton('btn-answered');
+                });
+                document.querySelector('.btn-marked').addEventListener('click', () => {
+                    filterQuestions('marked');
+                    highlightActiveButton('btn-marked');
+                });
+                document.querySelector('.btn-all').addEventListener('click', () => {
+                    filterQuestions('all');
+                    highlightActiveButton('btn-all');
+                });
+            });
+
+            // Hàm highlight nút đang active
+            function highlightActiveButton(activeClass) {
+                const buttons = document.querySelectorAll('.review-btn');
+                buttons.forEach(button => {
+                    button.classList.remove('active');
+                    if (button.classList.contains(activeClass)) {
+                        button.classList.add('active');
+                    }
+                });
             }
         </script>
 
+        <!-- Thêm event listener cho form submit và input change -->
         <script>
-            /**
-             * Hàm xử lý đánh dấu câu hỏi để review
-             * @param {HTMLElement} button - Button element được click
-             */
-            function toggleMarkForReview(button) {
-                // Toggle class marked
-                button.classList.toggle('marked');
-                
-                // Lưu trạng thái đánh dấu vào localStorage
-                var questionNumber = parseInt('${param.questionNumber}' || '1');
-                var markedQuestions = JSON.parse(localStorage.getItem('markedQuestions') || '{}');
-                
-                if (button.classList.contains('marked')) {
-                    markedQuestions[questionNumber] = true;
-                } else {
-                    delete markedQuestions[questionNumber];
-                }
-                
-                localStorage.setItem('markedQuestions', JSON.stringify(markedQuestions));
-            }
-
-            // Khôi phục trạng thái đánh dấu khi load trang
             document.addEventListener('DOMContentLoaded', function() {
-                var questionNumber = parseInt('${param.questionNumber}' || '1');
-                var markedQuestions = JSON.parse(localStorage.getItem('markedQuestions') || '{}');
+                // Lắng nghe sự kiện khi người dùng thay đổi đáp án
+                const answerForm = document.getElementById('answerForm');
+                const answerInputs = answerForm.querySelectorAll('input[name="answer"]');
                 
-                if (markedQuestions[questionNumber]) {
-                    document.querySelector('.btn-mark').classList.add('marked');
-                }
+                answerInputs.forEach(input => {
+                    input.addEventListener('change', function() {
+                        const questionId = parseInt(document.querySelector('input[name="questionId"]').value);
+                        
+                        // Kiểm tra xem có đáp án nào được chọn không
+                        const hasSelectedAnswer = Array.from(answerInputs).some(input => input.checked);
+                        
+                        if (hasSelectedAnswer) {
+                            questionStates.answered.add(questionId);
+                        } else {
+                            questionStates.answered.delete(questionId);
+                        }
+                        
+                        // Cập nhật hiển thị của các ô câu hỏi
+                        updateQuestionBoxStates();
+                    });
+                });
             });
         </script>
 
         <script>
+            // Các hàm xử lý popup
             function openReviewPopup() {
                 document.getElementById('reviewPopup').classList.add('show');
             }
@@ -1763,61 +1975,89 @@
                 document.getElementById('reviewPopup').classList.remove('show');
             }
 
-            // Close popup when clicking outside
+            // Đóng popup khi click bên ngoài
             document.addEventListener('click', function(event) {
                 const popup = document.getElementById('reviewPopup');
-                const popupContent = popup.querySelector('.popup-content');
                 if (event.target === popup) {
                     closeReviewPopup();
                 }
             });
-        </script>
 
-        <script>
+            // Hàm xử lý đánh dấu câu hỏi
+            function toggleMarkForReview(button) {
+                button.classList.toggle('marked');
+                const currentNumber = parseInt('${param.questionNumber}' || '1');
+                
+                if (button.classList.contains('marked')) {
+                    questionStates.marked.add(currentNumber);
+                } else {
+                    questionStates.marked.delete(currentNumber);
+                }
+                
+                // Lưu vào localStorage
+                const markedQuestions = {};
+                questionStates.marked.forEach(num => markedQuestions[num] = true);
+                localStorage.setItem('markedQuestions', JSON.stringify(markedQuestions));
+                
+                // Cập nhật hiển thị
+                updateQuestionBoxStates();
+            }
+
+            // Hàm điều hướng đến câu hỏi
             function navigateToQuestion(questionNumber) {
                 window.location.href = 'quiz-handle?action=navigate&questionNumber=' + questionNumber;
             }
 
-            // Update question box states based on current status
-            function updateQuestionBoxStates() {
-                const currentNumber = parseInt('${param.questionNumber}' || '1');
-                const boxes = document.querySelectorAll('.question-box');
-                
-                boxes.forEach((box, index) => {
-                    const number = index + 1;
-                    if (number === currentNumber) {
-                        box.classList.add('current');
-                    }
-                    // Thêm các trạng thái khác khi cần
+            // Hàm thiết lập các nút filter
+            function setupFilterButtons() {
+                document.querySelector('.btn-unanswered').addEventListener('click', () => {
+                    console.log('Filtering unanswered questions');
+                    filterQuestions('unanswered');
+                    highlightActiveButton('btn-unanswered');
+                });
+                document.querySelector('.btn-answered').addEventListener('click', () => {
+                    console.log('Filtering answered questions');
+                    filterQuestions('answered');
+                    highlightActiveButton('btn-answered');
+                });
+                document.querySelector('.btn-marked').addEventListener('click', () => {
+                    filterQuestions('marked');
+                    highlightActiveButton('btn-marked');
+                });
+                document.querySelector('.btn-all').addEventListener('click', () => {
+                    filterQuestions('all');
+                    highlightActiveButton('btn-all');
                 });
             }
 
-            // Call when popup opens
-            document.getElementById('reviewPopup').addEventListener('show', updateQuestionBoxStates);
-        </script>
-
-        <script>
-            function saveAnswer(questionId, answerId) {
-                // Gửi AJAX request để lưu câu trả lời
-                fetch('quiz-handle?action=saveAnswer', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `questionId=${questionId}&answerId=${answerId}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Cập nhật UI nếu cần
-                        updateQuestionBoxStates();
+            // Hàm cập nhật trạng thái các ô câu hỏi
+            function updateQuestionBoxStates() {
+                const boxes = document.querySelectorAll('.question-box');
+                boxes.forEach(box => {
+                    const questionId = parseInt(box.getAttribute('data-question-id'));
+                    const questionNumber = parseInt(box.querySelector('.question-number').textContent);
+                    
+                    // Reset classes
+                    box.classList.remove('answered', 'unanswered', 'marked', 'current');
+                    
+                    // Thêm class phù hợp
+                    if (questionStates.marked.has(questionNumber)) {
+                        box.classList.add('marked');
                     }
-                })
-                .catch(error => console.error('Error:', error));
+                    if (questionStates.answered.has(questionId)) {
+                        box.classList.add('answered');
+                    } else {
+                        box.classList.add('unanswered');
+                    }
+                    
+                    // Đánh dấu câu hiện tại
+                    if (questionNumber === parseInt('${param.questionNumber}')) {
+                        box.classList.add('current');
+                    }
+                });
             }
-        </script>
 
-        <script>
+            // Hàm xử lý peek popup
             function openPeekPopup() {
                 document.getElementById('peekPopup').classList.add('show');
             }
@@ -1826,11 +2066,78 @@
                 document.getElementById('peekPopup').classList.remove('show');
             }
 
-            // Close popup when clicking outside
+            // Đóng peek popup khi click bên ngoài
             document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('peekPopup').addEventListener('click', function(event) {
                     if (event.target === this) {
                         closePeekPopup();
+                    }
+                });
+            });
+        </script>
+
+        <script>
+            // Hàm lọc câu hỏi theo trạng thái
+            function filterQuestions(type) {
+                console.log('Filtering by type:', type);
+                console.log('Current answered states:', Array.from(questionStates.answered));
+                console.log('Current marked states:', Array.from(questionStates.marked));
+                
+                const boxes = document.querySelectorAll('.question-box');
+                boxes.forEach(box => {
+                    const questionId = parseInt(box.getAttribute('data-question-id'));
+                    const questionNumber = parseInt(box.querySelector('.question-number').textContent);
+                    
+                    let shouldShow = false;
+                    switch(type) {
+                        case 'unanswered':
+                            shouldShow = !questionStates.answered.has(questionId);
+                            break;
+                        case 'answered':
+                            shouldShow = questionStates.answered.has(questionId);
+                            break;
+                        case 'marked':
+                            shouldShow = questionStates.marked.has(questionNumber);
+                            break;
+                        case 'all':
+                            shouldShow = true;
+                            break;
+                    }
+                    
+                    box.style.display = shouldShow ? 'flex' : 'none';
+                });
+            }
+
+            // Hàm highlight nút đang active
+            function highlightActiveButton(activeClass) {
+                const buttons = document.querySelectorAll('.review-btn');
+                buttons.forEach(button => {
+                    button.classList.remove('active');
+                    if (button.classList.contains(activeClass)) {
+                        button.classList.add('active');
+                    }
+                });
+            }
+
+            // Thêm event listeners cho các nút filter khi trang load
+            document.addEventListener('DOMContentLoaded', function() {
+                const filterButtons = {
+                    'btn-unanswered': 'unanswered',
+                    'btn-answered': 'answered',
+                    'btn-marked': 'marked',
+                    'btn-all': 'all'
+                };
+
+                Object.entries(filterButtons).forEach(([buttonClass, filterType]) => {
+                    const button = document.querySelector('.' + buttonClass);
+                    if (button) {
+                        button.addEventListener('click', () => {
+                            console.log('Filter button clicked:', filterType);
+                            filterQuestions(filterType);
+                            highlightActiveButton(buttonClass);
+                        });
+                    } else {
+                        console.error('Button not found:', buttonClass);
                     }
                 });
             });
