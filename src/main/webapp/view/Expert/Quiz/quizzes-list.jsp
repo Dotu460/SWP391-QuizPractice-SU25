@@ -36,6 +36,44 @@
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 15px;
+        }
+        
+        .table-responsive {
+            min-width: 1200px;
+            width: 100%;
+            margin-bottom: 0;
+        }
+        
+        /* Đảm bảo thanh cuộn luôn hiển thị ở dưới */
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+            background-color: #f5f5f5;
+        }
+        
+        .table-container::-webkit-scrollbar-thumb {
+            background-color: #888;
+            border-radius: 4px;
+        }
+        
+        .table-container::-webkit-scrollbar-track {
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+
+        /* Giữ cột Actions luôn cố định bên phải */
+        .column-actions {
+            position: sticky;
+            right: 0;
+            background-color: white;
+            z-index: 1;
+            box-shadow: -2px 0 4px rgba(0,0,0,0.1);
         }
         
         .btn-action {
@@ -125,6 +163,31 @@
             white-space: nowrap;
             min-width: 160px;
         }
+
+        .pagination-info {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        .page-link {
+            color: #0d6efd;
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            padding: 0.375rem 0.75rem;
+        }
+        .page-item.active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: white;
+        }
+        .page-item.disabled .page-link {
+            color: #6c757d;
+            pointer-events: none;
+            background-color: #fff;
+            border-color: #dee2e6;
+        }
+        .pagination {
+            margin-bottom: 0;
+        }
     </style>
 </head>
 
@@ -198,7 +261,7 @@
                                                 <option value="">-- Tất cả môn học --</option>
                                                 <c:forEach items="${subjectsList}" var="subject">
                                                     <option value="${subject.id}" ${param.subjectId == subject.id ? 'selected' : ''}>
-                                                        ${subject.name}
+                                                        ${subject.title}
                                                     </option>
                                                 </c:forEach>
                                             </select>
@@ -207,9 +270,8 @@
                                             <label for="quizType">Quiz types:</label>
                                             <select class="form-control" id="quizType" name="quizType">
                                                 <option value="">-- Tất cả loại --</option>
-                                                <option value="practice" ${param.quizType == 'practice' ? 'selected' : ''}>Luyện tập</option>
-                                                <option value="test" ${param.quizType == 'test' ? 'selected' : ''}>Kiểm tra</option>
-                                                <option value="exam" ${param.quizType == 'exam' ? 'selected' : ''}>Thi thử</option>
+                                                <option value="practice" ${param.quizType == 'practice' ? 'selected' : ''}>Practice</option>
+                                                <option value="exam" ${param.quizType == 'exam' ? 'selected' : ''}>Exam</option>
                                             </select>
                                         </div>
                                         <%-- Comment out lesson filter
@@ -242,55 +304,105 @@
 
                             <!-- Quiz List -->
                             <div class="quiz-table">
-                                <div class="table-responsive" style="min-width: 1200px; overflow-x: auto;">
-                                    <table class="table table-hover mb-0" id="quizTable">
-                                        <thead class="thead-light">
-                                            <tr>
-                                                <th class="column-id" data-column="id">ID</th>
-                                                <th class="column-name" data-column="name">Quiz Name</th>
-                                                <th class="column-type" data-column="type">Quiz Type</th>
-                                                <th class="column-level" data-column="level">Level</th>
-                                                <th class="column-subject" data-column="subject">Subject</th>
-                                                <%-- Comment out lesson column
-                                                <th class="column-lesson" data-column="lesson">Lesson</th>
-                                                --%>
-                                                <th class="column-questions" data-column="questions">Number of Questions</th>
-                                                <th class="column-duration" data-column="duration">Duration</th>
-                                                <th class="column-actions" data-column="actions" style="min-width: 160px;">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                                    <c:forEach items="${quizzesList}" var="quiz" varStatus="status">
-                                                        <tr>
-                                                            <td class="column-id" data-column="id">${quiz.id}</td>
-                                                            <td class="column-name" data-column="name"><strong>${quiz.name}</strong></td>
-                                                            <td class="column-type" data-column="type"> ${quiz.quiz_type}
-                                                            </td>
-                                                            <td class="column-level" data-column="level">${quiz.level}
-                                                            </td>
-                                                            <td class="column-subject" data-column="subject"> </td>
-                                                            <%-- Comment out lesson cell
-                                                            <td class="column-lesson" data-column="lesson">
-                                                                ${quiz.lesson_name}
-                                                            </td>
-                                                            --%>
-                                                            <td class="column-questions" data-column="questions">${quiz.number_of_questions_target}</td>
-                                                            <td class="column-duration" data-column="duration">${quiz.duration_minutes} </td>
-                                                            <td class="column-actions" data-column="actions">
-                                                                <a href="${pageContext.request.contextPath}/QuizDetail?id=${quiz.id}" 
-                                                                   class="btn-action btn-view" title="Details">
-                                                                    <i class="fas fa-eye"></i>
-                                                                </a>
-                                                                <a href="javascript:void(0)" 
-                                                                   onclick="deleteQuiz(${quiz.id})" 
-                                                                   class="btn-action btn-delete" title="Delete">
-                                                                    <i class="fas fa-trash"></i>
-                                                                </a>
-                                                            </td>
-                                                        </tr>
+                                <div class="table-container">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0" id="quizTable">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th class="column-id" data-column="id">ID</th>
+                                                    <th class="column-name" data-column="name">Quiz Name</th>
+                                                    <th class="column-type" data-column="type">Quiz Type</th>
+                                                    <th class="column-level" data-column="level">Level</th>
+                                                    <th class="column-subject" data-column="subject">Subject</th>
+                                                    <%-- Comment out lesson column
+                                                    <th class="column-lesson" data-column="lesson">Lesson</th>
+                                                    --%>
+                                                    <th class="column-questions" data-column="questions">Number of Questions</th>
+                                                    <th class="column-duration" data-column="duration">Duration</th>
+                                                    <th class="column-actions" data-column="actions" style="min-width: 160px;">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                        <c:forEach items="${quizzesList}" var="quiz" varStatus="status">
+                                                            <tr>
+                                                                <td class="column-id" data-column="id">${quiz.id}</td>
+                                                                <td class="column-name" data-column="name"><strong>${quiz.name}</strong></td>
+                                                                <td class="column-type" data-column="type"> ${quiz.quiz_type}
+                                                                </td>
+                                                                <td class="column-level" data-column="level">${quiz.level}
+                                                                </td>
+                                                                <td class="column-subject" data-column="subject">
+                                                                    <c:set var="lesson" value="${lessonDAO.findById(quiz.lesson_id)}" />
+                                                                    <c:if test="${lesson != null}">
+                                                                        <c:set var="subject" value="${subjectDAO.findById(lesson.subject_id)}" />
+                                                                        <c:if test="${subject != null}">
+                                                                            ${subject.title}
+                                                                        </c:if>
+                                                                    </c:if>
+                                                                </td>
+                                                                <%-- Comment out lesson cell
+                                                                <td class="column-lesson" data-column="lesson">
+                                                                    ${quiz.lesson_name}
+                                                                </td>
+                                                                --%>
+                                                                <td class="column-questions" data-column="questions">${quiz.number_of_questions_target} </td>
+                                                                <td class="column-duration" data-column="duration">${quiz.duration_minutes} minutes</td>
+                                                                <td class="column-actions" data-column="actions">
+                                                                    <a href="${pageContext.request.contextPath}/QuizDetail?id=${quiz.id}" 
+                                                                       class="btn-action btn-view" title="Details">
+                                                                        <i class="fas fa-eye"></i>
+                                                                    </a>
+                                                                    <form action="${pageContext.request.contextPath}/quizzes-list" method="post" style="display: inline;">
+                                                                        <input type="hidden" name="action" value="delete">
+                                                                        <input type="hidden" name="quizId" value="${quiz.id}">
+                                                                        <button type="button" onclick="confirmDelete(this.form)" 
+                                                                                class="btn-action btn-delete" title="Delete">
+                                                                            <i class="fas fa-trash"></i>
+                                                                        </button>
+                                                                    </form>
+                                                                </td>
+                                                            </tr>
+                                                        </c:forEach>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Phân trang -->
+                                    <c:if test="${totalPages > 1}">
+                                        <div class="d-flex justify-content-center mt-4">
+                                            <nav aria-label="Page navigation">
+                                                <ul class="pagination mb-0">
+                                                    <!-- Nút Previous -->
+                                                    <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
+                                                        <a class="page-link" 
+                                                           href="${pageContext.request.contextPath}/quizzes-list?page=${currentPage - 1}&quizName=${param.quizName}&subjectId=${param.subjectId}&quizType=${param.quizType}"
+                                                           ${currentPage == 1 ? 'tabindex="-1" aria-disabled="true"' : ''}>
+                                                            &laquo;
+                                                        </a>
+                                                    </li>
+
+                                                    <!-- Các số trang -->
+                                                    <c:forEach begin="1" end="${totalPages}" var="i">
+                                                        <li class="page-item ${i == currentPage ? 'active' : ''}">
+                                                            <a class="page-link" 
+                                                               href="${pageContext.request.contextPath}/quizzes-list?page=${i}&quizName=${param.quizName}&subjectId=${param.subjectId}&quizType=${param.quizType}">
+                                                                ${i}
+                                                            </a>
+                                                        </li>
                                                     </c:forEach>
-                                        </tbody>
-                                    </table>
+
+                                                    <!-- Nút Next -->
+                                                    <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
+                                                        <a class="page-link" 
+                                                           href="${pageContext.request.contextPath}/quizzes-list?page=${currentPage + 1}&quizName=${param.quizName}&subjectId=${param.subjectId}&quizType=${param.quizType}"
+                                                           ${currentPage == totalPages ? 'tabindex="-1" aria-disabled="true"' : ''}>
+                                                            &raquo;
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+                                        </div>
+                                    </c:if>
                                 </div>
                             </div>
                         </div>
@@ -463,11 +575,19 @@
             loadLessons();
         });
 
-        function deleteQuiz(quizId) {
-            if (confirm('Bạn có chắc chắn muốn xóa quiz này không?')) {
-                window.location.href = '${pageContext.request.contextPath}/DeleteQuiz?id=' + quizId;
+        function confirmDelete(form) {
+            if (confirm('Are you sure you want to delete this quiz?')) {
+                form.submit();
             }
         }
+        
+        // Display success/error messages if they exist
+        <c:if test="${not empty successMessage}">
+            alert('${successMessage}');
+        </c:if>
+        <c:if test="${not empty errorMessage}">
+            alert('${errorMessage}');
+        </c:if>
     </script>
 </body>
 

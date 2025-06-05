@@ -179,8 +179,8 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
             parameters.add(quizType.trim());
         }
         
-        // Add pagination
-        sql.append(" ORDER BY q.id DESC LIMIT ? OFFSET ?");
+        // Add order by and pagination
+        sql.append(" ORDER BY q.id ASC LIMIT ? OFFSET ?");
         parameters.add(pageSize);
         parameters.add((page - 1) * pageSize);
         

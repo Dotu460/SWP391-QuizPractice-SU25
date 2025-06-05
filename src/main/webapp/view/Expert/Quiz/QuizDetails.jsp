@@ -164,10 +164,10 @@
 
                                 <!-- Quiz Actions -->
                                 <div class="quiz-actions text-end">
-                                    <button type="button" class="btn btn-primary" id="editBtn">
+                                    <button type="button" class="btn btn-primary" id="edit">
                                         <i class="fa fa-edit"></i> Edit Quiz
                                     </button>
-                                    <button type="button" class="btn btn-danger" id="deleteBtn" onclick="confirmDelete()">
+                                    <button type="button" class="btn btn-danger" id="delete" onclick="confirmDelete()">
                                         <i class="fa fa-trash"></i> Delete Quiz
                                     </button>
                                 </div>
