@@ -108,6 +108,30 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
         return 0;
     }
 
+    public int insertNewQuiz(Quizzes t) {
+        String sql = "INSERT INTO Quizzes (name, lesson_id, level, number_of_questions_target,"
+                + " duration_minutes, quiz_type, status) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, t.getName());
+            statement.setInt(2, t.getLesson_id());
+            statement.setString(3, t.getLevel());
+            statement.setInt(4, t.getNumber_of_questions_target());
+            statement.setInt(5, t.getDuration_minutes());
+            statement.setString(6, t.getQuiz_type());
+            statement.setString(7, t.getStatus());
+            statement.executeUpdate();
+            return 1;
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return 0;
+    }
+
     @Override
     public Quizzes getFromResultSet(ResultSet resultSet) throws SQLException {
         return Quizzes.builder()

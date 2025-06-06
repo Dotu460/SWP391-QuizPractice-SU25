@@ -9,6 +9,7 @@ import com.quiz.su25.dal.impl.SubjectDAO;
 import com.quiz.su25.dal.impl.LessonDAO;
 import com.quiz.su25.entity.Quizzes;
 import com.quiz.su25.entity.Subject;
+import com.quiz.su25.entity.Lesson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -45,6 +46,9 @@ public class QuizzesListController extends HttpServlet {
         }
 
         switch (action) {
+            case "add":
+                showAddQuizForm(request, response);
+                break;
             case "list":
             default:
                 listQuizzes(request, response);
@@ -59,6 +63,8 @@ public class QuizzesListController extends HttpServlet {
 
         if ("delete".equals(action)) {
             deleteQuiz(request, response);
+        } else if ("create".equals(action)) {
+            createQuiz(request, response);
         } else {
             response.sendRedirect(request.getContextPath() + "/quizzes-list");
         }
@@ -196,6 +202,94 @@ public class QuizzesListController extends HttpServlet {
         } catch (NumberFormatException e) {
             request.setAttribute("errorMessage", "Invalid quiz ID!");
             response.sendRedirect(request.getContextPath() + "/quizzes-list");
+        }
+    }
+
+    private void showAddQuizForm(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            // Get all lessons and subjects
+            List<Subject> subjectsList = subjectDAO.findAll();
+            List<Lesson> lessonsList = lessonDAO.findAll();
+            
+            // Set attributes for JSP
+            request.setAttribute("lessonsList", lessonsList);
+            request.setAttribute("subjectsList", subjectsList);
+            request.setAttribute("subjectDAO", subjectDAO);
+            
+            // Forward to the add quiz page
+            request.getRequestDispatcher("view/Expert/Quiz/addQuiz.jsp").forward(request, response);
+            
+        } catch (Exception e) {
+            System.out.println("Error in showAddQuizForm: " + e.getMessage());
+            e.printStackTrace();
+            request.setAttribute("error", "An error occurred while loading the page.");
+            request.getRequestDispatcher("view/Expert/Quiz/addQuiz.jsp").forward(request, response);
+        }
+    }
+
+    private void createQuiz(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            // Get parameters from form
+            String name = request.getParameter("name");
+            int lessonId = Integer.parseInt(request.getParameter("lesson_id"));
+            String level = request.getParameter("level");
+            String quizType = request.getParameter("quiz_type");
+            int durationMinutes = Integer.parseInt(request.getParameter("duration_minutes"));
+            int numberOfQuestions = Integer.parseInt(request.getParameter("number_of_questions"));
+
+            // Check if quiz with same information exists
+            List<Quizzes> allQuizzes = quizzesDAO.findAll();
+            boolean isDuplicate = false;
+            for (Quizzes quiz : allQuizzes) {
+                if (quiz.getName().equals(name) 
+                    && quiz.getLesson_id() == lessonId
+                    && quiz.getLevel().equals(level)
+                    && quiz.getQuiz_type().equals(quizType)
+                    && quiz.getDuration_minutes() == durationMinutes
+                    && quiz.getNumber_of_questions_target() == numberOfQuestions) {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+
+            if (isDuplicate) {
+                request.setAttribute("error", "A quiz with identical information already exists!");
+                showAddQuizForm(request, response);
+                return;
+            }
+
+            // Create new quiz
+            Quizzes newQuiz = new Quizzes();
+            newQuiz.setName(name);
+            newQuiz.setLesson_id(lessonId);
+            newQuiz.setNumber_of_questions_target(numberOfQuestions);
+            newQuiz.setLevel(level);
+            newQuiz.setQuiz_type(quizType);
+            newQuiz.setDuration_minutes(durationMinutes);
+            newQuiz.setStatus("active");
+
+            // Insert into database
+            int result = quizzesDAO.insertNewQuiz(newQuiz);
+
+            if (result > 0) {
+                // Redirect to quiz list with success message
+                request.getSession().setAttribute("successMessage", "Quiz created successfully!");
+                response.sendRedirect(request.getContextPath() + "/quizzes-list");
+            } else {
+                request.setAttribute("error", "Failed to create quiz!");
+                showAddQuizForm(request, response);
+            }
+
+        } catch (NumberFormatException e) {
+            request.setAttribute("error", "Invalid number format in form data!");
+            showAddQuizForm(request, response);
+        } catch (Exception e) {
+            System.out.println("Error in createQuiz: " + e.getMessage());
+            e.printStackTrace();
+            request.setAttribute("error", "An error occurred while creating the quiz!");
+            showAddQuizForm(request, response);
         }
     }
 }

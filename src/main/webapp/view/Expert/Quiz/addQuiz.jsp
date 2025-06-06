@@ -119,7 +119,7 @@
                                         </div>
                                     </div>
                                     <div class="col-auto">
-                                        <a href="${pageContext.request.contextPath}/QuizzesList" class="btn btn-secondary rounded-pill">
+                                        <a href="${pageContext.request.contextPath}/quizzes-list" class="btn btn-secondary rounded-pill">
                                             <i class="fa fa-arrow-left me-2"></i> Back to Quizzes
                                         </a>
                                     </div>
@@ -147,7 +147,7 @@
                                                 <h5 class="mb-0">Create New Quiz</h5>
                                             </div>
                                             <div class="card-body">
-                                                <form method="post" action="${pageContext.request.contextPath}/create-quiz">
+                                                <form method="post" action="${pageContext.request.contextPath}/quizzes-list?action=create">
                                                     <!-- Basic Information Section -->
                                                     <div class="form-section">
                                                         <h5>Quiz Information</h5>
@@ -159,19 +159,6 @@
                                                                            value="${param.name != null ? param.name : ''}" required>
                                                                 </div>
                                                             </div>
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label for="subject_id" class="form-label">Subject <span class="required">*</span></label>
-                                                                    <select class="form-control" id="subject_id" name="subject_id" required>
-                                                                        <option value="">Select Subject</option>
-                                                                        <c:forEach items="${subjectsList}" var="subject">
-                                                                            <option value="${subject.id}" ${param.subject_id == subject.id ? 'selected' : ''}>
-                                                                                ${subject.name}
-                                                                            </option>
-                                                                        </c:forEach>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
                                                         </div>
                                                         <div class="row">
                                                             <div class="col-md-6">
@@ -180,8 +167,9 @@
                                                                     <select class="form-control" id="lesson_id" name="lesson_id" required>
                                                                         <option value="">Select Lesson</option>
                                                                         <c:forEach items="${lessonsList}" var="lesson">
+                                                                            <c:set var="subject" value="${subjectDAO.findById(lesson.subject_id)}" />
                                                                             <option value="${lesson.id}" ${param.lesson_id == lesson.id ? 'selected' : ''}>
-                                                                                ${lesson.name}
+                                                                                ${subject.title}: ${lesson.title}
                                                                             </option>
                                                                         </c:forEach>
                                                                     </select>
@@ -202,9 +190,9 @@
                                                                     <label for="level" class="form-label">Độ khó <span class="required">*</span></label>
                                                                     <select class="form-control" id="level" name="level" required>
                                                                         <option value="">Chọn độ khó</option>
-                                                                        <option value="easy" ${param.level == 'easy' ? 'selected' : ''}>Dễ</option>
-                                                                        <option value="medium" ${param.level == 'medium' ? 'selected' : ''}>Trung bình</option>
-                                                                        <option value="hard" ${param.level == 'hard' ? 'selected' : ''}>Khó</option>
+                                                                        <option value="easy" ${param.level == 'easy' ? 'selected' : ''}>easy</option>
+                                                                        <option value="medium" ${param.level == 'medium' ? 'selected' : ''}>Medium</option>
+                                                                        <option value="hard" ${param.level == 'hard' ? 'selected' : ''}>hard</option>
                                                                     </select>
                                                                 </div>
                                                             </div>
@@ -265,74 +253,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/css/iziToast.min.css">
     <script src="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/js/iziToast.min.js"></script>
 
-    <script>
-        // Dynamic Lesson Loading based on Subject Selection
-        document.addEventListener('DOMContentLoaded', function() {
-            const subjectSelect = document.getElementById('subject_id');
-            const lessonSelect = document.getElementById('lesson_id');
-            
-            subjectSelect.addEventListener('change', function() {
-                const subjectId = this.value;
-                if (subjectId) {
-                    // Clear current lessons
-                    lessonSelect.innerHTML = '<option value="">Loading lessons...</option>';
-                    
-                    // Fetch lessons for selected subject
-                    fetch('${pageContext.request.contextPath}/get-lessons?subject_id=' + subjectId)
-                        .then(response => response.json())
-                        .then(lessons => {
-                            lessonSelect.innerHTML = '<option value="">Select Lesson</option>';
-                            lessons.forEach(lesson => {
-                                lessonSelect.innerHTML += `<option value="\${lesson.id}">\${lesson.name}</option>`;
-                            });
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            lessonSelect.innerHTML = '<option value="">Error loading lessons</option>';
-                        });
-                } else {
-                    lessonSelect.innerHTML = '<option value="">Select Lesson</option>';
-                }
-            });
-            
-            // Form submission handling
-            document.querySelector('form').addEventListener('submit', function(e) {
-                // Show loading state
-                const submitBtn = this.querySelector('button[type="submit"]');
-                const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Creating...';
-                submitBtn.disabled = true;
-            });
-        });
-
-        // Toast message display
-        var toastMessage = "${sessionScope.toastMessage}";
-        var toastType = "${sessionScope.toastType}";
-        if (toastMessage) {
-            iziToast.show({
-                title: toastType === 'success' ? 'Success' : 'Error',
-                message: toastMessage,
-                position: 'topRight',
-                color: toastType === 'success' ? 'green' : 'red',
-                timeout: 5000,
-                onClosing: function () {
-                    // Remove toast attributes from the session after displaying
-                    fetch('${pageContext.request.contextPath}/remove-toast', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                    }).then(response => {
-                        if (!response.ok) {
-                            console.error('Failed to remove toast attributes');
-                        }
-                    }).catch(error => {
-                        console.error('Error:', error);
-                    });
-                }
-            });
-        }
-    </script>
+    
 </body>
 
 </html>
