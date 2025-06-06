@@ -240,7 +240,7 @@
                             <div class="d-flex justify-content-between align-items-center mb-4">
                                 <h4 class="title">Quizzes List</h4>
                                 <div>
-                                    <a href="${pageContext.request.contextPath}/view/Expert/Quiz/addQuiz.jsp" class="btn btn-success">
+                                    <a href="${pageContext.request.contextPath}/quizzes-list?action=add" class="btn btn-success">
                                         <i class="fa fa-plus"></i> Tạo Quiz Mới
                                     </a>
                                 </div>
@@ -274,20 +274,6 @@
                                                 <option value="exam" ${param.quizType == 'exam' ? 'selected' : ''}>Exam</option>
                                             </select>
                                         </div>
-                                        <%-- Comment out lesson filter
-                                        <div class="col-md-3">
-                                            <label for="lessionId">Bài học:</label>
-                                            <select class="form-control" id="lessionId" name="lessionId">
-                                                <option value="">-- Tất cả bài học --</option>
-                                                <c:forEach items="${lessionList}" var="lession">
-                                                    <option value="${lession.id}" ${param.lessionId == lession.id ? 'selected' : ''} 
-                                                            data-subject="${lession.subject_id}">
-                                                        ${lession.name}
-                                                    </option>
-                                                </c:forEach>
-                                            </select>
-                                        </div>
-                                        --%>
                                         <div class="col-md-2 d-flex align-items-end">
                                             <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
                                         </div>
@@ -310,13 +296,11 @@
                                             <thead class="thead-light">
                                                 <tr>
                                                     <th class="column-id" data-column="id">ID</th>
-                                                    <th class="column-name" data-column="name">Quiz Name</th>
+                                                    <th class="column-name" data-column="name">Quiz Name</th>   
                                                     <th class="column-type" data-column="type">Quiz Type</th>
                                                     <th class="column-level" data-column="level">Level</th>
                                                     <th class="column-subject" data-column="subject">Subject</th>
-                                                    <%-- Comment out lesson column
                                                     <th class="column-lesson" data-column="lesson">Lesson</th>
-                                                    --%>
                                                     <th class="column-questions" data-column="questions">Number of Questions</th>
                                                     <th class="column-duration" data-column="duration">Duration</th>
                                                     <th class="column-actions" data-column="actions" style="min-width: 160px;">Actions</th>
@@ -340,11 +324,9 @@
                                                                         </c:if>
                                                                     </c:if>
                                                                 </td>
-                                                                <%-- Comment out lesson cell
                                                                 <td class="column-lesson" data-column="lesson">
-                                                                    ${quiz.lesson_name}
+                                                                    ${lessonDAO.findById(quiz.lesson_id).title}
                                                                 </td>
-                                                                --%>
                                                                 <td class="column-questions" data-column="questions">${quiz.number_of_questions_target} </td>
                                                                 <td class="column-duration" data-column="duration">${quiz.duration_minutes} minutes</td>
                                                                 <td class="column-actions" data-column="actions">
@@ -452,12 +434,10 @@
                             <input type="checkbox" id="col-subject" value="subject" checked>
                             <label for="col-subject">Môn học</label>
                         </div>
-                        <%-- Comment out lesson checkbox
                         <div class="column-checkbox">
                             <input type="checkbox" id="col-lesson" value="lesson" checked>
                             <label for="col-lesson">Bài học</label>
                         </div>
-                        --%>
                         <div class="column-checkbox">
                             <input type="checkbox" id="col-questions" value="questions" checked>
                             <label for="col-questions">Số câu hỏi</label>
@@ -514,7 +494,7 @@
         // Hàm áp dụng cài đặt cột
         function applySettings() {
             // Ẩn tất cả cột trước
-            $('.column-id, .column-name, .column-type, .column-level, .column-subject, .column-questions, .column-duration').hide();
+            $('.column-id, .column-name, .column-type, .column-level, .column-subject, .column-lesson, .column-questions, .column-duration').hide();
             
             // Hiện các cột được chọn
             if ($('#col-id').is(':checked')) {
@@ -532,10 +512,9 @@
             if ($('#col-subject').is(':checked')) {
                 $('.column-subject').show();
             }
-            // Comment out lesson show/hide
-            // if ($('#col-lesson').is(':checked')) {
-            //     $('.column-lesson').show();
-            // }
+            if ($('#col-lesson').is(':checked')) {
+                $('.column-lesson').show();
+            }
             if ($('#col-questions').is(':checked')) {
                 $('.column-questions').show();
             }
@@ -582,12 +561,6 @@
         }
         
         // Display success/error messages if they exist
-        <c:if test="${not empty successMessage}">
-            alert('${successMessage}');
-        </c:if>
-        <c:if test="${not empty errorMessage}">
-            alert('${errorMessage}');
-        </c:if>
     </script>
 </body>
 
