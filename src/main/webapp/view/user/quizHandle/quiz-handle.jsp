@@ -393,11 +393,19 @@
                 .question-box.marked {
                     border-color: #ffd700;
                     background: #fffbeb;
+                    z-index: 2;
                 }
 
+                .question-box.answered {
+                    border-color: #28a745;
+                    background: #f0fff4;
+                    z-index: 1;
+                }
+
+                /* Ưu tiên hiển thị màu của marked */
                 .question-box.marked.answered {
                     border-color: #ffd700;
-                    background: linear-gradient(135deg, #fffbeb 50%, #f0fff4 50%);
+                    background: #fffbeb;
                 }
 
                 .question-box.current {
@@ -1296,6 +1304,8 @@
                                         <i class="fas fa-check"></i>
                                     </button>
                                 </c:if>
+                                <input type="hidden" name="action" value="saveAnswer">
+                                <input type="hidden" name="nextAction" id="nextAction" value="">
                             </div>
                         </div>
                     </div>
@@ -1728,46 +1738,76 @@
                 marked: new Set()
             };
 
-            // Hàm lưu trạng thái answered vào localStorage
-            function saveAnsweredStates() {
-                const answeredQuestions = {};
-                questionStates.answered.forEach(id => {
-                    answeredQuestions[id] = true;
-                });
-                localStorage.setItem('answeredQuestions', JSON.stringify(answeredQuestions));
-            }
-
-            // Khởi tạo trạng thái từ localStorage và session
             document.addEventListener('DOMContentLoaded', function() {
-                // Lấy câu hỏi đã đánh dấu từ localStorage
+                // Khởi tạo hoặc lấy trạng thái từ localStorage
+                const isFirstLoad = !sessionStorage.getItem('quizStarted');
+                if (isFirstLoad) {
+                    // Clear localStorage khi bắt đầu phiên mới
+                    localStorage.removeItem('answeredQuestions');
+                    localStorage.removeItem('markedQuestions');
+                    sessionStorage.setItem('quizStarted', 'true');
+                }
+
+                // Lấy trạng thái marked từ localStorage
                 const markedQuestions = JSON.parse(localStorage.getItem('markedQuestions') || '{}');
                 questionStates.marked = new Set(Object.keys(markedQuestions).map(Number));
 
-                // Lấy câu trả lời đã lưu từ localStorage
+                // Lấy trạng thái answered từ localStorage
                 const savedAnswered = JSON.parse(localStorage.getItem('answeredQuestions') || '{}');
                 questionStates.answered = new Set(Object.keys(savedAnswered).map(Number));
 
-                // Lấy câu trả lời từ session và cập nhật thêm vào trạng thái
+                // Lấy câu trả lời từ session
                 const userAnswersJson = document.getElementById('userAnswersData').value;
                 try {
                     const userAnswers = JSON.parse(userAnswersJson || '{}');
-                    console.log('User Answers:', userAnswers);
+                    console.log('User Answers from session:', userAnswers);
                     
-                    // Duyệt qua tất cả câu trả lời và thêm vào Set answered
+                    // Cập nhật trạng thái answered từ session
                     Object.entries(userAnswers).forEach(([questionId, answers]) => {
                         if (answers && answers.length > 0) {
                             questionStates.answered.add(parseInt(questionId));
                         }
                     });
                     
-                    // Lưu lại trạng thái mới vào localStorage
+                    // Lưu trạng thái vào localStorage
                     saveAnsweredStates();
                     
-                    console.log('Answered Questions:', Array.from(questionStates.answered));
-                    console.log('Marked Questions:', Array.from(questionStates.marked));
+                    console.log('Updated Answered Questions:', Array.from(questionStates.answered));
+                    
+                    // Cập nhật hiển thị
+                    updateQuestionBoxStates();
                 } catch (error) {
-                    console.error('Error parsing user answers:', error);
+                    console.error('Error processing answers:', error);
                 }
+
+                            // Thêm event listener cho các input radio/checkbox
+            document.querySelectorAll('input[name="answer"]').forEach(input => {
+                input.addEventListener('change', function() {
+                    const currentQuestionId = parseInt(document.querySelector('input[name="questionId"]').value);
+                    const hasSelectedAnswer = Array.from(document.querySelectorAll('input[name="answer"]')).some(input => input.checked);
+                    
+                    if (hasSelectedAnswer) {
+                        questionStates.answered.add(currentQuestionId);
+                        // Thêm class answered cho câu hỏi hiện tại trong grid
+                        const currentBox = document.querySelector(`.question-box[data-question-id="${currentQuestionId}"]`);
+                        if (currentBox) {
+                            currentBox.classList.remove('unanswered');
+                            currentBox.classList.add('answered');
+                        }
+                    } else {
+                        questionStates.answered.delete(currentQuestionId);
+                        // Xóa class answered và thêm lại unanswered nếu không được mark
+                        const currentBox = document.querySelector(`.question-box[data-question-id="${currentQuestionId}"]`);
+                        if (currentBox && !questionStates.marked.has(currentQuestionId)) {
+                            currentBox.classList.remove('answered');
+                            currentBox.classList.add('unanswered');
+                        }
+                    }
+                    
+                    saveAnsweredStates();
+                    updateQuestionBoxStates();
+                });
+            });
 
                 // Cập nhật trạng thái ban đầu của các ô câu hỏi
                 updateQuestionBoxStates();
@@ -1789,6 +1829,9 @@
                 } else {
                     markButton.classList.remove('marked');
                 }
+                
+                // Cập nhật hiển thị của các ô câu hỏi
+                updateQuestionBoxStates();
             }
 
             // Hàm xử lý đánh dấu câu hỏi
@@ -1833,6 +1876,15 @@
                 window.location.href = 'quiz-handle?action=navigate&questionNumber=' + questionNumber;
             }
 
+            // Hàm lưu trạng thái answered vào localStorage
+            function saveAnsweredStates() {
+                const answeredQuestions = {};
+                questionStates.answered.forEach(id => {
+                    answeredQuestions[id] = true;
+                });
+                localStorage.setItem('answeredQuestions', JSON.stringify(answeredQuestions));
+            }
+
             // Hàm xử lý điều hướng
             function handleNavigation(action) {
                 console.log('Handling navigation:', action);
@@ -1842,10 +1894,13 @@
                 const answerInputs = document.querySelectorAll('input[name="answer"]');
                 const hasSelectedAnswer = Array.from(answerInputs).some(input => input.checked);
                 
+                // Cập nhật trạng thái answered
                 if (hasSelectedAnswer) {
                     questionStates.answered.add(currentQuestionId);
+                    console.log('Adding question', currentQuestionId, 'to answered states');
                 } else {
                     questionStates.answered.delete(currentQuestionId);
+                    console.log('Removing question', currentQuestionId, 'from answered states');
                 }
                 
                 // Lưu trạng thái marked
@@ -1858,12 +1913,11 @@
                 
                 // Lưu các trạng thái vào localStorage
                 saveAnsweredStates();
-                const markedQuestions = {};
-                questionStates.marked.forEach(id => markedQuestions[id] = true);
-                localStorage.setItem('markedQuestions', JSON.stringify(markedQuestions));
+                saveMarkedStates();
                 
-                // Cập nhật hiển thị
-                updateQuestionBoxStates();
+                // Log trạng thái trước khi chuyển trang
+                console.log('Current answered states before navigation:', Array.from(questionStates.answered));
+                console.log('Current marked states before navigation:', Array.from(questionStates.marked));
                 
                 // Set nextAction value và submit form
                 document.getElementById('nextAction').value = action;
@@ -1927,23 +1981,44 @@
                 }
             });
 
+            // Hàm lưu trạng thái marked vào localStorage
+            function saveMarkedStates() {
+                const markedQuestions = {};
+                questionStates.marked.forEach(id => {
+                    markedQuestions[id] = true;
+                });
+                localStorage.setItem('markedQuestions', JSON.stringify(markedQuestions));
+            }
+
             // Hàm xử lý đánh dấu câu hỏi
             function toggleMarkForReview(button) {
-                button.classList.toggle('marked');
                 const currentQuestionId = parseInt(document.querySelector('input[name="questionId"]').value);
+                const currentBox = document.querySelector(`.question-box[data-question-id="${currentQuestionId}"]`);
                 
                 if (button.classList.contains('marked')) {
-                    questionStates.marked.add(currentQuestionId);
-                } else {
                     questionStates.marked.delete(currentQuestionId);
+                    button.classList.remove('marked');
+                    // Cập nhật hiển thị ngay lập tức cho câu hỏi hiện tại
+                    if (currentBox) {
+                        currentBox.classList.remove('marked');
+                        if (!questionStates.answered.has(currentQuestionId)) {
+                            currentBox.classList.add('unanswered');
+                        }
+                    }
+                } else {
+                    questionStates.marked.add(currentQuestionId);
+                    button.classList.add('marked');
+                    // Cập nhật hiển thị ngay lập tức cho câu hỏi hiện tại
+                    if (currentBox) {
+                        currentBox.classList.remove('unanswered');
+                        currentBox.classList.add('marked');
+                    }
                 }
                 
                 // Lưu vào localStorage
-                const markedQuestions = {};
-                questionStates.marked.forEach(id => markedQuestions[id] = true);
-                localStorage.setItem('markedQuestions', JSON.stringify(markedQuestions));
+                saveMarkedStates();
                 
-                // Cập nhật hiển thị
+                // Cập nhật hiển thị tổng thể
                 updateQuestionBoxStates();
             }
 
@@ -2006,7 +2081,8 @@
                     }
                     if (questionStates.answered.has(questionId)) {
                         box.classList.add('answered');
-                    } else {
+                    }
+                    if (!questionStates.answered.has(questionId) && !questionStates.marked.has(questionId)) {
                         box.classList.add('unanswered');
                     }
                     
@@ -2045,6 +2121,15 @@
                     }
                     
                     box.style.display = shouldShow ? 'flex' : 'none';
+                });
+
+                // Highlight active button
+                const buttons = document.querySelectorAll('.review-btn');
+                buttons.forEach(button => {
+                    button.classList.remove('active');
+                    if (button.classList.contains('btn-' + type)) {
+                        button.classList.add('active');
+                    }
                 });
             }
 
