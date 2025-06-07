@@ -744,9 +744,9 @@
 
                 .score-exam-popup .btn-back {
                     padding: 10px 24px;
-                    border: 2px solid #8B7FD2;
+                    border: 2px solid #5751E1;
                     background: white;
-                    color: #8B7FD2;
+                    color: #5751E1;
                     border-radius: 8px;
                     font-weight: 500;
                     cursor: pointer;
@@ -760,7 +760,7 @@
                 .score-exam-popup .btn-confirm {
                     padding: 10px 24px;
                     border: none;
-                    background: #8B7FD2;
+                    background: #5751E1;
                     color: white;
                     border-radius: 8px;
                     font-weight: 500;
@@ -836,7 +836,7 @@
                                                 </c:when>
                                                 <c:otherwise>
                                                     <div class="guest-info">
-                                                        <span>Welcome, Guest!</span>
+                                                        <span>Welcome, Quang Minh!</span>
                                                     </div>
                                                 </c:otherwise>
                                             </c:choose>
@@ -1435,7 +1435,7 @@
             
             /* Style cho Question ID */
             .question-id {
-                color: #666;
+                color: #1A1B3D;
             }
             
             /* Style cho footer chứa các nút điều hướng */
@@ -1501,7 +1501,7 @@
             /* Style chung cho các nút */
             .btn-action, .btn-nav {
                 background: #fff;
-                border: 2px solid #8B7FD2;
+                border: 2px solid #5751E1;
                 border-radius: 8px;
                 padding: 8px 16px;
                 font-size: 14px;
@@ -2134,7 +2134,7 @@
                 } else if (answeredQuestionsCount < totalQuestionsCount) {
                     // Trường hợp 2: Chưa trả lời hết
                     title.textContent = 'Score Exam?';
-                    answeredCount.textContent = `${answeredQuestionsCount} of ${totalQuestionsCount} questions answered`;
+                    answeredCount.textContent = answeredQuestionsCount + ' of ${totalQuestions} questions answered';
                     answeredCount.style.display = 'block';
                     message.textContent = 'You haven\'t answered all questions. Do you want to submit your answers and score the exam?';
                     confirmButton.textContent = 'Score Exam';
@@ -2154,6 +2154,10 @@
                 
                 // Hiển thị popup
                 popup.style.display = 'flex';
+
+                console.log('Total questions:', totalQuestionsCount);
+                console.log('Answered questions:', answeredQuestionsCount);
+                console.log('Question states:', questionStates);
             }
 
             // Hàm đóng popup
