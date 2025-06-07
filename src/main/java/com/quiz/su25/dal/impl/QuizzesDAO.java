@@ -41,7 +41,7 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
     @Override
     public boolean update(Quizzes t) {
         String sql = "UPDATE Quizzes SET name = ?, lesson_id = ?, level = ?,"
-                + " number_of_questions_target = ?, duration_minutes = ?, pass_rate = ?, "
+                + " number_of_questions_target = ?, duration_minutes = ?,  "
                 + "quiz_type = ?, status = ? WHERE id = ?";
         try {
             connection = getConnection();
@@ -51,10 +51,9 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
             statement.setString(3, t.getLevel());
             statement.setInt(4, t.getNumber_of_questions_target());
             statement.setInt(5, t.getDuration_minutes());
-            statement.setDouble(6, t.getPass_rate());
-            statement.setString(7, t.getQuiz_type());
-            statement.setString(8, t.getStatus());
-            statement.setInt(9, t.getId());
+            statement.setString(6, t.getQuiz_type());
+            statement.setString(7, t.getStatus());
+            statement.setInt(8, t.getId());
             statement.executeUpdate();
             return true;
         } catch (SQLException e) {
@@ -85,7 +84,7 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
     @Override
     public int insert(Quizzes t) {
         String sql = "INSERT INTO Quizzes (name, lesson_id, level, number_of_questions_target,"
-                + " duration_minutes, pass_rate, quiz_type, status) "
+                + " duration_minutes, quiz_type, status) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             connection = getConnection();
@@ -131,6 +130,8 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
         }
         return 0;
     }
+
+    
 
     @Override
     public Quizzes getFromResultSet(ResultSet resultSet) throws SQLException {

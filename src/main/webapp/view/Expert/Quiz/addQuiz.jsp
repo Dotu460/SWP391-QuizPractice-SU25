@@ -187,9 +187,9 @@
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
-                                                                    <label for="level" class="form-label">Độ khó <span class="required">*</span></label>
+                                                                    <label for="level" class="form-label">LevelLevel <span class="required">*</span></label>
                                                                     <select class="form-control" id="level" name="level" required>
-                                                                        <option value="">Chọn độ khó</option>
+                                                                        <option value="">Choose Level</option>
                                                                         <option value="easy" ${param.level == 'easy' ? 'selected' : ''}>easy</option>
                                                                         <option value="medium" ${param.level == 'medium' ? 'selected' : ''}>Medium</option>
                                                                         <option value="hard" ${param.level == 'hard' ? 'selected' : ''}>hard</option>
@@ -249,9 +249,7 @@
     <!-- JS here -->
     <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
     
-    <!-- iziToast CSS and JS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/css/iziToast.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/js/iziToast.min.js"></script>
+
 
     
 </body>
