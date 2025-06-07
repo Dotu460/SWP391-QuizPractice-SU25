@@ -46,34 +46,34 @@
         }
         
         .table-responsive {
-            min-width: 1200px;
             width: 100%;
             margin-bottom: 0;
         }
-        
-        /* Đảm bảo thanh cuộn luôn hiển thị ở dưới */
-        .table-container::-webkit-scrollbar {
-            height: 8px;
-            background-color: #f5f5f5;
-        }
-        
-        .table-container::-webkit-scrollbar-thumb {
-            background-color: #888;
-            border-radius: 4px;
-        }
-        
-        .table-container::-webkit-scrollbar-track {
-            background-color: #f5f5f5;
-            border-radius: 4px;
+
+        /* Thêm CSS mới cho bảng */
+        .table th, .table td {
+            white-space: nowrap;  /* Giữ nội dung trên 1 dòng */
+            overflow: hidden;     /* Ẩn nội dung bị tràn */
+            max-width: 200px;     /* Chiều rộng tối đa của mỗi cột */
+            width: 12.5%;         /* Chia đều 8 cột (100/8) */
+            padding: 12px 15px;   /* Padding đều cho các ô */
+            vertical-align: middle; /* Căn giữa nội dung theo chiều dọc */
         }
 
-        /* Giữ cột Actions luôn cố định bên phải */
+        /* Cột Actions rộng hơn một chút vì có nhiều nút */
         .column-actions {
-            position: sticky;
-            right: 0;
+            width: 160px !important;
             background-color: white;
             z-index: 1;
-            box-shadow: -2px 0 4px rgba(0,0,0,0.1);
+        }
+
+        /* Hover effect để hiển thị nội dung đầy đủ */
+        .table td:hover {
+            overflow: visible;
+            white-space: normal;
+            background-color: #f8f9fa;
+            position: relative;
+            z-index: 2;
         }
         
         .btn-action {
@@ -188,6 +188,105 @@
         .pagination {
             margin-bottom: 0;
         }
+
+        /* Add styles for the reset button */
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+            color: white;
+        }
+
+        /* Custom styles for buttons */
+        .btn-sm {
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline-secondary {
+            color: #6c757d;
+            border-color: #6c757d;
+            background-color: transparent;
+        }
+        
+        .btn-outline-secondary:hover {
+            color: #fff;
+            background-color: #6c757d;
+            border-color: #6c757d;
+            transform: translateY(-1px);
+        }
+        
+        /* Add shadow on hover */
+        .btn:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* Icon spacing */
+        .btn i {
+            font-size: 12px;
+        }
+
+        .search-reset-group {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .search-btn, .reset-btn {
+            border: none;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            min-width: 60px;
+            letter-spacing: 0.3px;
+        }
+
+        .search-btn {
+            background-color: #3b82f6;
+            color: white;
+            flex: 1;
+        }
+
+        .search-btn:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .reset-btn {
+            background-color: #e5e7eb;
+            color: #4b5563;
+            flex: 1;
+        }
+
+        .reset-btn:hover {
+            background-color: #d1d5db;
+            transform: translateY(-1px);
+        }
+
+        .search-btn:active, .reset-btn:active {
+            transform: translateY(1px);
+        }
     </style>
 </head>
 
@@ -241,24 +340,24 @@
                                 <h4 class="title">Quizzes List</h4>
                                 <div>
                                     <a href="${pageContext.request.contextPath}/quizzes-list?action=add" class="btn btn-success">
-                                        <i class="fa fa-plus"></i> Tạo Quiz Mới
+                                        <i class="fa fa-plus"></i> Create New Quiz
                                     </a>
                                 </div>
                             </div>
 
                             <!-- Filter Section -->
                             <div class="filter-section">
-                                <form action="${pageContext.request.contextPath}/quizzes-list" method="get">
+                                <form action="${pageContext.request.contextPath}/quizzes-list" method="get" id="filterForm">
                                     <div class="row">
                                         <div class="col-md-4">
                                             <label for="quizName">Quiz name:</label>
                                             <input type="text" class="form-control" id="quizName" name="quizName" 
-                                                   placeholder="Nhập tên quiz..." value="${param.quizName}">
+                                                   placeholder="Enter quiz name..." value="${param.quizName}">
                                         </div>
                                         <div class="col-md-3">
                                             <label for="subjectId">Subject:</label>
                                             <select class="form-control" id="subjectId" name="subjectId" onchange="loadLessons()">
-                                                <option value="">-- Tất cả môn học --</option>
+                                                <option value="">-- All subjects --</option>
                                                 <c:forEach items="${subjectsList}" var="subject">
                                                     <option value="${subject.id}" ${param.subjectId == subject.id ? 'selected' : ''}>
                                                         ${subject.title}
@@ -269,19 +368,26 @@
                                         <div class="col-md-3">
                                             <label for="quizType">Quiz types:</label>
                                             <select class="form-control" id="quizType" name="quizType">
-                                                <option value="">-- Tất cả loại --</option>
+                                                <option value="">-- All types --</option>
                                                 <option value="practice" ${param.quizType == 'practice' ? 'selected' : ''}>Practice</option>
                                                 <option value="exam" ${param.quizType == 'exam' ? 'selected' : ''}>Exam</option>
                                             </select>
                                         </div>
                                         <div class="col-md-2 d-flex align-items-end">
-                                            <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
+                                            <div class="search-reset-group">
+                                                <button type="submit" class="search-btn">
+                                                    Search
+                                                </button>
+                                                <button type="button" class="reset-btn" onclick="resetFilter()">
+                                                    Reset
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-12 text-end">
                                             <button type="button" class="settings-btn" id="columnSettingsBtn" style="width: auto; padding: 6px 12px; font-size: 14px;">
-                                                <i class="fa fa-cog"></i> Tùy chỉnh hiển thị cột
+                                                <i class="fa fa-cog"></i> Customize column display
                                             </button>
                                         </div>
                                     </div>
@@ -330,7 +436,7 @@
                                                                 <td class="column-questions" data-column="questions">${quiz.number_of_questions_target} </td>
                                                                 <td class="column-duration" data-column="duration">${quiz.duration_minutes} minutes</td>
                                                                 <td class="column-actions" data-column="actions">
-                                                                    <a href="${pageContext.request.contextPath}/QuizDetail?id=${quiz.id}" 
+                                                                    <a href="${pageContext.request.contextPath}/quizzes-list?action=details&id=${quiz.id}" 
                                                                        class="btn-action btn-view" title="Details">
                                                                         <i class="fas fa-eye"></i>
                                                                     </a>
@@ -350,14 +456,33 @@
                                     </div>
 
                                     <!-- Phân trang -->
-                                    <c:if test="${totalPages > 1}">
-                                        <div class="d-flex justify-content-center mt-4">
+                                    <c:if test="${totalPages > 0}">
+                                        <div class="d-flex justify-content-between align-items-center mt-4">
+                                            <!-- Form nhập số bản ghi mỗi trang -->
+                                            <div class="records-per-page">
+                                                <form action="${pageContext.request.contextPath}/quizzes-list" method="get" class="d-flex align-items-center">
+                                                    <!-- Giữ lại các tham số tìm kiếm hiện tại -->
+                                                    <input type="hidden" name="quizName" value="${param.quizName}">
+                                                    <input type="hidden" name="subjectId" value="${param.subjectId}">
+                                                    <input type="hidden" name="quizType" value="${param.quizType}">
+                                                    
+                                                    <label for="recordsPerPage" class="me-2">Records per page:</label>
+                                                    <div class="d-flex align-items-center">
+                                                        <input type="number" class="form-control form-control-sm" 
+                                                               id="recordsPerPage" name="recordsPerPage" 
+                                                               value="${recordsPerPage}" min="1" max="100" 
+                                                               style="width: 50px;">
+                                                    </div>
+                                                </form>
+                                            </div>
+
+                                            <!-- Phân trang -->
                                             <nav aria-label="Page navigation">
                                                 <ul class="pagination mb-0">
                                                     <!-- Nút Previous -->
                                                     <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
                                                         <a class="page-link" 
-                                                           href="${pageContext.request.contextPath}/quizzes-list?page=${currentPage - 1}&quizName=${param.quizName}&subjectId=${param.subjectId}&quizType=${param.quizType}"
+                                                           href="${pageContext.request.contextPath}/quizzes-list?page=${currentPage - 1}&recordsPerPage=${recordsPerPage}&quizName=${param.quizName}&subjectId=${param.subjectId}&quizType=${param.quizType}"
                                                            ${currentPage == 1 ? 'tabindex="-1" aria-disabled="true"' : ''}>
                                                             &laquo;
                                                         </a>
@@ -367,7 +492,7 @@
                                                     <c:forEach begin="1" end="${totalPages}" var="i">
                                                         <li class="page-item ${i == currentPage ? 'active' : ''}">
                                                             <a class="page-link" 
-                                                               href="${pageContext.request.contextPath}/quizzes-list?page=${i}&quizName=${param.quizName}&subjectId=${param.subjectId}&quizType=${param.quizType}">
+                                                               href="${pageContext.request.contextPath}/quizzes-list?page=${i}&recordsPerPage=${recordsPerPage}&quizName=${param.quizName}&subjectId=${param.subjectId}&quizType=${param.quizType}">
                                                                 ${i}
                                                             </a>
                                                         </li>
@@ -376,7 +501,7 @@
                                                     <!-- Nút Next -->
                                                     <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
                                                         <a class="page-link" 
-                                                           href="${pageContext.request.contextPath}/quizzes-list?page=${currentPage + 1}&quizName=${param.quizName}&subjectId=${param.subjectId}&quizType=${param.quizType}"
+                                                           href="${pageContext.request.contextPath}/quizzes-list?page=${currentPage + 1}&recordsPerPage=${recordsPerPage}&quizName=${param.quizName}&subjectId=${param.subjectId}&quizType=${param.quizType}"
                                                            ${currentPage == totalPages ? 'tabindex="-1" aria-disabled="true"' : ''}>
                                                             &raquo;
                                                         </a>
@@ -408,11 +533,11 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="columnSettingsModalLabel">
-                        <i class="fa fa-cog"></i> Tùy chỉnh hiển thị cột
+                        <i class="fa fa-cog"></i> Customize column display
                     </h5>
                 </div>
                 <div class="modal-body">
-                    <p class="text-muted mb-3">Chọn các cột bạn muốn hiển thị trong bảng:</p>
+                    <p class="text-muted mb-3">Select the columns you want to display in the table:</p>
                     <form id="columnSettingsForm">
                         <div class="column-checkbox">
                             <input type="checkbox" id="col-id" value="id" checked>
@@ -420,47 +545,47 @@
                         </div>
                         <div class="column-checkbox">
                             <input type="checkbox" id="col-name" value="name" checked>
-                            <label for="col-name">Tên Quiz</label>
+                            <label for="col-name">Quiz Name</label>
                         </div>
                         <div class="column-checkbox">
                             <input type="checkbox" id="col-type" value="type" checked>
-                            <label for="col-type">Loại Quiz</label>
+                            <label for="col-type">Quiz Type</label>
                         </div>
                         <div class="column-checkbox">
                             <input type="checkbox" id="col-level" value="level" checked>
-                            <label for="col-level">Độ khó</label>
+                            <label for="col-level">Level</label>
                         </div>
                         <div class="column-checkbox">
                             <input type="checkbox" id="col-subject" value="subject" checked>
-                            <label for="col-subject">Môn học</label>
+                            <label for="col-subject">Subject</label>
                         </div>
                         <div class="column-checkbox">
                             <input type="checkbox" id="col-lesson" value="lesson" checked>
-                            <label for="col-lesson">Bài học</label>
+                            <label for="col-lesson">Lesson</label>
                         </div>
                         <div class="column-checkbox">
                             <input type="checkbox" id="col-questions" value="questions" checked>
-                            <label for="col-questions">Số câu hỏi</label>
+                            <label for="col-questions">Number of Questions</label>
                         </div>
                         <div class="column-checkbox">
                             <input type="checkbox" id="col-duration" value="duration" checked>
-                            <label for="col-duration">Thời gian</label>
+                            <label for="col-duration">Duration</label>
                         </div>
                     </form>
                     
                     <hr>
                     <div class="d-flex justify-content-between">
                         <button type="button" class="btn btn-outline-secondary btn-sm" id="selectAllBtn">
-                            <i class="fa fa-check-square"></i> Chọn tất cả
+                            <i class="fa fa-check-square"></i> Select all
                         </button>
                         <button type="button" class="btn btn-outline-secondary btn-sm" id="deselectAllBtn">
-                            <i class="fa fa-square"></i> Bỏ chọn tất cả
+                            <i class="fa fa-square"></i> Deselect all
                         </button>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" id="applySettingsBtn">
-                        <i class="fa fa-check"></i> Áp dụng
+                        <i class="fa fa-check"></i> Apply
                     </button>
                 </div>
             </div>
@@ -561,6 +686,23 @@
         }
         
         // Display success/error messages if they exist
+
+        // Add reset filter function
+        function resetFilter() {
+            document.getElementById('quizName').value = '';
+            document.getElementById('subjectId').value = '';
+            document.getElementById('quizType').value = '';
+            document.getElementById('recordsPerPage').value = ''; // Reset records per page too
+            document.getElementById('filterForm').submit();
+        }
+        
+        // Add event listener for records per page input
+        document.getElementById('recordsPerPage').addEventListener('change', function(e) {
+            if (!this.value || this.value < 1) {
+                this.value = ''; // Empty value to show all records
+            }
+            this.form.submit();
+        });
     </script>
 </body>
 
