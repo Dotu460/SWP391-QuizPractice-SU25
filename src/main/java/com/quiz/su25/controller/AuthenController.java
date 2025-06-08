@@ -10,7 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;    
 
 import com.quiz.su25.config.GlobalConfig;
-@WebServlet({"/login", "/logout"})
+import com.quiz.su25.utils.EmailUtils;
+@WebServlet(name="AuthenController", urlPatterns={"/login","/authen","/register","/otp"})
 public class AuthenController extends HttpServlet {
     private UserDAO userDAO = new UserDAO();
 
@@ -32,7 +33,7 @@ public class AuthenController extends HttpServlet {
                 logout(request, response);
                 break;
             case "/register":
-                request.getRequestDispatcher("view/authen/register/userregister.jsp").forward(request, response);
+                request.getRequestDispatcher("view/authen/register/register.jsp").forward(request, response);
                 break;
             default:
                 request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
@@ -53,7 +54,7 @@ public class AuthenController extends HttpServlet {
                 logout(request, response);
                 break;
             case "/register":
-//                register(request, response);
+                registerDoPost(request, response);
                 break;
             default :
                 login(request, response);
@@ -98,5 +99,63 @@ public class AuthenController extends HttpServlet {
             // For regular requests, redirect to home
             response.sendRedirect("home");
         }
+    }
+    
+    public void registerDoPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Get form parameters
+        String fullName = request.getParameter("fullName");
+        String password = request.getParameter("password");
+        String email = request.getParameter("email");
+        String mobile = request.getParameter("mobile");
+        String genderStr = request.getParameter("gender");
+        
+        HttpSession session = request.getSession();
+        int gender = "male".equals(genderStr) ? 1 : 0;
+        
+        try {
+            // Check if email already exists
+            if (userDAO.isEmailExist(email)) {
+                request.setAttribute("message", "Email already exists. Please use a different email.");
+                request.setAttribute("type", "danger");
+                request.getRequestDispatcher("view/authen/register/register.jsp").forward(request, response);
+                return;
+            }
+            
+            // Create new user
+            User newUser = User.builder()
+                    .full_name(fullName)
+                    .email(email)
+                    .password(password)
+                    .gender(gender)
+                    .mobile(mobile)
+                    .avatar_url(null)  // Default avatar
+                    .role_id(2)        // Default role for regular users
+                    .status("active")  // Default status
+                    .build();
+            
+            // Insert user into database
+            int userId = userDAO.insert(newUser);
+            
+            if (userId > 0) {
+                // Registration successful
+                request.setAttribute("message", "Registration successful. Please login.");
+                request.setAttribute("type", "success");
+                request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
+            } else {
+                // Registration failed
+                request.setAttribute("message", "Registration failed. Please try again.");
+                request.setAttribute("type", "danger");
+                request.getRequestDispatcher("view/authen/register/register.jsp").forward(request, response);
+            }
+        } catch (Exception e) {
+            // Handle exceptions
+            request.setAttribute("message", "An error occurred during registration: " + e.getMessage());
+            request.setAttribute("type", "danger");
+            request.getRequestDispatcher("view/authen/register/register.jsp").forward(request, response);
+        }
+        String OTP = EmailUtils.sendOTPMail(email);
+        session.setAttribute("OTP",OTP);
+        session.setAttribute("email",email);
+        request.getRequestDispatcher("otp.jsp").forward(request,response);
     }
 }

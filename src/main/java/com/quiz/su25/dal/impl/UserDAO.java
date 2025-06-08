@@ -259,6 +259,30 @@ public class UserDAO extends DBContext implements I_DAO<User> {
         }
         return null;
     }
+    
+    /**
+     * Check if an email already exists in the database
+     * @param email Email to check
+     * @return true if email exists, false otherwise
+     */
+    public boolean isEmailExist(String email) {
+        String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, email);
+            
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error checking if email exists: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return false;
+    }
 
     public List<User> getPaginatedUsers(int page, int pageSize, String genderFilter, String roleFilter,
                                         String statusFilter, String searchTerm, String sortBy, String sortOrder) {
