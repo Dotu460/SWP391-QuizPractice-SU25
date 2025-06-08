@@ -284,4 +284,28 @@ public class UserDAO extends DBContext implements I_DAO<User> {
         return false;
     }
 
+    /**
+     * Update password for a user with given email
+     * @param email User's email
+     * @param newPassword New password to set
+     * @return true if password was updated successfully, false otherwise
+     */
+    public boolean updatePassword(String email, String newPassword) {
+        String sql = "UPDATE users SET password = ? WHERE email = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, newPassword);
+            statement.setString(2, email);
+            
+            int rowsAffected = statement.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.out.println("Error updating password: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return false;
+    }
+
 }
