@@ -87,11 +87,17 @@ public class QuizHandleController extends HttpServlet {
                 
                 // Lấy câu trả lời đã chọn từ session
                 HttpSession session = request.getSession();
-                Map<Integer, List<Integer>> userAnswers = (Map<Integer, List<Integer>>) session.getAttribute("userAnswers");
+                Map<Integer, Object> userAnswers = (Map<Integer, Object>) session.getAttribute("userAnswers");
                 
                 if (userAnswers != null && userAnswers.containsKey(currentQuestion.getId())) {
-                    List<Integer> selectedAnswers = userAnswers.get(currentQuestion.getId());
-                    request.setAttribute("selectedAnswers", selectedAnswers);
+                    Object answer = userAnswers.get(currentQuestion.getId());
+                    if ("multiple".equals(currentQuestion.getType())) {
+                        // Nếu là câu hỏi trắc nghiệm, cast về List<Integer>
+                        request.setAttribute("selectedAnswers", (List<Integer>) answer);
+                    } else {
+                        // Nếu là câu hỏi tự luận, cast về String
+                        request.setAttribute("selectedAnswers", (String) answer);
+                    }
                 }
                 
                 // Set attributes cho JSP
@@ -125,29 +131,36 @@ public class QuizHandleController extends HttpServlet {
             try {
                 // Lấy thông tin câu hỏi và câu trả lời
                 int questionId = Integer.parseInt(request.getParameter("questionId"));
-                String[] selectedAnswerIds = request.getParameterValues("answer");
                 String nextAction = request.getParameter("nextAction");
                 int currentNumber = Integer.parseInt(request.getParameter("questionNumber"));
                 
-                System.out.println("Question ID: " + questionId); // Debug log
-                System.out.println("Current Number: " + currentNumber); // Debug log
-                System.out.println("Next Action: " + nextAction); // Debug log
+                // Lấy câu hỏi để kiểm tra type
+                QuestionDAO questionDAO = new QuestionDAO();
+                Question question = questionDAO.findById(questionId);
                 
                 // Lấy hoặc tạo mới map lưu câu trả lời trong session
                 HttpSession session = request.getSession();
-                Map<Integer, List<Integer>> userAnswers = (Map<Integer, List<Integer>>) session.getAttribute("userAnswers");
+                Map<Integer, Object> userAnswers = (Map<Integer, Object>) session.getAttribute("userAnswers");
                 if (userAnswers == null) {
                     userAnswers = new HashMap<>();
                 }
                 
-                // Lưu câu trả lời vào map
-                List<Integer> answers = new ArrayList<>();
-                if (selectedAnswerIds != null) {
-                    for (String answerId : selectedAnswerIds) {
-                        answers.add(Integer.parseInt(answerId));
+                if ("multiple".equals(question.getType())) {
+                    // Xử lý câu hỏi trắc nghiệm
+                    String[] selectedAnswerIds = request.getParameterValues("answer");
+                    List<Integer> answers = new ArrayList<>();
+                    if (selectedAnswerIds != null) {
+                        for (String answerId : selectedAnswerIds) {
+                            answers.add(Integer.parseInt(answerId));
+                        }
                     }
+                    userAnswers.put(questionId, answers);
+                } else if ("essay".equals(question.getType())) {
+                    // Xử lý câu hỏi tự luận
+                    String essayAnswer = request.getParameter("essay_answer");
+                    if (essayAnswer == null) essayAnswer = "";
+                    userAnswers.put(questionId, essayAnswer);
                 }
-                userAnswers.put(questionId, answers);
                 
                 // Cập nhật session
                 session.setAttribute("userAnswers", userAnswers);

@@ -71,14 +71,15 @@ public class QuestionOptionDAO extends DBContext implements I_DAO<QuestionOption
 
     @Override
     public int insert(QuestionOption t) {
-        String sql = "INSERT INTO QuestionOption (question_id, option_text, correct_key, display_order) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO QuestionOption (question_id, option_text, answer_text, correct_key, display_order) VALUES (?, ?, ?, ?, ?)";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setInt(1, t.getQuestion_id());
             statement.setString(2, t.getOption_text());
-            statement.setBoolean(3, t.isCorrect_key());
-            statement.setInt(4, t.getDisplay_order());
+            statement.setString(3, t.getAnswer_text());
+            statement.setBoolean(4, t.isCorrect_key());
+            statement.setInt(5, t.getDisplay_order());
             
             return statement.executeUpdate();
         } catch (Exception e) {
@@ -91,15 +92,16 @@ public class QuestionOptionDAO extends DBContext implements I_DAO<QuestionOption
 
     @Override
     public boolean update(QuestionOption t) {
-        String sql = "UPDATE QuestionOption SET question_id=?, option_text=?, correct_key=?, display_order=? WHERE id=?";
+        String sql = "UPDATE QuestionOption SET question_id=?, option_text=?, answer_text=?, correct_key=?, display_order=? WHERE id=?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setInt(1, t.getQuestion_id());
             statement.setString(2, t.getOption_text());
-            statement.setBoolean(3, t.isCorrect_key());
-            statement.setInt(4, t.getDisplay_order());
-            statement.setInt(5, t.getId());
+            statement.setString(3, t.getAnswer_text());
+            statement.setBoolean(4, t.isCorrect_key());
+            statement.setInt(5, t.getDisplay_order());
+            statement.setInt(6, t.getId());
             
             return statement.executeUpdate() > 0;
         } catch (Exception e) {
@@ -149,6 +151,7 @@ public class QuestionOptionDAO extends DBContext implements I_DAO<QuestionOption
                 .id(resultSet.getInt("id"))
                 .question_id(resultSet.getInt("question_id"))
                 .option_text(resultSet.getString("option_text"))
+                .answer_text(resultSet.getString("answer_text"))
                 .correct_key(resultSet.getBoolean("correct_key"))
                 .display_order(resultSet.getInt("display_order"))
                 .build();

@@ -785,6 +785,43 @@
                 .score-exam-popup .close-btn:hover {
                     color: #1A1B3D;
                 }
+
+                /* Essay Question Styles */
+                .essay-answer-container {
+                    width: 100%;
+                    margin-top: 20px;
+                }
+
+                .essay-answer {
+                    width: 100%;
+                    padding: 15px;
+                    border: 2px solid #e0e0e0;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    line-height: 1.6;
+                    resize: vertical;
+                    min-height: 200px;
+                    transition: all 0.3s ease;
+                }
+
+                .essay-answer:focus {
+                    border-color: #8B7FD2;
+                    box-shadow: 0 0 0 2px rgba(139, 127, 210, 0.1);
+                    outline: none;
+                }
+
+                .essay-controls {
+                    display: flex;
+                    justify-content: flex-end;
+                    color: #666;
+                    font-size: 14px;
+                }
+
+                .word-count {
+                    padding: 4px 8px;
+                    background: #f8f9fa;
+                    border-radius: 4px;
+                }
             </style>
     </head>
 
@@ -1265,28 +1302,57 @@
                             <input type="hidden" name="questionId" value="${question.id}">
                             <input type="hidden" name="nextAction" id="nextAction" value="">
                             
-                            <c:forEach items="${question.questionOptions}" var="option">
-                                <div class="answer-option mb-3">
-                                    <div class="form-check">
-                                        <input class="form-check-input" 
-                                               type="${question.questionOptions.size() > 1 ? 'checkbox' : 'radio'}"
-                                               name="answer" 
-                                               id="option${option.id}" 
-                                               value="${option.id}"
-                                               <c:if test="${not empty selectedAnswers && selectedAnswers.contains(option.id)}">checked</c:if>>
-                                        <label class="form-check-label" for="option${option.id}">
-                                            ${option.option_text}
-                                        </label>
+                            <c:choose>
+                                <c:when test="${empty question.type}">
+                                    <!-- Hiển thị thông báo lỗi khi type là null -->
+                                    <div class="alert alert-danger" role="alert">
+                                        <strong><i class="fas fa-exclamation-circle"></i> ERROR:</strong>
+                                        <div>
+                                            This question has not been set the type in the database.<br>
+                                            Please contact to the admin for the technical support.<br>
+                                            Question ID: ${question.id}
+                                        </div>
                                     </div>
-                                </div>
-                            </c:forEach>
+                                </c:when>
+                                <c:when test="${question.type eq 'multiple'}">
+                                    <!-- Multiple Choice Question -->
+                                    <c:forEach items="${question.questionOptions}" var="option">
+                                        <div class="answer-option mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" 
+                                                       type="${question.questionOptions.size() > 1 ? 'checkbox' : 'radio'}"
+                                                       name="answer" 
+                                                       id="option${option.id}" 
+                                                       value="${option.id}"
+                                                       <c:if test="${not empty selectedAnswers && selectedAnswers.contains(option.id)}">checked</c:if>>
+                                                <label class="form-check-label" for="option${option.id}">
+                                                    ${option.option_text}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </c:forEach>
+                                </c:when>
+                                <c:otherwise>
+                                    <!-- Essay Question -->
+                                    <div class="essay-answer-container">
+                                        <textarea class="form-control essay-answer" 
+                                                  name="essay_answer" 
+                                                  rows="6" 
+                                                  placeholder="Type your answer here..."
+                                                  onchange="autoSaveEssayAnswer(this.value)">${selectedAnswers}</textarea>
+                                        <div class="essay-controls mt-2">
+                                            <span class="word-count">0 words</span>
+                                        </div>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
                         </form>
                     </div>
                 </div>
 
                 <!-- Navigation Footer Section: Chứa các nút điều hướng -->
                 <div class="navigation-footer">
-                    <!-- Nút Review Progress: Hiện tại chưa có chức năng -->
+                    <!-- Nút Review Progress-->
                     <button class="btn-review" onclick="openReviewPopup()">
                         <i class="fas fa-tasks"></i>
                         Review Progress
@@ -1417,6 +1483,10 @@
             .question-header {
                 padding: 20px 0;
                 border-bottom: 1px solid #eee;
+            }
+            
+            .media-content{
+                width: 40%;
             }
             
             /* Container cho số câu hỏi và ID */
@@ -2179,6 +2249,73 @@
             window.addEventListener('beforeunload', function() {
                 // Xóa session khi người dùng rời khỏi trang
                 sessionStorage.removeItem('quizStarted');
+            });
+        </script>
+
+        <script>
+            // Add word count functionality for essay answers
+            document.addEventListener('DOMContentLoaded', function() {
+                const essayAnswer = document.querySelector('.essay-answer');
+                const wordCount = document.querySelector('.word-count');
+                
+                if (essayAnswer && wordCount) {
+                    function updateWordCount() {
+                        const text = essayAnswer.value.trim();
+                        const words = text ? text.split(/\s+/).length : 0;
+                        wordCount.textContent = words + ' words';
+                    }
+                    
+                    essayAnswer.addEventListener('input', updateWordCount);
+                    // Initial count
+                    updateWordCount();
+                }
+            });
+        </script>
+
+        <!-- Thêm script để xử lý tự động lưu câu trả lời -->
+        <script>
+            function autoSaveEssayAnswer(answer) {
+                const form = document.getElementById('answerForm');
+                const formData = new FormData(form);
+                formData.append('action', 'saveAnswer');
+                
+                // Lấy ID câu hỏi hiện tại
+                const currentQuestionId = parseInt(document.querySelector('input[name="questionId"]').value);
+                
+                // Gửi request để lưu câu trả lời
+                fetch('${pageContext.request.contextPath}/quiz-handle', {
+                    method: 'POST',
+                    body: formData
+                }).then(response => {
+                    if (response.ok) {
+                        console.log('Essay answer saved successfully');
+                        
+                        // Cập nhật trạng thái answered
+                        if (answer.trim() !== '') {
+                            // Thêm câu hỏi vào danh sách đã trả lời
+                            questionStates.answered.add(currentQuestionId);
+                            saveAnsweredStates();
+                        } else {
+                            // Nếu câu trả lời trống, xóa khỏi danh sách đã trả lời
+                            questionStates.answered.delete(currentQuestionId);
+                            saveAnsweredStates();
+                        }
+                        
+                        // Cập nhật hiển thị của các ô câu hỏi
+                        updateQuestionBoxStates();
+                    }
+                }).catch(error => {
+                    console.error('Error saving essay answer:', error);
+                });
+            }
+
+            // Thêm debounce để tránh gửi quá nhiều request
+            let timeoutId;
+            document.querySelector('.essay-answer').addEventListener('input', function(e) {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => {
+                    autoSaveEssayAnswer(e.target.value);
+                }, 1000); // Đợi 1 giây sau khi người dùng ngừng gõ
             });
         </script>
     </body>

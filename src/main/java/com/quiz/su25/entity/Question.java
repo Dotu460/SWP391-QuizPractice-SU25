@@ -25,6 +25,7 @@ import lombok.ToString;
 public class Question {
     private Integer id;
     private Integer quiz_id;
+    private String type;
     private String content;
     private String media_url;
     private String level;

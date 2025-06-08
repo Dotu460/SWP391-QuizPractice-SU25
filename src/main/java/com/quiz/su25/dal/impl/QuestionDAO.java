@@ -43,18 +43,19 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
 
     @Override
     public boolean update(Question t) {
-        String sql = "UPDATE Question SET quiz_id=?, content=?, media_url=?, level=?, status=?, explanation=?, created_by=? WHERE id=?";
+        String sql = "UPDATE Question SET quiz_id=?, type=?, content=?, media_url=?, level=?, status=?, explanation=?, created_by=? WHERE id=?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setInt(1, t.getQuiz_id());
-            statement.setString(2, t.getContent());
-            statement.setString(3, t.getMedia_url());
-            statement.setString(4, t.getLevel());
-            statement.setString(5, t.getStatus());
-            statement.setString(6, t.getExplanation());
-            statement.setInt(7, t.getCreated_by());
-            statement.setInt(8, t.getId());
+            statement.setString(2, t.getType());
+            statement.setString(3, t.getContent());
+            statement.setString(4, t.getMedia_url());
+            statement.setString(5, t.getLevel());
+            statement.setString(6, t.getStatus());
+            statement.setString(7, t.getExplanation());
+            statement.setInt(8, t.getCreated_by());
+            statement.setInt(9, t.getId());
             
             return statement.executeUpdate() > 0;
         } catch (Exception e) {
@@ -84,17 +85,18 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
 
     @Override
     public int insert(Question t) {
-        String sql = "INSERT INTO Question (quiz_id, content, media_url, level, status, explanation, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Question (quiz_id, type, content, media_url, level, status, explanation, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setInt(1, t.getQuiz_id());
-            statement.setString(2, t.getContent());
-            statement.setString(3, t.getMedia_url());
-            statement.setString(4, t.getLevel());
-            statement.setString(5, t.getStatus());
-            statement.setString(6, t.getExplanation());
-            statement.setInt(7, t.getCreated_by());
+            statement.setString(2, t.getType());
+            statement.setString(3, t.getContent());
+            statement.setString(4, t.getMedia_url());
+            statement.setString(5, t.getLevel());
+            statement.setString(6, t.getStatus());
+            statement.setString(7, t.getExplanation());
+            statement.setInt(8, t.getCreated_by());
             
             return statement.executeUpdate();
         } catch (Exception e) {
@@ -110,6 +112,7 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
         return Question.builder()
                 .id(resultSet.getInt("id"))
                 .quiz_id(resultSet.getInt("quiz_id"))
+                .type(resultSet.getString("type"))
                 .content(resultSet.getString("content"))
                 .media_url(resultSet.getString("media_url"))
                 .level(resultSet.getString("level"))
