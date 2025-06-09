@@ -316,7 +316,7 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
             int pageNumber, int pageSize) {
         
         List<Post> list = new ArrayList<>();
-        StringBuilder sqlBuilder = new StringBuilder("SELECT p.* FROM post p");
+        StringBuilder sqlBuilder = new StringBuilder("SELECT DISTINCT p.* FROM post p");
         
         // If we're searching by category name, we need to join with the category table
         if (searchCategory) {
@@ -324,35 +324,38 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
         }
         
         sqlBuilder.append(" WHERE 1=1");
-        
         List<Object> params = new ArrayList<>();
         
         // Add search conditions based on parameters
         if (keyword != null && !keyword.trim().isEmpty()) {
+            sqlBuilder.append(" AND (1=0"); // Start with false condition to use OR for each search field
+            
             if (searchTitle) {
-                sqlBuilder.append(" AND p.title LIKE ?");
+                sqlBuilder.append(" OR LOWER(p.title) LIKE LOWER(?)");
                 params.add("%" + keyword + "%");
             }
             
             if (searchCategory) {
-                sqlBuilder.append(" AND c.name LIKE ?");
+                sqlBuilder.append(" OR LOWER(c.name) LIKE LOWER(?)");
                 params.add("%" + keyword + "%");
             }
             
             if (searchBriefInfo) {
-                sqlBuilder.append(" AND p.brief_info LIKE ?");
+                sqlBuilder.append(" OR LOWER(p.brief_info) LIKE LOWER(?)");
                 params.add("%" + keyword + "%");
             }
+            
+            sqlBuilder.append(")");
         }
         
         if (searchDate && startDate != null && endDate != null) {
-            sqlBuilder.append(" AND p.updated_at BETWEEN ? AND ?");
+            sqlBuilder.append(" AND p.published_at BETWEEN ? AND ?");
             params.add(startDate);
             params.add(endDate);
         }
         
         // Add order by and pagination
-        sqlBuilder.append(" ORDER BY p.updated_at DESC LIMIT ? OFFSET ?");
+        sqlBuilder.append(" ORDER BY p.published_at DESC LIMIT ? OFFSET ?");
         params.add(pageSize);
         params.add((pageNumber - 1) * pageSize);
         

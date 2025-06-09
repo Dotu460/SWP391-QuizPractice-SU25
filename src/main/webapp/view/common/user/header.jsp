@@ -132,11 +132,9 @@
                                                 </ul>
                                             </li>
                                             <li class="menu-item-has-children">
-                                                <a href="blog.html">Blog</a>
+                                                <a>Blog</a>
                                                 <ul class="sub-menu">
-                                                    <li><a href="blog.html">Blog Right Sidebar</a></li>
-                                                    <li><a href="blog-2.html">Blog Left Sidebar</a></li>
-                                                    <li><a href="blog-3.html">Blog Full Width</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/blog">Blog List</a></li>
                                                     <li><a href="blog-details.html">Blog Details</a></li>
                                                 </ul>
                                             </li>

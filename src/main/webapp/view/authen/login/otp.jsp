@@ -184,7 +184,7 @@
                     </button>
 
                     <div class="back-link">
-                        <a href="${pageContext.request.contextPath}/authen?action=login">
+                        <a href="${pageContext.request.contextPath}/login">
                             <i class="fas fa-arrow-left me-2"></i>Back to login
                         </a>
                     </div>
