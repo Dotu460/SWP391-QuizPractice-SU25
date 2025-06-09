@@ -301,6 +301,24 @@
         .header-menu {
             margin-top: -10px;
         }
+        .button-style {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #6559F5; /* màu tím */
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            border: 2px solid #0D006C; /* tím đậm hơn một chút */
+            border-radius: 999px; /* bo tròn hoàn toàn */
+            box-shadow: 0 4px 12px rgba(128, 0, 128, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .button-style:hover {
+            background-color: #6559F5;
+            box-shadow: 0 6px 15px rgba(128, 0, 128, 0.3);
+        }
         .navbar {
             padding: 0;
         }
