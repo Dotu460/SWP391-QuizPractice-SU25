@@ -169,28 +169,6 @@
     <!-- Header -->
     <jsp:include page="../common/user/header.jsp"></jsp:include>
 
-    <!-- Breadcrumb -->
-    <section class="breadcrumb-area breadcrumb__hide-img" data-background="${pageContext.request.contextPath}/view/common/img/breadcrumb-bg.jpg">
-        <div class="container">
-            <div class="breadcrumb__wrapper">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="breadcrumb__content">
-                            <h2 class="breadcrumb__title">Blog</h2>
-                            <div class="breadcrumb__menu">
-                                <nav aria-label="Breadcrumbs">
-                                    <ul class="breadcrumb__list">
-                                        <li><a href="${pageContext.request.contextPath}/home">Home</a></li>
-                                        <li><span>Blog</span></li>
-                                    </ul>
-                                </nav>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- Blog Content -->
     <section class="blog-area section-padding-120">
