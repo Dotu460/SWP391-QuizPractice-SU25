@@ -21,7 +21,7 @@ import java.util.logging.Level;
  */
 public class EmailUtils {
     private static final String USERNAME_EMAIL = "trinhkhanhlinh60@gmail.com";
-    private static final String PASSWORD_APP_EMAIL = "nkbm sttl hpaj pmrw";
+    private static final String PASSWORD_APP_EMAIL = "ygut kwfj pcol wnrs";
     
     public static boolean sendMail(String to, String subject, String content) throws AddressException, MessagingException{
         Properties props = new Properties();
@@ -40,7 +40,7 @@ public class EmailUtils {
         message.setFrom(new InternetAddress(USERNAME_EMAIL));
         message.setRecipients(Message.RecipientType.TO,InternetAddress.parse(to));
         message.setSubject(subject);
-        message.setContent(content,"text/html; charset=UTP-8");
+        message.setContent(content,"text/html; charset=UTF-8");
         
         Transport.send(message);
         return true;
@@ -62,10 +62,6 @@ public class EmailUtils {
             return otp;
         }
     public static void main(String[] args){
-        try {
-            sendMail("khanhlinhtrinh323@gmail.com","test tao mail","helooo");
-        } catch (MessagingException ex) {
-            Logger.getLogger(EmailUtils.class.getName()).log(Level.SEVERE, null, ex);
-        }
+            sendOTPMail("khanhlinhtrinh323@gmail.com");
     }
 }

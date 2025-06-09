@@ -198,12 +198,14 @@
                 const form = document.getElementById('otpForm');
                 const otpValue = document.getElementById('otpValue');
                 const resendButton = document.getElementById('resendButton');
+                let timeLeft = 60; // 1 minute initial countdown
 
                 // Auto-focus first input on page load
                 inputs[0].focus();
 
-                // Auto-focus next input
+                // Handle input for OTP fields
                 inputs.forEach((input, index) => {
+                    // Auto-focus next input
                     input.addEventListener('input', function() {
                         if (this.value.length === 1) {
                             if (index < inputs.length - 1) {
@@ -225,6 +227,22 @@
                             e.preventDefault();
                         }
                     });
+
+                    // Handle paste event
+                    input.addEventListener('paste', function(e) {
+                        e.preventDefault();
+                        const pastedData = e.clipboardData.getData('text').slice(0, 6);
+                        if (/^\d+$/.test(pastedData)) {
+                            [...pastedData].forEach((digit, i) => {
+                                if (inputs[i]) {
+                                    inputs[i].value = digit;
+                                    if (i < inputs.length - 1) {
+                                        inputs[i + 1].focus();
+                                    }
+                                }
+                            });
+                        }
+                    });
                 });
 
                 // Handle form submission
@@ -240,46 +258,85 @@
                     }
                 });
 
-                // Timer functionality
-                let timeLeft = 300; // 5 minutes
-                const countdownEl = document.getElementById('countdown');
-                resendButton.disabled = true;
+                // Initialize timer
+                function startTimer() {
+                    const countdownEl = document.getElementById('countdown');
+                    resendButton.disabled = true;
+                    
+                    const timer = setInterval(() => {
+                        timeLeft--;
+                        const minutes = Math.floor(timeLeft / 60);
+                        const seconds = timeLeft % 60;
+                        countdownEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-                const timer = setInterval(() => {
-                    timeLeft--;
-                    const minutes = Math.floor(timeLeft / 60);
-                    const seconds = timeLeft % 60;
-                    countdownEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                        if (timeLeft <= 0) {
+                            clearInterval(timer);
+                            resendButton.disabled = false;
+                            timeLeft = 60; // Reset for next use
+                        }
+                    }, 1000);
 
-                    if (timeLeft <= 0) {
-                        clearInterval(timer);
-                        resendButton.disabled = false;
-                    }
-                }, 1000);
+                    return timer;
+                }
+
+                // Start initial timer
+                let currentTimer = startTimer();
             });
 
+            // Function to handle OTP resend
             function resendOTP() {
                 const resendButton = document.getElementById('resendButton');
                 const form = document.getElementById('otpForm');
+                const inputs = document.querySelectorAll('.otp-inputs input[type="text"]');
+                
+                // Disable resend button immediately
                 resendButton.disabled = true;
 
-                // Gửi request để resend OTP
+                // Create loading indicator
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = 'alert alert-info';
+                loadingDiv.style.backgroundColor = '#EFF6FF';
+                loadingDiv.style.borderColor = '#93C5FD';
+                loadingDiv.style.color = '#1D4ED8';
+                loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending new OTP...';
+                form.insertBefore(loadingDiv, form.firstChild);
+
+                // Send resend OTP request
                 fetch('${pageContext.request.contextPath}/resendOTP', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    }
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin',
+                    cache: 'no-cache'
                 })
-                .then(response => response.text())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
                 .then(result => {
+                    // Remove loading indicator
+                    loadingDiv.remove();
+
                     if (result === 'success') {
+                        // Clear OTP inputs
+                        inputs.forEach(input => {
+                            input.value = '';
+                        });
+                        inputs[0].focus();
+
                         // Reset timer
-                        let timeLeft = 60; // 1 phút
+                        let timeLeft = 60;
                         const countdownEl = document.getElementById('countdown');
                         
                         const timer = setInterval(() => {
                             timeLeft--;
-                            countdownEl.textContent = `00:${timeLeft.toString().padStart(2, '0')}`;
+                            const minutes = Math.floor(timeLeft / 60);
+                            const seconds = timeLeft % 60;
+                            countdownEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
                             if (timeLeft <= 0) {
                                 clearInterval(timer);
@@ -287,51 +344,51 @@
                             }
                         }, 1000);
 
-                        // Xóa các ô input
-                        const inputs = document.querySelectorAll('.otp-inputs input[type="text"]');
-                        inputs.forEach(input => input.value = '');
-                        inputs[0].focus();
-
-                        // Hiển thị thông báo thành công
+                        // Show success message
                         const successDiv = document.createElement('div');
                         successDiv.className = 'alert alert-success';
                         successDiv.style.backgroundColor = '#F0FDF4';
                         successDiv.style.borderColor = '#86EFAC';
                         successDiv.style.color = '#16A34A';
-                        successDiv.innerHTML = '<i class="fas fa-check-circle me-2"></i>OTP mới đã được gửi đến email của bạn';
+                        successDiv.innerHTML = '<i class="fas fa-check-circle"></i> New OTP has been sent to your email';
                         form.insertBefore(successDiv, form.firstChild);
 
-                        // Xóa thông báo sau 3 giây
+                        // Remove success message after 3 seconds
                         setTimeout(() => {
                             successDiv.remove();
                         }, 3000);
                     } else {
-                        // Hiển thị thông báo lỗi
+                        // Show error message for server error
                         const errorDiv = document.createElement('div');
                         errorDiv.className = 'alert alert-danger';
-                        errorDiv.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>Có lỗi xảy ra khi gửi lại OTP';
+                        errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Failed to resend OTP. Please try again.';
                         form.insertBefore(errorDiv, form.firstChild);
 
-                        // Xóa thông báo sau 3 giây
+                        // Remove error message after 3 seconds
                         setTimeout(() => {
                             errorDiv.remove();
                         }, 3000);
 
+                        // Re-enable resend button
                         resendButton.disabled = false;
                     }
                 })
                 .catch(error => {
-                    // Hiển thị thông báo lỗi
+                    // Remove loading indicator
+                    loadingDiv.remove();
+
+                    // Show error message for network error
                     const errorDiv = document.createElement('div');
                     errorDiv.className = 'alert alert-danger';
-                    errorDiv.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>Có lỗi xảy ra khi gửi lại OTP';
+                    errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Network error. Please check your connection and try again.';
                     form.insertBefore(errorDiv, form.firstChild);
 
-                    // Xóa thông báo sau 3 giây
+                    // Remove error message after 3 seconds
                     setTimeout(() => {
                         errorDiv.remove();
                     }, 3000);
 
+                    // Re-enable resend button
                     resendButton.disabled = false;
                 });
             }
