@@ -14,8 +14,9 @@
     <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog - SkillGro</title>
+    <title>SkillGro - Blog List</title>
     <jsp:include page="../common/user/link_css_common.jsp"></jsp:include>
+    <link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/view/common/img/favicon.png">
     <style>
         .blog-sidebar {
             background-color: #f8f9fa;
