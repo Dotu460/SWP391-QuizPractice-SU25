@@ -205,12 +205,16 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="pageSize">Posts per page:</label>
-                                        <select class="form-control" id="pageSize" name="pageSize" onchange="document.getElementById('displayOptionsForm').submit()">
-                                            <option value="3" ${pageSize == 3 ? 'selected' : ''}>3</option>
-                                            <option value="6" ${pageSize == 6 ? 'selected' : ''}>6</option>
-                                            <option value="9" ${pageSize == 9 ? 'selected' : ''}>9</option>
-                                            <option value="12" ${pageSize == 12 ? 'selected' : ''}>12</option>
-                                        </select>
+                                        <form id="displayOptionsForm" method="get" action="yourServletOrControllerURL">
+                                            <input type="number"
+                                                   class="form-control"
+                                                   id="pageSize"
+                                                   name="pageSize"
+                                                   value="${pageSize}"
+                                                   min="1"
+                                                   max="100"
+                                                   onchange="document.getElementById('displayOptionsForm').submit()" />
+                                        </form>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -286,54 +290,40 @@
                     
                     <c:forEach items="${posts}" var="postItem">
                         <c:set var="post" value="${postItem.post}" />
-                        <div class="blog__post-item-three">
+                        <div class="blog__post-item" style="display: flex; gap: 20px; margin-bottom: 30px; background: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                             <!-- Post Thumbnail -->
-                            <c:if test="${fn:contains(displayOptions, 'title') || fn:contains(displayOptions, 'category') || fn:contains(displayOptions, 'brief_info')}">
-                                <div class="blog__post-thumb-three">
-                                    <a href="${pageContext.request.contextPath}/post?id=${post.id}">
-                                        <img src="${pageContext.request.contextPath}${post.thumbnail_url}" alt="${post.title}">
-                                    </a>
-                                </div>
-                            </c:if>
+                            <div class="blog__post-thumb" style="flex: 0 0 200px;">
+                                <a href="${pageContext.request.contextPath}/post?id=${post.id}">
+                                    <img src="${pageContext.request.contextPath}${post.thumbnail_url}" 
+                                         alt="${post.title}" 
+                                         style="width: 200px; height: 150px; object-fit: cover; border-radius: 8px;">
+                                </a>
+                            </div>
                             
                             <!-- Post Content -->
-                            <div class="blog__post-content">
-                                <!-- Title -->
-                                <c:if test="${fn:contains(displayOptions, 'title')}">
-                                    <h3 class="title">
-                                        <a href="${pageContext.request.contextPath}/post?id=${post.id}">${post.title}</a>
-                                    </h3>
-                                </c:if>
-                                
-                                <!-- Meta -->
-                                <div class="blog__post-meta">
-                                    <ul class="list-wrap">
-                                        <!-- Category -->
-                                        <c:if test="${fn:contains(displayOptions, 'category')}">
-                                            <li>
-                                                <i class="fas fa-folder-open"></i>
-                                                <a href="${pageContext.request.contextPath}/blog?category=${post.category_id}">${postItem.categoryName}</a>
-                                            </li>
-                                        </c:if>
-                                        
-                                        <!-- Date -->
-                                        <c:if test="${fn:contains(displayOptions, 'date')}">
-                                            <li>
-                                                <i class="fas fa-calendar-alt"></i>
-                                                <fmt:formatDate value="${post.updated_at}" pattern="MMM dd, yyyy" />
-                                            </li>
-                                        </c:if>
-                                    </ul>
+                            <div class="blog__post-content" style="flex: 1;">
+                                <!-- Category -->
+                                <div class="category" style="margin-bottom: 8px;">
+                                    <span style="color: #666; font-size: 14px;">${postItem.categoryName}</span>
                                 </div>
                                 
-                                <!-- Brief Info -->
-                                <c:if test="${fn:contains(displayOptions, 'brief_info')}">
-                                    <p>${post.brief_info}</p>
-                                </c:if>
+                                <!-- Title -->
+                                <h3 class="title" style="margin: 0 0 10px 0; font-size: 20px; font-weight: 600;">
+                                    <a href="${pageContext.request.contextPath}/post?id=${post.id}" 
+                                       style="color: #333; text-decoration: none;">
+                                        ${post.title}
+                                    </a>
+                                </h3>
                                 
-                                <a href="${pageContext.request.contextPath}/post?id=${post.id}" class="btn">
-                                    Read More <i class="fas fa-arrow-right"></i>
-                                </a>
+                                <!-- Brief Info -->
+                                <p style="color: #666; margin-bottom: 10px; font-size: 15px;">
+                                    ${post.brief_info}
+                                </p>
+                                
+                                <!-- Date -->
+                                <div class="date" style="color: #888; font-size: 13px;">
+                                    <fmt:formatDate value="${post.published_at}" pattern="MMMM d, yyyy" />
+                                </div>
                             </div>
                         </div>
                     </c:forEach>
@@ -428,42 +418,7 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Advanced Search Options -->
-                                <div class="advanced-search">
-                                    <h6>Search Options:</h6>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="display" value="title" id="searchTitle" 
-                                               ${fn:contains(displayOptions, 'title') ? 'checked' : ''}>
-                                        <label class="form-check-label" for="searchTitle">Title</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="display" value="category" id="searchCategory" 
-                                               ${fn:contains(displayOptions, 'category') ? 'checked' : ''}>
-                                        <label class="form-check-label" for="searchCategory">Category</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="display" value="brief_info" id="searchBriefInfo" 
-                                               ${fn:contains(displayOptions, 'brief_info') ? 'checked' : ''}>
-                                        <label class="form-check-label" for="searchBriefInfo">Brief Info</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="display" value="date" id="searchDate" 
-                                               ${fn:contains(displayOptions, 'date') ? 'checked' : ''}>
-                                        <label class="form-check-label" for="searchDate">Date</label>
-                                    </div>
-                                    
-                                    <!-- Date Range -->
-                                    <div class="mt-3">
-                                        <h6>Date Range:</h6>
-                                        <div class="form-group">
-                                            <label for="startDate" class="small">From:</label>
-                                            <input type="date" class="form-control form-control-sm" name="startDate" id="startDate" value="${startDate}">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="endDate" class="small">To:</label>
-                                            <input type="date" class="form-control form-control-sm" name="endDate" id="endDate" value="${endDate}">
-                                        </div>
-                                    </div>
+                                
                                     
                                     <!-- Preserve other parameters -->
                                     <c:if test="${not empty categoryId}">
@@ -475,24 +430,7 @@
                                 </div>
                             </form>
                         </div>
-                        
-                        <!-- Categories -->
-                        <div class="categories">
-                            <h4 class="sidebar-title">Categories</h4>
-                            <ul class="category-list">
-                                <li>
-                                    <a href="${pageContext.request.contextPath}/blog">All Categories</a>
-                                </li>
-                                <c:forEach items="${categories}" var="category">
-                                    <li>
-                                        <a href="${pageContext.request.contextPath}/blog?category=${category.category.id}">
-                                            ${category.category.name}
-                                        </a>
-                                        <span class="badge badge-primary">${category.postCount}</span>
-                                    </li>
-                                </c:forEach>
-                            </ul>
-                        </div>
+        
                         
                         <!-- Latest Posts -->
                         <div class="latest-posts">
