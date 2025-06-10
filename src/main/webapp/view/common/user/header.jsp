@@ -142,6 +142,23 @@
                                             <li><a href="registration.html">Student Registration</a></li>
                                             <li><a href="404.html">404 Page</a></li>
                                             <li><a href="contact.html">contact</a></li>
+                                            <!-- Login/Logout button -->
+                                            <c:choose>
+                                                <c:when test="${not empty sessionScope.user}">
+                                                    <li>
+                                                        <a href="${pageContext.request.contextPath}/logout" class="logout-btn">
+                                                            <i class="fas fa-sign-out-alt"></i> Logout
+                                                        </a>
+                                                    </li>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <li>
+                                                        <a href="${pageContext.request.contextPath}/login" class="login-btn" >
+                                                            <i class="fas fa-sign-in-alt"></i> Login
+                                                        </a>
+                                                    </li>
+                                                </c:otherwise>
+                                            </c:choose>
                                         </ul>
                                     </li>
                                     <li class="menu-item-has-children"><a href="#">Dashboard</a>
@@ -182,9 +199,9 @@
                             <div class="tgmenu__action">
                                 <ul class="list-wrap">                                   
                                     <c:choose>
-                                        <c:when test="${not empty sessionScope.user}">
+                                        <c:when test="${not empty sessionScope.account}">
                                         <!-- Nút Log out -->
-                                            <a href="login?action=logout" class="button-style">Log out</a>
+                                            <a href="logout" class="button-style">Log out</a>
                                         </c:when>
                                         <c:otherwise>
                                         <!-- Nút Log in -->

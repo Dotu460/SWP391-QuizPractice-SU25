@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpSession;
 
 import com.quiz.su25.config.GlobalConfig;
 import com.quiz.su25.utils.EmailUtils;
-@WebServlet(name="AuthenController", urlPatterns={"/login","/register","/verifyOTP","/forgot-password","/reset-password","/resendOTP","/newpassword","/registerverifyOTP"})
+@WebServlet(name="AuthenController", urlPatterns={"/login","/logout","/register","/verifyOTP","/forgot-password","/reset-password","/resendOTP","/newpassword","/registerverifyOTP"})
 public class AuthenController extends HttpServlet {
     private UserDAO userDAO = new UserDAO();
 
@@ -117,21 +117,15 @@ public class AuthenController extends HttpServlet {
         }
     }
 
-    public void logout(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    // Trong AuthenController:
+    public void logout(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         if (session != null) {
+            session.removeAttribute(GlobalConfig.SESSION_ACCOUNT);
             session.invalidate();
         }
-        
-        // Check if it's an AJAX request
-        String xRequestedWith = request.getHeader("X-Requested-With");
-        if ("XMLHttpRequest".equals(xRequestedWith)) {
-            // For AJAX requests, send a 200 OK status
-            response.setStatus(HttpServletResponse.SC_OK);
-        } else {
-            // For regular requests, redirect to home
-            response.sendRedirect("home");
-        }
+
+        response.sendRedirect(request.getContextPath() + "/home"); // Trở lại trang home
     }
     private void registerverifyOTP(HttpServletRequest request, HttpServletResponse response) 
     throws ServletException, IOException {
