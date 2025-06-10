@@ -61,7 +61,7 @@ public class EmailUtils {
             int otp = (int)(Math.random() * Math.pow(10,i));
             return otp;
         }
-    public static void main(String[] args){
-            sendOTPMail("khanhlinhtrinh323@gmail.com");
-    }
+//    public static void main(String[] args){
+//            sendOTPMail("khanhlinhtrinh323@gmail.com");
+//    }
 }

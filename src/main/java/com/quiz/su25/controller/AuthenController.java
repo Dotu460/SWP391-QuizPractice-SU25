@@ -128,8 +128,19 @@ public class AuthenController extends HttpServlet {
         String email = (String) session.getAttribute("email");
         String OTPInSession = (String) session.getAttribute("OTP");
         Boolean isPasswordReset = (Boolean) session.getAttribute("isPasswordReset");
+        Long otpCreationTime = (Long) session.getAttribute("OTPCreationTime");
         
         try {
+            // Check OTP expiration (5 minutes)
+            if (otpCreationTime == null || System.currentTimeMillis() - otpCreationTime > 1 * 60 * 1000) {
+                // OTP has expired
+                session.removeAttribute("OTP");
+                session.removeAttribute("OTPCreationTime");
+                request.setAttribute("error", "OTP đã hết hạn. Vui lòng yêu cầu mã mới.");
+                request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
+                return;
+            }
+
             // Check OTP
             if(OTP.equals(OTPInSession)) {
                 if (isPasswordReset != null && isPasswordReset) {
@@ -175,6 +186,7 @@ public class AuthenController extends HttpServlet {
                     if (userId > 0) {
                         // Clear session attributes
                         session.removeAttribute("OTP");
+                        session.removeAttribute("OTPCreationTime");
                         session.removeAttribute("email");
                         session.removeAttribute("fullName");
                         session.removeAttribute("password");
@@ -238,6 +250,8 @@ public class AuthenController extends HttpServlet {
             // Generate and send OTP
             String OTP = EmailUtils.sendOTPMail(email);
             session.setAttribute("OTP", OTP);
+            // Set OTP creation time
+            session.setAttribute("OTPCreationTime", System.currentTimeMillis());
             
             // Forward to OTP verification page
             request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
@@ -266,6 +280,7 @@ public class AuthenController extends HttpServlet {
                 HttpSession session = request.getSession();
                 session.setAttribute("email", email);
                 session.setAttribute("OTP", OTP);
+                session.setAttribute("OTPCreationTime", System.currentTimeMillis());
                 session.setAttribute("isPasswordReset", true); // Đánh dấu đây là quá trình reset password
                 
                 // Chuyển đến trang nhập OTP
@@ -290,27 +305,58 @@ public class AuthenController extends HttpServlet {
         
         HttpSession session = request.getSession();
         String email = (String) session.getAttribute("email");
+        Boolean isPasswordReset = (Boolean) session.getAttribute("isPasswordReset");
+        String isRegistration = request.getParameter("isRegistration");
+        
+        System.out.println("ResendOTP - Email from session: " + email);
+        System.out.println("ResendOTP - isPasswordReset: " + isPasswordReset);
+        System.out.println("ResendOTP - isRegistration: " + isRegistration);
         
         try {
             if (email != null && !email.isEmpty()) {
-                // Kiểm tra email có tồn tại trong database
-                if (userDAO.isEmailExist(email)) {
-                    // Tạo và gửi OTP mới
+                // For registration flow, don't check email existence
+                if ("true".equals(isRegistration)) {
+                    // Generate and send new OTP
                     String newOTP = EmailUtils.sendOTPMail(email);
                     session.setAttribute("OTP", newOTP);
+                    session.setAttribute("OTPCreationTime", System.currentTimeMillis());
                     
-                    System.out.println("OTP resent successfully to: " + email);
+                    System.out.println("ResendOTP - Registration flow - New OTP sent to: " + email);
+                    response.getWriter().write("success");
+                    return;
+                }
+                
+                // For password reset flow
+                if (isPasswordReset != null && isPasswordReset) {
+                    // Generate and send new OTP
+                    String newOTP = EmailUtils.sendOTPMail(email);
+                    session.setAttribute("OTP", newOTP);
+                    session.setAttribute("OTPCreationTime", System.currentTimeMillis());
+                    
+                    System.out.println("ResendOTP - Password reset flow - New OTP sent to: " + email);
+                    response.getWriter().write("success");
+                    return;
+                }
+                
+                // For other flows, check email existence
+                if (userDAO.isEmailExist(email)) {
+                    // Generate and send new OTP
+                    String newOTP = EmailUtils.sendOTPMail(email);
+                    session.setAttribute("OTP", newOTP);
+                    session.setAttribute("OTPCreationTime", System.currentTimeMillis());
+                    
+                    System.out.println("ResendOTP - Other flow - New OTP sent to: " + email);
                     response.getWriter().write("success");
                 } else {
-                    System.out.println("Failed to resend OTP: Email not found in database - " + email);
+                    System.out.println("ResendOTP - Email not found in database: " + email);
                     response.getWriter().write("error");
                 }
             } else {
-                System.out.println("Failed to resend OTP: Email not found in session");
+                System.out.println("ResendOTP - Email not found in session");
                 response.getWriter().write("error");
             }
         } catch (Exception e) {
-            System.out.println("Error in resendOTP: " + e.getMessage());
+            System.out.println("ResendOTP - Error: " + e.getMessage());
             e.printStackTrace();
             response.getWriter().write("error");
         }
