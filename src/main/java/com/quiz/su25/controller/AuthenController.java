@@ -44,7 +44,7 @@ public class AuthenController extends HttpServlet {
             case "/verifyOTP":
                 request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
                 break;
-            case "//registerverifyOTP":
+            case "/registerverifyOTP":
                 request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
                 break;  
             case "/newpassword":
@@ -132,9 +132,19 @@ public class AuthenController extends HttpServlet {
         String OTP = request.getParameter("otp");
         HttpSession session = request.getSession();
         String OTPInSession = (String) session.getAttribute("OTP");
+        Long otpCreationTime = (Long) session.getAttribute("OTPCreationTime");
 
         // Check OTP
+        long currentTime = System.currentTimeMillis();
+        if(otpCreationTime == null || currentTime - otpCreationTime >60000){
+            request.setAttribute("error", "Mã OTP đã hết hạn. vui lòng yêu cầu mã mới");
+            request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
+            return;
+        }
+        // Check OTP
         if(OTP.equals(OTPInSession)) {
+            session.removeAttribute("OTP");
+            session.removeAttribute("OTPCreationTime");
             request.getRequestDispatcher("view/authen/register/newpassword.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "Mã OTP không đúng. Vui lòng thử lại.");
@@ -146,9 +156,18 @@ public class AuthenController extends HttpServlet {
         String OTP = request.getParameter("otp");
         HttpSession session = request.getSession();
         String OTPInSession = (String) session.getAttribute("OTP");
+        Long otpCreationTime = (Long) session.getAttribute("OTPCreationTime");
 
         // Check OTP
+        long currentTime = System.currentTimeMillis();
+        if(otpCreationTime == null || currentTime - otpCreationTime >60000){
+            request.setAttribute("error", "Mã OTP đã hết hạn. vui lòng yêu cầu mã mới");
+            request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
+            return;
+        }
         if(OTP.equals(OTPInSession)) {
+            session.removeAttribute("OTP");
+            session.removeAttribute("OTPCreationTime");
             request.getRequestDispatcher("view/authen/login/reset-password.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "Mã OTP không đúng. Vui lòng thử lại.");
@@ -277,7 +296,7 @@ public class AuthenController extends HttpServlet {
                     session.setAttribute("OTPCreationTime", System.currentTimeMillis());
                     
                     System.out.println("ResendOTP - Password reset flow - New OTP sent to: " + email);
-                    response.getWriter().write("success");
+//                    response.getWriter().write("success");
                     return;
                 }
                 
