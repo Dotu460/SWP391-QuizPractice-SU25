@@ -6,7 +6,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="x-ua-compatible" content="ie=edge">
-        <title>SkillGro - Reset Password</title>
+        <title>Set New Password - SkillGro</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/view/common/img/favicon.png">
         <!-- CSS here -->
@@ -72,6 +72,32 @@
             .form-control::placeholder {
                 color: #A0AEC0;
             }
+            .password-requirements {
+                margin-top: 12px;
+                padding: 16px;
+                background-color: #F8FAFC;
+                border-radius: 12px;
+                font-size: 14px;
+            }
+            .requirement-item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 8px;
+                color: #64748B;
+            }
+            .requirement-item:last-child {
+                margin-bottom: 0;
+            }
+            .requirement-item.valid {
+                color: #16A34A;
+            }
+            .requirement-item.invalid {
+                color: #DC2626;
+            }
+            .requirement-item i {
+                width: 16px;
+            }
             .reset-btn {
                 width: 100%;
                 padding: 16px;
@@ -130,11 +156,11 @@
         <div class="login-container">
             <div class="login-box">
                 <div class="login-header">
-                    <h2>Reset Password</h2>
-                    <p>Please enter your new password</p>
+                    <h2>Set New Password</h2>
+                    <p>Create a strong password for your account</p>
                 </div>
 
-                <form action="${pageContext.request.contextPath}/reset-password" method="post" id="resetForm">
+                <form action="${pageContext.request.contextPath}/newpassword" method="post" id="resetForm">
                     <c:if test="${error != null}">
                         <div class="alert alert-danger">
                             <i class="fas fa-exclamation-circle"></i>
@@ -146,7 +172,6 @@
                         <label for="password">New Password</label>
                         <input type="password" class="form-control" id="password" name="password" 
                                placeholder="Enter your new password" required>
-                       
                     </div>
 
                     <div class="form-group">
@@ -155,13 +180,13 @@
                                placeholder="Confirm your new password" required>
                     </div>
 
-                    <button type="submit" class="reset-btn" id="resetBtn" onclick="resetPassword()">
-                        <i class="fas fa-key me-2"></i>Reset Password
+                    <button type="submit" class="reset-btn" id="resetBtn" onclick="newPassword()>
+                        <i class="fas fa-key me-2"></i>Set Password
                     </button>
 
                     <div class="back-link">
-                        <a href="${pageContext.request.contextPath}/login">
-                            <i class="fas fa-arrow-left me-2"></i>Back to login
+                        <a href="${pageContext.request.contextPath}/register">
+                            <i class="fas fa-arrow-left me-2"></i>Back to register
                         </a>
                     </div>
                 </form>
@@ -191,7 +216,7 @@
                         special: /[!@#$%^&*(),.?":{}|<>]/.test(value)
                     };
 
-                    // Update requirement list styles
+                    // Update requirement list styles and icons
                     Object.keys(checks).forEach(check => {
                         if (checks[check]) {
                             requirements[check].classList.remove('invalid');
@@ -205,7 +230,7 @@
                     // Enable/disable submit button
                     const allValid = Object.values(checks).every(Boolean);
                     const passwordsMatch = password.value === confirmPassword.value;
-                    resetBtn.disabled = !(allValid && passwordsMatch);
+                    resetBtn.disabled = !(allValid && passwordsMatch && confirmPassword.value);
                 }
 
                 password.addEventListener('input', validatePassword);

@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpSession;
 
 import com.quiz.su25.config.GlobalConfig;
 import com.quiz.su25.utils.EmailUtils;
-@WebServlet(name="AuthenController", urlPatterns={"/login","/register","/verifyOTP","/forgot-password","/reset-password","/resendOTP"})
+@WebServlet(name="AuthenController", urlPatterns={"/login","/register","/verifyOTP","/forgot-password","/reset-password","/resendOTP","/newpassword"})
 public class AuthenController extends HttpServlet {
     private UserDAO userDAO = new UserDAO();
 
@@ -43,6 +43,9 @@ public class AuthenController extends HttpServlet {
                 break;
             case "/verifyOTP":
                 request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
+                break;
+            case "/newpassword":
+                request.getRequestDispatcher("view/authen/register/newpassword.jsp").forward(request, response);
                 break;
             default:
                 request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
@@ -76,6 +79,9 @@ public class AuthenController extends HttpServlet {
                 break;
             case "/reset-password":
                 resetPassword(request, response);
+                break;
+            case "/newpassword":
+                newPassword(request, response);
                 break;
             default:
                 login(request, response);
@@ -298,6 +304,7 @@ public class AuthenController extends HttpServlet {
 
     private void resendOTP(HttpServletRequest request, HttpServletResponse response) 
     throws ServletException, IOException {
+        System.out.println(">>> resendOTP servlet called <<<");
         response.setContentType("text/plain;charset=UTF-8");
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         response.setHeader("Pragma", "no-cache");
@@ -310,12 +317,14 @@ public class AuthenController extends HttpServlet {
         
         System.out.println("ResendOTP - Email from session: " + email);
         System.out.println("ResendOTP - isPasswordReset: " + isPasswordReset);
-        System.out.println("ResendOTP - isRegistration: " + isRegistration);
+        System.out.println("isRegistration: " + isRegistration);
+        System.out.println("Request method: " + request.getMethod());
+        System.out.println("All parameters: " + request.getParameterMap().keySet());
         
         try {
             if (email != null && !email.isEmpty()) {
                 // For registration flow, don't check email existence
-                if ("true".equals(isRegistration)) {
+                if ("true".equalsIgnoreCase(isRegistration)) {
                     // Generate and send new OTP
                     String newOTP = EmailUtils.sendOTPMail(email);
                     session.setAttribute("OTP", newOTP);
@@ -405,6 +414,58 @@ public class AuthenController extends HttpServlet {
         } catch (Exception e) {
             request.setAttribute("error", "An error occurred: " + e.getMessage());
             request.getRequestDispatcher("view/authen/login/reset-password.jsp").forward(request, response);
+        }
+    }
+    private void newPassword(HttpServletRequest request, HttpServletResponse response) 
+    throws ServletException, IOException {
+        String password = request.getParameter("password");
+        String confirmPassword = request.getParameter("confirm_password");
+        HttpSession session = request.getSession();
+        String email = (String) session.getAttribute("email");
+        
+        try {
+            // Validate session and email
+            if (email == null || email.isEmpty()) {
+                request.setAttribute("error", "Invalid session! Please start the registration process again.");
+                request.getRequestDispatcher("view/authen/register/register.jsp").forward(request, response);
+                return;
+            }
+            
+            // Validate password match
+            if (!password.equals(confirmPassword)) {
+                request.setAttribute("error", "Passwords do not match!");
+                request.getRequestDispatcher("view/authen/register/newpassword.jsp").forward(request, response);
+                return;
+            }
+            
+            // Get existing user data
+            User existingUser = userDAO.findByEmailAndPassword(email, password);
+            if (existingUser != null) {
+                // Update user with new password
+                existingUser.setPassword(password);
+                boolean success = userDAO.update(existingUser);
+                
+                if (success) {
+                    // Clear session attributes
+                    session.removeAttribute("email");
+                    session.removeAttribute("OTP");
+                    session.removeAttribute("OTPCreationTime");
+                    
+                    // Set success message and redirect to login
+                    request.setAttribute("message", "Password has been set successfully! Please login.");
+                    request.setAttribute("type", "success");
+                    request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
+                } else {
+                    request.setAttribute("error", "Failed to set new password. Please try again.");
+                    request.getRequestDispatcher("view/authen/register/newpassword.jsp").forward(request, response);
+                }
+            } else {
+                request.setAttribute("error", "User not found or invalid credentials.");
+                request.getRequestDispatcher("view/authen/register/newpassword.jsp").forward(request, response);
+            }
+        } catch (Exception e) {
+            request.setAttribute("error", "An error occurred: " + e.getMessage());
+            request.getRequestDispatcher("view/authen/register/newpassword.jsp").forward(request, response);
         }
     }
 }

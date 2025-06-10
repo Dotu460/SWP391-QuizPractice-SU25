@@ -329,20 +329,20 @@
                 // Create loading indicator
                 const loadingDiv = document.createElement('div');
                 loadingDiv.className = 'alert alert-info';
+                loadingDiv.style.backgroundColor = '#EFF6FF';
+                loadingDiv.style.borderColor = '#93C5FD';
+                loadingDiv.style.color = '#1D4ED8';
                 loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending new OTP...';
                 form.insertBefore(loadingDiv, form.firstChild);
-
-                // Create form data
-                const formData = new FormData();
-                formData.append('isRegistration', 'true');
 
                 // Send resend OTP request
                 fetch('${pageContext.request.contextPath}/resendOTP', {
                     method: 'POST',
                     headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: formData,
+                    body: 'isRegistration=true',
                     credentials: 'same-origin',
                     cache: 'no-cache'
                 })
@@ -353,12 +353,10 @@
                     return response.text();
                 })
                 .then(result => {
-                    console.log('ResendOTP response:', result); // Add logging
-                    
                     // Remove loading indicator
                     loadingDiv.remove();
 
-                    if (result.trim() === 'success') { // Add trim() to handle whitespace
+                    if (result.trim() === 'success') {
                         // Clear OTP inputs
                         inputs.forEach(input => {
                             input.value = '';
@@ -371,6 +369,9 @@
                         // Show success message
                         const successDiv = document.createElement('div');
                         successDiv.className = 'alert alert-success';
+                        successDiv.style.backgroundColor = '#F0FDF4';
+                        successDiv.style.borderColor = '#86EFAC';
+                        successDiv.style.color = '#16A34A';
                         successDiv.innerHTML = '<i class="fas fa-check-circle"></i> New OTP has been sent to your email';
                         form.insertBefore(successDiv, form.firstChild);
 
@@ -395,8 +396,6 @@
                     }
                 })
                 .catch(error => {
-                    console.error('ResendOTP error:', error); // Add logging
-                    
                     // Remove loading indicator
                     loadingDiv.remove();
 
