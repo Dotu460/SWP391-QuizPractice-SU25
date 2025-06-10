@@ -186,6 +186,7 @@
                         <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
                         <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
                         <input type="hidden" name="otp" id="otpValue">
+                        <input type="hidden" name="isRegistration" value="true">
                     </div>
 
                     <c:if test="${error != null}">
@@ -222,6 +223,7 @@
         <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
 
         <script>
+            const contextPath = '${pageContext.request.contextPath}';
             document.addEventListener('DOMContentLoaded', function() {
                 const inputs = document.querySelectorAll('.otp-inputs input[type="text"]');
                 const form = document.getElementById('otpForm');
@@ -336,7 +338,7 @@
                 form.insertBefore(loadingDiv, form.firstChild);
 
                 // Send resend OTP request
-                fetch('${pageContext.request.contextPath}/resendOTP', {
+                fetch(contextPath +'/resendOTP', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',

@@ -72,14 +72,14 @@ public class UserDAO extends DBContext implements I_DAO<User> {
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            statement.setString(1, user.getFull_name());
-            statement.setString(2, user.getEmail());
-            statement.setString(3, user.getPassword());
-            statement.setInt(4, user.getGender());
-            statement.setString(5, user.getMobile());
-            statement.setString(6, user.getAvatar_url());
-            statement.setInt(7, user.getRole_id());
-            statement.setString(8, user.getStatus());
+            statement.setObject(1, user.getFull_name());     // Can be NULL
+            statement.setString(2, user.getEmail());         // NOT NULL
+            statement.setString(3, user.getPassword());      // NOT NULL
+            statement.setObject(4, user.getGender());        // Can be NULL
+            statement.setString(5, user.getMobile());        // NOT NULL
+            statement.setObject(6, user.getAvatar_url());    // Can be NULL
+            statement.setObject(7, user.getRole_id());       // Can be NULL
+            statement.setObject(8, user.getStatus());        // Can be NULL
 
             statement.executeUpdate();
             resultSet = statement.getGeneratedKeys();
@@ -88,6 +88,7 @@ public class UserDAO extends DBContext implements I_DAO<User> {
             }
         } catch (SQLException e) {
             System.out.println("Error insert at class UserDAO: " + e.getMessage());
+            e.printStackTrace(); // Print full stack trace for debugging
         } finally {
             closeResources();
         }

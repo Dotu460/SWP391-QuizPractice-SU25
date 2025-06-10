@@ -131,120 +131,14 @@ public class AuthenController extends HttpServlet {
     throws ServletException, IOException {
         String OTP = request.getParameter("otp");
         HttpSession session = request.getSession();
-        String email = (String) session.getAttribute("email");
         String OTPInSession = (String) session.getAttribute("OTP");
-        Boolean isPasswordReset = (Boolean) session.getAttribute("isPasswordReset");
-        Long otpCreationTime = (Long) session.getAttribute("OTPCreationTime");
-        String isRegistration = request.getParameter("isRegistration");
-        
-        try {
-            // Check OTP expiration (1 minute)
-            if (otpCreationTime == null || System.currentTimeMillis() - otpCreationTime > 1 * 60 * 1000) {
-                // OTP has expired
-                session.removeAttribute("OTP");
-                session.removeAttribute("OTPCreationTime");
-                request.setAttribute("error", "OTP đã hết hạn. Vui lòng yêu cầu mã mới.");
-                
-                // Redirect based on flow
-                if ("true".equals(isRegistration)) {
-                    request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
-                } else {
-                    request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
-                }
-                return;
-            }
 
-            // Check OTP
-            if(OTP.equals(OTPInSession)) {
-                // Registration Flow
-                if ("true".equals(isRegistration)) {
-                    // Double check if email already exists
-                    if (userDAO.isEmailExist(email)) {
-                        request.setAttribute("error", "Email đã tồn tại trong hệ thống.");
-                        request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
-                        return;
-                    }
-                    
-                    // Get user information from session
-                    String fullName = (String) session.getAttribute("fullName");
-                    String password = (String) session.getAttribute("password");
-                    String mobile = (String) session.getAttribute("mobile");
-                    String genderStr = (String) session.getAttribute("gender");
-                    
-                    // Handle gender safely
-                    int gender = 0; // Default value if gender is null
-                    if (genderStr != null && genderStr.equals("male")) {
-                        gender = 1;
-                    }
-
-                    // Create new user
-                    User newUser = User.builder()
-                        .full_name(fullName)
-                        .email(email)
-                        .password(password)
-                        .gender(gender)
-                        .mobile(mobile)
-                        .avatar_url(null)  // Default avatar
-                        .role_id(2)        // Default role for regular users
-                        .status("active")  // Default status
-                        .build();
-
-                    // Save user to database
-                    int userId = userDAO.insert(newUser);
-
-                    if (userId > 0) {
-                        // Clear session attributes
-                        session.removeAttribute("OTP");
-                        session.removeAttribute("OTPCreationTime");
-                        session.removeAttribute("email");
-                        session.removeAttribute("fullName");
-                        session.removeAttribute("password");
-                        session.removeAttribute("mobile");
-                        session.removeAttribute("gender");
-
-                        // Add success message
-                        request.setAttribute("message", "Đăng ký thành công! Vui lòng đăng nhập.");
-                        request.setAttribute("type", "success");
-
-                        // Redirect to login page
-                        request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
-                    } else {
-                        request.setAttribute("error", "Không thể tạo tài khoản. Vui lòng thử lại.");
-                        request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
-                    }
-                }
-                // Password Reset Flow
-                else if (isPasswordReset != null && isPasswordReset) {
-                    // Forward to reset password page
-                    request.getRequestDispatcher("view/authen/login/reset-password.jsp").forward(request, response);
-                }
-                // Regular Login Flow
-                else {
-                    // Forward to login page with success message
-                    request.setAttribute("message", "Xác thực OTP thành công!");
-                    request.setAttribute("type", "success");
-                    request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
-                }
-            } else {
-                // Invalid OTP - Redirect based on flow
-                request.setAttribute("error", "Mã OTP không đúng. Vui lòng thử lại.");
-                if ("true".equals(isRegistration)) {
-                    request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
-                } else {
-                    request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Error in verifyOTP: " + e.getMessage());
-            e.printStackTrace();
-            request.setAttribute("error", "Đã xảy ra lỗi: " + e.getMessage());
-            
-            // Redirect based on flow
-            if ("true".equals(isRegistration)) {
-                request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
-            } else {
-                request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
-            }
+        // Check OTP
+        if(OTP.equals(OTPInSession)) {
+            request.getRequestDispatcher("view/authen/register/newpassword.jsp").forward(request, response);
+        } else {
+            request.setAttribute("error", "Mã OTP không đúng. Vui lòng thử lại.");
+            request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
         }
     }
     public void registerDoPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -343,72 +237,53 @@ public class AuthenController extends HttpServlet {
         
         System.out.println("ResendOTP - Email from session: " + email);
         System.out.println("ResendOTP - isPasswordReset: " + isPasswordReset);
-        System.out.println("ResendOTP - isRegistration: " + isRegistration);
+        System.out.println("isRegistration: " + isRegistration);
+        System.out.println("Request method: " + request.getMethod());
+        System.out.println("All parameters: " + request.getParameterMap().keySet());
         
         try {
-            if (email == null || email.isEmpty()) {
-                System.out.println("ResendOTP - Email not found in session");
-                response.getWriter().write("error");
-                return;
-            }
-
-            String newOTP = null;
-            
-            // Registration Flow
-            if ("true".equals(isRegistration)) {
-                // No need to check email existence for registration
-                newOTP = EmailUtils.sendOTPMail(email);
-                if (newOTP != null) {
+            if (email != null && !email.isEmpty()) {
+                // For registration flow, don't check email existence
+                if ("true".equalsIgnoreCase(isRegistration)) {
+                    // Generate and send new OTP
+                    String newOTP = EmailUtils.sendOTPMail(email);
                     session.setAttribute("OTP", newOTP);
                     session.setAttribute("OTPCreationTime", System.currentTimeMillis());
+                    
                     System.out.println("ResendOTP - Registration flow - New OTP sent to: " + email);
                     response.getWriter().write("success");
-                } else {
-                    System.out.println("ResendOTP - Registration flow - Failed to send OTP");
-                    response.getWriter().write("error");
-                }
-                return;
-            }
-            
-            // Password Reset Flow
-            if (isPasswordReset != null && isPasswordReset) {
-                // Verify email exists for password reset
-                if (!userDAO.isEmailExist(email)) {
-                    System.out.println("ResendOTP - Password reset flow - Email not found: " + email);
-                    response.getWriter().write("error");
                     return;
                 }
                 
-                newOTP = EmailUtils.sendOTPMail(email);
-                if (newOTP != null) {
+                // For password reset flow
+                if (isPasswordReset != null && isPasswordReset) {
+                    // Generate and send new OTP
+                    String newOTP = EmailUtils.sendOTPMail(email);
                     session.setAttribute("OTP", newOTP);
                     session.setAttribute("OTPCreationTime", System.currentTimeMillis());
+                    
                     System.out.println("ResendOTP - Password reset flow - New OTP sent to: " + email);
                     response.getWriter().write("success");
-                } else {
-                    System.out.println("ResendOTP - Password reset flow - Failed to send OTP");
-                    response.getWriter().write("error");
+                    return;
                 }
-                return;
-            }
-            
-            // Regular Login Flow
-            if (userDAO.isEmailExist(email)) {
-                newOTP = EmailUtils.sendOTPMail(email);
-                if (newOTP != null) {
+                
+                // For other flows, check email existence
+                if (userDAO.isEmailExist(email)) {
+                    // Generate and send new OTP
+                    String newOTP = EmailUtils.sendOTPMail(email);
                     session.setAttribute("OTP", newOTP);
                     session.setAttribute("OTPCreationTime", System.currentTimeMillis());
-                    System.out.println("ResendOTP - Login flow - New OTP sent to: " + email);
+                    
+                    System.out.println("ResendOTP - Other flow - New OTP sent to: " + email);
                     response.getWriter().write("success");
                 } else {
-                    System.out.println("ResendOTP - Login flow - Failed to send OTP");
+                    System.out.println("ResendOTP - Email not found in database: " + email);
                     response.getWriter().write("error");
                 }
             } else {
-                System.out.println("ResendOTP - Login flow - Email not found in database: " + email);
+                System.out.println("ResendOTP - Email not found in session");
                 response.getWriter().write("error");
             }
-            
         } catch (Exception e) {
             System.out.println("ResendOTP - Error: " + e.getMessage());
             e.printStackTrace();
@@ -466,12 +341,15 @@ public class AuthenController extends HttpServlet {
         String password = request.getParameter("password");
         String confirmPassword = request.getParameter("confirm_password");
         HttpSession session = request.getSession();
+        
+        // Get required data from session
         String email = (String) session.getAttribute("email");
+        String mobile = (String) session.getAttribute("mobile");
         
         try {
-            // Validate session and email
-            if (email == null || email.isEmpty()) {
-                request.setAttribute("error", "Invalid session! Please start the registration process again.");
+            // Validate required data
+            if (email == null || mobile == null) {
+                request.setAttribute("error", "Missing required information. Please start over.");
                 request.getRequestDispatcher("view/authen/register/register.jsp").forward(request, response);
                 return;
             }
@@ -483,33 +361,44 @@ public class AuthenController extends HttpServlet {
                 return;
             }
             
-            // Get existing user data
-            User existingUser = userDAO.findByEmailAndPassword(email, password);
-            if (existingUser != null) {
-                // Update user with new password
-                existingUser.setPassword(password);
-                boolean success = userDAO.update(existingUser);
+            // Create new user with only required fields
+            User newUser = new User();
+            // Set NOT NULL fields
+            newUser.setEmail(email);
+            newUser.setPassword(password);
+            newUser.setMobile(mobile);
+            
+            // Optional fields - let them be NULL
+            String fullName = (String) session.getAttribute("fullName");
+            String genderStr = (String) session.getAttribute("gender");
+            if (fullName != null) newUser.setFull_name(fullName);
+            if (genderStr != null) newUser.setGender("male".equals(genderStr) ? 1 : 0);
+            
+            // Insert new user
+            int userId = userDAO.insert(newUser);
+            
+            if (userId > 0) {
+                // Clear all session attributes
+                session.removeAttribute("email");
+                session.removeAttribute("OTP");
+                session.removeAttribute("OTPCreationTime");
+                session.removeAttribute("fullName");
+                session.removeAttribute("mobile");
+                session.removeAttribute("gender");
                 
-                if (success) {
-                    // Clear session attributes
-                    session.removeAttribute("email");
-                    session.removeAttribute("OTP");
-                    session.removeAttribute("OTPCreationTime");
-                    
-                    // Set success message and redirect to login
-                    request.setAttribute("message", "Password has been set successfully! Please login.");
-                    request.setAttribute("type", "success");
-                    request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
-                } else {
-                    request.setAttribute("error", "Failed to set new password. Please try again.");
-                    request.getRequestDispatcher("view/authen/register/newpassword.jsp").forward(request, response);
-                }
+                // Set success message and redirect to login
+                request.setAttribute("message", "Registration completed successfully! Please login.");
+                request.setAttribute("type", "success");
+                request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
             } else {
-                request.setAttribute("error", "User not found or invalid credentials.");
+                System.out.println("Failed to insert user. User ID returned: " + userId);
+                request.setAttribute("error", "Failed to create account. Please try again.");
                 request.getRequestDispatcher("view/authen/register/newpassword.jsp").forward(request, response);
             }
         } catch (Exception e) {
-            request.setAttribute("error", "An error occurred: " + e.getMessage());
+            System.out.println("Error in newPassword: " + e.getMessage());
+            e.printStackTrace();
+            request.setAttribute("error", "An error occurred during registration: " + e.getMessage());
             request.getRequestDispatcher("view/authen/register/newpassword.jsp").forward(request, response);
         }
     }
