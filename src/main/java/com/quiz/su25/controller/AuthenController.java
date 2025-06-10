@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpSession;
 
 import com.quiz.su25.config.GlobalConfig;
 import com.quiz.su25.utils.EmailUtils;
-@WebServlet(name="AuthenController", urlPatterns={"/login","/register","/verifyOTP","/forgot-password","/reset-password","/resendOTP","/newpassword"})
+@WebServlet(name="AuthenController", urlPatterns={"/login","/register","/verifyOTP","/forgot-password","/reset-password","/resendOTP","/newpassword","/registerverifyOTP"})
 public class AuthenController extends HttpServlet {
     private UserDAO userDAO = new UserDAO();
 
@@ -44,6 +44,9 @@ public class AuthenController extends HttpServlet {
             case "/verifyOTP":
                 request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
                 break;
+            case "//registerverifyOTP":
+                request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
+                break;  
             case "/newpassword":
                 request.getRequestDispatcher("view/authen/register/newpassword.jsp").forward(request, response);
                 break;
@@ -70,6 +73,9 @@ public class AuthenController extends HttpServlet {
                 break;
             case "/verifyOTP":
                 verifyOTP(request, response);
+                break;
+            case "/registerverifyOTP":
+                registerverifyOTP(request,response);
                 break;
             case "/resendOTP":
                 resendOTP(request, response);
@@ -127,7 +133,7 @@ public class AuthenController extends HttpServlet {
             response.sendRedirect("home");
         }
     }
-    private void verifyOTP(HttpServletRequest request, HttpServletResponse response) 
+    private void registerverifyOTP(HttpServletRequest request, HttpServletResponse response) 
     throws ServletException, IOException {
         String OTP = request.getParameter("otp");
         HttpSession session = request.getSession();
@@ -139,6 +145,20 @@ public class AuthenController extends HttpServlet {
         } else {
             request.setAttribute("error", "Mã OTP không đúng. Vui lòng thử lại.");
             request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
+        }
+    }
+    private void verifyOTP(HttpServletRequest request, HttpServletResponse response) 
+    throws ServletException, IOException {
+        String OTP = request.getParameter("otp");
+        HttpSession session = request.getSession();
+        String OTPInSession = (String) session.getAttribute("OTP");
+
+        // Check OTP
+        if(OTP.equals(OTPInSession)) {
+            request.getRequestDispatcher("view/authen/login/reset-password.jsp").forward(request, response);
+        } else {
+            request.setAttribute("error", "Mã OTP không đúng. Vui lòng thử lại.");
+            request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
         }
     }
     public void registerDoPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -180,7 +200,7 @@ public class AuthenController extends HttpServlet {
             session.setAttribute("OTPCreationTime", System.currentTimeMillis());
             
             // Forward to OTP verification page
-            request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
+            request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
             
         } catch (Exception e) {
             // Handle exceptions

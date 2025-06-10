@@ -177,7 +177,7 @@
                     </p>
                 </div>
 
-                <form action="${pageContext.request.contextPath}/verifyOTP" method="post" id="otpForm">
+                <form action="${pageContext.request.contextPath}/registerverifyOTP" method="post" id="otpForm">
                     <div class="otp-inputs">
                         <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
                         <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
