@@ -343,53 +343,72 @@ public class AuthenController extends HttpServlet {
         
         System.out.println("ResendOTP - Email from session: " + email);
         System.out.println("ResendOTP - isPasswordReset: " + isPasswordReset);
-        System.out.println("isRegistration: " + isRegistration);
-        System.out.println("Request method: " + request.getMethod());
-        System.out.println("All parameters: " + request.getParameterMap().keySet());
+        System.out.println("ResendOTP - isRegistration: " + isRegistration);
         
         try {
-            if (email != null && !email.isEmpty()) {
-                // For registration flow, don't check email existence
-                if ("true".equalsIgnoreCase(isRegistration)) {
-                    // Generate and send new OTP
-                    String newOTP = EmailUtils.sendOTPMail(email);
+            if (email == null || email.isEmpty()) {
+                System.out.println("ResendOTP - Email not found in session");
+                response.getWriter().write("error");
+                return;
+            }
+
+            String newOTP = null;
+            
+            // Registration Flow
+            if ("true".equals(isRegistration)) {
+                // No need to check email existence for registration
+                newOTP = EmailUtils.sendOTPMail(email);
+                if (newOTP != null) {
                     session.setAttribute("OTP", newOTP);
                     session.setAttribute("OTPCreationTime", System.currentTimeMillis());
-                    
                     System.out.println("ResendOTP - Registration flow - New OTP sent to: " + email);
                     response.getWriter().write("success");
+                } else {
+                    System.out.println("ResendOTP - Registration flow - Failed to send OTP");
+                    response.getWriter().write("error");
+                }
+                return;
+            }
+            
+            // Password Reset Flow
+            if (isPasswordReset != null && isPasswordReset) {
+                // Verify email exists for password reset
+                if (!userDAO.isEmailExist(email)) {
+                    System.out.println("ResendOTP - Password reset flow - Email not found: " + email);
+                    response.getWriter().write("error");
                     return;
                 }
                 
-                // For password reset flow
-                if (isPasswordReset != null && isPasswordReset) {
-                    // Generate and send new OTP
-                    String newOTP = EmailUtils.sendOTPMail(email);
+                newOTP = EmailUtils.sendOTPMail(email);
+                if (newOTP != null) {
                     session.setAttribute("OTP", newOTP);
                     session.setAttribute("OTPCreationTime", System.currentTimeMillis());
-                    
                     System.out.println("ResendOTP - Password reset flow - New OTP sent to: " + email);
                     response.getWriter().write("success");
-                    return;
+                } else {
+                    System.out.println("ResendOTP - Password reset flow - Failed to send OTP");
+                    response.getWriter().write("error");
                 }
-                
-                // For other flows, check email existence
-                if (userDAO.isEmailExist(email)) {
-                    // Generate and send new OTP
-                    String newOTP = EmailUtils.sendOTPMail(email);
+                return;
+            }
+            
+            // Regular Login Flow
+            if (userDAO.isEmailExist(email)) {
+                newOTP = EmailUtils.sendOTPMail(email);
+                if (newOTP != null) {
                     session.setAttribute("OTP", newOTP);
                     session.setAttribute("OTPCreationTime", System.currentTimeMillis());
-                    
-                    System.out.println("ResendOTP - Other flow - New OTP sent to: " + email);
+                    System.out.println("ResendOTP - Login flow - New OTP sent to: " + email);
                     response.getWriter().write("success");
                 } else {
-                    System.out.println("ResendOTP - Email not found in database: " + email);
+                    System.out.println("ResendOTP - Login flow - Failed to send OTP");
                     response.getWriter().write("error");
                 }
             } else {
-                System.out.println("ResendOTP - Email not found in session");
+                System.out.println("ResendOTP - Login flow - Email not found in database: " + email);
                 response.getWriter().write("error");
             }
+            
         } catch (Exception e) {
             System.out.println("ResendOTP - Error: " + e.getMessage());
             e.printStackTrace();
