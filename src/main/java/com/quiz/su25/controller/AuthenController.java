@@ -135,30 +135,33 @@ public class AuthenController extends HttpServlet {
         String OTPInSession = (String) session.getAttribute("OTP");
         Boolean isPasswordReset = (Boolean) session.getAttribute("isPasswordReset");
         Long otpCreationTime = (Long) session.getAttribute("OTPCreationTime");
+        String isRegistration = request.getParameter("isRegistration");
         
         try {
-            // Check OTP expiration (5 minutes)
+            // Check OTP expiration (1 minute)
             if (otpCreationTime == null || System.currentTimeMillis() - otpCreationTime > 1 * 60 * 1000) {
                 // OTP has expired
                 session.removeAttribute("OTP");
                 session.removeAttribute("OTPCreationTime");
                 request.setAttribute("error", "OTP đã hết hạn. Vui lòng yêu cầu mã mới.");
-                request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
+                
+                // Redirect based on flow
+                if ("true".equals(isRegistration)) {
+                    request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
+                } else {
+                    request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
+                }
                 return;
             }
 
             // Check OTP
             if(OTP.equals(OTPInSession)) {
-                if (isPasswordReset != null && isPasswordReset) {
-                    // This is password reset flow
-                    // Forward to reset password page
-                    request.getRequestDispatcher("view/authen/login/reset-password.jsp").forward(request, response);
-                } else {
-                    // This is registration flow
+                // Registration Flow
+                if ("true".equals(isRegistration)) {
                     // Double check if email already exists
                     if (userDAO.isEmailExist(email)) {
                         request.setAttribute("error", "Email đã tồn tại trong hệ thống.");
-                        request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
+                        request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
                         return;
                     }
                     
@@ -207,18 +210,41 @@ public class AuthenController extends HttpServlet {
                         request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
                     } else {
                         request.setAttribute("error", "Không thể tạo tài khoản. Vui lòng thử lại.");
-                        request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
+                        request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
                     }
                 }
+                // Password Reset Flow
+                else if (isPasswordReset != null && isPasswordReset) {
+                    // Forward to reset password page
+                    request.getRequestDispatcher("view/authen/login/reset-password.jsp").forward(request, response);
+                }
+                // Regular Login Flow
+                else {
+                    // Forward to login page with success message
+                    request.setAttribute("message", "Xác thực OTP thành công!");
+                    request.setAttribute("type", "success");
+                    request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
+                }
             } else {
+                // Invalid OTP - Redirect based on flow
                 request.setAttribute("error", "Mã OTP không đúng. Vui lòng thử lại.");
-                request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
+                if ("true".equals(isRegistration)) {
+                    request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
+                } else {
+                    request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
+                }
             }
         } catch (Exception e) {
             System.out.println("Error in verifyOTP: " + e.getMessage());
             e.printStackTrace();
             request.setAttribute("error", "Đã xảy ra lỗi: " + e.getMessage());
-            request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
+            
+            // Redirect based on flow
+            if ("true".equals(isRegistration)) {
+                request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
+            } else {
+                request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
+            }
         }
     }
     public void registerDoPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
