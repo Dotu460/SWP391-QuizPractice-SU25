@@ -37,8 +37,6 @@ public class BlogListController extends HttpServlet {
         String pageParam = request.getParameter("page");
         String pageSizeParam = request.getParameter("pageSize");
         String[] displayOptionsArray = request.getParameterValues("display");
-        String startDateParam = request.getParameter("startDate");
-        String endDateParam = request.getParameter("endDate");
         
         // Parse parameters with defaults
         int page = (pageParam != null && !pageParam.isEmpty()) ? Integer.parseInt(pageParam) : 1;
@@ -54,43 +52,15 @@ public class BlogListController extends HttpServlet {
             displayOptions = Arrays.asList("title", "category", "brief_info", "date");
         }
         
-        // Parse dates for search
-        Date startDate = null;
-        Date endDate = null;
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        
-        if (startDateParam != null && !startDateParam.isEmpty()) {
-            try {
-                startDate = new Date(dateFormat.parse(startDateParam).getTime());
-            } catch (ParseException e) {
-                System.out.println("Error parsing start date: " + e.getMessage());
-            }
-        }
-        
-        if (endDateParam != null && !endDateParam.isEmpty()) {
-            try {
-                endDate = new Date(dateFormat.parse(endDateParam).getTime());
-            } catch (ParseException e) {
-                System.out.println("Error parsing end date: " + e.getMessage());
-            }
-        }
-        
         // Get posts based on search criteria
         List<Post> posts;
         int totalCount;
         List<Map<String, Object>> postsWithDetails = new ArrayList<>();
         
         if (searchQuery != null && !searchQuery.trim().isEmpty()) {
-            // Search posts
-            boolean searchTitle = displayOptions.contains("title");
-            boolean searchCategory = displayOptions.contains("category");
-            boolean searchBriefInfo = displayOptions.contains("brief_info");
-            boolean searchDate = displayOptions.contains("date");
-            
-            posts = postDAO.searchPosts(searchQuery.trim(), searchTitle, searchCategory, 
-                                      searchBriefInfo, searchDate, startDate, endDate, page, pageSize);
-            totalCount = postDAO.countSearchResults(searchQuery.trim(), searchTitle, searchCategory, 
-                                                  searchBriefInfo, searchDate, startDate, endDate);
+            // Search posts in all fields
+            posts = postDAO.searchPosts(searchQuery.trim(), true, true, true, false, null, null, page, pageSize);
+            totalCount = postDAO.countSearchResults(searchQuery.trim(), true, true, true, false, null, null);
         } else if (categoryId != null) {
             // Filter by category
             posts = postDAO.getPostsByCategory(categoryId, page, pageSize);
@@ -101,18 +71,14 @@ public class BlogListController extends HttpServlet {
             totalCount = postDAO.countTotalPosts();
         }
         
-        // Get additional details for each post (category name, author info)
+        // Get additional details for each post
         for (Post post : posts) {
             Map<String, Object> postDetails = new HashMap<>();
             postDetails.put("post", post);
             
-            // Get category name
-            if (post.getCategory_id() != null) {
-                Category category = categoryDAO.findById(post.getCategory_id());
-                postDetails.put("categoryName", category != null ? category.getName() : "Uncategorized");
-            } else {
-                postDetails.put("categoryName", "Uncategorized");
-            }
+            // Get category name using the category_id
+            String categoryName = postDAO.findCategory(post.getCategory_id());
+            postDetails.put("category", categoryName);
             
             postsWithDetails.add(postDetails);
         }
@@ -120,18 +86,11 @@ public class BlogListController extends HttpServlet {
         // Calculate pagination
         int totalPages = (int) Math.ceil((double) totalCount / pageSize);
         
-        // Get categories with post counts for sidebar
-        List<Map<String, Object>> categories = categoryDAO.getCategoriesWithPostCounts();
-        
         // Get latest posts for sidebar
         List<Post> latestPosts = postDAO.getLatestPostsForSidebar(5);
         
-        // Available display options
-        List<String> availableDisplayOptions = Arrays.asList("title", "category", "brief_info", "date");
-        
         // Set attributes for JSP
         request.setAttribute("posts", postsWithDetails);
-        request.setAttribute("categories", categories);
         request.setAttribute("latestPosts", latestPosts);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
@@ -140,9 +99,6 @@ public class BlogListController extends HttpServlet {
         request.setAttribute("searchQuery", searchQuery);
         request.setAttribute("categoryId", categoryId);
         request.setAttribute("displayOptions", displayOptions);
-        request.setAttribute("availableDisplayOptions", availableDisplayOptions);
-        request.setAttribute("startDate", startDateParam);
-        request.setAttribute("endDate", endDateParam);
         
         // Forward to JSP
         request.getRequestDispatcher("/view/blog_list/blog_list.jsp").forward(request, response);

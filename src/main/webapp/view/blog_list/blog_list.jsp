@@ -177,57 +177,92 @@
             <div class="row">
                 <!-- Blog Posts -->
                 <div class="col-lg-8">
-                    <!-- Display Options Form -->
-                    <div class="display-options mb-4">
-                        <form action="${pageContext.request.contextPath}/blog" method="get" id="displayOptionsForm">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="pageSize">Posts per page:</label>
-                                        <form id="displayOptionsForm" method="get" action="yourServletOrControllerURL">
+                    <!-- Settings Button -->
+                    <div class="text-end mb-4">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#displaySettingsModal">
+                            <i class="fas fa-cog"></i> Display Settings
+                        </button>
+                    </div>
+
+                    <!-- Display Settings Modal -->
+                    <div class="modal fade" id="displaySettingsModal" tabindex="-1" aria-labelledby="displaySettingsModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="displaySettingsModalLabel">Display Settings</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="${pageContext.request.contextPath}/blog" method="get" id="displayOptionsForm">
+                                        <!-- Posts per page -->
+                                        <div class="mb-3">
+                                            <label for="pageSize" class="form-label">Posts per page:</label>
                                             <input type="number"
                                                    class="form-control"
                                                    id="pageSize"
                                                    name="pageSize"
                                                    value="${pageSize}"
                                                    min="1"
-                                                   max="100"
-                                                   onchange="document.getElementById('displayOptionsForm').submit()" />
-                                        </form>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Display options:</label>
-                                        <div>
-                                            <c:forEach items="${availableDisplayOptions}" var="option">
-                                                <div class="form-check form-check-inline">
+                                                   max="100" />
+                                        </div>
+
+                                        <!-- Display options -->
+                                        <div class="mb-3">
+                                            <label class="form-label">Display options:</label>
+                                            <div class="d-flex flex-wrap gap-3">
+                                                <div class="form-check">
                                                     <input class="form-check-input" type="checkbox" name="display" 
-                                                           id="display_${option}" value="${option}" 
-                                                           ${fn:contains(displayOptions, option) ? 'checked' : ''}>
-                                                    <label class="form-check-label" for="display_${option}">
-                                                        ${fn:toUpperCase(fn:substring(option, 0, 1))}${fn:substring(option, 1, fn:length(option))}
+                                                           id="display_title" value="title" 
+                                                           ${fn:contains(displayOptions, 'title') ? 'checked' : ''}>
+                                                    <label class="form-check-label" for="display_title">
+                                                        Title
                                                     </label>
                                                 </div>
-                                            </c:forEach>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="display" 
+                                                           id="display_category" value="category" 
+                                                           ${fn:contains(displayOptions, 'category') ? 'checked' : ''}>
+                                                    <label class="form-check-label" for="display_category">
+                                                        Category
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="display" 
+                                                           id="display_brief_info" value="brief_info" 
+                                                           ${fn:contains(displayOptions, 'brief_info') ? 'checked' : ''}>
+                                                    <label class="form-check-label" for="display_brief_info">
+                                                        Brief Info
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="display" 
+                                                           id="display_date" value="date" 
+                                                           ${fn:contains(displayOptions, 'date') ? 'checked' : ''}>
+                                                    <label class="form-check-label" for="display_date">
+                                                        Date
+                                                    </label>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
+
+                                        <!-- Preserve other parameters -->
+                                        <c:if test="${not empty categoryId}">
+                                            <input type="hidden" name="category" value="${categoryId}">
+                                        </c:if>
+                                        <c:if test="${not empty searchQuery}">
+                                            <input type="hidden" name="search" value="${searchQuery}">
+                                        </c:if>
+                                        <c:if test="${not empty param.page}">
+                                            <input type="hidden" name="page" value="${param.page}">
+                                        </c:if>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" form="displayOptionsForm" class="btn btn-primary">Apply Changes</button>
                                 </div>
                             </div>
-                            
-                            <!-- Preserve other parameters -->
-                            <c:if test="${not empty categoryId}">
-                                <input type="hidden" name="category" value="${categoryId}">
-                            </c:if>
-                            <c:if test="${not empty searchQuery}">
-                                <input type="hidden" name="search" value="${searchQuery}">
-                            </c:if>
-                            <c:if test="${not empty param.page}">
-                                <input type="hidden" name="page" value="${param.page}">
-                            </c:if>
-                            
-                            <button type="submit" class="btn btn-primary btn-sm">Apply</button>
-                        </form>
+                        </div>
                     </div>
                     
                     <!-- Search Results Summary -->
@@ -281,28 +316,37 @@
                             
                             <!-- Post Content -->
                             <div class="blog__post-content" style="flex: 1;">
-                                <!-- Category -->
-                                <div class="category" style="margin-bottom: 8px;">
-                                    <span style="color: #666; font-size: 14px;">${postItem.categoryName}</span>
-                                </div>
+                                <!-- Category - Only show if Category is selected -->
+                                <c:if test="${fn:contains(displayOptions, 'category')}">
+                                    <div class="category" style="margin-bottom: 8px;">
+                                        <span style="color: #666; font-size: 14px;">${postItem.category}</span>
+                                    </div>
+                                </c:if>
                                 
-                                <!-- Title -->
-                                <h3 class="title" style="margin: 0 0 10px 0; font-size: 20px; font-weight: 600;">
-                                    <a href="${pageContext.request.contextPath}/post?id=${post.id}" 
-                                       style="color: #333; text-decoration: none;">
-                                        ${post.title}
-                                    </a>
-                                </h3>
+                                <!-- Title - Only show if Title is selected -->
+                                <c:if test="${fn:contains(displayOptions, 'title')}">
+                                    <h3 class="title" style="margin: 0 0 10px 0; font-size: 20px; font-weight: 600;">
+                                        <a href="${pageContext.request.contextPath}/post?id=${post.id}" 
+                                           style="color: #333; text-decoration: none;">
+                                            ${post.title}
+                                        </a>
+                                    </h3>
+                                </c:if>
                                 
-                                <!-- Brief Info -->
-                                <p style="color: #666; margin-bottom: 10px; font-size: 15px;">
-                                    ${post.brief_info}
-                                </p>
+                                <!-- Brief Info - Only show if Brief_info is selected -->
+                                <c:if test="${fn:contains(displayOptions, 'brief_info')}">
+                                    <p style="color: #666; margin-bottom: 10px; font-size: 15px;">
+                                        ${post.brief_info}
+                                    </p>
+                                </c:if>
                                 
-                                <!-- Date -->
-                                <div class="date" style="color: #888; font-size: 13px;">
-                                    <fmt:formatDate value="${post.published_at}" pattern="MMMM d, yyyy" />
-                                </div>
+                                <!-- Date - Only show if Date is selected -->
+                                <c:if test="${fn:contains(displayOptions, 'date')}">
+                                    <div class="date" style="color: #888; font-size: 13px;">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        <fmt:formatDate value="${post.published_at}" pattern="MMMM d, yyyy" />
+                                    </div>
+                                </c:if>
                             </div>
                         </div>
                     </c:forEach>
@@ -319,11 +363,8 @@
                                 <c:if test="${not empty searchQuery}">
                                     <c:set var="queryParams" value="${queryParams}&search=${searchQuery}" />
                                 </c:if>
-                                <c:if test="${not empty startDate}">
-                                    <c:set var="queryParams" value="${queryParams}&startDate=${startDate}" />
-                                </c:if>
-                                <c:if test="${not empty endDate}">
-                                    <c:set var="queryParams" value="${queryParams}&endDate=${endDate}" />
+                                <c:if test="${not empty param.page}">
+                                    <c:set var="queryParams" value="${queryParams}&page=${param.page}" />
                                 </c:if>
                                 <c:forEach items="${displayOptions}" var="option">
                                     <c:set var="queryParams" value="${queryParams}&display=${option}" />
@@ -331,7 +372,7 @@
                                 
                                 <!-- Previous Page -->
                                 <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
-                                    <a class="page-link" href="${pageContext.request.contextPath}/blog?page=${currentPage - 1}&${queryParams}" aria-label="Previous">
+                                    <a class="page-link" href="${pageContext.request.contextPath}/blog?${queryParams}&page=${currentPage - 1}" aria-label="Previous">
                                         <span aria-hidden="true">&laquo;</span>
                                     </a>
                                 </li>
@@ -342,7 +383,7 @@
                                 
                                 <c:if test="${startPage > 1}">
                                     <li class="page-item">
-                                        <a class="page-link" href="${pageContext.request.contextPath}/blog?page=1&${queryParams}">1</a>
+                                        <a class="page-link" href="${pageContext.request.contextPath}/blog?${queryParams}&page=1">1</a>
                                     </li>
                                     <c:if test="${startPage > 2}">
                                         <li class="page-item disabled">
@@ -353,7 +394,7 @@
                                 
                                 <c:forEach begin="${startPage}" end="${endPage}" var="i">
                                     <li class="page-item ${currentPage == i ? 'active' : ''}">
-                                        <a class="page-link" href="${pageContext.request.contextPath}/blog?page=${i}&${queryParams}">
+                                        <a class="page-link" href="${pageContext.request.contextPath}/blog?${queryParams}&page=${i}">
                                             ${i}
                                         </a>
                                     </li>
@@ -366,7 +407,7 @@
                                         </li>
                                     </c:if>
                                     <li class="page-item">
-                                        <a class="page-link" href="${pageContext.request.contextPath}/blog?page=${totalPages}&${queryParams}">${totalPages}</a>
+                                        <a class="page-link" href="${pageContext.request.contextPath}/blog?${queryParams}&page=${totalPages}">${totalPages}</a>
                                     </li>
                                 </c:if>
                                 
@@ -387,26 +428,32 @@
                         <!-- Search Box -->
                         <div class="search-box">
                             <h4 class="sidebar-title">Search Posts</h4>
-                            <form action="${pageContext.request.contextPath}/blog" method="get" id="searchForm">
-                                <div class="input-group mb-3">
-                                    <input type="text" class="form-control" placeholder="Search..." name="search" value="${searchQuery}">
-                                    <div class="input-group-append">
-                                        <button class="btn btn-primary" type="submit">
-                                            <i class="fas fa-search"></i>
-                                        </button>
-                                    </div>
+                            <form action="${pageContext.request.contextPath}/blog" method="get" id="searchForm" class="mt-3">
+                                <div class="input-group">
+                                    <input type="text" 
+                                           class="form-control" 
+                                           placeholder="Search posts..." 
+                                           name="search" 
+                                           value="${searchQuery}"
+                                           aria-label="Search posts"
+                                           aria-describedby="button-search">
+                                    <button class="btn btn-primary" type="submit" id="button-search">
+                                        <i class="fas fa-search"></i>
+                                    </button>
                                 </div>
+
+                                <!-- Preserve display options -->
+                                <c:forEach items="${displayOptions}" var="option">
+                                    <input type="hidden" name="display" value="${option}">
+                                </c:forEach>
                                 
+                                <!-- Preserve page size -->
+                                <c:if test="${not empty pageSize}">
+                                    <input type="hidden" name="pageSize" value="${pageSize}">
+                                </c:if>
                                 
-                                    
-                                    <!-- Preserve other parameters -->
-                                    <c:if test="${not empty categoryId}">
-                                        <input type="hidden" name="category" value="${categoryId}">
-                                    </c:if>
-                                    <c:if test="${not empty pageSize}">
-                                        <input type="hidden" name="pageSize" value="${pageSize}">
-                                    </c:if>
-                                </div>
+                                <!-- Reset to page 1 when searching -->
+                                <input type="hidden" name="page" value="1">
                             </form>
                         </div>
         
