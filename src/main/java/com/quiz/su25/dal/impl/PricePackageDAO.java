@@ -15,7 +15,7 @@ import java.sql.Date;
 
 /**
  *
- * @author Admin
+ * @author quangmingdoc
  */
 public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
 

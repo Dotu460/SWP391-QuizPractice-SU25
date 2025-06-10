@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  *
- * @author Admin
+ * @author quangmingdoc
  */
 public class QuestionDAO extends DBContext implements I_DAO<Question> {
 

@@ -17,6 +17,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter
 @Setter
+
 public class User {
     private Integer id;
     private String full_name;

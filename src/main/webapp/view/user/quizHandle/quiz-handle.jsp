@@ -845,14 +845,14 @@
                                 <div class="settings-menu">
                                     <div class="settings-icon" onclick="toggleSettingsDropdown()">
                                         <i class="fas fa-cog"></i>
-                    </div>
+                                    </div>
                                     <div class="settings-dropdown">
                                         <a href="#" class="dropdown-item" onclick="exitQuiz()">
                                             <i class="fas fa-sign-out-alt"></i>
                                             <span>Exit Quiz</span>
                                         </a>
-                </div>
-            </div>
+                                    </div>
+                                </div>
                                 <div class="user-menu">
                                     <div class="user-icon" onclick="toggleDropdown()">
                                         <i class="fas fa-user"></i>
@@ -1811,34 +1811,6 @@
         </script>
 
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const mobileNavToggler = document.querySelector('.mobile-nav-toggler');
-                const mobileMenu = document.querySelector('.tgmobile__menu');
-                const menuBackdrop = document.querySelector('.tgmobile__menu-backdrop');
-                const closeBtn = document.querySelector('.close-btn');
-
-                // Open menu
-                mobileNavToggler.addEventListener('click', function() {
-                    mobileMenu.classList.add('active');
-                    menuBackdrop.classList.add('active');
-                    document.body.style.overflow = 'hidden';
-                });
-
-                // Close menu when clicking close button
-                closeBtn.addEventListener('click', closeMenu);
-
-                // Close menu when clicking backdrop
-                menuBackdrop.addEventListener('click', closeMenu);
-
-                function closeMenu() {
-                    mobileMenu.classList.remove('active');
-                    menuBackdrop.classList.remove('active');
-                    document.body.style.overflow = '';
-                }
-            });
-        </script>
-
-        <script>
             function toggleDropdown() {
                 const dropdown = document.querySelector('.dropdown-menu');
                 dropdown.classList.toggle('show');
@@ -1877,7 +1849,6 @@
             
             function exitQuiz() {
                 if(confirm('Are you sure you want to exit the quiz?')) {
-                    // Add your exit quiz logic here
                     window.location.href = 'your-exit-url';
                 }
             }
