@@ -652,32 +652,6 @@
             alert('Đã áp dụng cài đặt cột!');
         }
 
-        function loadLessons() {
-            var subjectId = $('#subjectId').val();
-            var lessionSelect = $('#lessionId');
-            
-            // Hide all lessons first
-            lessionSelect.find('option[data-subject]').hide();
-            
-            if (subjectId === '') {
-                // If no subject selected, show "All lessons" option only
-                lessionSelect.val('');
-                lessionSelect.find('option[value=""]').show();
-            } else {
-                // Show lessons for selected subject
-                lessionSelect.find('option[data-subject="' + subjectId + '"]').show();
-                
-                // If current selection is not in shown options, reset to default
-                if (lessionSelect.find('option:selected').is(':hidden')) {
-                    lessionSelect.val('');
-                }
-            }
-        }
-
-        // Run on page load
-        $(document).ready(function() {
-            loadLessons();
-        });
 
         function confirmDelete(form) {
             if (confirm('Are you sure you want to delete this quiz?')) {

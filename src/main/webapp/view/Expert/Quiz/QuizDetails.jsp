@@ -142,7 +142,7 @@
                                         </div>
                                     </div>
                                     <div class="col-auto">
-                                        <a href="${pageContext.request.contextPath}/QuizzesList" class="btn btn-secondary rounded-pill">
+                                        <a href="${pageContext.request.contextPath}/quizzes-list" class="btn btn-secondary rounded-pill">
                                             <i class="fa fa-arrow-left me-2"></i> Back to Quizzes
                                         </a>
                                     </div>
@@ -164,11 +164,8 @@
 
                                 <!-- Quiz Actions -->
                                 <div class="quiz-actions text-end">
-                                    <button type="button" class="btn btn-primary" id="edit">
+                                    <button type="button" class="btn btn-primary" id="editBtn">
                                         <i class="fa fa-edit"></i> Edit Quiz
-                                    </button>
-                                    <button type="button" class="btn btn-danger" id="delete" onclick="confirmDelete()">
-                                        <i class="fa fa-trash"></i> Delete Quiz
                                     </button>
                                 </div>
 
@@ -180,8 +177,9 @@
                                                 <h5 class="mb-0">Quiz Information</h5>
                                             </div>
                                             <div class="card-body">
-                                                <form method="post" action="${pageContext.request.contextPath}/update-quiz" id="quizForm" class="view-mode">
+                                                <form method="post" action="${pageContext.request.contextPath}/quizzes-list?action=update" id="quizForm" class="view-mode">
                                                     <input type="hidden" name="quiz_id" value="${quiz.id}">
+                                                    <input type="hidden" name="redirect" value="list">
                                                     
                                                     <!-- Basic Information Section -->
                                                     <div class="form-section">
@@ -194,89 +192,77 @@
                                                                            value="${quiz.name}" required>
                                                                 </div>
                                                             </div>
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label for="subject_id" class="form-label">Subject <span class="required">*</span></label>
-                                                                    <select class="form-control" id="subject_id" name="subject_id" required>
-                                                                        <option value="">Select Subject</option>
-                                                                        <c:forEach items="${subjectsList}" var="subject">
-                                                                            <option value="${subject.id}" ${quiz.subject_id == subject.id ? 'selected' : ''}>
-                                                                                ${subject.name}
-                                                                            </option>
-                                                                        </c:forEach>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
                                                         </div>
-                                                        <div class="row">
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label for="lesson_id" class="form-label">Lesson <span class="required">*</span></label>
-                                                                    <select class="form-control" id="lesson_id" name="lesson_id" required>
-                                                                        <option value="">Select Lesson</option>
-                                                                        <c:forEach items="${lessonsList}" var="lesson">
-                                                                            <option value="${lesson.id}" ${quiz.lesson_id == lesson.id ? 'selected' : ''}>
-                                                                                ${lesson.name}
-                                                                            </option>
-                                                                        </c:forEach>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label for="quiz_type" class="form-label">Quiz Type <span class="required">*</span></label>
-                                                                    <select class="form-control" id="quiz_type" name="quiz_type" required>
-                                                                        <option value="">Select Type</option>
-                                                                        <option value="Practice" ${quiz.quiz_type == 'Practice' ? 'selected' : ''}>Practice</option>
-                                                                        <option value="Exam" ${quiz.quiz_type == 'Exam' ? 'selected' : ''}>Exam</option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label for="level" class="form-label">Độ khó <span class="required">*</span></label>
-                                                                    <select class="form-control" id="level" name="level" required>
-                                                                        <option value="">Chọn độ khó</option>
-                                                                        <option value="easy" ${quiz.level == 'easy' ? 'selected' : ''}>Dễ</option>
-                                                                        <option value="medium" ${quiz.level == 'medium' ? 'selected' : ''}>Trung bình</option>
-                                                                        <option value="hard" ${quiz.level == 'hard' ? 'selected' : ''}>Khó</option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <!-- Quiz Settings Section -->
-                                                    <div class="form-section">
-                                                        <h5>Quiz Settings</h5>
-                                                        <div class="row">
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label for="duration_minutes" class="form-label">Duration (Minutes) <span class="required">*</span></label>
-                                                                    <input type="number" class="form-control" id="duration_minutes" name="duration_minutes" 
-                                                                           value="${quiz.duration_minutes}" min="1" required>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label for="number_of_questions" class="form-label">Number of Questions <span class="required">*</span></label>
-                                                                    <input type="number" class="form-control" id="number_of_questions" name="number_of_questions" 
-                                                                           value="${quiz.number_of_questions}" min="1" required>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <!-- Action Buttons -->
-                                                    <div class="text-end btn-group" id="formButtons" style="display: none;">
-                                                        <button type="button" class="btn btn-secondary" id="cancelBtn">
-                                                            <i class="fa fa-times"></i> Cancel
-                                                        </button>
-                                                        <button type="submit" class="btn btn-primary">
-                                                            <i class="fa fa-save"></i> Save Changes
-                                                        </button>
-                                                    </div>
-                                                </form>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="lesson_id" class="form-label">Lesson <span class="required">*</span></label>
+                                                    <select class="form-control" id="lesson_id" name="lesson_id" required>
+                                                        <option value="">Select Lesson</option>
+                                                        <c:forEach items="${lessonsList}" var="lesson">
+                                                            <c:set var="subject" value="${subjectDAO.findById(lesson.subject_id)}" />
+                                                            <option value="${lesson.id}" ${quiz.lesson_id == lesson.id ? 'selected' : ''}>
+                                                                ${subject.title}: ${lesson.title}
+                                                            </option>
+                                                        </c:forEach>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="quiz_type" class="form-label">Quiz Type <span class="required">*</span></label>
+                                                    <select class="form-control" id="quiz_type" name="quiz_type" required>
+                                                        <option value="">Select Type</option>
+                                                        <option value="practice" ${quiz.quiz_type == 'practice' ? 'selected' : ''}>Practice</option>
+                                                        <option value="exam" ${quiz.quiz_type == 'exam' ? 'selected' : ''}>Exam</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="level" class="form-label">Level <span class="required">*</span></label>
+                                                    <select class="form-control" id="level" name="level" required>
+                                                        <option value="">Choose Level</option>
+                                                        <option value="easy" ${quiz.level == 'easy' ? 'selected' : ''}>Easy</option>
+                                                        <option value="medium" ${quiz.level == 'medium' ? 'selected' : ''}>Medium</option>
+                                                        <option value="hard" ${quiz.level == 'hard' ? 'selected' : ''}>Hard</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Quiz Settings Section -->
+                                    <div class="form-section">
+                                        <h5>Quiz Settings</h5>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="duration_minutes" class="form-label">Duration (Minutes) <span class="required">*</span></label>
+                                                    <input type="number" class="form-control" id="duration_minutes" name="duration_minutes" 
+                                                           value="${quiz.duration_minutes}" min="1" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="number_of_questions" class="form-label">Number of Questions <span class="required">*</span></label>
+                                                    <input type="number" class="form-control" id="number_of_questions" name="number_of_questions" 
+                                                           value="${quiz.number_of_questions_target}" min="1" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Action Buttons -->
+                                    <div class="text-end btn-group" id="formButtons" style="display: none;">
+                                        <button type="button" class="btn btn-secondary" id="cancelBtn">
+                                            <i class="fa fa-times"></i> Cancel
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fa fa-save"></i> Save Changes
+                                        </button>
+                                    </div>
+                                </form>
                                             </div>
                                         </div>
                                     </div>
@@ -297,15 +283,8 @@
     <!-- JS here -->
     <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
     
-    <!-- iziToast CSS and JS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/css/iziToast.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/js/iziToast.min.js"></script>
-
     <script>
-        // Dynamic Lesson Loading based on Subject Selection
         document.addEventListener('DOMContentLoaded', function() {
-            const subjectSelect = document.getElementById('subject_id');
-            const lessonSelect = document.getElementById('lesson_id');
             const quizForm = document.getElementById('quizForm');
             const editBtn = document.getElementById('editBtn');
             const cancelBtn = document.getElementById('cancelBtn');
@@ -327,75 +306,13 @@
                 editBtn.style.display = 'inline-block';
                 quizForm.reset();
             });
-            
-            // Subject change handler
-            subjectSelect.addEventListener('change', function() {
-                const subjectId = this.value;
-                if (subjectId) {
-                    // Clear current lessons
-                    lessonSelect.innerHTML = '<option value="">Loading lessons...</option>';
-                    
-                    // Fetch lessons for selected subject
-                    fetch('${pageContext.request.contextPath}/get-lessons?subject_id=' + subjectId)
-                        .then(response => response.json())
-                        .then(lessons => {
-                            lessonSelect.innerHTML = '<option value="">Select Lesson</option>';
-                            lessons.forEach(lesson => {
-                                lessonSelect.innerHTML += `<option value="\${lesson.id}">\${lesson.name}</option>`;
-                            });
-                            // If we have a selected lesson_id, select it
-                            if ('${quiz.lesson_id}') {
-                                lessonSelect.value = '${quiz.lesson_id}';
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            lessonSelect.innerHTML = '<option value="">Error loading lessons</option>';
-                        });
-                } else {
-                    lessonSelect.innerHTML = '<option value="">Select Lesson</option>';
-                }
-            });
-            
-            // Form submission handling
+
+            // Form submit handler
             quizForm.addEventListener('submit', function(e) {
-                // Show loading state
-                const submitBtn = this.querySelector('button[type="submit"]');
-                const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
-                submitBtn.disabled = true;
+                // Add any validation if needed
+                return true; // Allow form submission
             });
         });
-
-        // Delete confirmation
-
-        // Toast message display
-        var toastMessage = "${sessionScope.toastMessage}";
-        var toastType = "${sessionScope.toastType}";
-        if (toastMessage) {
-            iziToast.show({
-                title: toastType === 'success' ? 'Success' : 'Error',
-                message: toastMessage,
-                position: 'topRight',
-                color: toastType === 'success' ? 'green' : 'red',
-                timeout: 5000,
-                onClosing: function () {
-                    // Remove toast attributes from the session after displaying
-                    fetch('${pageContext.request.contextPath}/remove-toast', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                    }).then(response => {
-                        if (!response.ok) {
-                            console.error('Failed to remove toast attributes');
-                        }
-                    }).catch(error => {
-                        console.error('Error:', error);
-                    });
-                }
-            });
-        }
     </script>
 </body>
 
