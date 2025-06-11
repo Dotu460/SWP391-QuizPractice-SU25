@@ -260,8 +260,9 @@
 
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required 
+                        <input type="password" class="form-control" id="password" name="password" 
                                placeholder="Enter your password">
+                        <span id="password-error" class="error-text"></span>
                     </div>
 
                     <div class="form-footer">
@@ -277,50 +278,72 @@
             </div>
         </div>
         <script>
-            function validateForm() {
-                const emailInput = document.getElementById('email');
-                const errorSpan = document.getElementById('email-error');
-                const emailValue = emailInput.value.trim();
-
-                // Regex kiểm tra định dạng email
-                const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-                // Reset lỗi
-                errorSpan.textContent = "";
-
-                if (emailValue === '') {
-                    errorSpan.textContent = "Email is required.";
-                    emailInput.focus();
-                    return false;
-                }
-
-                if (!emailRegex.test(emailValue)) {
-                    errorSpan.textContent = "Invalid email format.";
-                    emailInput.focus();
-                    return false;
-                }
-
-                return true;
-            }
-
-            // Kiểm tra realtime khi nhập
             document.addEventListener("DOMContentLoaded", function () {
+                // EMAIL realtime
                 const emailInput = document.getElementById('email');
-                const errorSpan = document.getElementById('email-error');
+                const emailError = document.getElementById('email-error');
                 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
                 emailInput.addEventListener("input", function () {
                     const emailValue = emailInput.value.trim();
-
                     if (emailValue === '') {
-                        errorSpan.textContent = "Email is required.";
+                        emailError.textContent = "Email is required.";
                     } else if (!emailRegex.test(emailValue)) {
-                        errorSpan.textContent = "Invalid email format.";
+                        emailError.textContent = "Invalid email format.";
                     } else {
-                        errorSpan.textContent = "";
+                        emailError.textContent = "";
+                    }
+                });
+
+                // PASSWORD realtime
+                const passwordInput = document.getElementById("password");
+                const passwordError = document.getElementById("password-error");
+
+                passwordInput.addEventListener("input", function () {
+                    const passwordValue = passwordInput.value.trim();
+                    if (passwordValue === "") {
+                        passwordError.textContent = "Password is required.";
+                    } else {
+                        passwordError.textContent = "";
                     }
                 });
             });
+
+            function validateForm() {
+                let isValid = true;
+
+                // EMAIL validation
+                const emailInput = document.getElementById('email');
+                const emailError = document.getElementById('email-error');
+                const emailValue = emailInput.value.trim();
+                const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+                emailError.textContent = "";
+                if (emailValue === '') {
+                    emailError.textContent = "Email is required.";
+                    emailInput.focus();
+                    isValid = false;
+                } else if (!emailRegex.test(emailValue)) {
+                    emailError.textContent = "Invalid email format.";
+                    emailInput.focus();
+                    isValid = false;
+                }
+
+                // PASSWORD validation
+                const passwordInput = document.getElementById("password");
+                const passwordError = document.getElementById("password-error");
+                const passwordValue = passwordInput.value.trim();
+
+                passwordError.textContent = "";
+                if (passwordValue === "") {
+                    passwordError.textContent = "Password is required.";
+                    if (isValid)
+                        passwordInput.focus();
+                    isValid = false;
+                }
+
+                return isValid;
+            }
         </script>
 
         <!-- JS here -->
