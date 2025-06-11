@@ -211,8 +211,10 @@ public class AdminController extends HttpServlet {
 
             // Set role
             int roleId = Integer.parseInt(request.getParameter("roleId"));
-            Role role = new Role();
-            //role.setId(roleId);
+            // Validate role ID - only allow existing roles (2 or 3)
+            if (roleId != 2 && roleId != 3) {
+                roleId = 2; // Default to role 2 if invalid role ID provided
+            }
             user.setRole_id(roleId);
 
             return user;

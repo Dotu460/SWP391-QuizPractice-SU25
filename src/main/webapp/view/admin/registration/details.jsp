@@ -46,6 +46,9 @@
             font-weight: 600;
             color: #0066cc;
             font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .section-content {
@@ -165,6 +168,76 @@
             background-color: #f8d7da;
             border-color: #f5c6cb;
         }
+
+        .price-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .price-info .original-price {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+
+        .price-info .sale-price {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-paid {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .info-box-title {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .info-box-content {
+            color: #6c757d;
+        }
+
+        .user-creation-fields {
+            display: none;
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .user-creation-fields.active {
+            display: block;
+        }
     </style>
 </head>
 
@@ -188,7 +261,13 @@
                         <div class="col-lg-10">
                             <div class="dashboard__content-wrap">
                                 <div class="dashboard__content-title">
-                                    <h4 class="title">Registration Details</h4>
+                                    <h4 class="title">
+                                        <c:choose>
+                                            <c:when test="${registration == null}">Add New Registration</c:when>
+                                            <c:when test="${isViewMode}">View Registration Details</c:when>
+                                            <c:otherwise>Edit Registration</c:otherwise>
+                                        </c:choose>
+                                    </h4>
                                 </div>
 
                                 <!-- Success/Error Messages -->
@@ -197,6 +276,7 @@
                                         <c:choose>
                                             <c:when test="${param.success == 'added'}">Registration successfully added.</c:when>
                                             <c:when test="${param.success == 'updated'}">Registration successfully updated.</c:when>
+                                            <c:when test="${param.success == 'userCreated'}">User account created and login information sent.</c:when>
                                         </c:choose>
                                     </div>
                                 </c:if>
@@ -207,140 +287,213 @@
                                             <c:when test="${param.error == 'addFailed'}">Failed to add registration.</c:when>
                                             <c:when test="${param.error == 'updateFailed'}">Failed to update registration.</c:when>
                                             <c:when test="${param.error == 'invalidData'}">Invalid data provided.</c:when>
+                                            <c:when test="${param.error == 'userCreateFailed'}">Failed to create user account.</c:when>
                                         </c:choose>
                                     </div>
                                 </c:if>
 
-                                <form id="registrationForm">
+                                <form id="registrationForm" action="${pageContext.request.contextPath}/admin/registrations" method="post">
+                                    <input type="hidden" name="action" value="${registration == null ? 'add' : 'edit'}">
+                                    <c:if test="${registration != null}">
+                                        <input type="hidden" name="id" value="${registration.id}">
+                                    </c:if>
+
                                     <!-- Registration Details Section -->
                                     <div class="section">
-                                        <div class="section-header">📋 Registration Details</div>
+                                        <div class="section-header">
+                                            <i class="fas fa-file-alt"></i>
+                                            Registration Details
+                                        </div>
                                         <div class="section-content">
+                                            <div class="info-box">
+                                                <div class="info-box-title">Subject Information</div>
+                                                <div class="info-box-content">
+                                                    <c:forEach items="${subjects}" var="subject">
+                                                        <c:if test="${registration != null && registration.subject_id == subject.id}">
+                                                            <strong>${subject.title}</strong>
+                                                            <p>${subject.description}</p>
+                                                        </c:if>
+                                                    </c:forEach>
+                                                </div>
+                                            </div>
+
                                             <div class="form-row">
                                                 <label for="subject" class="required">Subject:</label>
-                                                <input type="text" id="subject" name="subject" value="Advanced Mathematics" required />
-                                            </div>
-                                            
-                                            <div class="form-row">
-                                                <label for="priority">Priority:</label>
-                                                <select id="priority" name="priority">
-                                                    <option value="high" selected>High</option>
-                                                    <option value="medium">Medium</option>
-                                                    <option value="low">Low</option>
+                                                <select id="subject" name="subjectId" required ${isViewMode ? 'disabled' : ''}>
+                                                    <c:forEach items="${subjects}" var="subject">
+                                                        <option value="${subject.id}" ${registration != null && registration.subject_id == subject.id ? 'selected' : ''}>
+                                                            ${subject.title}
+                                                        </option>
+                                                    </c:forEach>
                                                 </select>
                                             </div>
-                                            
-                                            <div class="form-row">
-                                                <textarea id="customerMessage" name="customerMessage">📦 Premium Package Details
-Advanced Mathematics course with 1-on-1 tutoring, practice tests, and completion certificate. Includes digital materials and 24/7 support.
 
-List Price: $399.00 Sale Price: $299.00</textarea>
+                                            <div class="info-box">
+                                                <div class="info-box-title">Package Information</div>
+                                                <div class="info-box-content">
+                                                    <c:forEach items="${pricePackages}" var="pkg">
+                                                        <c:if test="${registration != null && registration.package_id == pkg.id}">
+                                                            <strong>${pkg.name}</strong>
+                                                            <div class="price-info">
+                                                                <span class="original-price">$${pkg.list_price}</span>
+                                                                <span class="sale-price">$${pkg.sale_price}</span>
+                                                            </div>
+                                                            <p>${pkg.description}</p>
+                                                        </c:if>
+                                                    </c:forEach>
+                                                </div>
                                             </div>
-                                            
+
                                             <div class="form-row">
-                                                <label for="listPrice">List Price:</label>
-                                                <input type="text" id="listPrice" name="listPrice" value="$299.00 One Time: $349.00" />
+                                                <label for="package" class="required">Package:</label>
+                                                <select id="package" name="packageId" required ${isViewMode ? 'disabled' : ''}>
+                                                    <c:forEach items="${pricePackages}" var="pkg">
+                                                        <option value="${pkg.id}" ${registration != null && registration.package_id == pkg.id ? 'selected' : ''}>
+                                                            ${pkg.name} - 
+                                                            <span class="price-info">
+                                                                <span class="original-price">$${pkg.list_price}</span>
+                                                                <span class="sale-price">$${pkg.sale_price}</span>
+                                                            </span>
+                                                        </option>
+                                                    </c:forEach>
+                                                </select>
                                             </div>
-                                            
+
                                             <div class="form-row">
                                                 <label for="validFrom" class="required">Valid From:</label>
-                                                <input type="date" id="validFrom" name="validFrom" value="2024-06-01" required />
+                                                <input type="date" id="validFrom" name="validFrom" 
+                                                       value="${registration != null ? registration.valid_from : ''}" required 
+                                                       ${isViewMode ? 'readonly' : ''} />
                                             </div>
                                             
                                             <div class="form-row">
                                                 <label for="validTo" class="required">Valid To:</label>
-                                                <input type="date" id="validTo" name="validTo" value="2025-06-01" required />
+                                                <input type="date" id="validTo" name="validTo" 
+                                                       value="${registration != null ? registration.valid_to : ''}" required 
+                                                       ${isViewMode ? 'readonly' : ''} />
                                             </div>
                                         </div>
                                     </div>
                                     
                                     <!-- Personal Information Section -->
                                     <div class="section">
-                                        <div class="section-header">👤 Personal Information</div>
+                                        <div class="section-header">
+                                            <i class="fas fa-user"></i>
+                                            Personal Information
+                                        </div>
                                         <div class="section-content">
+                                            <c:if test="${user != null}">
+                                                <div class="info-box">
+                                                    <div class="info-box-title">Current User Information</div>
+                                                    <div class="info-box-content">
+                                                        <p><strong>Full Name:</strong> ${user.full_name}</p>
+                                                        <p><strong>Gender:</strong> ${user.gender == 1 ? 'Male' : 'Female'}</p>
+                                                        <p><strong>Email:</strong> ${user.email}</p>
+                                                        <p><strong>Mobile:</strong> ${user.mobile}</p>
+                                                    </div>
+                                                </div>
+                                            </c:if>
+
                                             <div class="form-row">
                                                 <label for="fullName" class="required">Full Name:</label>
-                                                <input type="text" id="fullName" name="fullName" value="John Doe" required />
+                                                <input type="text" id="fullName" name="fullName" 
+                                                       value="${user != null ? user.full_name : ''}" required 
+                                                       ${isViewMode ? 'readonly' : ''} />
                                             </div>
                                             
                                             <div class="form-row">
                                                 <label for="gender">Gender:</label>
-                                                <select id="gender" name="gender">
-                                                    <option value="male" selected>Male</option>
-                                                    <option value="female">Female</option>
-                                                    <option value="other">Other</option>
+                                                <select id="gender" name="gender" ${isViewMode ? 'disabled' : ''}>
+                                                    <option value="1" ${user != null && user.gender == 1 ? 'selected' : ''}>Male</option>
+                                                    <option value="0" ${user != null && user.gender == 0 ? 'selected' : ''}>Female</option>
                                                 </select>
                                             </div>
                                             
                                             <div class="form-row">
                                                 <label for="email" class="required">Email:</label>
-                                                <input type="email" id="email" name="email" value="john.doe@example.com" required />
+                                                <input type="email" id="email" name="email" 
+                                                       value="${user != null ? user.email : ''}" required 
+                                                       ${isViewMode ? 'readonly' : ''} />
                                             </div>
                                             
                                             <div class="form-row">
                                                 <label for="mobile" class="required">Mobile:</label>
-                                                <input type="tel" id="mobile" name="mobile" value="+84-90-234-5678" required />
+                                                <input type="tel" id="mobile" name="mobile" 
+                                                       value="${user != null ? user.mobile : ''}" required 
+                                                       ${isViewMode ? 'readonly' : ''} />
+                                            </div>
+
+                                            <div id="userCreationFields" class="user-creation-fields">
+                                                <div class="info-box-title">New User Account Information</div>
+                                                <p>Please fill in the following information to create a new user account.</p>
+                                                <div class="form-row">
+                                                    <label for="password" class="required">Password:</label>
+                                                    <input type="password" id="password" name="password" 
+                                                           placeholder="Enter password for new user" />
+                                                </div>
+                                                <div class="form-row">
+                                                    <label for="confirmPassword" class="required">Confirm Password:</label>
+                                                    <input type="password" id="confirmPassword" name="confirmPassword" 
+                                                           placeholder="Confirm password" />
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                     
-                                    <!-- Customer Message Section -->
+                                    <!-- Status & Notes Section -->
                                     <div class="section">
-                                        <div class="section-header">💬 Customer Message</div>
-                                        <div class="section-content">
-                                            <div class="form-row">
-                                                <textarea id="customerMessage" name="customerMessage">Thank you for registering! Your NetAmateur package is now active. You will receive login information shortly either in message.</textarea>
-                                            </div>
+                                        <div class="section-header">
+                                            <i class="fas fa-credit-card"></i>
+                                            Status & Notes
                                         </div>
-                                    </div>
-                                    
-                                    <!-- Status & Payment Section -->
-                                    <div class="section">
-                                        <div class="section-header">💳 Status & Payment</div>
                                         <div class="section-content">
                                             <div class="form-row">
-                                                <label for="currentStatus">Current Status:</label>
-                                                <input type="text" id="currentStatus" name="currentStatus" class="readonly" readonly value="Open" />
+                                                <label for="status">Status:</label>
+                                                <select id="status" name="status" required ${isViewMode ? 'disabled' : ''}>
+                                                    <option value="pending" ${registration != null && registration.status == 'pending' ? 'selected' : ''}>Pending</option>
+                                                    <option value="paid" ${registration != null && registration.status == 'paid' ? 'selected' : ''}>Paid</option>
+                                                    <option value="cancelled" ${registration != null && registration.status == 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                                                </select>
                                             </div>
                                             
                                             <div class="form-row">
-                                                <label for="sizeText">Sale Representative:</label>
-                                                <input type="text" id="sizeText" name="sizeText" class="readonly" readonly value="System Admin" />
+                                                <label for="notes">Email Content:</label>
+                                                <textarea id="notes" name="notes" placeholder="Add any additional notes to be included in the email notification..." 
+                                                          ${isViewMode ? 'readonly' : ''}>${registration != null && registration.status == 'paid' ? 'Your registration has been confirmed. You can now access the course materials.' : ''}</textarea>
                                             </div>
                                         </div>
                                     </div>
                                     
                                     <!-- System Information Section -->
                                     <div class="section">
-                                        <div class="section-header">🔧 System Information</div>
+                                        <div class="section-header">
+                                            <i class="fas fa-cog"></i>
+                                            System Information
+                                        </div>
                                         <div class="section-content">
                                             <div class="form-row">
                                                 <label for="registrationTime">Registration Time:</label>
-                                                <input type="text" id="registrationTime" name="registrationTime" class="readonly" readonly value="2024-06-05 21:02:00" />
-                                            </div>
-                                            
-                                            <div class="form-row">
-                                                <label for="createdBy">Created By:</label>
-                                                <input type="text" id="createdBy" name="createdBy" class="readonly" readonly value="System Admin" />
-                                            </div>
-                                            
-                                            <div class="form-row">
-                                                <label for="lastUpdated">Last Updated:</label>
-                                                <input type="text" id="lastUpdated" name="lastUpdated" class="readonly" readonly value="2024-06-05 21:02:00" />
-                                            </div>
-                                            
-                                            <div class="form-row">
-                                                <label for="updatedBy">Updated By:</label>
-                                                <input type="text" id="updatedBy" name="updatedBy" class="readonly" readonly value="System Admin" />
+                                                <input type="text" id="registrationTime" class="readonly" readonly 
+                                                       value="${registration != null ? registration.registration_time : ''}" />
                                             </div>
                                         </div>
                                     </div>
                                     
                                     <!-- Action Buttons -->
                                     <div class="button-row">
-                                        <button type="button" class="btn btn-secondary" onclick="history.back()">Cancel</button>
-                                        <button type="button" class="btn btn-success" onclick="saveForm()">Save Changes</button>
-                                        <button type="submit" class="btn btn-primary">Save & Submit Information</button>
+                                        <button type="button" class="btn btn-secondary" onclick="history.back()">Back</button>
+                                        <c:if test="${!isViewMode}">
+                                            <button type="submit" class="btn btn-primary">
+                                                <c:choose>
+                                                    <c:when test="${registration == null}">Add Registration</c:when>
+                                                    <c:otherwise>Save Changes</c:otherwise>
+                                                </c:choose>
+                                            </button>
+                                        </c:if>
+                                        <c:if test="${isViewMode}">
+                                            <a href="${pageContext.request.contextPath}/admin/registrations?action=edit&id=${registration.id}" 
+                                               class="btn btn-primary">Edit</a>
+                                        </c:if>
                                     </div>
                                 </form>
                             </div>
@@ -361,13 +514,41 @@ List Price: $399.00 Sale Price: $299.00</textarea>
     <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
 
     <script>
-        function saveForm() {
-            alert('Form saved successfully!');
-        }
-        
-        document.getElementById('registrationForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Form submitted successfully!');
+        // Handle status change to "Paid"
+        document.getElementById('status').addEventListener('change', function() {
+            const userCreationFields = document.getElementById('userCreationFields');
+            const email = document.getElementById('email').value;
+            
+            if (this.value === 'paid') {
+                if (email) {
+                    fetch('${pageContext.request.contextPath}/admin/check-user?email=' + encodeURIComponent(email))
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data.exists) {
+                                if (confirm('User does not exist. Would you like to create a new user account?')) {
+                                    // Show user creation fields
+                                    userCreationFields.classList.add('active');
+                                    document.getElementById('fullName').readOnly = false;
+                                    document.getElementById('gender').disabled = false;
+                                    document.getElementById('mobile').readOnly = false;
+                                    
+                                    // Add required attributes to password fields
+                                    document.getElementById('password').required = true;
+                                    document.getElementById('confirmPassword').required = true;
+                                } else {
+                                    this.value = 'pending';
+                                    userCreationFields.classList.remove('active');
+                                }
+                            } else {
+                                userCreationFields.classList.remove('active');
+                            }
+                        });
+                }
+            } else {
+                userCreationFields.classList.remove('active');
+                document.getElementById('password').required = false;
+                document.getElementById('confirmPassword').required = false;
+            }
         });
 
         // Initialize date range validation
@@ -389,6 +570,40 @@ List Price: $399.00 Sale Price: $299.00</textarea>
                 alert('From Date must be less than or equal to To Date');
                 this.value = toDate;
             }
+        });
+
+        // Form submission
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate form
+            if (!this.checkValidity()) {
+                e.stopPropagation();
+                this.classList.add('was-validated');
+                return;
+            }
+
+            // Validate password if creating new user
+            const status = document.getElementById('status').value;
+            const userCreationFields = document.getElementById('userCreationFields');
+            
+            if (status === 'paid' && userCreationFields.classList.contains('active')) {
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                if (password !== confirmPassword) {
+                    alert('Passwords do not match!');
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    alert('Password must be at least 6 characters long!');
+                    return;
+                }
+            }
+
+            // Submit form
+            this.submit();
         });
     </script>
 </body>

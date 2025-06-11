@@ -551,6 +551,100 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
+     * Find registrations with dynamic column selection and filters
+     */
+    public List<Registration> findRegistrationsWithDynamicColumns(
+            String emailSearch, String subjectSearch, String status,
+            Date fromDate, Date toDate, String sortBy, String sortOrder,
+            int page, int pageSize, String[] selectedColumns) {
+        
+        // Always select all registration columns to build the object properly
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT r.* FROM registrations r ");
+        sql.append("JOIN users u ON r.user_id = u.id ");
+        sql.append("JOIN subject s ON r.subject_id = s.id ");
+        sql.append("LEFT JOIN pricePackage p ON r.package_id = p.id ");
+        sql.append("WHERE 1=1 ");
+        
+        List<Object> parameters = new ArrayList<>();
+        
+        // Add filters
+        if (emailSearch != null && !emailSearch.trim().isEmpty()) {
+            sql.append("AND u.email LIKE ? ");
+            parameters.add("%" + emailSearch.trim() + "%");
+        }
+        
+        if (subjectSearch != null && !subjectSearch.trim().isEmpty()) {
+            sql.append("AND s.title LIKE ? ");
+            parameters.add("%" + subjectSearch.trim() + "%");
+        }
+        
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append("AND r.status = ? ");
+            parameters.add(status.trim());
+        }
+        
+        if (fromDate != null) {
+            sql.append("AND r.registration_time >= ? ");
+            parameters.add(fromDate);
+        }
+        
+        if (toDate != null) {
+            sql.append("AND r.registration_time <= ? ");
+            parameters.add(toDate);
+        }
+        
+        // Add sorting
+        if (sortBy != null && !sortBy.trim().isEmpty()) {
+            sql.append("ORDER BY ");
+            switch (sortBy) {
+                case "email":
+                    sql.append("u.email");
+                    break;
+                case "subject":
+                    sql.append("s.title");
+                    break;
+                default:
+                    sql.append("r.").append(sortBy);
+            }
+            
+            if ("desc".equalsIgnoreCase(sortOrder)) {
+                sql.append(" DESC");
+            } else {
+                sql.append(" ASC");
+            }
+        } else {
+            sql.append("ORDER BY r.id DESC");
+        }
+        
+        // Add pagination
+        sql.append(" LIMIT ? OFFSET ?");
+        parameters.add(pageSize);
+        parameters.add((page - 1) * pageSize);
+        
+        List<Registration> registrations = new ArrayList<>();
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+            
+            // Set parameters
+            for (int i = 0; i < parameters.size(); i++) {
+                statement.setObject(i + 1, parameters.get(i));
+            }
+            
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                registrations.add(getFromResultSet(resultSet));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in findRegistrationsWithDynamicColumns: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        
+        return registrations;
+    }
+
+    /**
      * Count total filtered registrations
      */
     public int countFilteredRegistrations(
@@ -611,6 +705,27 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
         }
         
         return 0;
+    }
+
+    /**
+     * Lấy tất cả các giá trị status duy nhất từ bảng registrations
+     */
+    public List<String> getAllStatuses() {
+        List<String> statuses = new ArrayList<>();
+        String sql = "SELECT DISTINCT status FROM registrations ORDER BY status ASC";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                statuses.add(resultSet.getString("status"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getAllStatuses at class RegistrationDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return statuses;
     }
 
     public static void main(String[] args) {
