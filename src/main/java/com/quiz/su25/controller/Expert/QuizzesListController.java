@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-package com.quiz.su25.controller.Quizz;
+package com.quiz.su25.controller.Expert;
 
 import com.quiz.su25.dal.impl.QuizzesDAO;
 import com.quiz.su25.dal.impl.SubjectDAO;
@@ -24,7 +24,6 @@ import java.util.List;
 @WebServlet("/quizzes-list")
 public class QuizzesListController extends HttpServlet {
 
-    private static final int RECORDS_PER_PAGE = 5;
     private static final String LIST_PAGE = "view/Expert/Quiz/quizzes-list.jsp";
     private QuizzesDAO quizzesDAO;
     private SubjectDAO subjectDAO;
@@ -49,6 +48,9 @@ public class QuizzesListController extends HttpServlet {
             case "add":
                 showAddQuizForm(request, response);
                 break;
+            case "details":
+                showQuizDetails(request, response);
+                break;
             case "list":
             default:
                 listQuizzes(request, response);
@@ -65,6 +67,8 @@ public class QuizzesListController extends HttpServlet {
             deleteQuiz(request, response);
         } else if ("create".equals(action)) {
             createQuiz(request, response);
+        } else if ("update".equals(action)) {
+            updateQuiz(request, response);
         } else {
             response.sendRedirect(request.getContextPath() + "/quizzes-list");
         }
@@ -95,11 +99,28 @@ public class QuizzesListController extends HttpServlet {
                 System.out.println("Invalid subject ID format: " + e.getMessage());
             }
 
-            // Handle pagination
-            int currentPage = 1;
+            // Get total records count
+            int totalRecords = quizzesDAO.getTotalFilteredQuizzes(quizName, subjectId, null, quizType);
+
+            // Handle records per page - default to total records count
+            int recordsPerPage = totalRecords;
+            String recordsPerPageStr = request.getParameter("recordsPerPage");
+            if (recordsPerPageStr != null && !recordsPerPageStr.trim().isEmpty()) {
+                try {
+                    recordsPerPage = Integer.parseInt(recordsPerPageStr);
+                    if (recordsPerPage < 1) {
+                        recordsPerPage = totalRecords;
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid records per page format: " + e.getMessage());
+                }
+            }
+
+            // Always show page 1 when showing all records
+            int currentPage = (recordsPerPage == totalRecords) ? 1 : 1;
             try {
                 String pageStr = request.getParameter("page");
-                if (pageStr != null && !pageStr.trim().isEmpty()) {
+                if (pageStr != null && !pageStr.trim().isEmpty() && recordsPerPage != totalRecords) {
                     currentPage = Integer.parseInt(pageStr);
                 }
             } catch (NumberFormatException e) {
@@ -107,8 +128,7 @@ public class QuizzesListController extends HttpServlet {
             }
 
             // Calculate total pages
-            int totalRecords = quizzesDAO.getTotalFilteredQuizzes(quizName, subjectId, null, quizType);
-            int totalPages = (int) Math.ceil((double) totalRecords / RECORDS_PER_PAGE);
+            int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
 
             // Validate page number
             if (totalPages == 0) {
@@ -122,7 +142,7 @@ public class QuizzesListController extends HttpServlet {
 
             // Get filtered quizzes with pagination
             List<Quizzes> quizzesList = quizzesDAO.findQuizzesWithFilters(
-                quizName, subjectId, null, quizType, currentPage, RECORDS_PER_PAGE
+                quizName, subjectId, null, quizType, currentPage, recordsPerPage
             );
 
             // Get all subjects for dropdown
@@ -133,6 +153,7 @@ public class QuizzesListController extends HttpServlet {
             request.setAttribute("subjectsList", subjectsList);
             request.setAttribute("currentPage", currentPage);
             request.setAttribute("totalPages", totalPages);
+            request.setAttribute("recordsPerPage", recordsPerPage);
             request.setAttribute("quizName", quizName);
             request.setAttribute("subjectId", subjectId);
             request.setAttribute("quizType", quizType);
@@ -290,6 +311,122 @@ public class QuizzesListController extends HttpServlet {
             e.printStackTrace();
             request.setAttribute("error", "An error occurred while creating the quiz!");
             showAddQuizForm(request, response);
+        }
+    }
+
+    private void updateQuiz(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            // Get parameters from form
+            int quizId = Integer.parseInt(request.getParameter("quiz_id"));
+            String name = request.getParameter("name");
+            int lessonId = Integer.parseInt(request.getParameter("lesson_id"));
+            String level = request.getParameter("level");
+            String quizType = request.getParameter("quiz_type");
+            int durationMinutes = Integer.parseInt(request.getParameter("duration_minutes"));
+            int numberOfQuestions = Integer.parseInt(request.getParameter("number_of_questions"));
+            String redirect = request.getParameter("redirect");
+
+            // Get existing quiz
+            Quizzes existingQuiz = quizzesDAO.findById(quizId);
+            if (existingQuiz == null) {
+                request.setAttribute("error", "Quiz not found!");
+                response.sendRedirect(request.getContextPath() + "/quizzes-list");
+                return;
+            }
+
+            // Check for duplicate quiz
+            List<Quizzes> allQuizzes = quizzesDAO.findAll();
+            boolean isDuplicate = false;
+            for (Quizzes quiz : allQuizzes) {
+                if (quiz.getId() != quizId && // Skip the current quiz being updated
+                    quiz.getName().equals(name) &&
+                    quiz.getLesson_id() == lessonId &&
+                    quiz.getLevel().equals(level) &&
+                    quiz.getQuiz_type().equals(quizType) &&
+                    quiz.getDuration_minutes() == durationMinutes &&
+                    quiz.getNumber_of_questions_target() == numberOfQuestions) {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+
+            if (isDuplicate) {
+                request.setAttribute("error", "A quiz with identical information already exists!");
+                response.sendRedirect(request.getContextPath() + "/QuizDetails?id=" + quizId);
+                return;
+            }
+
+            // Update quiz object
+            existingQuiz.setName(name);
+            existingQuiz.setLesson_id(lessonId);
+            existingQuiz.setLevel(level);
+            existingQuiz.setQuiz_type(quizType);
+            existingQuiz.setDuration_minutes(durationMinutes);
+            existingQuiz.setNumber_of_questions_target(numberOfQuestions);
+
+            // Update in database
+            boolean updated = quizzesDAO.update(existingQuiz);
+
+            if (updated) {
+                request.getSession().setAttribute("successMessage", "Quiz updated successfully!");
+            } else {
+                request.getSession().setAttribute("errorMessage", "Failed to update quiz!");
+            }
+
+            // Redirect based on the redirect parameter
+            if ("list".equals(redirect)) {
+                response.sendRedirect(request.getContextPath() + "/quizzes-list");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/QuizDetails?id=" + quizId);
+            }
+
+        } catch (NumberFormatException e) {
+            request.setAttribute("error", "Invalid number format in form data!");
+            response.sendRedirect(request.getContextPath() + "/quizzes-list");
+        } catch (Exception e) {
+            System.out.println("Error in updateQuiz: " + e.getMessage());
+            e.printStackTrace();
+            request.setAttribute("error", "An error occurred while updating the quiz!");
+            response.sendRedirect(request.getContextPath() + "/quizzes-list");
+        }
+    }
+
+    private void showQuizDetails(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            // Get quiz ID from request
+            int quizId = Integer.parseInt(request.getParameter("id"));
+            Quizzes quiz = quizzesDAO.findById(quizId);
+
+            if (quiz == null) {
+                request.setAttribute("error", "Quiz not found!");
+                response.sendRedirect(request.getContextPath() + "/quizzes-list");
+                return;
+            }
+
+            // Get all lessons and subjects for dropdowns
+            List<Subject> subjectsList = subjectDAO.findAll();
+            List<Lesson> lessonsList = lessonDAO.findAll();
+            
+            // Set attributes for JSP
+            request.setAttribute("quiz", quiz);
+            request.setAttribute("lessonsList", lessonsList);
+            request.setAttribute("subjectsList", subjectsList);
+            request.setAttribute("subjectDAO", subjectDAO);
+            request.setAttribute("lessonDAO", lessonDAO);
+            
+            // Forward to the quiz details page
+            request.getRequestDispatcher("view/Expert/Quiz/QuizDetails.jsp").forward(request, response);
+            
+        } catch (NumberFormatException e) {
+            request.setAttribute("error", "Invalid quiz ID!");
+            response.sendRedirect(request.getContextPath() + "/quizzes-list");
+        } catch (Exception e) {
+            System.out.println("Error in showQuizDetails: " + e.getMessage());
+            e.printStackTrace();
+            request.setAttribute("error", "An error occurred while loading the quiz details.");
+            response.sendRedirect(request.getContextPath() + "/quizzes-list");
         }
     }
 }

@@ -287,10 +287,10 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
     }
 
     public static void main(String[] args) {
-        QuizzesDAO dao = new QuizzesDAO();
-        System.out.println(dao.findAll());
+        QuizzesDAO quizzesDAO = new QuizzesDAO();
+        int total = quizzesDAO.getTotalFilteredQuizzes(null, null, null, null);
+        System.out.println(total);
     }
-
 
 }
 
