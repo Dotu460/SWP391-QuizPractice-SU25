@@ -2,7 +2,6 @@ package com.quiz.su25.controller;
 
 import com.quiz.su25.dal.impl.CategoryDAO;
 import com.quiz.su25.dal.impl.PostDAO;
-import com.quiz.su25.entity.Category;
 import com.quiz.su25.entity.Post;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -10,9 +9,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.Date;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @WebServlet(name = "BlogListController", urlPatterns = {"/blog"})
@@ -31,7 +27,7 @@ public class BlogListController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        // Get parameters
+        // Lấy parameter search từ request
         String searchQuery = request.getParameter("search");
         String categoryParam = request.getParameter("category");
         String pageParam = request.getParameter("page");
@@ -43,12 +39,12 @@ public class BlogListController extends HttpServlet {
         int pageSize = (pageSizeParam != null && !pageSizeParam.isEmpty()) ? Integer.parseInt(pageSizeParam) : 6;
         Integer categoryId = (categoryParam != null && !categoryParam.isEmpty()) ? Integer.parseInt(categoryParam) : null;
         
-        // Default display options
+        // Xử lý display options
         List<String> displayOptions = new ArrayList<>();
         if (displayOptionsArray != null && displayOptionsArray.length > 0) {
             displayOptions = Arrays.asList(displayOptionsArray);
         } else {
-            // Default to show all if no specific options selected
+            // Nếu không có option nào được chọn, mặc định hiển thị tất cả
             displayOptions = Arrays.asList("title", "category", "brief_info", "date");
         }
         
@@ -58,7 +54,7 @@ public class BlogListController extends HttpServlet {
         List<Map<String, Object>> postsWithDetails = new ArrayList<>();
         
         if (searchQuery != null && !searchQuery.trim().isEmpty()) {
-            // Search posts in all fields
+            // Gọi method search từ PostDAO
             posts = postDAO.searchPosts(searchQuery.trim(), true, true, true, false, null, null, page, pageSize);
             totalCount = postDAO.countSearchResults(searchQuery.trim(), true, true, true, false, null, null);
         } else if (categoryId != null) {

@@ -211,6 +211,7 @@
                                                 <label class="form-label">Display options:</label>
                                                 <div class="d-flex flex-wrap gap-3">
                                                     <div class="form-check">
+                                                         <!-- 1. Hiển thị các checkbox với trạng thái checked dựa trên displayOptions -->
                                                         <input class="form-check-input" type="checkbox" name="display" 
                                                                id="display_title" value="title" 
                                                                ${fn:contains(displayOptions, 'title') ? 'checked' : ''}>
@@ -301,7 +302,7 @@
                                 No posts found. Try adjusting your search criteria.
                             </div>
                         </c:if>
-
+                        <!-- 2. Hiển thị nội dung post dựa trên displayOptions -->
                         <c:forEach items="${posts}" var="postItem">
                             <c:set var="post" value="${postItem.post}" />
                             <div class="blog__post-item" style="display: flex; gap: 20px; margin-bottom: 30px; background: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -428,6 +429,7 @@
                             <!-- Search Box -->
                             <div class="search-box">
                                 <h4 class="sidebar-title">Search Posts</h4>
+                                <!-- Form tìm kiếm -->
                                 <form action="${pageContext.request.contextPath}/blog" method="get" id="searchForm" class="mt-3">
                                     <div class="input-group">
                                         <input type="text" 
