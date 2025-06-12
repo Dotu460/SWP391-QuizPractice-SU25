@@ -822,6 +822,131 @@
                     background: #f8f9fa;
                     border-radius: 4px;
                 }
+
+                /* Score Result Popup Styles */
+                .score-result-popup {
+                    display: none;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.5);
+                    z-index: 1100;
+                    justify-content: center;
+                    align-items: center;
+                }
+
+                .score-result-popup .popup-content {
+                    background: white;
+                    border-radius: 12px;
+                    width: 90%;
+                    max-width: 500px;
+                    padding: 24px;
+                    text-align: center;
+                }
+
+                .score-display {
+                    margin: 20px 0;
+                }
+
+                .score-circle {
+                    width: 150px;
+                    height: 150px;
+                    border-radius: 50%;
+                    background: #f8f7ff;
+                    border: 8px solid #5751E1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto;
+                    position: relative;
+                }
+
+                #finalScore {
+                    font-size: 48px;
+                    font-weight: bold;
+                    color: #5751E1;
+                }
+
+                .score-label {
+                    font-size: 24px;
+                    color: #666;
+                    margin-left: 4px;
+                }
+
+                .score-message {
+                    font-size: 18px;
+                    color: #1A1B3D;
+                    margin: 20px 0;
+                    padding: 10px;
+                    border-radius: 8px;
+                }
+
+                .popup-buttons {
+                    display: flex;
+                    justify-content: center;
+                    gap: 16px;
+                    margin-top: 24px;
+                }
+
+                .btn-review-answers,
+                .btn-return-dashboard {
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-weight: 500;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                }
+
+                .btn-review-answers {
+                    background: #5751E1;
+                    color: white;
+                    border: none;
+                }
+
+                .btn-return-dashboard {
+                    background: white;
+                    color: #5751E1;
+                    border: 2px solid #5751E1;
+                }
+
+                .btn-review-answers:hover {
+                    background: #7A6DC0;
+                }
+
+                .btn-return-dashboard:hover {
+                    background: #f8f7ff;
+                }
+
+                @media (max-width: 576px) {
+                    .score-circle {
+                        width: 120px;
+                        height: 120px;
+                        border-width: 6px;
+                    }
+
+                    #finalScore {
+                        font-size: 36px;
+                    }
+
+                    .score-label {
+                        font-size: 18px;
+                    }
+
+                    .popup-buttons {
+                        flex-direction: column;
+                    }
+
+                    .btn-review-answers,
+                    .btn-return-dashboard {
+                        width: 100%;
+                        justify-content: center;
+                    }
+                }
             </style>
     </head>
 
@@ -1287,10 +1412,75 @@
                         ${question.content}
                     </div>
                     
-                    <!-- Media URL nếu có -->
+                    <!-- Media URL nếu có (video / ảnh) -->
                     <c:if test="${not empty question.media_url}">
                         <div class="media-content mt-3">
-                            <img src="${question.media_url}" alt="Question Media" class="img-fluid">
+                            <c:choose>
+                                <c:when test="${fn:endsWith(question.media_url, '.mp4') 
+                                            || fn:endsWith(question.media_url, '.webm') 
+                                            || fn:endsWith(question.media_url, '.ogg')
+                                            || fn:endsWith(question.media_url, '.mov')
+                                            || fn:endsWith(question.media_url, '.MOV')}">
+                                    <video controls playsinline style="max-width:100%; border-radius:8px;">
+                                        <c:choose>
+                                            <c:when test="${fn:startsWith(question.media_url, 'http://') || fn:startsWith(question.media_url, 'https://')}">
+                                                <source src="${question.media_url}" type="video/mp4">
+                                            </c:when>
+                                            <c:otherwise>
+                                                <source src="${pageContext.request.contextPath}/media/${question.media_url}" type="video/mp4">
+                                            </c:otherwise>
+                                        </c:choose>
+                                        <p>Your browser does not support HTML5 video.</p>
+                                    </video>
+                                    
+                                    <div id="videoError" style="display:none; color: red; margin-top: 10px; padding: 10px; background: #fff5f5; border-radius: 4px;"></div>
+                                    
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function() {
+                                            const video = document.querySelector('video');
+                                            const errorDiv = document.getElementById('videoError');
+                                            
+                                            if (video) {
+                                                video.addEventListener('error', function(e) {
+                                                    console.error('Video error:', e);
+                                                    errorDiv.style.display = 'block';
+                                                    errorDiv.innerHTML = `
+                                                        <strong>Error loading video:</strong><br>
+                                                        Path: ${question.media_url}<br>
+                                                        Error: ${video.error ? video.error.message : 'Unknown error'}<br>
+                                                        <small>Please check if the URL is correct and accessible.</small>
+                                                    `;
+                                                });
+                                            }
+                                        });
+                                    </script>
+                                </c:when>
+                                <c:otherwise>
+                                    <!-- Image with error handling -->
+                                    <c:choose>
+                                        <c:when test="${fn:startsWith(question.media_url, 'http://') || fn:startsWith(question.media_url, 'https://')}">
+                                            <img src="${question.media_url}" 
+                                                 alt="Question Media" 
+                                                 class="img-fluid" 
+                                                 style="max-width:100%; border-radius:8px;"
+                                                 onerror="this.onerror=null; this.style.display='none'; document.getElementById('imageError').style.display='block';">
+                                        </c:when>
+                                        <c:otherwise>
+                                            <img src="${pageContext.request.contextPath}/media/${question.media_url}" 
+                                                 alt="Question Media" 
+                                                 class="img-fluid" 
+                                                 style="max-width:100%; border-radius:8px;"
+                                                 onerror="this.onerror=null; this.style.display='none'; document.getElementById('imageError').style.display='block';">
+                                        </c:otherwise>
+                                    </c:choose>
+                                    
+                                    <div id="imageError" style="display:none; color: red; margin-top: 10px; padding: 10px; background: #fff5f5; border-radius: 4px;">
+                                        <strong>Error loading image:</strong><br>
+                                        Path: ${question.media_url}<br>
+                                        <small>Please check if the URL is correct and accessible.</small>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
                         </div>
                     </c:if>
 
@@ -1471,6 +1661,37 @@
                             <div class="popup-buttons">
                                 <button class="btn-back" onclick="closeScoreExamPopup()">Back</button>
                                 <button id="confirmButton" class="btn-confirm"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Score Result Popup -->
+                <div id="scoreResultPopup" class="score-result-popup">
+                    <div class="popup-content">
+                        <div class="popup-header">
+                            <h3>Quiz Result</h3>
+                            <button class="close-btn" onclick="closeScoreResultPopup()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="popup-body">
+                            <div class="score-display">
+                                <div class="score-circle">
+                                    <span id="finalScore">0</span>
+                                    <span class="score-label">/10</span>
+                                </div>
+                            </div>
+                            <div id="scoreMessage" class="score-message"></div>
+                            <div class="popup-buttons">
+                                <button class="btn-review-answers" onclick="reviewAnswers()">
+                                    <i class="fas fa-search"></i>
+                                    Review Answers
+                                </button>
+                                <button class="btn-return-dashboard" onclick="returnToDashboard()">
+                                    <i class="fas fa-home"></i>
+                                    Return to Dashboard
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -1853,7 +2074,7 @@
                 }
             }
         </script>
-
+        
         <script>
             // Khởi tạo trạng thái câu hỏi
             let questionStates = {
@@ -2190,7 +2411,7 @@
                 // Thêm event listener cho nút confirm
                 confirmButton.onclick = function() {
                     closeScoreExamPopup();
-                    handleNavigation('score');
+                    handleScoreExam();
                 };
                 
                 // Hiển thị popup
@@ -2289,5 +2510,129 @@
                 }, 1000); // Đợi 1 giây sau khi người dùng ngừng gõ
             });
         </script>
+
+        <script>
+            // Hàm xử lý khi bấm nút Score Exam trong popup xác nhận
+            function handleScoreExam() {
+                try {
+                    submitQuiz();
+                } catch (error) {
+                    console.error('Error in handleScoreExam:', error);
+                    alert('Đã xảy ra lỗi khi xử lý dữ liệu: ' + error.message);
+                }
+            }
+
+            // Tách logic chấm điểm ra thành hàm riêng
+            function submitQuiz() {
+                // Đóng popup xác nhận
+                closeScoreExamPopup();
+                
+                // Lấy tất cả câu trả lời từ sessionStorage
+                const savedAnswers = JSON.parse(sessionStorage.getItem('selectedAnswers') || '{}');
+                
+                // Debug: Log dữ liệu gửi đi
+                console.log('Submitting answers:', savedAnswers);
+                
+                // Tạo FormData object
+                const formData = new FormData();
+                formData.append('action', 'scoreExam');
+                
+                // Chuyển đổi object thành mảng các câu trả lời
+                const answersArray = Object.entries(savedAnswers).map(([questionId, answers]) => ({
+                    questionId: parseInt(questionId),
+                    selectedOptions: Array.isArray(answers) ? answers : [answers]
+                }));
+                
+                formData.append('userAnswers', JSON.stringify(answersArray));
+                
+                // Debug: Log FormData
+                for (let pair of formData.entries()) {
+                    console.log(pair[0] + ': ' + pair[1]);
+                }
+                
+                // Gọi API để chấm điểm
+                fetch('${pageContext.request.contextPath}/quiz-handle', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(async response => {
+                    const text = await response.text();
+                    console.log('Raw server response:', text);
+                    
+                    try {
+                        if (!text) {
+                            throw new Error('Empty response from server');
+                    }
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error('JSON parse error:', e);
+                        throw new Error('Invalid JSON response from server: ' + text);
+                    }
+                })
+                .then(data => {
+                    console.log('Processed response data:', data);
+                    
+                    // Kiểm tra format của data
+                    if (!data || typeof data.score === 'undefined') {
+                        console.error('Invalid response data:', data);
+                        throw new Error('Invalid response format: missing score');
+                    }
+                    
+                    // Hiển thị điểm trong popup kết quả
+                    const score = parseFloat(data.score);
+                    document.getElementById('finalScore').textContent = score.toFixed(1);
+                    
+                    // Cập nhật thông điệp dựa trên điểm số
+                    const scoreMessage = document.getElementById('scoreMessage');
+                    if (score >= 8) {
+                        scoreMessage.textContent = "Xuất sắc! Thành tích tuyệt vời!";
+                        scoreMessage.style.backgroundColor = "#e6f7e6";
+                        scoreMessage.style.color = "#28a745";
+                    } else if (score >= 6.5) {
+                        scoreMessage.textContent = "Tốt! Bạn đã làm rất tốt!";
+                        scoreMessage.style.backgroundColor = "#fff3cd";
+                         scoreMessage.style.color = "#856404";
+                    } else if (score >= 5) {
+                        scoreMessage.textContent = "Đạt! Hãy tiếp tục luyện tập để cải thiện!";
+                        scoreMessage.style.backgroundColor = "#fff3cd";
+                        scoreMessage.style.color = "#856404";
+                    } else {
+                        scoreMessage.textContent = "Cố gắng lên! Bạn có thể làm tốt hơn!";
+                        scoreMessage.style.backgroundColor = "#f8d7da";
+                        scoreMessage.style.color = "#dc3545";
+                    }
+                    
+                    // Hiển thị popup kết quả
+                    document.getElementById('scoreResultPopup').style.display = 'flex';
+                    
+                    // Xóa dữ liệu trong sessionStorage sau khi chấm điểm thành công
+                    sessionStorage.removeItem('selectedAnswers');
+                    sessionStorage.removeItem('answeredQuestions');
+                    sessionStorage.removeItem('markedQuestions');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Đã xảy ra lỗi khi chấm điểm: ' + error.message);
+                });
+            }
+
+            // Hàm đóng popup kết quả
+            function closeScoreResultPopup() {
+                document.getElementById('scoreResultPopup').style.display = 'none';
+            }
+
+            // Hàm xem lại câu trả lời
+            function reviewAnswers() {
+                // Chuyển hướng đến trang xem lại câu trả lời
+                window.location.href = '${pageContext.request.contextPath}/quiz-review';
+            }
+
+            // Hàm trở về dashboard
+            function returnToDashboard() {
+                window.location.href = '${pageContext.request.contextPath}/dashboard';
+            }
+        </script>
+        
+
     </body>
 </html>

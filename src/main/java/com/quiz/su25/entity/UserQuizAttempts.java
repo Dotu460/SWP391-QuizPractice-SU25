@@ -3,9 +3,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.quiz.su25.entity;
-
-import java.sql.Date;
-
 /**
  *
  * @author quangmingdoc
@@ -32,12 +29,12 @@ public class UserQuizAttempts {
     private Integer id;
     private Integer user_id;
     private Integer quiz_id;
-    private Integer start_time;
-    private Integer end_time;
-    private Integer score;
-    private Boolean passed;
-    private String status;
-    private Date created_at;
+    private Date start_time;
+    private Date end_time;
+    private Double score;
+    private Boolean passed;   //1 - passed n 0 - not passed
+    private String status;    //in_progress - completed
+    private Date created_at;  
     private Date update_at;
     
 }

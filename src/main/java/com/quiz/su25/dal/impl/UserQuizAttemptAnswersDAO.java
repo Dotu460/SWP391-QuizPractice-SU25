@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserQuizAttempAnswersDAO extends DBContext implements I_DAO<UserQuizAttemptAnswers> {
+public class UserQuizAttemptAnswersDAO extends DBContext implements I_DAO<UserQuizAttemptAnswers> {
 
     @Override
     public List<UserQuizAttemptAnswers> findAll() {
@@ -254,5 +254,12 @@ public class UserQuizAttempAnswersDAO extends DBContext implements I_DAO<UserQui
             }
             closeResources();
         }
+    }
+    
+    public static void main(String[] args) {
+        UserQuizAttemptAnswersDAO userQuizAttemptAnswersDAO = new UserQuizAttemptAnswersDAO();
+        userQuizAttemptAnswersDAO.findAll().forEach(item -> {
+            System.out.println(item);
+        });
     }
 }

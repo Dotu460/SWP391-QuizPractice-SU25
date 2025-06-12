@@ -63,23 +63,51 @@ public class AuthenController extends HttpServlet {
 
     public void login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String email = request.getParameter("email");
-        String password = request.getParameter("password");        
+        String password = request.getParameter("password");
         
         try {
             User user = userDAO.findByEmailAndPassword(email, password);
-            
             if (user != null) {
                 HttpSession session = request.getSession();
-                session.setAttribute(GlobalConfig.SESSION_ACCOUNT, user);
-               
-                response.sendRedirect("home");
+                session.setAttribute("user", user);
+                
+                // Lấy URL redirect từ session
+                String redirectURL = (String) session.getAttribute("redirectURL");
+                
+                // Khôi phục trạng thái quiz nếu có
+                if (session.getAttribute("tempQuizId") != null) {
+                    session.setAttribute("quizId", session.getAttribute("tempQuizId"));
+                    session.removeAttribute("tempQuizId");
+                }
+                
+                if (session.getAttribute("tempUserAnswers") != null) {
+                    session.setAttribute("userAnswers", session.getAttribute("tempUserAnswers"));
+                    session.removeAttribute("tempUserAnswers");
+                }
+                
+                if (session.getAttribute("tempCurrentNumber") != null) {
+                    session.setAttribute("currentNumber", session.getAttribute("tempCurrentNumber"));
+                    session.removeAttribute("tempCurrentNumber");
+                }
+                
+                // Xóa URL redirect và các thông tin tạm khỏi session
+                session.removeAttribute("redirectURL");
+                
+                if (redirectURL != null && !redirectURL.isEmpty()) {
+                    // Nếu có URL redirect, chuyển hướng về trang đó
+                    response.sendRedirect(redirectURL);
+                } else {
+                    // Nếu không có URL redirect, chuyển về trang mặc định
+                    response.sendRedirect("home");
+                }
             } else {
-                request.setAttribute("error", "Invalid email or password");
-                request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
+                request.setAttribute("error", "Email hoặc mật khẩu không đúng!");
+                request.getRequestDispatcher("view/common/authen/login.jsp").forward(request, response);
             }
         } catch (Exception e) {
-            request.setAttribute("error", "An error occurred during login. Please try again.");
-            request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
+            System.out.println(e);
+            request.setAttribute("error", "Đã xảy ra lỗi trong quá trình đăng nhập!");
+            request.getRequestDispatcher("view/common/authen/login.jsp").forward(request, response);
         }
     }
 

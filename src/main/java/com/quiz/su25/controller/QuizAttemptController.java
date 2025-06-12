@@ -1,6 +1,6 @@
 package com.quiz.su25.controller;
 
-import com.quiz.su25.dal.impl.UserQuizAttempAnswersDAO;
+import com.quiz.su25.dal.impl.UserQuizAttemptAnswersDAO;
 import com.quiz.su25.dal.impl.UserQuizAttemptsDAO;
 import com.quiz.su25.entity.UserQuizAttemptAnswers;
 import com.quiz.su25.entity.UserQuizAttempts;
@@ -9,11 +9,11 @@ import java.util.List;
 
 public class QuizAttemptController {
     private final UserQuizAttemptsDAO attemptsDAO;
-    private final UserQuizAttempAnswersDAO answersDAO;
+    private final UserQuizAttemptAnswersDAO answersDAO;
 
     public QuizAttemptController() {
         this.attemptsDAO = new UserQuizAttemptsDAO();
-        this.answersDAO = new UserQuizAttempAnswersDAO();
+        this.answersDAO = new UserQuizAttemptAnswersDAO();
     }
 
     /**
@@ -23,7 +23,7 @@ public class QuizAttemptController {
         UserQuizAttempts attempt = UserQuizAttempts.builder()
                 .user_id(userId)
                 .quiz_id(quizId)
-                .start_time((int) (System.currentTimeMillis() / 1000)) // Current time in seconds
+                .start_time(new Date(System.currentTimeMillis())) // Current time as SQL Date
                 .status("in_progress")
                 .created_at(new Date(System.currentTimeMillis()))
                 .build();
@@ -50,29 +50,40 @@ public class QuizAttemptController {
     /**
      * Complete a quiz attempt and calculate score
      */
-    public boolean completeQuizAttempt(Integer attemptId) {
-        // Get the attempt
-        UserQuizAttempts attempt = attemptsDAO.findById(attemptId);
-        if (attempt == null) return false;
+    public double completeQuizAttempt(Integer attemptId) {
+        try {
+            // Get the attempt
+            UserQuizAttempts attempt = attemptsDAO.findById(attemptId);
+            if (attempt == null) return 0.0;
 
-        // Count correct answers
-        int correctAnswers = answersDAO.countCorrectAnswers(attemptId);
-        
-        // Get total questions answered
-        List<UserQuizAttemptAnswers> answers = answersDAO.findByAttemptId(attemptId);
-        int totalQuestions = answers.size();
-        
-        // Calculate score (as percentage)
-        int score = totalQuestions > 0 ? (correctAnswers * 100) / totalQuestions : 0;
-        
-        // Update attempt with score
-        attempt.setEnd_time((int) (System.currentTimeMillis() / 1000));
-        attempt.setScore(score);
-        attempt.setPassed(score >= 50); // Assuming 50% is passing score
-        attempt.setStatus("completed");
-        attempt.setUpdate_at(new Date(System.currentTimeMillis()));
-        
-        return attemptsDAO.update(attempt);
+            // Count correct answers
+            int correctAnswers = answersDAO.countCorrectAnswers(attemptId);
+            
+            // Get total questions answered
+            List<UserQuizAttemptAnswers> answers = answersDAO.findByAttemptId(attemptId);
+            int totalQuestions = answers.size();
+            
+            // Calculate score (as a number between 0 and 10)
+            double score = totalQuestions > 0 ? (correctAnswers * 10.0) / totalQuestions : 0.0;
+            
+            // Update attempt with score
+            attempt.setEnd_time(new Date(System.currentTimeMillis()));
+            attempt.setScore(score);
+            attempt.setPassed(score >= 5.0); // Passing score is 5.0
+            attempt.setStatus("completed");
+            attempt.setUpdate_at(new Date(System.currentTimeMillis()));
+            
+            if (attemptsDAO.update(attempt)) {
+                return score;
+            }
+            
+            return 0.0;
+            
+        } catch (Exception e) {
+            System.out.println("Error completing quiz attempt: " + e.getMessage());
+            e.printStackTrace();
+            return 0.0;
+        }
     }
 
     /**

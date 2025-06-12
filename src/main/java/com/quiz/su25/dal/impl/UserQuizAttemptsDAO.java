@@ -61,9 +61,9 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
             statement = connection.prepareStatement(sql);
             statement.setInt(1, t.getUser_id());
             statement.setInt(2, t.getQuiz_id());
-            statement.setInt(3, t.getStart_time());
-            statement.setInt(4, t.getEnd_time());
-            statement.setInt(5, t.getScore());
+            statement.setDate(3, t.getStart_time());
+            statement.setDate(4, t.getEnd_time());
+            statement.setDouble(5, t.getScore());
             statement.setBoolean(6, t.getPassed());
             statement.setString(7, t.getStatus());
             statement.setDate(8, t.getCreated_at());
@@ -86,9 +86,9 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
             statement = connection.prepareStatement(sql);
             statement.setInt(1, t.getUser_id());
             statement.setInt(2, t.getQuiz_id());
-            statement.setInt(3, t.getStart_time());
-            statement.setInt(4, t.getEnd_time());
-            statement.setInt(5, t.getScore());
+            statement.setDate(3, t.getStart_time());
+            statement.setDate(4, t.getEnd_time());
+            statement.setDouble(5, t.getScore());
             statement.setBoolean(6, t.getPassed());
             statement.setString(7, t.getStatus());
             statement.setDate(8, t.getCreated_at());
@@ -127,9 +127,9 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
                 .id(resultSet.getInt("id"))
                 .user_id(resultSet.getInt("user_id"))
                 .quiz_id(resultSet.getInt("quiz_id"))
-                .start_time(resultSet.getInt("start_time"))
-                .end_time(resultSet.getInt("end_time"))
-                .score(resultSet.getInt("score"))
+                .start_time(resultSet.getDate("start_time"))
+                .end_time(resultSet.getDate("end_time"))
+                .score(resultSet.getDouble("score"))
                 .passed(resultSet.getBoolean("passed"))
                 .status(resultSet.getString("status"))
                 .created_at(resultSet.getDate("created_at"))
@@ -226,5 +226,12 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
         } finally {
             closeResources();
         }
+    }
+    
+    public static void main(String[] args) {
+        UserQuizAttemptsDAO userQuizAttemptsDAO = new UserQuizAttemptsDAO();
+        userQuizAttemptsDAO.findAll().forEach(item -> {
+            System.out.println(item);
+        });
     }
 }
