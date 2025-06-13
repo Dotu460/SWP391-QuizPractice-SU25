@@ -32,4 +32,5 @@ public class Post {
     private Date created_at;
     private String status;
     private Boolean featured_flag;
+    private Integer view_count;
 }

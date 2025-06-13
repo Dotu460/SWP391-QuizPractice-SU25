@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@WebServlet(name = "SubjectController", urlPatterns = {"/subjects", "/subject/*"})
+@WebServlet(name = "SubjectController", urlPatterns = {"/admin/subjects", "/admin/subject/*"})
 public class SubjectController extends HttpServlet {
 
     private static final int DEFAULT_PAGE_SIZE = 8;
@@ -32,9 +32,9 @@ public class SubjectController extends HttpServlet {
         String path = request.getServletPath();
         String pathInfo = request.getPathInfo();
 
-        if (path.equals("/subjects")) {
+        if (path.equals("/admin/subjects")) {
             listSubjects(request, response);
-        } else if (path.equals("/subject")) {
+        } else if (path.equals("/admin/subject")) {
             if (pathInfo != null && pathInfo.equals("/details")) {
                 viewSubject(request, response);
             } else if (pathInfo != null && pathInfo.equals("/register")) {
@@ -48,7 +48,7 @@ public class SubjectController extends HttpServlet {
         String path = request.getServletPath();
         String pathInfo = request.getPathInfo();
 
-        if (path.equals("/subject") && pathInfo != null && pathInfo.equals("/register")) {
+        if (path.equals("/admin/subject") && pathInfo != null && pathInfo.equals("/register")) {
             registerForSubject(request, response);
         }
     }
@@ -113,7 +113,7 @@ public class SubjectController extends HttpServlet {
 //        request.setAttribute("lowestPricePackages", lowestPricePackages);
 
         // Forward to the view
-        request.getRequestDispatcher("/view/admin/list.jsp").forward(request, response);
+        request.getRequestDispatcher("/view/admin/subject/list.jsp").forward(request, response);
     }
 
     private void viewSubject(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -133,12 +133,12 @@ public class SubjectController extends HttpServlet {
 //                request.setAttribute("packages", packages);
                 request.setAttribute("category", category);
 
-                request.getRequestDispatcher("/view/admin/details.jsp").forward(request, response);
+                request.getRequestDispatcher("/view/admin/subject/details.jsp").forward(request, response);
             } else {
-                response.sendRedirect(request.getContextPath() + "/subjects?error=subjectNotFound");
+                response.sendRedirect(request.getContextPath() + "/admin/subjects?error=subjectNotFound");
             }
         } else {
-            response.sendRedirect(request.getContextPath() + "/subjects?error=invalidId");
+            response.sendRedirect(request.getContextPath() + "/admin/subjects?error=invalidId");
         }
     }
 
@@ -167,12 +167,12 @@ public class SubjectController extends HttpServlet {
 //                request.setAttribute("packages", packages);
                 request.setAttribute("selectedPackage", selectedPackage);
 
-                request.getRequestDispatcher("/view/admin/registration.jsp").forward(request, response);
+                request.getRequestDispatcher("/view/admin/subject/registration.jsp").forward(request, response);
             } else {
-                response.sendRedirect(request.getContextPath() + "/subjects?error=subjectNotFound");
+                response.sendRedirect(request.getContextPath() + "/admin/subjects?error=subjectNotFound");
             }
         } else {
-            response.sendRedirect(request.getContextPath() + "/subjects?error=invalidId");
+            response.sendRedirect(request.getContextPath() + "/admin/subjects?error=invalidId");
         }
     }
 
@@ -191,9 +191,9 @@ public class SubjectController extends HttpServlet {
 
             // For now, redirect with success message
             response.sendRedirect(request.getContextPath() +
-                "/subject/details?id=" + subjectId + "&success=registered");
+                "/admin/subject/details?id=" + subjectId + "&success=registered");
         } else {
-            response.sendRedirect(request.getContextPath() + "/subjects?error=invalidData");
+            response.sendRedirect(request.getContextPath() + "/admin/subjects?error=invalidData");
         }
     }
 

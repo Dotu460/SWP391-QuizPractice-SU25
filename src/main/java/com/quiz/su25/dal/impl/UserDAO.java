@@ -199,43 +199,80 @@ public class UserDAO extends DBContext implements I_DAO<User> {
 
     public static void main(String[] args) {
         UserDAO userDAO = new UserDAO();
+        RoleDAO roleDAO = new RoleDAO();
 
-        // First, get an existing user
-        User existingUser = userDAO.findById(10); // Thay đổi ID này theo ID có trong database của bạn
-
-        if (existingUser != null) {
-            System.out.println("Before update:");
-            System.out.println("Full name: " + existingUser.getFull_name());
-            System.out.println("Mobile: " + existingUser.getMobile());
-            System.out.println("Gender: " + existingUser.getGender());
-
-            // Create updated user with some changes
-            User updatedUser = User.builder()
-                    .id(existingUser.getId())
-                    .full_name("Test Update Name")
-                    .email(existingUser.getEmail()) // keep existing email
-                    .password(existingUser.getPassword()) // keep existing password
-                    .gender(1) // change gender
-                    .mobile("0987654321") // change mobile
-                    .avatar_url(existingUser.getAvatar_url()) // keep existing avatar
-                    .role_id(existingUser.getRole_id()) // keep existing role
-                    .status(existingUser.getStatus()) // keep existing status
-                    .build();
-
-            // Try to update
-            boolean success = userDAO.update(updatedUser);
-            System.out.println("\nUpdate success: " + success);
-
-            if (success) {
-                // Verify the update by getting the user again
-                User verifyUser = userDAO.findById(10);
-                System.out.println("\nAfter update:");
-                System.out.println("Full name: " + verifyUser.getFull_name());
-                System.out.println("Mobile: " + verifyUser.getMobile());
-                System.out.println("Gender: " + verifyUser.getGender());
-            }
+        // 1. First check what roles exist in the database
+        System.out.println("=== Checking Available Roles ===");
+        var roles = roleDAO.findAll();
+        if (roles.isEmpty()) {
+            System.out.println("No roles found in database!");
         } else {
-            System.out.println("User not found!");
+            System.out.println("Available roles:");
+            roles.forEach(role -> 
+                System.out.println("Role ID: " + role.getId() + 
+                                 ", Name: " + role.getRole_name() + 
+                                 ", Description: " + role.getDescription())
+            );
+        }
+
+        // 2. Try to create a user with role_id = 2 (should be Regular User)
+        System.out.println("\n=== Testing User Creation with role_id = 2 ===");
+        User testUser = User.builder()
+                .full_name("Test User")
+                .email("test" + System.currentTimeMillis() + "@example.com") // Unique email
+                .password("password123")
+                .gender(1)
+                .mobile("1234567890")
+                .avatar_url(null)
+                .role_id(2)  // Try with role_id = 2
+                .status("active")
+                .build();
+
+        try {
+            int userId = userDAO.insert(testUser);
+            if (userId > 0) {
+                System.out.println("Successfully created user with role_id = 2");
+                System.out.println("New user ID: " + userId);
+                
+                // Verify the user was created correctly
+                User createdUser = userDAO.findById(userId);
+                if (createdUser != null) {
+                    System.out.println("Verified user details:");
+                    System.out.println("ID: " + createdUser.getId());
+                    System.out.println("Name: " + createdUser.getFull_name());
+                    System.out.println("Email: " + createdUser.getEmail());
+                    System.out.println("Role ID: " + createdUser.getRole_id());
+                }
+            } else {
+                System.out.println("Failed to create user with role_id = 2");
+            }
+        } catch (Exception e) {
+            System.out.println("Error creating user: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // 3. Try to create a user with an invalid role_id
+        System.out.println("\n=== Testing User Creation with invalid role_id = 999 ===");
+        User invalidUser = User.builder()
+                .full_name("Invalid Role User")
+                .email("invalid" + System.currentTimeMillis() + "@example.com")
+                .password("password123")
+                .gender(1)
+                .mobile("1234567890")
+                .avatar_url(null)
+                .role_id(999)  // Try with invalid role_id
+                .status("active")
+                .build();
+
+        try {
+            int userId = userDAO.insert(invalidUser);
+            if (userId > 0) {
+                System.out.println("WARNING: Successfully created user with invalid role_id = 999");
+            } else {
+                System.out.println("Expected failure: Could not create user with invalid role_id = 999");
+            }
+        } catch (Exception e) {
+            System.out.println("Expected error creating user with invalid role: " + e.getMessage());
         }
     }
 
@@ -258,6 +295,30 @@ public class UserDAO extends DBContext implements I_DAO<User> {
             closeResources();
         }
         return null;
+    }
+    
+    /**
+     * Check if an email already exists in the database
+     * @param email Email to check
+     * @return true if email exists, false otherwise
+     */
+    public boolean isEmailExist(String email) {
+        String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, email);
+            
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error checking if email exists: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return false;
     }
 
     public List<User> getPaginatedUsers(int page, int pageSize, String genderFilter, String roleFilter,
@@ -398,6 +459,23 @@ public class UserDAO extends DBContext implements I_DAO<User> {
         }
 
         return count;
+    }
+
+    public User findByEmail(String email) {
+        String sql = "SELECT * FROM users WHERE email = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, email);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                return getFromResultSet(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error finding user by email: " + e.getMessage());
+        }
+        return null;
     }
 
 }

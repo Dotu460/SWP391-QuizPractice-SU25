@@ -27,15 +27,9 @@
                 </a>
             </li>
             <li class="${param.active == 'subjects' ? 'active' : ''}">
-                <a href="${pageContext.request.contextPath}/subjects">
+                <a href="${pageContext.request.contextPath}/admin/subjects">
                     <i class="skillgro-book"></i>
                     Subjects
-                </a>
-            </li>
-            <li class="${param.active == 'courses' ? 'active' : ''}">
-                <a href="${pageContext.request.contextPath}/admin/courses">
-                    <i class="skillgro-video-tutorial"></i>
-                    Courses
                 </a>
             </li>
             <li class="${param.active == 'users' ? 'active' : ''}">
@@ -44,12 +38,20 @@
                     Users
                 </a>
             </li>
-            <li class="${param.active == 'reviews' ? 'active' : ''}">
-                <a href="${pageContext.request.contextPath}/admin/reviews">
+            <li class="${param.active == 'registrations' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/admin/registrations">
                     <i class="skillgro-book-2"></i>
-                    Reviews
+                    Registrations
                 </a>
             </li>
+            <li class="${param.active == 'courses' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/admin/courses">
+                    <i class="skillgro-video-tutorial"></i>
+                    Courses
+                </a>
+            </li>
+
+
             <li class="${param.active == 'announcements' ? 'active' : ''}">
                 <a href="${pageContext.request.contextPath}/admin/announcements">
                     <i class="skillgro-marketing"></i>
