@@ -461,4 +461,21 @@ public class UserDAO extends DBContext implements I_DAO<User> {
         return count;
     }
 
+    public User findByEmail(String email) {
+        String sql = "SELECT * FROM users WHERE email = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, email);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                return getFromResultSet(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error finding user by email: " + e.getMessage());
+        }
+        return null;
+    }
+
 }

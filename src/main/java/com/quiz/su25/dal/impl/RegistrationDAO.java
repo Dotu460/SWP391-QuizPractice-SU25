@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.sql.Date;
 import java.util.function.BiConsumer;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Lớp DAO (Data Access Object) cho thực thể Registration. Chịu trách nhiệm
@@ -551,96 +555,145 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Find registrations with dynamic column selection and filters
+     * Recalculate pagination based on desired number of rows
+     * @param totalRecords Total number of records
+     * @param desiredRows Number of rows user wants to display
+     * @return Map containing pageSize and totalPages
+     */
+    public Map<String, Integer> calculatePagination(int totalRecords, int desiredRows) {
+        Map<String, Integer> result = new HashMap<>();
+        
+        // Validate and adjust desiredRows
+        int pageSize = desiredRows;
+        if (pageSize <= 0) {
+            pageSize = 10; // Default page size
+        } else if (pageSize > 1000) {
+            pageSize = 1000; // Maximum page size
+        }
+        
+        // Calculate total pages
+        int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
+        if (totalPages < 1) {
+            totalPages = 1; // At least 1 page
+        }
+        
+        result.put("pageSize", pageSize);
+        result.put("totalPages", totalPages);
+        return result;
+    }
+
+    /**
+     * Find registrations with dynamic columns and pagination
      */
     public List<Registration> findRegistrationsWithDynamicColumns(
             String emailSearch, String subjectSearch, String status,
             Date fromDate, Date toDate, String sortBy, String sortOrder,
             int page, int pageSize, String[] selectedColumns) {
+        List<Registration> registrations = new ArrayList<>();
         
-        // Always select all registration columns to build the object properly
-        StringBuilder sql = new StringBuilder("SELECT DISTINCT r.* FROM registrations r ");
-        sql.append("JOIN users u ON r.user_id = u.id ");
-        sql.append("JOIN subject s ON r.subject_id = s.id ");
-        sql.append("LEFT JOIN pricePackage p ON r.package_id = p.id ");
-        sql.append("WHERE 1=1 ");
+        // Validate page and pageSize
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 10;
+        if (pageSize > 1000) pageSize = 1000;
         
-        List<Object> parameters = new ArrayList<>();
+        String sql = "SELECT r.* FROM registrations r " +
+                    "INNER JOIN users u ON r.user_id = u.id " +
+                    "INNER JOIN subject s ON r.subject_id = s.id " +
+                    "WHERE 1=1 ";
         
         // Add filters
-        if (emailSearch != null && !emailSearch.trim().isEmpty()) {
-            sql.append("AND u.email LIKE ? ");
-            parameters.add("%" + emailSearch.trim() + "%");
+        if (emailSearch != null && !emailSearch.isEmpty()) {
+            sql += "AND u.email LIKE ? ";
         }
-        
-        if (subjectSearch != null && !subjectSearch.trim().isEmpty()) {
-            sql.append("AND s.title LIKE ? ");
-            parameters.add("%" + subjectSearch.trim() + "%");
+        if (subjectSearch != null && !subjectSearch.isEmpty()) {
+            sql += "AND s.title LIKE ? ";
         }
-        
-        if (status != null && !status.trim().isEmpty()) {
-            sql.append("AND r.status = ? ");
-            parameters.add(status.trim());
+        if (status != null && !status.isEmpty()) {
+            sql += "AND r.status = ? ";
         }
-        
         if (fromDate != null) {
-            sql.append("AND r.registration_time >= ? ");
-            parameters.add(fromDate);
+            sql += "AND r.valid_from >= ? ";
         }
-        
         if (toDate != null) {
-            sql.append("AND r.registration_time <= ? ");
-            parameters.add(toDate);
+            sql += "AND r.valid_to <= ? ";
         }
-        
+
         // Add sorting
-        if (sortBy != null && !sortBy.trim().isEmpty()) {
-            sql.append("ORDER BY ");
+        if (sortBy != null && !sortBy.isEmpty()) {
+            sql += "ORDER BY ";
             switch (sortBy) {
+                case "id":
+                    sql += "r.id ";
+                    break;
                 case "email":
-                    sql.append("u.email");
+                    sql += "u.email ";
                     break;
                 case "subject":
-                    sql.append("s.title");
+                    sql += "s.title ";
+                    break;
+                case "package":
+                    sql += "r.package_id ";
+                    break;
+                case "total_cost":
+                    sql += "r.total_cost ";
+                    break;
+                case "status":
+                    sql += "r.status ";
+                    break;
+                case "valid_from":
+                    sql += "r.valid_from ";
+                    break;
+                case "valid_to":
+                    sql += "r.valid_to ";
+                    break;
+                case "registration_time":
+                    sql += "r.registration_time ";
                     break;
                 default:
-                    sql.append("r.").append(sortBy);
+                    sql += "r.id ";
             }
-            
-            if ("desc".equalsIgnoreCase(sortOrder)) {
-                sql.append(" DESC");
-            } else {
-                sql.append(" ASC");
-            }
+            sql += (sortOrder != null && sortOrder.equalsIgnoreCase("desc")) ? "DESC " : "ASC ";
         } else {
-            sql.append("ORDER BY r.id DESC");
+            sql += "ORDER BY r.id DESC "; // Default sorting
         }
-        
-        // Add pagination
-        sql.append(" LIMIT ? OFFSET ?");
-        parameters.add(pageSize);
-        parameters.add((page - 1) * pageSize);
-        
-        List<Registration> registrations = new ArrayList<>();
-        try {
-            connection = getConnection();
-            statement = connection.prepareStatement(sql.toString());
+
+        // Add pagination for MySQL
+        sql += "LIMIT ? OFFSET ?";
+
+        try (Connection conn = getConnection();
+             PreparedStatement stm = conn.prepareStatement(sql)) {
             
-            // Set parameters
-            for (int i = 0; i < parameters.size(); i++) {
-                statement.setObject(i + 1, parameters.get(i));
+            int paramIndex = 1;
+            
+            // Set filter parameters
+            if (emailSearch != null && !emailSearch.isEmpty()) {
+                stm.setString(paramIndex++, "%" + emailSearch + "%");
             }
-            
-            resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                registrations.add(getFromResultSet(resultSet));
+            if (subjectSearch != null && !subjectSearch.isEmpty()) {
+                stm.setString(paramIndex++, "%" + subjectSearch + "%");
+            }
+            if (status != null && !status.isEmpty()) {
+                stm.setString(paramIndex++, status);
+            }
+            if (fromDate != null) {
+                stm.setDate(paramIndex++, fromDate);
+            }
+            if (toDate != null) {
+                stm.setDate(paramIndex++, toDate);
+            }
+
+            // Set pagination parameters for MySQL
+            stm.setInt(paramIndex++, pageSize);
+            stm.setInt(paramIndex, (page - 1) * pageSize);
+
+            try (ResultSet rs = stm.executeQuery()) {
+                while (rs.next()) {
+                    registrations.add(getFromResultSet(rs));
+                }
             }
         } catch (SQLException e) {
-            System.out.println("Error in findRegistrationsWithDynamicColumns: " + e.getMessage());
-        } finally {
-            closeResources();
+            e.printStackTrace();
         }
-        
         return registrations;
     }
 

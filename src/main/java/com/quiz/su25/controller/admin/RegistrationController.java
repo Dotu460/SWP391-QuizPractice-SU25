@@ -1,15 +1,16 @@
 package com.quiz.su25.controller.admin;
 
 import com.quiz.su25.dal.impl.RegistrationDAO;
-import com.quiz.su25.dal.impl.SubjectDAO;
 import com.quiz.su25.dal.impl.UserDAO;
+import com.quiz.su25.dal.impl.SubjectDAO;
 import com.quiz.su25.dal.impl.PricePackageDAO;
 import com.quiz.su25.entity.Registration;
-import com.quiz.su25.entity.Subject;
 import com.quiz.su25.entity.User;
+import com.quiz.su25.entity.Subject;
 import com.quiz.su25.entity.PricePackage;
 import com.quiz.su25.utils.PasswordUtils;
 import com.quiz.su25.utils.EmailUtils;
+import com.quiz.su25.validation.RegistrationValidation;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -18,6 +19,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.Date;
 import java.util.*;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 @WebServlet(name = "RegistrationController", urlPatterns = {"/admin/registrations"})
 public class RegistrationController extends HttpServlet {
@@ -56,6 +59,9 @@ public class RegistrationController extends HttpServlet {
             case "view":
                 showViewForm(request, response);
                 break;
+            case "check-user":
+                checkUserByEmail(request, response);
+                break;
             default:
                 listRegistrations(request, response);
                 break;
@@ -70,16 +76,24 @@ public class RegistrationController extends HttpServlet {
         String status = request.getParameter("status");
         String fromDate = request.getParameter("fromDate");
         String toDate = request.getParameter("toDate");
-        String sortBy = request.getParameter("sortBy");
-        String sortOrder = request.getParameter("sortOrder");
+        
+        // Get the last sort parameters (in case of multiple)
+        String[] sortByParams = request.getParameterValues("sortBy");
+        String[] sortOrderParams = request.getParameterValues("sortOrder");
+        String sortBy = (sortByParams != null && sortByParams.length > 0) ? sortByParams[sortByParams.length - 1] : null;
+        String sortOrder = (sortOrderParams != null && sortOrderParams.length > 0) ? sortOrderParams[sortOrderParams.length - 1] : null;
         
         // Get dynamic configuration parameters
         String[] selectedColumns = request.getParameterValues("selectedColumns");
-        String pageSizeParam = request.getParameter("pageSize");
+        
+        // If no columns selected, show all columns by default
+        if (selectedColumns == null || selectedColumns.length == 0) {
+            selectedColumns = new String[]{"id", "email", "subject", "package", "total_cost", "status", "valid_from", "valid_to", "registration_time"};
+        }
         
         // Get page parameters
         int page = 1;
-        int pageSize = 10; // Default page size
+        int desiredRows = 10; // Default desired rows
         
         try {
             page = Integer.parseInt(request.getParameter("page"));
@@ -87,18 +101,10 @@ public class RegistrationController extends HttpServlet {
             // Keep default value
         }
         
-        // Parse custom page size
+        // Parse desired rows
         try {
-            if (pageSizeParam != null && !pageSizeParam.trim().isEmpty()) {
-                int customPageSize = Integer.parseInt(pageSizeParam);
-                if (customPageSize > 0 && customPageSize <= 1000) { // Limit max page size to 1000
-                    pageSize = customPageSize;
-                } else if (customPageSize > 1000) {
-                    pageSize = 1000; // Set to max if exceeded
-                    request.setAttribute("pageSizeWarning", "Page size limited to maximum 1000 rows");
-                } else {
-                    request.setAttribute("pageSizeWarning", "Page size must be greater than 0");
-                }
+            if (request.getParameter("pageSize") != null && !request.getParameter("pageSize").trim().isEmpty()) {
+                desiredRows = Integer.parseInt(request.getParameter("pageSize"));
             }
         } catch (NumberFormatException e) {
             request.setAttribute("pageSizeWarning", "Invalid page size format. Using default value.");
@@ -119,29 +125,25 @@ public class RegistrationController extends HttpServlet {
             request.setAttribute("error", "Invalid date format");
         }
 
-        // Get filtered and paginated registrations
-        List<Registration> registrations;
-        if (selectedColumns != null && selectedColumns.length > 0) {
-            registrations = registrationDAO.findRegistrationsWithDynamicColumns(
-                emailSearch, subjectSearch, status, fromDateObj, toDateObj, 
-                sortBy, sortOrder, page, pageSize, selectedColumns
-            );
-        } else {
-            registrations = registrationDAO.findRegistrationsWithFilters(
-                emailSearch, subjectSearch, status, fromDateObj, toDateObj, 
-                sortBy, sortOrder, page, pageSize
-            );
-        }
-
-        // Get all registration statuses for filter dropdown
-        List<String> allStatuses = registrationDAO.getAllStatuses();
-        request.setAttribute("allStatuses", allStatuses);
-
         // Get total count for pagination
         int totalRegistrations = registrationDAO.countFilteredRegistrations(
             emailSearch, subjectSearch, status, fromDateObj, toDateObj
         );
-        int totalPages = (int) Math.ceil((double) totalRegistrations / pageSize);
+
+        // Calculate pagination
+        Map<String, Integer> pagination = registrationDAO.calculatePagination(totalRegistrations, desiredRows);
+        int pageSize = pagination.get("pageSize");
+        int totalPages = pagination.get("totalPages");
+
+        // Get filtered and paginated registrations
+        List<Registration> registrations = registrationDAO.findRegistrationsWithDynamicColumns(
+            emailSearch, subjectSearch, status, fromDateObj, toDateObj, 
+            sortBy, sortOrder, page, pageSize, selectedColumns
+        );
+
+        // Get all registration statuses for filter dropdown
+        List<String> allStatuses = registrationDAO.getAllStatuses();
+        request.setAttribute("allStatuses", allStatuses);
 
         // Load related data for display
         Map<Integer, String> userEmails = new HashMap<>();
@@ -176,6 +178,7 @@ public class RegistrationController extends HttpServlet {
         request.setAttribute("page", page);
         request.setAttribute("pageSize", pageSize);
         request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalRecords", totalRegistrations);
         request.setAttribute("emailSearch", emailSearch);
         request.setAttribute("subjectSearch", subjectSearch);
         request.setAttribute("status", status);
@@ -208,8 +211,11 @@ public class RegistrationController extends HttpServlet {
                 request.setAttribute("pricePackage", pricePackage);
                 
                 // Load lists for dropdowns
-                request.setAttribute("subjects", subjectDAO.findAll());
-                request.setAttribute("pricePackages", pricePackageDAO.findAll());
+                List<Subject> subjects = subjectDAO.findAll();
+                List<PricePackage> pricePackages = pricePackageDAO.findAll();
+                
+                request.setAttribute("subjects", subjects);
+                request.setAttribute("pricePackages", pricePackages);
                 
                 request.getRequestDispatcher("/view/admin/registration/details.jsp").forward(request, response);
             } else {
@@ -261,6 +267,29 @@ public class RegistrationController extends HttpServlet {
         }
     }
 
+    private void checkUserByEmail(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String email = request.getParameter("email");
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        
+        try {
+            User user = userDAO.findByEmail(email);
+            if (user != null) {
+                response.getWriter().write(String.format(
+                    "{\"exists\": true, \"user\": {\"full_name\": \"%s\", \"gender\": %d, \"mobile\": \"%s\"}}",
+                    user.getFull_name(),
+                    user.getGender(),
+                    user.getMobile()
+                ));
+            } else {
+                response.getWriter().write("{\"exists\": false}");
+            }
+        } catch (Exception e) {
+            response.getWriter().write("{\"error\": \"" + e.getMessage() + "\"}");
+        }
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -286,137 +315,220 @@ public class RegistrationController extends HttpServlet {
 
     private void addRegistration(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // Get form data
+        String fullName = request.getParameter("fullName");
+        String email = request.getParameter("email");
+        String mobile = request.getParameter("mobile");
+        Integer gender = Integer.parseInt(request.getParameter("gender"));
+        Integer subjectId = Integer.parseInt(request.getParameter("subjectId"));
+        Integer packageId = Integer.parseInt(request.getParameter("packageId"));
+        String validFromStr = request.getParameter("validFrom");
+        String validToStr = request.getParameter("validTo");
+        String status = request.getParameter("status");
+        String notes = request.getParameter("notes");
+
+        // Parse dates
+        Date validFrom = null;
+        Date validTo = null;
         try {
-            String email = request.getParameter("email");
-            String fullName = request.getParameter("fullName");
-            String mobile = request.getParameter("mobile");
-            String genderParam = request.getParameter("gender");
-            String status = request.getParameter("status");
-            
-            int userId = -1;
-            
-            // Check if user exists by email
-            User existingUser = null;
-            try {
-                // Find user by email
-                List<User> allUsers = userDAO.findAll();
-                for (User u : allUsers) {
-                    if (u.getEmail().equals(email)) {
-                        existingUser = u;
-                        break;
-                    }
-                }
-            } catch (Exception e) {
-                System.out.println("Error checking existing user: " + e.getMessage());
+            validFrom = Date.valueOf(validFromStr);
+            validTo = Date.valueOf(validToStr);
+        } catch (IllegalArgumentException e) {
+            request.setAttribute("error", "Invalid date format");
+            request.getRequestDispatcher("/view/admin/registration/new.jsp").forward(request, response);
+            return;
+        }
+
+        // Validate data
+        Map<String, String> errors = RegistrationValidation.validateRegistration(
+                fullName, email, mobile, subjectId, packageId, validFrom, validTo, status);
+
+        if (!errors.isEmpty()) {
+            // Set error messages
+            request.setAttribute("fullNameError", errors.get("fullName"));
+            request.setAttribute("emailError", errors.get("email"));
+            request.setAttribute("mobileError", errors.get("mobile"));
+            request.setAttribute("subjectError", errors.get("subject"));
+            request.setAttribute("packageError", errors.get("package"));
+            request.setAttribute("dateError", errors.get("date"));
+            request.setAttribute("statusError", errors.get("status"));
+
+            // Set form data back
+            request.setAttribute("fullName", fullName);
+            request.setAttribute("email", email);
+            request.setAttribute("mobile", mobile);
+            request.setAttribute("gender", gender);
+            request.setAttribute("subjectId", subjectId);
+            request.setAttribute("packageId", packageId);
+            request.setAttribute("validFrom", validFromStr);
+            request.setAttribute("validTo", validToStr);
+            request.setAttribute("status", status);
+            request.setAttribute("notes", notes);
+
+            // Get required data for form
+            request.setAttribute("subjects", subjectDAO.findAll());
+            request.setAttribute("pricePackages", pricePackageDAO.findAll());
+
+            // Forward back to form with errors
+            request.getRequestDispatcher("/view/admin/registration/new.jsp").forward(request, response);
+            return;
+        }
+
+        // Check if user exists
+        User user = userDAO.findByEmail(email);
+        if (user == null) {
+            // Create new user
+            user = new User();
+            user.setFull_name(fullName);
+            user.setEmail(email);
+            user.setMobile(mobile);
+            user.setGender(gender);
+            user.setRole_id(2); // Student role
+            user.setStatus("active");
+
+            // Generate random password
+            String password = PasswordUtils.generateRandomPassword();
+            user.setPassword(password);
+
+            // Insert user
+            int userId = userDAO.insert(user);
+            if (userId > 0) {
+                user.setId(userId);
+                // Send email with login information
+                EmailUtils.sendRegistrationEmail(
+                    email,
+                    fullName,
+                    password,
+                    subjectDAO.findById(subjectId).getTitle(),
+                    validFrom.toString(),
+                    validTo.toString(),
+                    notes
+                );
+                // Store password note in session
+                request.getSession().setAttribute("passwordNote", 
+                    "A new user account has been created with the following credentials:\n" +
+                    "Email: " + email + "\n" +
+                    "Password: " + password + "\n" +
+                    "Please inform the user to change their password upon first login.");
             }
-            
-            String generatedPassword = null;
-            String passwordNote = null;
-            
-            if (existingUser != null) {
-                userId = existingUser.getId();
-            } else {
-                // Generate random password for new user
-                generatedPassword = PasswordUtils.generateRandomPassword();
-                passwordNote = PasswordUtils.generatePasswordNote(generatedPassword);
-                
-                // Create new user
-                User newUser = User.builder()
-                    .full_name(fullName)
-                    .email(email)
-                    .mobile(mobile)
-                    .gender(genderParam != null ? Integer.parseInt(genderParam) : 1)
-                    .password(generatedPassword) // Use generated password
-                    .role_id(2) // Default role for regular users
-                    .status("active")
-                    .build();
-                
-                userId = userDAO.insert(newUser);
-                if (userId <= 0) {
-                    response.sendRedirect(request.getContextPath() + "/admin/registrations?error=userCreateFailed");
-                    return;
-                }
-            }
-            
-            // Get package price for total cost
-            int packageId = Integer.parseInt(request.getParameter("packageId"));
-            PricePackage pricePackage = pricePackageDAO.findById(packageId);
-            double totalCost = pricePackage != null ? pricePackage.getSale_price() : 0.0;
-            
-            // Get subject title for email
-            int subjectId = Integer.parseInt(request.getParameter("subjectId"));
-            Subject subject = subjectDAO.findById(subjectId);
-            String subjectTitle = subject != null ? subject.getTitle() : "Unknown Subject";
-            
-            Registration registration = new Registration();
-            registration.setUser_id(userId);
-            registration.setSubject_id(subjectId);
-            registration.setPackage_id(packageId);
-            registration.setTotal_cost(totalCost);
-            registration.setStatus(status);
-            registration.setValid_from(Date.valueOf(request.getParameter("validFrom")));
-            registration.setValid_to(Date.valueOf(request.getParameter("validTo")));
-            registration.setRegistration_time(new Date(System.currentTimeMillis()));
-            
-            int newId = registrationDAO.insert(registration);
-            if (newId > 0) {
-                String successParam = existingUser == null ? "added&userCreated=true" : "added";
-                if (generatedPassword != null) {
-                    // Add password note to the success message
-                    request.getSession().setAttribute("passwordNote", passwordNote);
-                    
-                    // Send welcome email with login information
-                    try {
-                        EmailUtils.sendRegistrationEmail(
-                            email,
-                            fullName,
-                            generatedPassword,
-                            subjectTitle,
-                            registration.getValid_from().toString(),
-                            registration.getValid_to().toString()
-                        );
-                    } catch (Exception e) {
-                        System.out.println("Error sending welcome email: " + e.getMessage());
-                        // Don't fail the registration if email fails
-                    }
-                }
-                response.sendRedirect(request.getContextPath() + "/admin/registrations?success=" + successParam);
-            } else {
-                response.sendRedirect(request.getContextPath() + "/admin/registrations?error=addFailed");
-            }
-        } catch (Exception e) {
-            System.out.println("Error in addRegistration: " + e.getMessage());
-            e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/admin/registrations?error=invalidData");
+        }
+
+        // Create registration
+        Registration registration = new Registration();
+        registration.setUser_id(user.getId());
+        registration.setSubject_id(subjectId);
+        registration.setPackage_id(packageId);
+        registration.setValid_from(validFrom);
+        registration.setValid_to(validTo);
+        registration.setRegistration_time(new Date(System.currentTimeMillis()));
+        registration.setStatus(status);
+
+
+        // Insert registration
+        int registrationId = registrationDAO.insert(registration);
+        if (registrationId > 0) {
+            // Redirect to list with success message
+            response.sendRedirect(request.getContextPath() + "/admin/registrations?success=added");
+        } else {
+            request.setAttribute("error", "Failed to add registration");
+            request.getRequestDispatcher("/view/admin/registration/new.jsp").forward(request, response);
         }
     }
 
     private void updateRegistration(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // Get form data
+        Integer id = Integer.parseInt(request.getParameter("id"));
+        String fullName = request.getParameter("fullName");
+        String email = request.getParameter("email");
+        String mobile = request.getParameter("mobile");
+        Integer gender = Integer.parseInt(request.getParameter("gender"));
+        Integer subjectId = Integer.parseInt(request.getParameter("subjectId"));
+        Integer packageId = Integer.parseInt(request.getParameter("packageId"));
+        String validFromStr = request.getParameter("validFrom");
+        String validToStr = request.getParameter("validTo");
+        String status = request.getParameter("status");
+        String notes = request.getParameter("notes");
+
+        // Parse dates
+        Date validFrom = null;
+        Date validTo = null;
         try {
-            int id = Integer.parseInt(request.getParameter("id"));
-            Registration registration = registrationDAO.findById(id);
-            
-            if (registration != null) {
-                // Update registration properties from request parameters
-                registration.setUser_id(Integer.parseInt(request.getParameter("userId")));
-                registration.setSubject_id(Integer.parseInt(request.getParameter("subjectId")));
-                registration.setPackage_id(Integer.parseInt(request.getParameter("packageId")));
-                registration.setTotal_cost(Double.parseDouble(request.getParameter("totalCost")));
-                registration.setStatus(request.getParameter("status"));
-                registration.setValid_from(Date.valueOf(request.getParameter("validFrom")));
-                registration.setValid_to(Date.valueOf(request.getParameter("validTo")));
-                
-                if (registrationDAO.update(registration)) {
-                    response.sendRedirect(request.getContextPath() + "/admin/registrations?success=updated");
-                } else {
-                    response.sendRedirect(request.getContextPath() + "/admin/registrations?error=updateFailed");
-                }
-            } else {
-                response.sendRedirect(request.getContextPath() + "/admin/registrations?error=notFound");
-            }
-        } catch (Exception e) {
-            response.sendRedirect(request.getContextPath() + "/admin/registrations?error=invalidData");
+            validFrom = Date.valueOf(validFromStr);
+            validTo = Date.valueOf(validToStr);
+        } catch (IllegalArgumentException e) {
+            request.setAttribute("error", "Invalid date format");
+            request.getRequestDispatcher("/view/admin/registration/details.jsp").forward(request, response);
+            return;
+        }
+
+        // Validate data
+        Map<String, String> errors = RegistrationValidation.validateRegistration(
+                fullName, email, mobile, subjectId, packageId, validFrom, validTo, status);
+
+        if (!errors.isEmpty()) {
+            // Set error messages
+            request.setAttribute("fullNameError", errors.get("fullName"));
+            request.setAttribute("emailError", errors.get("email"));
+            request.setAttribute("mobileError", errors.get("mobile"));
+            request.setAttribute("subjectError", errors.get("subject"));
+            request.setAttribute("packageError", errors.get("package"));
+            request.setAttribute("dateError", errors.get("date"));
+            request.setAttribute("statusError", errors.get("status"));
+
+            // Set form data back
+            request.setAttribute("fullName", fullName);
+            request.setAttribute("email", email);
+            request.setAttribute("mobile", mobile);
+            request.setAttribute("gender", gender);
+            request.setAttribute("subjectId", subjectId);
+            request.setAttribute("packageId", packageId);
+            request.setAttribute("validFrom", validFromStr);
+            request.setAttribute("validTo", validToStr);
+            request.setAttribute("status", status);
+            request.setAttribute("notes", notes);
+
+            // Get required data for form
+            request.setAttribute("subjects", subjectDAO.findAll());
+            request.setAttribute("pricePackages", pricePackageDAO.findAll());
+
+            // Forward back to form with errors
+            request.getRequestDispatcher("/view/admin/registration/details.jsp").forward(request, response);
+            return;
+        }
+
+        // Get existing registration
+        Registration registration = registrationDAO.findById(id);
+        if (registration == null) {
+            request.setAttribute("error", "Registration not found");
+            request.getRequestDispatcher("/view/admin/registration/details.jsp").forward(request, response);
+            return;
+        }
+
+        // Update user information
+        User user = userDAO.findById(registration.getUser_id());
+        if (user != null) {
+            user.setFull_name(fullName);
+            user.setEmail(email);
+            user.setMobile(mobile);
+            user.setGender(gender);
+            userDAO.update(user);
+        }
+
+        // Update registration
+        registration.setSubject_id(subjectId);
+        registration.setPackage_id(packageId);
+        registration.setValid_from(validFrom);
+        registration.setValid_to(validTo);
+        registration.setStatus(status);
+        
+
+        if (registrationDAO.update(registration)) {
+            // Redirect to list with success message
+            response.sendRedirect(request.getContextPath() + "/admin/registrations?success=updated");
+        } else {
+            request.setAttribute("error", "Failed to update registration");
+            request.getRequestDispatcher("/view/admin/registration/details.jsp").forward(request, response);
         }
     }
 

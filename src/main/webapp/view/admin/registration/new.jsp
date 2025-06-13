@@ -22,6 +22,7 @@
 
     <!-- CSS here -->
     <jsp:include page="../../common/user/link_css_common.jsp"></jsp:include>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/view/common/css/tien.css">
 
     <!-- Custom CSS for this page -->
     <style>
@@ -205,6 +206,131 @@
             background-color: #f8d7da;
             color: #721c24;
         }
+
+        /* Add styles for alerts */
+        .alert {
+            padding: 10px 15px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            border-color: #ffeeba;
+            color: #856404;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        /* Add transition for alerts */
+        .alert {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .alert.fade-out {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        /* Add loading indicator */
+        .loading {
+            position: relative;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: translateY(-50%) rotate(0deg); }
+            100% { transform: translateY(-50%) rotate(360deg); }
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-info:hover {
+            background-color: #138496;
+            transform: translateY(-1px);
+        }
+
+        .btn-info:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .email-check-container {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            align-items: center;
+        }
+
+        .email-check-container input {
+            flex: 1;
+        }
+
+        /* Error message styles */
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .error-message i {
+            font-size: 14px;
+        }
+
+        .is-invalid {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+        }
+
+        .is-invalid:focus {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+        }
     </style>
 </head>
 
@@ -255,15 +381,9 @@
                                     </c:choose>
                                 </div>
                             </c:if>
-                            <c:if test="${param.error != null}">
+                            <c:if test="${error != null}">
                                 <div class="alert alert-danger">
-                                    <c:choose>
-                                        <c:when test="${param.error == 'notFound'}">Registration not found.</c:when>
-                                        <c:when test="${param.error == 'addFailed'}">Failed to add registration.</c:when>
-                                        <c:when test="${param.error == 'updateFailed'}">Failed to update registration.</c:when>
-                                        <c:when test="${param.error == 'invalidData'}">Invalid data provided.</c:when>
-                                        <c:when test="${param.error == 'userCreateFailed'}">Failed to create user account.</c:when>
-                                    </c:choose>
+                                    ${error}
                                 </div>
                             </c:if>
 
@@ -278,43 +398,64 @@
                                     <div class="section-header">📋 Registration Details</div>
                                     <div class="section-content">
                                         <div class="form-row">
-                                            <label for="subject" class="required">Subject:</label>
-                                            <select id="subject" name="subjectId" required ${isViewMode ? 'disabled' : ''}>
+                                            <label for="subject">Subject:</label>
+                                            <select id="subject" name="subjectId" class="${subjectError != null ? 'is-invalid' : ''}">
                                                 <c:forEach items="${subjects}" var="subject">
                                                     <option value="${subject.id}" ${registration != null && registration.subject_id == subject.id ? 'selected' : ''}>
-                                                            ${subject.title}
+                                                        ${subject.title}
                                                     </option>
                                                 </c:forEach>
                                             </select>
+                                            <c:if test="${subjectError != null}">
+                                                <div class="error-message">
+                                                    <i class="fas fa-exclamation-circle"></i>
+                                                    ${subjectError}
+                                                </div>
+                                            </c:if>
                                         </div>
 
                                         <div class="form-row">
-                                            <label for="package" class="required">Package:</label>
-                                            <select id="package" name="packageId" required ${isViewMode ? 'disabled' : ''}>
+                                            <label for="package">Package:</label>
+                                            <select id="package" name="packageId" class="${packageError != null ? 'is-invalid' : ''}">
                                                 <c:forEach items="${pricePackages}" var="pkg">
-                                                    <option value="${pkg.id}" ${registration != null && registration.package_id == pkg.id ? 'selected' : ''}>
-                                                            ${pkg.name} -
-                                                        <span class="price-info">
-                                                                <span class="original-price">$${pkg.list_price}</span>
-                                                                <span class="sale-price">$${pkg.sale_price}</span>
-                                                            </span>
+                                                    <option value="${pkg.id}"
+                                                            ${registration != null && registration.package_id == pkg.id ? 'selected' : ''}>
+                                                        ${pkg.name} - $${pkg.sale_price}
                                                     </option>
                                                 </c:forEach>
                                             </select>
+                                            <c:if test="${packageError != null}">
+                                                <div class="error-message">
+                                                    <i class="fas fa-exclamation-circle"></i>
+                                                    ${packageError}
+                                                </div>
+                                            </c:if>
                                         </div>
 
                                         <div class="form-row">
-                                            <label for="validFrom" class="required">Valid From:</label>
+                                            <label for="validFrom">Valid From:</label>
                                             <input type="date" id="validFrom" name="validFrom"
-                                                   value="${registration != null ? registration.valid_from : ''}" required
-                                            ${isViewMode ? 'readonly' : ''} />
+                                                   value="${registration != null ? registration.valid_from : ''}"
+                                                   class="${dateError != null ? 'is-invalid' : ''}" />
+                                            <c:if test="${dateError != null}">
+                                                <div class="error-message">
+                                                    <i class="fas fa-exclamation-circle"></i>
+                                                    ${dateError}
+                                                </div>
+                                            </c:if>
                                         </div>
 
                                         <div class="form-row">
-                                            <label for="validTo" class="required">Valid To:</label>
+                                            <label for="validTo">Valid To:</label>
                                             <input type="date" id="validTo" name="validTo"
-                                                   value="${registration != null ? registration.valid_to : ''}" required
-                                            ${isViewMode ? 'readonly' : ''} />
+                                                   value="${registration != null ? registration.valid_to : ''}"
+                                                   class="${dateError != null ? 'is-invalid' : ''}" />
+                                            <c:if test="${dateError != null}">
+                                                <div class="error-message">
+                                                    <i class="fas fa-exclamation-circle"></i>
+                                                    ${dateError}
+                                                </div>
+                                            </c:if>
                                         </div>
                                     </div>
                                 </div>
@@ -324,10 +465,16 @@
                                     <div class="section-header">👤 Personal Information</div>
                                     <div class="section-content">
                                         <div class="form-row">
-                                            <label for="fullName" class="required">Full Name:</label>
+                                            <label for="fullName">Full Name:</label>
                                             <input type="text" id="fullName" name="fullName"
-                                                   value="${user != null ? user.full_name : ''}" required
-                                            ${isViewMode ? 'readonly' : ''} />
+                                                   value="${user != null ? user.full_name : ''}"
+                                                   class="${fullNameError != null ? 'is-invalid' : ''}" />
+                                            <c:if test="${fullNameError != null}">
+                                                <div class="error-message">
+                                                    <i class="fas fa-exclamation-circle"></i>
+                                                    ${fullNameError}
+                                                </div>
+                                            </c:if>
                                         </div>
 
                                         <div class="form-row">
@@ -339,17 +486,34 @@
                                         </div>
 
                                         <div class="form-row">
-                                            <label for="email" class="required">Email:</label>
-                                            <input type="email" id="email" name="email"
-                                                   value="${user != null ? user.email : ''}" required
-                                            ${isViewMode ? 'readonly' : ''} />
+                                            <label for="email">Email:</label>
+                                            <div class="email-check-container">
+                                                <input type="email" id="email" name="email"
+                                                       value="${user != null ? user.email : ''}"
+                                                       class="${emailError != null ? 'is-invalid' : ''}" />
+                                                <button type="button" id="checkEmailBtn" class="btn btn-info">
+                                                    <i class="fas fa-search"></i> Check Email
+                                                </button>
+                                            </div>
+                                            <c:if test="${emailError != null}">
+                                                <div class="error-message">
+                                                    <i class="fas fa-exclamation-circle"></i>
+                                                    ${emailError}
+                                                </div>
+                                            </c:if>
                                         </div>
 
                                         <div class="form-row">
-                                            <label for="mobile" class="required">Mobile:</label>
+                                            <label for="mobile">Mobile:</label>
                                             <input type="tel" id="mobile" name="mobile"
-                                                   value="${user != null ? user.mobile : ''}" required
-                                            ${isViewMode ? 'readonly' : ''} />
+                                                   value="${user != null ? user.mobile : ''}"
+                                                   class="${mobileError != null ? 'is-invalid' : ''}" />
+                                            <c:if test="${mobileError != null}">
+                                                <div class="error-message">
+                                                    <i class="fas fa-exclamation-circle"></i>
+                                                    ${mobileError}
+                                                </div>
+                                            </c:if>
                                         </div>
                                     </div>
                                 </div>
@@ -360,11 +524,17 @@
                                     <div class="section-content">
                                         <div class="form-row">
                                             <label for="status">Status:</label>
-                                            <select id="status" name="status" required ${isViewMode ? 'disabled' : ''}>
+                                            <select id="status" name="status" required ${isViewMode ? 'disabled' : ''} class="${statusError != null ? 'is-invalid' : ''}">
                                                 <option value="pending" ${registration != null && registration.status == 'pending' ? 'selected' : ''}>Pending</option>
                                                 <option value="paid" ${registration != null && registration.status == 'paid' ? 'selected' : ''}>Paid</option>
                                                 <option value="cancelled" ${registration != null && registration.status == 'cancelled' ? 'selected' : ''}>Cancelled</option>
                                             </select>
+                                            <c:if test="${statusError != null}">
+                                                <div class="error-message">
+                                                    <i class="fas fa-exclamation-circle"></i>
+                                                    ${statusError}
+                                                </div>
+                                            </c:if>
                                         </div>
 
                                         <div class="form-row">
@@ -420,66 +590,38 @@
 
 <!-- JS here -->
 <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
+<script src="${pageContext.request.contextPath}/view/common/js/tien.js"></script>
 
 <script>
-    // Handle status change to "Paid"
-    document.getElementById('status').addEventListener('change', function() {
-        if (this.value === 'paid') {
-            // Check if user exists
-            const email = document.getElementById('email').value;
-            if (email) {
-                fetch('${pageContext.request.contextPath}/admin/check-user?email=' + encodeURIComponent(email))
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data.exists) {
-                            if (confirm('User does not exist. Would you like to create a new user account?')) {
-                                // Enable user creation fields
-                                document.getElementById('fullName').readOnly = false;
-                                document.getElementById('gender').disabled = false;
-                                document.getElementById('mobile').readOnly = false;
-                            } else {
-                                this.value = 'pending';
-                            }
-                        }
-                    });
-            }
-        }
-    });
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle email check
+        const emailInput = document.getElementById('email');
+        const checkEmailBtn = document.getElementById('checkEmailBtn');
+        
+        checkEmailBtn.addEventListener('click', function() {
+            const email = emailInput.value;
+            
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+            
+            fetch('${pageContext.request.contextPath}/admin/registrations?action=check-user&email=' + encodeURIComponent(email))
+                .then(response => response.json())
+                .then(data => {
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-search"></i> Check Email';
 
-    // Initialize date range validation
-    document.getElementById('validTo').addEventListener('change', function() {
-        var fromDate = document.getElementById('validFrom').value;
-        var toDate = this.value;
-
-        if (fromDate && toDate && fromDate > toDate) {
-            alert('To Date must be greater than or equal to From Date');
-            this.value = fromDate;
-        }
-    });
-
-    document.getElementById('validFrom').addEventListener('change', function() {
-        var fromDate = this.value;
-        var toDate = document.getElementById('validTo').value;
-
-        if (fromDate && toDate && fromDate > toDate) {
-            alert('From Date must be less than or equal to To Date');
-            this.value = toDate;
-        }
-    });
-
-    // Form submission
-    document.getElementById('registrationForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        // Validate form
-        if (!this.checkValidity()) {
-            e.stopPropagation();
-            this.classList.add('was-validated');
-            return;
-        }
-
-        // Submit form
-        this.submit();
+                    if (data.exists) {
+                        document.getElementById('fullName').value = data.user.full_name;
+                        document.getElementById('gender').value = data.user.gender;
+                        document.getElementById('mobile').value = data.user.mobile;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-search"></i> Check Email';
+                });
+        });
     });
 </script>
 </body>

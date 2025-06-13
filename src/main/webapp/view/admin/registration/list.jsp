@@ -8,7 +8,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>Registration Management - SkillGro Dashboard</title>
+    <title>Registrations - SkillGro Dashboard</title>
     <meta name="description" content="SkillGro - Online Courses & Education Platform">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -145,6 +145,111 @@
             background-color: #f8d7da;
             border-color: #f5c6cb;
         }
+
+        /* Custom button styles */
+        .btn {
+            padding: 8px 16px;
+            font-weight: 500;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #4A90E2;
+            border-color: #4A90E2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #357ABD;
+            border-color: #357ABD;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #218838;
+            transform: translateY(-1px);
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background-color: #138496;
+            border-color: #138496;
+            transform: translateY(-1px);
+        }
+
+        /* Filter section styles */
+        .dashboard__filter-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .text-muted {
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+
+        /* Table styles */
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+
+        /* Pagination styles */
+        .pagination {
+            margin-bottom: 0;
+        }
+
+        .page-link {
+            color: #4A90E2;
+            border: 1px solid #dee2e6;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .page-item.active .page-link {
+            background-color: #4A90E2;
+            border-color: #4A90E2;
+        }
+
+        .page-link:hover {
+            color: #357ABD;
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+        }
+
+        /* Input group styles */
+        .input-group-text {
+            background-color: #f8f9fa;
+            border: 1px solid #ced4da;
+            color: #495057;
+        }
+
+        .form-control:focus {
+            border-color: #4A90E2;
+            box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+        }
     </style>
 </head>
 
@@ -167,16 +272,12 @@
                         </div>
                         <div class="col-lg-10">
                             <div class="dashboard__content-wrap">
-                                <div class="dashboard__content-title">
-                                    <h4 class="title">Registration Management</h4>
+                                <div class="dashboard__content-title d-flex justify-content-between align-items-center">
+                                    <h4 class="title">Registrations Management</h4>
+                                    <a href="${pageContext.request.contextPath}/admin/registrations?action=add" class="btn btn-success">
+                                        <i class="fas fa-plus"></i> Add New Registration
+                                    </a>
                                 </div>
-
-                                <!-- Page Size Warning -->
-                                <c:if test="${not empty pageSizeWarning}">
-                                    <div class="alert alert-warning" style="color: #856404; background-color: #fff3cd; border-color: #ffeaa7;">
-                                        <strong>Warning:</strong> ${pageSizeWarning}
-                                    </div>
-                                </c:if>
 
                                 <!-- Success/Error Messages -->
                                 <c:if test="${param.success != null}">
@@ -198,368 +299,319 @@
                                     </div>
                                 </c:if>
 
-                                <!-- Combined Filter & Configuration Section -->
-                                <div class="dashboard__filter">
-                                    <form action="${pageContext.request.contextPath}/admin/registrations" method="get" id="mainForm">
-                                        <!-- Filter Fields -->
-                                        <div class="form-group">
-                                            <label for="emailSearch">Email:</label>
-                                            <input type="text" id="emailSearch" name="emailSearch" 
-                                                   value="${emailSearch}" placeholder="Search by email...">
+                                <!-- Search and Filter Section -->
+                                <div class="dashboard__filter-section">
+                                    <form action="${pageContext.request.contextPath}/admin/registrations" method="get" class="row g-3" id="filterForm">
+                                        <!-- Filter descriptions -->
+                                        <div class="col-12 mb-2">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <small class="text-muted">Search by user's email address</small>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <small class="text-muted">Search by subject name</small>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <small class="text-muted">Filter by registration status</small>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <small class="text-muted">Filter by start date</small>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <small class="text-muted">Filter by end date</small>
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        <div class="form-group">
-                                            <label for="subjectSearch">Subject:</label>
-                                            <input type="text" id="subjectSearch" name="subjectSearch" 
-                                                   value="${subjectSearch}" placeholder="Search by subject...">
+                                        <!-- Existing search fields -->
+                                        <div class="col-md-3">
+                                            <input type="text" class="form-control" name="emailSearch" placeholder="Search by email" value="${emailSearch}">
                                         </div>
-
-                                        <div class="form-group">
-                                            <label for="status">Status:</label>
-                                            <select name="status" id="status">
+                                        <div class="col-md-3">
+                                            <input type="text" class="form-control" name="subjectSearch" placeholder="Search by subject" value="${subjectSearch}">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <select class="form-select" name="status">
                                                 <option value="">All Status</option>
-                                                <c:forEach var="s" items="${allStatuses}">
-                                                    <option value="${s}" ${status eq s ? 'selected' : ''}>${s}</option>
+                                                <c:forEach items="${allStatuses}" var="statusOption">
+                                                    <option value="${statusOption}" ${status == statusOption ? 'selected' : ''}>${statusOption}</option>
                                                 </c:forEach>
                                             </select>
                                         </div>
-
-                                        <div class="form-group">
-                                            <label for="fromDate">From Date:</label>
-                                            <input type="date" id="fromDate" name="fromDate" value="${fromDate}">
+                                        <div class="col-md-2">
+                                            <input type="date" class="form-control" name="fromDate" value="${fromDate}">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="date" class="form-control" name="toDate" value="${toDate}">
                                         </div>
 
-                                        <div class="form-group">
-                                            <label for="toDate">To Date:</label>
-                                            <input type="date" id="toDate" name="toDate" value="${toDate}">
-                                        </div>
-
-                                        <!-- Dynamic Configuration -->
-                                        <div class="form-group">
-                                            <label for="pageSize">Rows per page:</label>
-                                            <div style="display: flex; align-items: center; gap: 10px;">
-                                                <input type="number" name="pageSize" id="pageSize" 
-                                                       value="${pageSize != null ? pageSize : 10}" 
-                                                       min="1" max="1000" 
-                                                       style="width: 120px; padding: 8px 12px;"
-                                                       placeholder="Enter number">
-                                                <small class="text-muted">(1-1000)</small>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group" style="min-width: 300px;">
-                                            <label>Select Columns to Display:</label>
-                                            <small class="text-muted" style="display: block; margin-bottom: 8px;">
-                                                💡 Select columns to display. Click "Apply Filters" to apply changes.
-                                            </small>
-
-                                            
-                                            <!-- Create a set for faster lookup -->
-                                            <c:set var="selectedColumnSet" value=""/>
-                                            <c:if test="${not empty selectedColumns}">
-                                                <c:forEach items="${selectedColumns}" var="col">
-                                                    <c:set var="selectedColumnSet" value="${selectedColumnSet},${col},"/>
-                                                </c:forEach>
-                                            </c:if>
-                                            
-                                            <div class="column-selector">
-                                                <div class="column-group">
-                                                    <label class="column-checkbox">
-                                                        <input type="checkbox" name="selectedColumns" value="id" 
-                                                               <c:choose>
-                                                                   <c:when test="${empty selectedColumns}">checked</c:when>
-                                                                   <c:when test="${fn:contains(selectedColumnSet, ',id,')}">checked</c:when>
-                                                               </c:choose>>
-                                                        <span class="checkmark"></span>
-                                                        <span class="column-label">ID</span>
-                                                    </label>
-                                                    <label class="column-checkbox">
-                                                        <input type="checkbox" name="selectedColumns" value="email" 
-                                                               <c:choose>
-                                                                   <c:when test="${empty selectedColumns}">checked</c:when>
-                                                                   <c:when test="${fn:contains(selectedColumnSet, ',email,')}">checked</c:when>
-                                                               </c:choose>>
-                                                        <span class="checkmark"></span>
-                                                        <span class="column-label">Email</span>
-                                                    </label>
-                                                    <label class="column-checkbox">
-                                                        <input type="checkbox" name="selectedColumns" value="registration_time" 
-                                                               <c:choose>
-                                                                   <c:when test="${empty selectedColumns}">checked</c:when>
-                                                                   <c:when test="${fn:contains(selectedColumnSet, ',registration_time,')}">checked</c:when>
-                                                               </c:choose>>
-                                                        <span class="checkmark"></span>
-                                                        <span class="column-label">Registration Time</span>
-                                                    </label>
+                                        <!-- Column Selection -->
+                                        <div class="col-12 mt-3">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6 class="mb-0">Select Columns to Display</h6>
                                                 </div>
-                                                <div class="column-group">
-                                                    <label class="column-checkbox">
-                                                        <input type="checkbox" name="selectedColumns" value="subject" 
-                                                               <c:choose>
-                                                                   <c:when test="${empty selectedColumns}">checked</c:when>
-                                                                   <c:when test="${fn:contains(selectedColumnSet, ',subject,')}">checked</c:when>
-                                                               </c:choose>>
-                                                        <span class="checkmark"></span>
-                                                        <span class="column-label">Subject</span>
-                                                    </label>
-                                                    <label class="column-checkbox">
-                                                        <input type="checkbox" name="selectedColumns" value="package" 
-                                                               <c:choose>
-                                                                   <c:when test="${empty selectedColumns}">checked</c:when>
-                                                                   <c:when test="${fn:contains(selectedColumnSet, ',package,')}">checked</c:when>
-                                                               </c:choose>>
-                                                        <span class="checkmark"></span>
-                                                        <span class="column-label">Package</span>
-                                                    </label>
-                                                    <label class="column-checkbox">
-                                                        <input type="checkbox" name="selectedColumns" value="total_cost" 
-                                                               <c:choose>
-                                                                   <c:when test="${empty selectedColumns}">checked</c:when>
-                                                                   <c:when test="${fn:contains(selectedColumnSet, ',total_cost,')}">checked</c:when>
-                                                               </c:choose>>
-                                                        <span class="checkmark"></span>
-                                                        <span class="column-label">Total Cost</span>
-                                                    </label>
-                                                </div>
-                                                <div class="column-group">
-                                                    <label class="column-checkbox">
-                                                        <input type="checkbox" name="selectedColumns" value="status" 
-                                                               <c:choose>
-                                                                   <c:when test="${empty selectedColumns}">checked</c:when>
-                                                                   <c:when test="${fn:contains(selectedColumnSet, ',status,')}">checked</c:when>
-                                                               </c:choose>>
-                                                        <span class="checkmark"></span>
-                                                        <span class="column-label">Status</span>
-                                                    </label>
-                                                    <label class="column-checkbox">
-                                                        <input type="checkbox" name="selectedColumns" value="valid_from" 
-                                                               <c:choose>
-                                                                   <c:when test="${empty selectedColumns}">checked</c:when>
-                                                                   <c:when test="${fn:contains(selectedColumnSet, ',valid_from,')}">checked</c:when>
-                                                               </c:choose>>
-                                                        <span class="checkmark"></span>
-                                                        <span class="column-label">Valid From</span>
-                                                    </label>
-                                                    <label class="column-checkbox">
-                                                        <input type="checkbox" name="selectedColumns" value="valid_to" 
-                                                               <c:choose>
-                                                                   <c:when test="${empty selectedColumns}">checked</c:when>
-                                                                   <c:when test="${fn:contains(selectedColumnSet, ',valid_to,')}">checked</c:when>
-                                                               </c:choose>>
-                                                        <span class="checkmark"></span>
-                                                        <span class="column-label">Valid To</span>
-                                                    </label>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-3">
+                                                            <div class="form-check">
+                                                                <input type="checkbox" class="form-check-input column-selector" id="col_id" name="selectedColumns" value="id" 
+                                                                       ${empty paramValues['selectedColumns'] ? 'checked' : fn:join(paramValues['selectedColumns'], ',').contains('id') ? 'checked' : ''}>
+                                                                <label class="form-check-label" for="col_id">ID</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="form-check">
+                                                                <input type="checkbox" class="form-check-input column-selector" id="col_email" name="selectedColumns" value="email"
+                                                                       ${empty paramValues['selectedColumns'] ? 'checked' : fn:join(paramValues['selectedColumns'], ',').contains('email') ? 'checked' : ''}>
+                                                                <label class="form-check-label" for="col_email">Email</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="form-check">
+                                                                <input type="checkbox" class="form-check-input column-selector" id="col_subject" name="selectedColumns" value="subject"
+                                                                       ${empty paramValues['selectedColumns'] ? 'checked' : fn:join(paramValues['selectedColumns'], ',').contains('subject') ? 'checked' : ''}>
+                                                                <label class="form-check-label" for="col_subject">Subject</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="form-check">
+                                                                <input type="checkbox" class="form-check-input column-selector" id="col_package" name="selectedColumns" value="package"
+                                                                       ${empty paramValues['selectedColumns'] ? 'checked' : fn:join(paramValues['selectedColumns'], ',').contains('package') ? 'checked' : ''}>
+                                                                <label class="form-check-label" for="col_package">Package</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="form-check">
+                                                                <input type="checkbox" class="form-check-input column-selector" id="col_total_cost" name="selectedColumns" value="total_cost"
+                                                                       ${empty paramValues['selectedColumns'] ? 'checked' : fn:join(paramValues['selectedColumns'], ',').contains('total_cost') ? 'checked' : ''}>
+                                                                <label class="form-check-label" for="col_total_cost">Total Cost</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="form-check">
+                                                                <input type="checkbox" class="form-check-input column-selector" id="col_status" name="selectedColumns" value="status"
+                                                                       ${empty paramValues['selectedColumns'] ? 'checked' : fn:join(paramValues['selectedColumns'], ',').contains('status') ? 'checked' : ''}>
+                                                                <label class="form-check-label" for="col_status">Status</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="form-check">
+                                                                <input type="checkbox" class="form-check-input column-selector" id="col_valid_from" name="selectedColumns" value="valid_from"
+                                                                       ${empty paramValues['selectedColumns'] ? 'checked' : fn:join(paramValues['selectedColumns'], ',').contains('valid_from') ? 'checked' : ''}>
+                                                                <label class="form-check-label" for="col_valid_from">Valid From</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="form-check">
+                                                                <input type="checkbox" class="form-check-input column-selector" id="col_valid_to" name="selectedColumns" value="valid_to"
+                                                                       ${empty paramValues['selectedColumns'] ? 'checked' : fn:join(paramValues['selectedColumns'], ',').contains('valid_to') ? 'checked' : ''}>
+                                                                <label class="form-check-label" for="col_valid_to">Valid To</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="form-check">
+                                                                <input type="checkbox" class="form-check-input column-selector" id="col_registration_time" name="selectedColumns" value="registration_time"
+                                                                       ${empty paramValues['selectedColumns'] ? 'checked' : fn:join(paramValues['selectedColumns'], ',').contains('registration_time') ? 'checked' : ''}>
+                                                                <label class="form-check-label" for="col_registration_time">Registration Time</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <input type="hidden" name="sortBy" value="${sortBy}">
-                                        <input type="hidden" name="sortOrder" value="${sortOrder}">
-                                        <input type="hidden" name="page" value="1">
-
-                                        <button type="submit" style="background-color: #3f78e0; color: white; padding: 12px 25px;">
-                                            📊 Apply Filters
-                                        </button>
+                                        <!-- Action buttons -->
+                                        <div class="col-12 text-end">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-filter"></i> Apply Filters
+                                            </button>
+                                        </div>
                                     </form>
                                 </div>
 
-                                <!-- Add Registration Button -->
-                                <div class="dashboard__actions mb-4">
-                                    <a href="${pageContext.request.contextPath}/admin/registrations?action=add" 
-                                       class="btn btn-primary">
-                                        <i class="fas fa-plus"></i> Add New Registration
-                                    </a>
-                                </div>
-
-                                <!-- Registrations Table -->
-                                <div class="dashboard__review-table table-responsive">
-                                    <table class="table">
+                                <!-- Table Section -->
+                                <div class="table-responsive mt-3">
+                                    <table class="table table-striped">
                                         <thead>
                                             <tr>
-                                                <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',id,')}">
-                                                    <th class="table-header-sortable" onclick="sortTable('id')">
-                                                        ID
-                                                        <c:if test="${sortBy eq 'id'}">
-                                                            <i class="fas fa-sort-${sortOrder eq 'asc' ? 'up' : 'down'}"></i>
-                                                        </c:if>
+                                                <c:forEach items="${selectedColumns}" var="column">
+                                                    <th>
+                                                        <c:choose>
+                                                            <c:when test="${column == 'id'}">
+                                                                <a href="?${pageContext.request.queryString}&sortBy=id&sortOrder=${sortBy == 'id' && sortOrder == 'asc' ? 'desc' : 'asc'}" 
+                                                                   class="text-dark text-decoration-none">
+                                                                    ID
+                                                                    <c:if test="${sortBy == 'id'}">
+                                                                        <i class="fas fa-sort-${sortOrder == 'asc' ? 'up' : 'down'}"></i>
+                                                                    </c:if>
+                                                                </a>
+                                                            </c:when>
+                                                            <c:when test="${column == 'email'}">
+                                                                <a href="?${pageContext.request.queryString}&sortBy=email&sortOrder=${sortBy == 'email' && sortOrder == 'asc' ? 'desc' : 'asc'}" 
+                                                                   class="text-dark text-decoration-none">
+                                                                    Email
+                                                                    <c:if test="${sortBy == 'email'}">
+                                                                        <i class="fas fa-sort-${sortOrder == 'asc' ? 'up' : 'down'}"></i>
+                                                                    </c:if>
+                                                                </a>
+                                                            </c:when>
+                                                            <c:when test="${column == 'subject'}">
+                                                                <a href="?${pageContext.request.queryString}&sortBy=subject&sortOrder=${sortBy == 'subject' && sortOrder == 'asc' ? 'desc' : 'asc'}" 
+                                                                   class="text-dark text-decoration-none">
+                                                                    Subject
+                                                                    <c:if test="${sortBy == 'subject'}">
+                                                                        <i class="fas fa-sort-${sortOrder == 'asc' ? 'up' : 'down'}"></i>
+                                                                    </c:if>
+                                                                </a>
+                                                            </c:when>
+                                                            <c:when test="${column == 'package'}">
+                                                                <a href="?${pageContext.request.queryString}&sortBy=package&sortOrder=${sortBy == 'package' && sortOrder == 'asc' ? 'desc' : 'asc'}" 
+                                                                   class="text-dark text-decoration-none">
+                                                                    Package
+                                                                    <c:if test="${sortBy == 'package'}">
+                                                                        <i class="fas fa-sort-${sortOrder == 'asc' ? 'up' : 'down'}"></i>
+                                                                    </c:if>
+                                                                </a>
+                                                            </c:when>
+                                                            <c:when test="${column == 'total_cost'}">
+                                                                <a href="?${pageContext.request.queryString}&sortBy=total_cost&sortOrder=${sortBy == 'total_cost' && sortOrder == 'asc' ? 'desc' : 'asc'}" 
+                                                                   class="text-dark text-decoration-none">
+                                                                    Total Cost
+                                                                    <c:if test="${sortBy == 'total_cost'}">
+                                                                        <i class="fas fa-sort-${sortOrder == 'asc' ? 'up' : 'down'}"></i>
+                                                                    </c:if>
+                                                                </a>
+                                                            </c:when>
+                                                            <c:when test="${column == 'status'}">
+                                                                <a href="?${pageContext.request.queryString}&sortBy=status&sortOrder=${sortBy == 'status' && sortOrder == 'asc' ? 'desc' : 'asc'}" 
+                                                                   class="text-dark text-decoration-none">
+                                                                    Status
+                                                                    <c:if test="${sortBy == 'status'}">
+                                                                        <i class="fas fa-sort-${sortOrder == 'asc' ? 'up' : 'down'}"></i>
+                                                                    </c:if>
+                                                                </a>
+                                                            </c:when>
+                                                            <c:when test="${column == 'valid_from'}">
+                                                                <a href="?${pageContext.request.queryString}&sortBy=valid_from&sortOrder=${sortBy == 'valid_from' && sortOrder == 'asc' ? 'desc' : 'asc'}" 
+                                                                   class="text-dark text-decoration-none">
+                                                                    Valid From
+                                                                    <c:if test="${sortBy == 'valid_from'}">
+                                                                        <i class="fas fa-sort-${sortOrder == 'asc' ? 'up' : 'down'}"></i>
+                                                                    </c:if>
+                                                                </a>
+                                                            </c:when>
+                                                            <c:when test="${column == 'valid_to'}">
+                                                                <a href="?${pageContext.request.queryString}&sortBy=valid_to&sortOrder=${sortBy == 'valid_to' && sortOrder == 'asc' ? 'desc' : 'asc'}" 
+                                                                   class="text-dark text-decoration-none">
+                                                                    Valid To
+                                                                    <c:if test="${sortBy == 'valid_to'}">
+                                                                        <i class="fas fa-sort-${sortOrder == 'asc' ? 'up' : 'down'}"></i>
+                                                                    </c:if>
+                                                                </a>
+                                                            </c:when>
+                                                            <c:when test="${column == 'registration_time'}">
+                                                                <a href="?${pageContext.request.queryString}&sortBy=registration_time&sortOrder=${sortBy == 'registration_time' && sortOrder == 'asc' ? 'desc' : 'asc'}" 
+                                                                   class="text-dark text-decoration-none">
+                                                                    Registration Time
+                                                                    <c:if test="${sortBy == 'registration_time'}">
+                                                                        <i class="fas fa-sort-${sortOrder == 'asc' ? 'up' : 'down'}"></i>
+                                                                    </c:if>
+                                                                </a>
+                                                            </c:when>
+                                                        </c:choose>
                                                     </th>
-                                                </c:if>
-                                                <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',email,')}">
-                                                    <th class="table-header-sortable" onclick="sortTable('email')">
-                                                        Email
-                                                        <c:if test="${sortBy eq 'email'}">
-                                                            <i class="fas fa-sort-${sortOrder eq 'asc' ? 'up' : 'down'}"></i>
-                                                        </c:if>
-                                                    </th>
-                                                </c:if>
-                                                <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',registration_time,')}">
-                                                    <th class="table-header-sortable" onclick="sortTable('registration_time')">
-                                                        Registration Time
-                                                        <c:if test="${sortBy eq 'registration_time'}">
-                                                            <i class="fas fa-sort-${sortOrder eq 'asc' ? 'up' : 'down'}"></i>
-                                                        </c:if>
-                                                    </th>
-                                                </c:if>
-                                                <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',subject,')}">
-                                                    <th class="table-header-sortable" onclick="sortTable('subject')">
-                                                        Subject
-                                                        <c:if test="${sortBy eq 'subject'}">
-                                                            <i class="fas fa-sort-${sortOrder eq 'asc' ? 'up' : 'down'}"></i>
-                                                        </c:if>
-                                                    </th>
-                                                </c:if>
-                                                <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',package,')}">
-                                                    <th class="table-header-sortable" onclick="sortTable('package')">
-                                                        Package
-                                                        <c:if test="${sortBy eq 'package'}">
-                                                            <i class="fas fa-sort-${sortOrder eq 'asc' ? 'up' : 'down'}"></i>
-                                                        </c:if>
-                                                    </th>
-                                                </c:if>
-                                                <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',total_cost,')}">
-                                                    <th class="table-header-sortable" onclick="sortTable('total_cost')">
-                                                        Total Cost
-                                                        <c:if test="${sortBy eq 'total_cost'}">
-                                                            <i class="fas fa-sort-${sortOrder eq 'asc' ? 'up' : 'down'}"></i>
-                                                        </c:if>
-                                                    </th>
-                                                </c:if>
-                                                <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',status,')}">
-                                                    <th class="table-header-sortable" onclick="sortTable('status')">
-                                                        Status
-                                                        <c:if test="${sortBy eq 'status'}">
-                                                            <i class="fas fa-sort-${sortOrder eq 'asc' ? 'up' : 'down'}"></i>
-                                                        </c:if>
-                                                    </th>
-                                                </c:if>
-                                                <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',valid_from,')}">
-                                                    <th class="table-header-sortable" onclick="sortTable('valid_from')">
-                                                        Valid From
-                                                        <c:if test="${sortBy eq 'valid_from'}">
-                                                            <i class="fas fa-sort-${sortOrder eq 'asc' ? 'up' : 'down'}"></i>
-                                                        </c:if>
-                                                    </th>
-                                                </c:if>
-                                                <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',valid_to,')}">
-                                                    <th class="table-header-sortable" onclick="sortTable('valid_to')">
-                                                        Valid To
-                                                        <c:if test="${sortBy eq 'valid_to'}">
-                                                            <i class="fas fa-sort-${sortOrder eq 'asc' ? 'up' : 'down'}"></i>
-                                                        </c:if>
-                                                    </th>
-                                                </c:if>
+                                                </c:forEach>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <c:forEach items="${registrations}" var="registration">
+                                            <c:forEach items="${registrations}" var="reg">
                                                 <tr>
-                                                    <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',id,')}">
-                                                        <td>${registration.id}</td>
-                                                    </c:if>
-                                                    <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',email,')}">
-                                                        <td>${userEmails[registration.user_id]}</td>
-                                                    </c:if>
-                                                    <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',registration_time,')}">
-                                                        <td><fmt:formatDate value="${registration.registration_time}" pattern="yyyy-MM-dd HH:mm:ss"/></td>
-                                                    </c:if>
-                                                    <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',subject,')}">
-                                                        <td>${subjectTitles[registration.subject_id]}</td>
-                                                    </c:if>
-                                                    <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',package,')}">
-                                                        <td>${packageNames[registration.package_id]}</td>
-                                                    </c:if>
-                                                    <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',total_cost,')}">
-                                                        <td><fmt:formatNumber value="${registration.total_cost}" type="currency"/></td>
-                                                    </c:if>
-                                                    <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',status,')}">
+                                                    <c:forEach items="${selectedColumns}" var="column">
                                                         <td>
-                                                            <span class="status-badge status-${registration.status.toLowerCase()}">${registration.status}</span>
+                                                            <c:choose>
+                                                                <c:when test="${column == 'id'}">${reg.id}</c:when>
+                                                                <c:when test="${column == 'email'}">${userEmails[reg.user_id]}</c:when>
+                                                                <c:when test="${column == 'subject'}">${subjectTitles[reg.subject_id]}</c:when>
+                                                                <c:when test="${column == 'package'}">${packageNames[reg.package_id]}</c:when>
+                                                                <c:when test="${column == 'total_cost'}">$${reg.total_cost}</c:when>
+                                                                <c:when test="${column == 'status'}">
+                                                                    <span class="badge ${reg.status == 'pending' ? 'bg-warning' : reg.status == 'paid' ? 'bg-success' : 'bg-danger'}">
+                                                                        ${reg.status}
+                                                                    </span>
+                                                                </c:when>
+                                                                <c:when test="${column == 'valid_from'}">
+                                                                    <fmt:formatDate value="${reg.valid_from}" pattern="yyyy-MM-dd"/>
+                                                                </c:when>
+                                                                <c:when test="${column == 'valid_to'}">
+                                                                    <fmt:formatDate value="${reg.valid_to}" pattern="yyyy-MM-dd"/>
+                                                                </c:when>
+                                                                <c:when test="${column == 'registration_time'}">
+                                                                    <fmt:formatDate value="${reg.registration_time}" pattern="yyyy-MM-dd HH:mm:ss"/>
+                                                                </c:when>
+                                                            </c:choose>
                                                         </td>
-                                                    </c:if>
-                                                    <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',valid_from,')}">
-                                                        <td><fmt:formatDate value="${registration.valid_from}" pattern="yyyy-MM-dd"/></td>
-                                                    </c:if>
-                                                    <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',valid_to,')}">
-                                                        <td><fmt:formatDate value="${registration.valid_to}" pattern="yyyy-MM-dd"/></td>
-                                                    </c:if>
+                                                    </c:forEach>
                                                     <td>
-                                                        <div class="action-buttons">
-                                                            <a href="${pageContext.request.contextPath}/admin/registrations?action=edit&id=${registration.id}" 
-                                                               class="action-button edit-button">
-                                                                <i class="fas fa-edit"></i> Edit
-                                                            </a>
-                                                            <a href="${pageContext.request.contextPath}/admin/registrations?action=view&id=${registration.id}" 
-                                                               class="action-button view-button">
-                                                                <i class="fas fa-eye"></i> View
-                                                            </a>
-                                                        </div>
+                                                        <a href="${pageContext.request.contextPath}/admin/registrations?action=view&id=${reg.id}" 
+                                                           class="btn btn-info btn-sm">View</a>
+                                                        <a href="${pageContext.request.contextPath}/admin/registrations?action=edit&id=${reg.id}" 
+                                                           class="btn btn-primary btn-sm">Edit</a>
                                                     </td>
                                                 </tr>
                                             </c:forEach>
-                                            <c:if test="${empty registrations}">
-                                                <tr>
-                                                    <c:set var="visibleColumnCount" value="1"/> <!-- Actions always visible -->
-                                                    <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',id,')}">
-                                                        <c:set var="visibleColumnCount" value="${visibleColumnCount + 1}"/>
-                                                    </c:if>
-                                                    <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',email,')}">
-                                                        <c:set var="visibleColumnCount" value="${visibleColumnCount + 1}"/>
-                                                    </c:if>
-                                                    <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',registration_time,')}">
-                                                        <c:set var="visibleColumnCount" value="${visibleColumnCount + 1}"/>
-                                                    </c:if>
-                                                    <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',subject,')}">
-                                                        <c:set var="visibleColumnCount" value="${visibleColumnCount + 1}"/>
-                                                    </c:if>
-                                                    <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',package,')}">
-                                                        <c:set var="visibleColumnCount" value="${visibleColumnCount + 1}"/>
-                                                    </c:if>
-                                                    <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',total_cost,')}">
-                                                        <c:set var="visibleColumnCount" value="${visibleColumnCount + 1}"/>
-                                                    </c:if>
-                                                    <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',status,')}">
-                                                        <c:set var="visibleColumnCount" value="${visibleColumnCount + 1}"/>
-                                                    </c:if>
-                                                    <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',valid_from,')}">
-                                                        <c:set var="visibleColumnCount" value="${visibleColumnCount + 1}"/>
-                                                    </c:if>
-                                                    <c:if test="${empty selectedColumns or fn:contains(selectedColumnSet, ',valid_to,')}">
-                                                        <c:set var="visibleColumnCount" value="${visibleColumnCount + 1}"/>
-                                                    </c:if>
-                                                    <td colspan="${visibleColumnCount}" class="text-center">No registrations found</td>
-                                                </tr>
-                                            </c:if>
                                         </tbody>
                                     </table>
                                 </div>
 
-                                <!-- Pagination -->
-                                <c:if test="${totalPages > 0}">
-                                    <div class="pagination justify-content-center mt-4">
-                                        <c:if test="${page > 1}">
-                                            <a href="javascript:void(0)" onclick="gotoPage('${page - 1}')" class="btn btn-outline-primary me-2">
-                                                <i class="fas fa-chevron-left"></i> Previous
-                                            </a>
-                                        </c:if>
+                                <!-- Results count, rows per page and pagination info -->
+                                <div class="dashboard__info-section mt-3">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-3">
+                                            <div class="input-group">
+                                                <label class="input-group-text" for="pageSize">Rows per page</label>
+                                                <input type="number" class="form-control" id="pageSize" name="pageSize" 
+                                                       min="1" max="1000" value="${pageSize}" 
+                                                       placeholder="Rows per page">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <p class="mb-0">
+                                                <c:set var="startRow" value="${(page-1)*pageSize + 1}"/>
+                                                <c:set var="endRow" value="${page*pageSize}"/>
+                                                <c:set var="displayEndRow" value="${endRow > totalRecords ? totalRecords : endRow}"/>
+<%--                                                Showing ${startRow} to ${displayEndRow} of ${totalRecords} entries--%>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <nav aria-label="Page navigation" class="float-end">
+                                                <ul class="pagination justify-content-end mb-0">
+                                                    <!-- Previous page -->
+                                                    <li class="page-item ${page == 1 ? 'disabled' : ''}">
+                                                        <a class="page-link" href="${pageContext.request.contextPath}/admin/registrations?page=${page-1}&pageSize=${pageSize}&emailSearch=${emailSearch}&subjectSearch=${subjectSearch}&status=${status}&fromDate=${fromDate}&toDate=${toDate}&sortBy=${sortBy}&sortOrder=${sortOrder}" aria-label="Previous">
+                                                            <span aria-hidden="true">&laquo;</span>
+                                                        </a>
+                                                    </li>
 
-                                        <span class="mx-3">
-                                            Page ${page} of ${totalPages} 
-                                            <br><small class="text-muted">
-                                                Showing ${pageSize} rows per page
-                                                <c:if test="${not empty registrations}">
-                                                    | ${(page-1) * pageSize + 1} - ${(page-1) * pageSize + registrations.size()} records
-                                                </c:if>
-                                            </small>
-                                        </span>
-
-                                        <c:if test="${page < totalPages}">
-                                            <a href="javascript:void(0)" onclick="gotoPage('${page + 1}')" class="btn btn-outline-primary ms-2">
-                                                Next <i class="fas fa-chevron-right"></i>
-                                            </a>
-                                        </c:if>
+                                                    <!-- Page numbers -->
+                                                    <c:forEach begin="1" end="${totalPages}" var="i">
+                                                        <li class="page-item ${page == i ? 'active' : ''}">
+                                                            <a class="page-link" href="${pageContext.request.contextPath}/admin/registrations?page=${i}&pageSize=${pageSize}&emailSearch=${emailSearch}&subjectSearch=${subjectSearch}&status=${status}&fromDate=${fromDate}&toDate=${toDate}&sortBy=${sortBy}&sortOrder=${sortOrder}">${i}</a>
+                                                        </li>
+                                                    </c:forEach>
+                                                    
+                                                    <!-- Next page -->
+                                                    <li class="page-item ${page == totalPages ? 'disabled' : ''}">
+                                                        <a class="page-link" href="${pageContext.request.contextPath}/admin/registrations?page=${page+1}&pageSize=${pageSize}&emailSearch=${emailSearch}&subjectSearch=${subjectSearch}&status=${status}&fromDate=${fromDate}&toDate=${toDate}&sortBy=${sortBy}&sortOrder=${sortOrder}" aria-label="Next">
+                                                            <span aria-hidden="true">&raquo;</span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+                                        </div>
                                     </div>
-                                </c:if>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -578,130 +630,76 @@
     <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
 
     <script>
-        function sortTable(column) {
-            // Chuẩn hóa tên cột cho sort
-            const columnMap = {
-                'id': 'id',
-                'email': 'email',
-                'registration_time': 'registration_time',
-                'subject': 'subject',
-                'package': 'package',
-                'total_cost': 'total_cost',
-                'status': 'status',
-                'valid_from': 'valid_from',
-                'valid_to': 'valid_to'
-            };
-            const sortColumn = columnMap[column] || column;
-            const urlParams = new URLSearchParams(window.location.search);
-            let newOrder = 'asc';
-            if (urlParams.get('sortBy') === sortColumn && urlParams.get('sortOrder') === 'asc') {
-                newOrder = 'desc';
-            }
-            urlParams.set('sortBy', sortColumn);
-            urlParams.set('sortOrder', newOrder);
-            urlParams.set('page', '1');
-            window.location.href = window.location.pathname + '?' + urlParams.toString();
-        }
-
-        function gotoPage(page) {
-            const urlParams = new URLSearchParams(window.location.search);
-            urlParams.set('page', page.toString());
-            window.location.href = window.location.pathname + '?' + urlParams.toString();
-        }
-
-        function updateTable() {
-            const mainForm = document.getElementById('mainForm');
-            setTimeout(() => {
-                mainForm.submit();
-            }, 100);
-        }
-
-        // Page size functions removed - no quick selection buttons needed
-
-        function validateAndSubmitForm() {
-            const pageSizeInput = document.getElementById('pageSize');
-            const value = parseInt(pageSizeInput.value);
+        // Handle form submission
+        document.getElementById('filterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
             
-            if (isNaN(value) || value < 1) {
-                alert('Page size must be a number greater than 0');
-                pageSizeInput.value = 10;
+            // Get date values
+            const fromDate = document.querySelector('input[name="fromDate"]').value;
+            const toDate = document.querySelector('input[name="toDate"]').value;
+            
+            // Validate dates if both are provided
+            if (fromDate && toDate) {
+                if (new Date(fromDate) > new Date(toDate)) {
+                    alert('End date must be greater than or equal to start date');
+                    return;
+                }
+            }
+            
+            // Submit form if validation passes
+            this.submit();
+        });
+
+        // Handle date input changes
+        document.querySelector('input[name="fromDate"]').addEventListener('change', function() {
+            const toDate = document.querySelector('input[name="toDate"]');
+            if (this.value && toDate.value && new Date(this.value) > new Date(toDate.value)) {
+                alert('Start date must be less than or equal to end date');
+                this.value = toDate.value;
+            }
+        });
+
+        document.querySelector('input[name="toDate"]').addEventListener('change', function() {
+            const fromDate = document.querySelector('input[name="fromDate"]');
+            if (this.value && fromDate.value && new Date(fromDate.value) > new Date(this.value)) {
+                alert('End date must be greater than or equal to start date');
+                this.value = fromDate.value;
+            }
+        });
+
+        // Handle page size change
+        document.getElementById('pageSize').addEventListener('change', function() {
+            // Reset to page 1 when changing page size
+            const pageInput = document.createElement('input');
+            pageInput.type = 'hidden';
+            pageInput.name = 'page';
+            pageInput.value = '1';
+            this.form.appendChild(pageInput);
+            this.form.submit();
+        });
+
+        // Add JavaScript to handle form submission
+        document.getElementById('filterForm').addEventListener('submit', function(e) {
+            // Get all checked columns
+            var checkedColumns = document.querySelectorAll('.column-selector:checked');
+            if (checkedColumns.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one column to display');
                 return;
             }
-            
-            if (value > 1000) {
-                alert('Page size cannot exceed 1000. Setting to maximum value.');
-                pageSizeInput.value = 1000;
-            }
-            
-            updateTable();
-        }
-
-        // Initialize date range validation
-        document.getElementById('toDate').addEventListener('change', function() {
-            var fromDate = document.getElementById('fromDate').value;
-            var toDate = this.value;
-            
-            if (fromDate && toDate && fromDate > toDate) {
-                alert('To Date must be greater than or equal to From Date');
-                this.value = fromDate;
-            }
         });
 
-        document.getElementById('fromDate').addEventListener('change', function() {
-            var fromDate = this.value;
-            var toDate = document.getElementById('toDate').value;
-            
-            if (fromDate && toDate && fromDate > toDate) {
-                alert('From Date must be less than or equal to To Date');
-                this.value = toDate;
-            }
-        });
-
-        // Update pagination links to preserve current configuration
-        // Function gotoPage is already defined above, no need to redefine
-
-        // Preserve checkbox state when submitting form
-        document.getElementById('mainForm').addEventListener('submit', function(e) {
-            // Remove any existing hidden selectedColumns inputs to avoid duplicates
-            const existingHiddenInputs = this.querySelectorAll('input[type="hidden"][name="selectedColumns"]');
-            existingHiddenInputs.forEach(input => input.remove());
-            
-            // Get all checkboxes that are currently checked
-            const checkedCheckboxes = this.querySelectorAll('input[name="selectedColumns"]:checked');
-            console.log('Submitting form with checked columns:', Array.from(checkedCheckboxes).map(cb => cb.value));
-            
-            // Disable all visible checkboxes temporarily to prevent duplicate submission
-            const allCheckboxes = this.querySelectorAll('input[name="selectedColumns"]');
-            allCheckboxes.forEach(checkbox => {
-                if (!checkbox.disabled) {
-                    checkbox.disabled = true;
-                    // Mark for re-enabling after form submission (though page will reload)
-                    checkbox.setAttribute('data-was-enabled', 'true');
-                }
-            });
-            
-            // Create hidden inputs for each checked checkbox to ensure they are submitted
-            checkedCheckboxes.forEach(checkbox => {
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'selectedColumns';
-                hiddenInput.value = checkbox.value;
-                this.appendChild(hiddenInput);
-                console.log('Added hidden input for:', checkbox.value);
-            });
-        });
-
-        // Column visibility will be applied server-side after form submission
-
-        // Initialize page
+        // Initialize checkboxes on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Add Enter key support for page size input
-            document.getElementById('pageSize').addEventListener('keypress', function(event) {
-                if (event.key === 'Enter') {
-                    event.preventDefault();
-                    validateAndSubmitForm();
-                }
-            });
+            // If no checkboxes are checked and no selectedColumns in URL, check all by default
+            var checkedColumns = document.querySelectorAll('.column-selector:checked');
+            var hasSelectedColumns = window.location.search.includes('selectedColumns=');
+            
+            if (checkedColumns.length === 0 && !hasSelectedColumns) {
+                document.querySelectorAll('.column-selector').forEach(function(checkbox) {
+                    checkbox.checked = true;
+                });
+            }
         });
     </script>
 </body>

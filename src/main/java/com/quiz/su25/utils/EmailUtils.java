@@ -78,7 +78,7 @@ public class EmailUtils {
     private static final String SMTP_USERNAME = "tienhoang1524@gmail.com"; // Replace with your email
     private static final String SMTP_PASSWORD = "rdzs hcay eesp wfiy"; // Replace with your app password
 
-    public static void sendRegistrationEmail(String toEmail, String fullName, String password, String subjectTitle, String validFrom, String validTo) {
+    public static void sendRegistrationEmail(String toEmail, String fullName, String password, String subjectTitle, String validFrom, String validTo, String notes) {
         Properties props = new Properties();
         props.put("mail.smtp.host", SMTP_HOST);
         props.put("mail.smtp.port", SMTP_PORT);
@@ -169,6 +169,12 @@ public class EmailUtils {
                             padding: 10px;
                             margin: 10px 0;
                         }
+                        .notes {
+                            background-color: #e3f2fd;
+                            border-left: 4px solid #2196f3;
+                            padding: 10px;
+                            margin: 10px 0;
+                        }
                     </style>
                 </head>
                 <body>
@@ -209,6 +215,8 @@ public class EmailUtils {
                             </div>
                         </div>
                         
+                        %s
+                        
                         <div class="important">
                             <strong>Important Notes:</strong>
                             <ul>
@@ -228,7 +236,14 @@ public class EmailUtils {
                 </body>
                 </html>
                 """, 
-                fullName, toEmail, password, subjectTitle, validFrom, validTo);
+                fullName, toEmail, password, subjectTitle, validFrom, validTo,
+                notes != null && !notes.trim().isEmpty() ? 
+                    String.format("""
+                        <div class="notes">
+                            <div class="section-title">📝 Additional Notes</div>
+                            <p>%s</p>
+                        </div>
+                        """, notes) : "");
 
             message.setContent(emailContent, "text/html; charset=UTF-8");
             Transport.send(message);
@@ -244,7 +259,7 @@ public class EmailUtils {
         System.out.println("=== Testing Email Sending ===");
         
         // Test data
-        String testEmail = "greenhl1572018@gmail.com"; // Replace with your test email
+        String testEmail = "33b3kwornd@illubd.com"; // Replace with your test email
         String testName = "Test User";
         String testPassword = "TestPass123";
         String testSubject = "Java Programming";
@@ -267,7 +282,8 @@ public class EmailUtils {
                 testPassword,
                 testSubject,
                 testValidFrom,
-                testValidTo
+                testValidTo,
+                "This is a test email. Please ignore if you are not the intended recipient."
             );
             System.out.println("\nTest completed successfully!");
         } catch (Exception e) {

@@ -238,6 +238,29 @@
         .user-creation-fields.active {
             display: block;
         }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .error-message i {
+            font-size: 14px;
+        }
+
+        .is-invalid {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+        }
+
+        .is-invalid:focus {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+        }
     </style>
 </head>
 
@@ -280,23 +303,16 @@
                                         </c:choose>
                                     </div>
                                 </c:if>
-                                <c:if test="${param.error != null}">
+                                <c:if test="${error != null}">
                                     <div class="alert alert-danger">
-                                        <c:choose>
-                                            <c:when test="${param.error == 'notFound'}">Registration not found.</c:when>
-                                            <c:when test="${param.error == 'addFailed'}">Failed to add registration.</c:when>
-                                            <c:when test="${param.error == 'updateFailed'}">Failed to update registration.</c:when>
-                                            <c:when test="${param.error == 'invalidData'}">Invalid data provided.</c:when>
-                                            <c:when test="${param.error == 'userCreateFailed'}">Failed to create user account.</c:when>
-                                        </c:choose>
+                                        ${error}
                                     </div>
                                 </c:if>
 
                                 <form id="registrationForm" action="${pageContext.request.contextPath}/admin/registrations" method="post">
                                     <input type="hidden" name="action" value="${registration == null ? 'add' : 'edit'}">
-                                    <c:if test="${registration != null}">
-                                        <input type="hidden" name="id" value="${registration.id}">
-                                    </c:if>
+                                    <input type="hidden" name="id" value="${registration.id}">
+                                    <input type="hidden" name="currentPage" value="edit">
 
                                     <!-- Registration Details Section -->
                                     <div class="section">
@@ -305,72 +321,76 @@
                                             Registration Details
                                         </div>
                                         <div class="section-content">
-                                            <div class="info-box">
-                                                <div class="info-box-title">Subject Information</div>
-                                                <div class="info-box-content">
-                                                    <c:forEach items="${subjects}" var="subject">
-                                                        <c:if test="${registration != null && registration.subject_id == subject.id}">
-                                                            <strong>${subject.title}</strong>
-                                                            <p>${subject.description}</p>
-                                                        </c:if>
-                                                    </c:forEach>
-                                                </div>
-                                            </div>
-
                                             <div class="form-row">
-                                                <label for="subject" class="required">Subject:</label>
-                                                <select id="subject" name="subjectId" required ${isViewMode ? 'disabled' : ''}>
+                                                <label for="subject">Subject:</label>
+                                                <select id="subject" name="subjectId" class="${subjectError != null ? 'is-invalid' : ''}">
                                                     <c:forEach items="${subjects}" var="subject">
                                                         <option value="${subject.id}" ${registration != null && registration.subject_id == subject.id ? 'selected' : ''}>
                                                             ${subject.title}
                                                         </option>
                                                     </c:forEach>
                                                 </select>
+                                                <c:if test="${subjectError != null}">
+                                                    <div class="error-message">
+                                                        <i class="fas fa-exclamation-circle"></i>
+                                                        ${subjectError}
+                                                    </div>
+                                                </c:if>
                                             </div>
 
-                                            <div class="info-box">
+                                            <div class="form-row">
+                                                <label for="package">Package:</label>
+                                                <select id="package" name="packageId" class="${packageError != null ? 'is-invalid' : ''}">
+                                                    <c:forEach items="${pricePackages}" var="pkg">
+                                                        <option value="${pkg.id}" ${registration != null && registration.package_id == pkg.id ? 'selected' : ''}>
+                                                            ${pkg.name} - $${pkg.sale_price}
+                                                        </option>
+                                                    </c:forEach>
+                                                </select>
+                                                <c:if test="${packageError != null}">
+                                                    <div class="error-message">
+                                                        <i class="fas fa-exclamation-circle"></i>
+                                                        ${packageError}
+                                                    </div>
+                                                </c:if>
+                                            </div>
+
+                                            <div id="packageInfo" class="info-box" style="display: none;">
                                                 <div class="info-box-title">Package Information</div>
                                                 <div class="info-box-content">
-                                                    <c:forEach items="${pricePackages}" var="pkg">
-                                                        <c:if test="${registration != null && registration.package_id == pkg.id}">
-                                                            <strong>${pkg.name}</strong>
-                                                            <div class="price-info">
-                                                                <span class="original-price">$${pkg.list_price}</span>
-                                                                <span class="sale-price">$${pkg.sale_price}</span>
-                                                            </div>
-                                                            <p>${pkg.description}</p>
-                                                        </c:if>
-                                                    </c:forEach>
+                                                    <p><strong>Package:</strong> <span id="packageName"></span></p>
+                                                    <div class="price-info">
+                                                        <span class="original-price" id="originalPrice"></span>
+                                                        <span class="sale-price" id="salePrice"></span>
+                                                    </div>
+                                                    <p id="packageDescription"></p>
                                                 </div>
                                             </div>
 
                                             <div class="form-row">
-                                                <label for="package" class="required">Package:</label>
-                                                <select id="package" name="packageId" required ${isViewMode ? 'disabled' : ''}>
-                                                    <c:forEach items="${pricePackages}" var="pkg">
-                                                        <option value="${pkg.id}" ${registration != null && registration.package_id == pkg.id ? 'selected' : ''}>
-                                                            ${pkg.name} - 
-                                                            <span class="price-info">
-                                                                <span class="original-price">$${pkg.list_price}</span>
-                                                                <span class="sale-price">$${pkg.sale_price}</span>
-                                                            </span>
-                                                        </option>
-                                                    </c:forEach>
-                                                </select>
-                                            </div>
-
-                                            <div class="form-row">
-                                                <label for="validFrom" class="required">Valid From:</label>
+                                                <label for="validFrom">Valid From:</label>
                                                 <input type="date" id="validFrom" name="validFrom" 
-                                                       value="${registration != null ? registration.valid_from : ''}" required 
-                                                       ${isViewMode ? 'readonly' : ''} />
+                                                       value="${registration != null ? registration.valid_from : ''}"
+                                                       class="${dateError != null ? 'is-invalid' : ''}" />
+                                                <c:if test="${dateError != null}">
+                                                    <div class="error-message">
+                                                        <i class="fas fa-exclamation-circle"></i>
+                                                        ${dateError}
+                                                    </div>
+                                                </c:if>
                                             </div>
                                             
                                             <div class="form-row">
-                                                <label for="validTo" class="required">Valid To:</label>
+                                                <label for="validTo">Valid To:</label>
                                                 <input type="date" id="validTo" name="validTo" 
-                                                       value="${registration != null ? registration.valid_to : ''}" required 
-                                                       ${isViewMode ? 'readonly' : ''} />
+                                                       value="${registration != null ? registration.valid_to : ''}"
+                                                       class="${dateError != null ? 'is-invalid' : ''}" />
+                                                <c:if test="${dateError != null}">
+                                                    <div class="error-message">
+                                                        <i class="fas fa-exclamation-circle"></i>
+                                                        ${dateError}
+                                                    </div>
+                                                </c:if>
                                             </div>
                                         </div>
                                     </div>
@@ -382,48 +402,66 @@
                                             Personal Information
                                         </div>
                                         <div class="section-content">
-                                            <c:if test="${user != null}">
-                                                <div class="info-box">
-                                                    <div class="info-box-title">Current User Information</div>
-                                                    <div class="info-box-content">
-                                                        <p><strong>Full Name:</strong> ${user.full_name}</p>
-                                                        <p><strong>Gender:</strong> ${user.gender == 1 ? 'Male' : 'Female'}</p>
-                                                        <p><strong>Email:</strong> ${user.email}</p>
-                                                        <p><strong>Mobile:</strong> ${user.mobile}</p>
-                                                    </div>
+                                            <div id="userInfo" class="info-box" style="display: none;">
+                                                <div class="info-box-title">User Information</div>
+                                                <div class="info-box-content">
+                                                    <p><strong>Full Name:</strong> <span id="userFullName"></span></p>
+                                                    <p><strong>Gender:</strong> <span id="userGender"></span></p>
+                                                    <p><strong>Mobile:</strong> <span id="userMobile"></span></p>
                                                 </div>
-                                            </c:if>
+                                            </div>
 
                                             <div class="form-row">
-                                                <label for="fullName" class="required">Full Name:</label>
+                                                <label for="fullName">Full Name:</label>
                                                 <input type="text" id="fullName" name="fullName" 
-                                                       value="${user != null ? user.full_name : ''}" required 
-                                                       ${isViewMode ? 'readonly' : ''} />
+                                                       value="${user != null ? user.full_name : ''}" class="${fullNameError != null ? 'is-invalid' : ''}" />
+                                                <c:if test="${fullNameError != null}">
+                                                    <div class="error-message">
+                                                        <i class="fas fa-exclamation-circle"></i>
+                                                        ${fullNameError}
+                                                    </div>
+                                                </c:if>
                                             </div>
                                             
                                             <div class="form-row">
                                                 <label for="gender">Gender:</label>
-                                                <select id="gender" name="gender" ${isViewMode ? 'disabled' : ''}>
+                                                <select id="gender" name="gender">
                                                     <option value="1" ${user != null && user.gender == 1 ? 'selected' : ''}>Male</option>
                                                     <option value="0" ${user != null && user.gender == 0 ? 'selected' : ''}>Female</option>
                                                 </select>
                                             </div>
                                             
                                             <div class="form-row">
-                                                <label for="email" class="required">Email:</label>
-                                                <input type="email" id="email" name="email" 
-                                                       value="${user != null ? user.email : ''}" required 
-                                                       ${isViewMode ? 'readonly' : ''} />
+                                                <label for="email">Email:</label>
+                                                <div class="email-check-container">
+                                                    <input type="email" id="email" name="email"
+                                                           value="${user != null ? user.email : ''}"
+                                                           class="${emailError != null ? 'is-invalid' : ''}" />
+                                                    <button type="button" id="checkEmailBtn" class="btn btn-info">
+                                                        <i class="fas fa-search"></i> Check Email
+                                                    </button>
+                                                </div>
+                                                <c:if test="${emailError != null}">
+                                                    <div class="error-message">
+                                                        <i class="fas fa-exclamation-circle"></i>
+                                                        ${emailError}
+                                                    </div>
+                                                </c:if>
                                             </div>
                                             
                                             <div class="form-row">
-                                                <label for="mobile" class="required">Mobile:</label>
+                                                <label for="mobile">Mobile:</label>
                                                 <input type="tel" id="mobile" name="mobile" 
-                                                       value="${user != null ? user.mobile : ''}" required 
-                                                       ${isViewMode ? 'readonly' : ''} />
+                                                       value="${user != null ? user.mobile : ''}" class="${mobileError != null ? 'is-invalid' : ''}" />
+                                                <c:if test="${mobileError != null}">
+                                                    <div class="error-message">
+                                                        <i class="fas fa-exclamation-circle"></i>
+                                                        ${mobileError}
+                                                    </div>
+                                                </c:if>
                                             </div>
 
-                                            <div id="userCreationFields" class="user-creation-fields">
+                                            <div id="userCreationFields" class="user-creation-fields" style="display: none;">
                                                 <div class="info-box-title">New User Account Information</div>
                                                 <p>Please fill in the following information to create a new user account.</p>
                                                 <div class="form-row">
@@ -449,11 +487,17 @@
                                         <div class="section-content">
                                             <div class="form-row">
                                                 <label for="status">Status:</label>
-                                                <select id="status" name="status" required ${isViewMode ? 'disabled' : ''}>
+                                                <select id="status" name="status" required class="${statusError != null ? 'is-invalid' : ''}">
                                                     <option value="pending" ${registration != null && registration.status == 'pending' ? 'selected' : ''}>Pending</option>
                                                     <option value="paid" ${registration != null && registration.status == 'paid' ? 'selected' : ''}>Paid</option>
                                                     <option value="cancelled" ${registration != null && registration.status == 'cancelled' ? 'selected' : ''}>Cancelled</option>
                                                 </select>
+                                                <c:if test="${statusError != null}">
+                                                    <div class="error-message">
+                                                        <i class="fas fa-exclamation-circle"></i>
+                                                        ${statusError}
+                                                    </div>
+                                                </c:if>
                                             </div>
                                             
                                             <div class="form-row">
@@ -514,96 +558,61 @@
     <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
 
     <script>
-        // Handle status change to "Paid"
-        document.getElementById('status').addEventListener('change', function() {
-            const userCreationFields = document.getElementById('userCreationFields');
-            const email = document.getElementById('email').value;
-            
-            if (this.value === 'paid') {
-                if (email) {
-                    fetch('${pageContext.request.contextPath}/admin/check-user?email=' + encodeURIComponent(email))
-                        .then(response => response.json())
-                        .then(data => {
-                            if (!data.exists) {
-                                if (confirm('User does not exist. Would you like to create a new user account?')) {
-                                    // Show user creation fields
-                                    userCreationFields.classList.add('active');
-                                    document.getElementById('fullName').readOnly = false;
-                                    document.getElementById('gender').disabled = false;
-                                    document.getElementById('mobile').readOnly = false;
-                                    
-                                    // Add required attributes to password fields
-                                    document.getElementById('password').required = true;
-                                    document.getElementById('confirmPassword').required = true;
-                                } else {
-                                    this.value = 'pending';
-                                    userCreationFields.classList.remove('active');
-                                }
-                            } else {
-                                userCreationFields.classList.remove('active');
-                            }
-                        });
-                }
-            } else {
-                userCreationFields.classList.remove('active');
-                document.getElementById('password').required = false;
-                document.getElementById('confirmPassword').required = false;
-            }
-        });
-
-        // Initialize date range validation
-        document.getElementById('validTo').addEventListener('change', function() {
-            var fromDate = document.getElementById('validFrom').value;
-            var toDate = this.value;
-            
-            if (fromDate && toDate && fromDate > toDate) {
-                alert('To Date must be greater than or equal to From Date');
-                this.value = fromDate;
-            }
-        });
-
-        document.getElementById('validFrom').addEventListener('change', function() {
-            var fromDate = this.value;
-            var toDate = document.getElementById('validTo').value;
-            
-            if (fromDate && toDate && fromDate > toDate) {
-                alert('From Date must be less than or equal to To Date');
-                this.value = toDate;
-            }
-        });
-
-        // Form submission
-        document.getElementById('registrationForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Validate form
-            if (!this.checkValidity()) {
-                e.stopPropagation();
-                this.classList.add('was-validated');
-                return;
-            }
-
-            // Validate password if creating new user
-            const status = document.getElementById('status').value;
-            const userCreationFields = document.getElementById('userCreationFields');
-            
-            if (status === 'paid' && userCreationFields.classList.contains('active')) {
-                const password = document.getElementById('password').value;
-                const confirmPassword = document.getElementById('confirmPassword').value;
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle package selection
+            const packageSelect = document.getElementById('package');
+            packageSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const packageInfo = document.getElementById('packageInfo');
+                const packageName = document.getElementById('packageName');
+                const originalPrice = document.getElementById('originalPrice');
+                const salePrice = document.getElementById('salePrice');
+                const packageDescription = document.getElementById('packageDescription');
                 
-                if (password !== confirmPassword) {
-                    alert('Passwords do not match!');
-                    return;
-                }
+                // Get package data from the selected option text
+                const packageText = selectedOption.textContent;
+                const packageMatch = packageText.match(/(.*?) - \$(\d+\.?\d*)/);
                 
-                if (password.length < 6) {
-                    alert('Password must be at least 6 characters long!');
-                    return;
+                if (packageMatch) {
+                    const name = packageMatch[1];
+                    const price = packageMatch[2];
+                    
+                    packageName.textContent = name;
+                    salePrice.textContent = `$${price}`;
+                    packageInfo.style.display = 'block';
+                } else {
+                    packageInfo.style.display = 'none';
                 }
-            }
+            });
 
-            // Submit form
-            this.submit();
+            // Handle email check
+            const emailInput = document.getElementById('email');
+            const checkEmailBtn = document.getElementById('checkEmailBtn');
+            
+            checkEmailBtn.addEventListener('click', function() {
+                const email = emailInput.value;
+                
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+                
+                fetch('${pageContext.request.contextPath}/admin/registrations?action=check-user&email=' + encodeURIComponent(email))
+                    .then(response => response.json())
+                    .then(data => {
+                        this.disabled = false;
+                        this.innerHTML = '<i class="fas fa-search"></i> Check Email';
+
+                        if (data.exists) {
+                            document.getElementById('fullName').value = data.user.full_name;
+                            document.getElementById('gender').value = data.user.gender;
+                            document.getElementById('mobile').value = data.user.mobile;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        this.disabled = false;
+                        this.innerHTML = '<i class="fas fa-search"></i> Check Email';
+                    });
+            });
         });
     </script>
 </body>
