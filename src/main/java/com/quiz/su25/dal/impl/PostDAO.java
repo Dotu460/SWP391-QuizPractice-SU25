@@ -17,7 +17,7 @@ import com.quiz.su25.dal.I_DAO;
 import java.sql.Date;
 
 public class PostDAO extends DBContext implements I_DAO<Post> {
-    
+
     @Override
     public List<Post> findAll() {
         List<Post> list = new ArrayList<>();
@@ -59,22 +59,23 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
 
     @Override
     public int insert(Post post) {
-        String sql = "INSERT INTO post (title, thumbnail_url, brief_info, content, category_id, author_id, published_at, updated_at, created_at, status, featured_flag) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO post (title,category, thumbnail_url,category, brief_info, content, category_id, author_id, published_at, updated_at, created_at, status, featured_flag) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         int generatedId = -1;
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, post.getTitle());
-            statement.setString(2, post.getThumbnail_url());
-            statement.setString(3, post.getBrief_info());
-            statement.setString(4, post.getContent());
-            statement.setInt(5, post.getCategory_id());
-            statement.setInt(6, post.getAuthor_id());
-            statement.setDate(7, post.getPublished_at());
-            statement.setDate(8, post.getUpdated_at());
-            statement.setDate(9, post.getCreated_at());
-            statement.setString(10, post.getStatus());
-            statement.setBoolean(11, post.getFeatured_flag());
+            statement.setString(2, post.getCategory());
+            statement.setString(3, post.getThumbnail_url());
+            statement.setString(4, post.getBrief_info());
+            statement.setString(5, post.getContent());
+            statement.setInt(6, post.getCategory_id());
+            statement.setInt(7, post.getAuthor_id());
+            statement.setDate(8, post.getPublished_at());
+            statement.setDate(9, post.getUpdated_at());
+            statement.setDate(10, post.getCreated_at());
+            statement.setString(11, post.getStatus());
+            statement.setBoolean(12, post.getFeatured_flag());
 
             statement.executeUpdate();
             resultSet = statement.getGeneratedKeys();
@@ -150,6 +151,7 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
         return Post.builder()
                 .id(resultSet.getInt("id"))
                 .title(resultSet.getString("title"))
+                .category(resultSet.getString("category"))
                 .thumbnail_url(resultSet.getString("thumbnail_url"))
                 .brief_info(resultSet.getString("brief_info"))
                 .content(resultSet.getString("content"))
@@ -199,9 +201,10 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
         }
         return list;
     }
-    
+
     /**
      * Get posts with pagination sorted by updated date
+     *
      * @param pageNumber The page number (1-based)
      * @param pageSize Number of posts per page
      * @return List of posts for the requested page
@@ -225,9 +228,10 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
         }
         return list;
     }
-    
+
     /**
      * Count total number of posts
+     *
      * @return Total number of posts
      */
     public int countTotalPosts() {
@@ -246,9 +250,10 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
         }
         return 0;
     }
-    
+
     /**
      * Get posts by category ID with pagination
+     *
      * @param categoryId The category ID
      * @param pageNumber The page number (1-based)
      * @param pageSize Number of posts per page
@@ -274,9 +279,10 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
         }
         return list;
     }
-    
+
     /**
      * Count total number of posts in a category
+     *
      * @param categoryId The category ID
      * @return Total number of posts in the category
      */
@@ -297,9 +303,10 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
         }
         return 0;
     }
-    
+
     /**
      * Search posts with multiple criteria and pagination
+     *
      * @param keyword The keyword to search for
      * @param searchTitle Whether to search in title
      * @param searchCategory Whether to search in category
@@ -311,81 +318,93 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
      * @param pageSize Number of posts per page
      * @return List of posts matching the search criteria
      */
-    public List<Post> searchPosts(String keyword, boolean searchTitle, boolean searchCategory, 
+    public List<Post> searchPosts(String keyword, boolean searchTitle, boolean searchCategory,
             boolean searchBriefInfo, boolean searchDate, Date startDate, Date endDate,
             int pageNumber, int pageSize) {
-        
+
         List<Post> list = new ArrayList<>();
-        StringBuilder sqlBuilder = new StringBuilder("SELECT p.* FROM post p");
-        
-        // If we're searching by category name, we need to join with the category table
-        if (searchCategory) {
-            sqlBuilder.append(" JOIN category c ON p.category_id = c.id");
-        }
-        
-        sqlBuilder.append(" WHERE 1=1");
-        
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("SELECT DISTINCT p.* FROM quiz_practice_su25.post p WHERE 1=1 ");
+
         List<Object> params = new ArrayList<>();
-        
+
         // Add search conditions based on parameters
         if (keyword != null && !keyword.trim().isEmpty()) {
+            sqlBuilder.append("AND (");
+            List<String> conditions = new ArrayList<>();
+
             if (searchTitle) {
-                sqlBuilder.append(" AND p.title LIKE ?");
+                conditions.add("LOWER(p.title) LIKE LOWER(?)");
                 params.add("%" + keyword + "%");
             }
-            
-            if (searchCategory) {
-                sqlBuilder.append(" AND c.name LIKE ?");
-                params.add("%" + keyword + "%");
-            }
-            
+
             if (searchBriefInfo) {
-                sqlBuilder.append(" AND p.brief_info LIKE ?");
+                conditions.add("LOWER(p.brief_info) LIKE LOWER(?)");
                 params.add("%" + keyword + "%");
             }
+
+            if (searchCategory) {
+                conditions.add("LOWER(p.category) LIKE LOWER(?)");
+                params.add("%" + keyword + "%");
+            }
+
+            if (!conditions.isEmpty()) {
+                sqlBuilder.append(String.join(" OR ", conditions));
+            }
+            sqlBuilder.append(")");
+
         }
-        
-        if (searchDate && startDate != null && endDate != null) {
-            sqlBuilder.append(" AND p.updated_at BETWEEN ? AND ?");
-            params.add(startDate);
-            params.add(endDate);
-        }
-        
-        // Add order by and pagination
-        sqlBuilder.append(" ORDER BY p.updated_at DESC LIMIT ? OFFSET ?");
+        sqlBuilder.append("ORDER BY p.published_at DESC LIMIT ? OFFSET ?");
         params.add(pageSize);
-        params.add((pageNumber - 1) * pageSize);
-        
+        params.add((pageNumber - 1)* pageSize);
+
+//        if (searchDate && startDate != null && endDate != null) {
+//            sqlBuilder.append(" AND p.published_at BETWEEN ? AND ?");
+//            params.add(startDate);
+//            params.add(endDate);
+//        }
+//
+//        // Add order by and pagination
+//        sqlBuilder.append(" ORDER BY p.published_at DESC LIMIT ? OFFSET ?");
+//        params.add(pageSize);
+//        params.add((pageNumber - 1) * pageSize);
+
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sqlBuilder.toString());
-            
+
             // Set parameters
             for (int i = 0; i < params.size(); i++) {
-                if (params.get(i) instanceof String) {
-                    statement.setString(i + 1, (String) params.get(i));
-                } else if (params.get(i) instanceof Integer) {
-                    statement.setInt(i + 1, (Integer) params.get(i));
-                } else if (params.get(i) instanceof Date) {
-                    statement.setDate(i + 1, (Date) params.get(i));
+                Object param = params.get(i);
+                if (param instanceof String) {
+                    statement.setString(i + 1, (String) param);
+                } else if (param instanceof Date) {
+                    statement.setDate(i + 1, (Date) param);
+                } else if (param instanceof Integer) {
+                    statement.setInt(i + 1, (Integer) param);
                 }
             }
-            
+
+            System.out.println("Executing SQL: " + sqlBuilder.toString());
+            System.out.println("With params: " + params);
+
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 list.add(getFromResultSet(resultSet));
             }
         } catch (SQLException e) {
             System.out.println("Error searchPosts at class PostDAO: " + e.getMessage());
+            e.printStackTrace();
         } finally {
             closeResources();
         }
-        
+
         return list;
     }
-    
+
     /**
      * Count total number of posts matching search criteria
+     *
      * @param keyword The keyword to search for
      * @param searchTitle Whether to search in title
      * @param searchCategory Whether to search in category
@@ -395,74 +414,84 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
      * @param endDate End date for date range search (can be null)
      * @return Total number of posts matching the search criteria
      */
-    public int countSearchResults(String keyword, boolean searchTitle, boolean searchCategory, 
+    public int countSearchResults(String keyword, boolean searchTitle, boolean searchCategory,
             boolean searchBriefInfo, boolean searchDate, Date startDate, Date endDate) {
-        
-        StringBuilder sqlBuilder = new StringBuilder("SELECT COUNT(*) FROM post p");
-        
-        // If we're searching by category name, we need to join with the category table
-        if (searchCategory) {
-            sqlBuilder.append(" JOIN category c ON p.category_id = c.id");
-        }
-        
-        sqlBuilder.append(" WHERE 1=1");
-        
+
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("SELECT COUNT(DISTINCT p.id) FROM post p ");
+        sqlBuilder.append("LEFT JOIN category c ON p.category_id = c.id ");
+        sqlBuilder.append("WHERE 1=1 ");
+
         List<Object> params = new ArrayList<>();
-        
+
         // Add search conditions based on parameters
         if (keyword != null && !keyword.trim().isEmpty()) {
+            sqlBuilder.append("AND (");
+            List<String> conditions = new ArrayList<>();
+
             if (searchTitle) {
-                sqlBuilder.append(" AND p.title LIKE ?");
+                conditions.add("LOWER(p.title) LIKE LOWER(?)");
                 params.add("%" + keyword + "%");
             }
-            
-            if (searchCategory) {
-                sqlBuilder.append(" AND c.name LIKE ?");
-                params.add("%" + keyword + "%");
-            }
-            
+
             if (searchBriefInfo) {
-                sqlBuilder.append(" AND p.brief_info LIKE ?");
+                conditions.add("LOWER(p.brief_info) LIKE LOWER(?)");
                 params.add("%" + keyword + "%");
             }
+
+            if (searchCategory) {
+                conditions.add("LOWER(c.name) LIKE LOWER(?)");
+                params.add("%" + keyword + "%");
+            }
+
+            if (!conditions.isEmpty()) {
+                sqlBuilder.append(String.join(" OR ", conditions));
+            }
+            sqlBuilder.append(")");
         }
-        
+
         if (searchDate && startDate != null && endDate != null) {
-            sqlBuilder.append(" AND p.updated_at BETWEEN ? AND ?");
+            sqlBuilder.append(" AND p.published_at BETWEEN ? AND ?");
             params.add(startDate);
             params.add(endDate);
         }
-        
+
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sqlBuilder.toString());
-            
+
             // Set parameters
             for (int i = 0; i < params.size(); i++) {
-                if (params.get(i) instanceof String) {
-                    statement.setString(i + 1, (String) params.get(i));
-                } else if (params.get(i) instanceof Integer) {
-                    statement.setInt(i + 1, (Integer) params.get(i));
-                } else if (params.get(i) instanceof Date) {
-                    statement.setDate(i + 1, (Date) params.get(i));
+                Object param = params.get(i);
+                if (param instanceof String) {
+                    statement.setString(i + 1, (String) param);
+                } else if (param instanceof Date) {
+                    statement.setDate(i + 1, (Date) param);
+                } else if (param instanceof Integer) {
+                    statement.setInt(i + 1, (Integer) param);
                 }
             }
-            
+
+            System.out.println("Executing count SQL: " + sqlBuilder.toString());
+            System.out.println("With params: " + params);
+
             resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return resultSet.getInt(1);
             }
         } catch (SQLException e) {
             System.out.println("Error countSearchResults at class PostDAO: " + e.getMessage());
+            e.printStackTrace();
         } finally {
             closeResources();
         }
-        
+
         return 0;
     }
-    
+
     /**
      * Get latest posts for sidebar
+     *
      * @param limit Number of posts to retrieve
      * @return List of latest posts
      */
@@ -484,11 +513,14 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
         }
         return list;
     }
-    
+
     /**
-     * Get post details with author and category information for blog detail page
+     * Get post details with author and category information for blog detail
+     * page
+     *
      * @param postId The post ID
-     * @return Map containing post details, author information, and category information
+     * @return Map containing post details, author information, and category
+     * information
      */
     public Map<String, Object> getPostDetailsWithAuthorAndCategory(int postId) {
         Map<String, Object> result = new HashMap<>();
@@ -498,25 +530,25 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
                 + "JOIN users u ON p.author_id = u.id "
                 + "JOIN category c ON p.category_id = c.id "
                 + "WHERE p.id = ?";
-        
+
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setInt(1, postId);
             resultSet = statement.executeQuery();
-            
+
             if (resultSet.next()) {
                 // Get post details
                 Post post = getFromResultSet(resultSet);
                 result.put("post", post);
-                
+
                 // Get author details
                 Map<String, Object> author = new HashMap<>();
                 author.put("id", resultSet.getInt("author_id"));
                 author.put("name", resultSet.getString("author_name"));
                 author.put("avatar", resultSet.getString("author_avatar"));
                 result.put("author", author);
-                
+
                 // Get category details
                 Map<String, Object> category = new HashMap<>();
                 category.put("id", resultSet.getInt("category_id"));
@@ -528,12 +560,13 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
         } finally {
             closeResources();
         }
-        
+
         return result;
     }
-    
+
     /**
      * Get related posts by category for blog detail page
+     *
      * @param categoryId The category ID
      * @param currentPostId The current post ID to exclude
      * @param limit Number of related posts to retrieve
@@ -559,9 +592,10 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
         }
         return list;
     }
-    
+
     /**
      * Increment view count for a post
+     *
      * @param postId The post ID
      * @return true if successful, false otherwise
      */
@@ -580,5 +614,41 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
             closeResources();
         }
         return success;
+    }
+
+    /**
+     * Find category name by category_id
+     *
+     * @param categoryId The category ID
+     * @return Category name or "Uncategorized" if not found
+     */
+    public String findCategory(Integer categoryId) {
+        if (categoryId == null) {
+            return "Uncategorized";
+        }
+
+        String sql = "SELECT p.category FROM quiz_practice_su25.post p WHERE p.category_id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, categoryId);
+
+            System.out.println("Executing SQL: " + sql); // Debug log
+            System.out.println("With category ID: " + categoryId); // Debug log
+
+            resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                String categoryName = resultSet.getString("category");
+                System.out.println("Found category: " + categoryName); // Debug log
+                return categoryName != null ? categoryName : "Uncategorized";
+            }
+        } catch (SQLException e) {
+            System.out.println("Error findCategory at class PostDAO: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+        return "Uncategorized";
     }
 }

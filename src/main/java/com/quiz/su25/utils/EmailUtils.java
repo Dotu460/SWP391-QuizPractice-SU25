@@ -20,12 +20,8 @@ import java.util.logging.Level;
  * @author LENOVO
  */
 public class EmailUtils {
-//    private static final String USERNAME_EMAIL = "trinhkhanhlinh60@gmail.com";
-//    private static final String PASSWORD_APP_EMAIL = "nkbm sttl hpaj pmrw";
-
-    private static final String USERNAME_EMAIL = "tienhoang1524@gmail.com";
-    private static final String PASSWORD_APP_EMAIL = "rdzs hcay eesp wfiy";
-
+    private static final String USERNAME_EMAIL = "trinhkhanhlinh60@gmail.com";
+    private static final String PASSWORD_APP_EMAIL = "ygut kwfj pcol wnrs";
     
     public static boolean sendMail(String to, String subject, String content) throws AddressException, MessagingException{
         Properties props = new Properties();
