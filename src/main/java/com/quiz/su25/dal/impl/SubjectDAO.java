@@ -98,11 +98,6 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
                 + "WHERE subject_id = ?";
         boolean success = false;
         try {
-            connection = getConnection();
-            statement = connection.prepareStatement(sql);
-            statement.setString(1, subject.getTitle());
-            statement.setString(2, subject.getThumbnail_url());
-            statement.setString(3, subject.getTag_line());
             statement.setString(4, subject.getBrief_info());
             statement.setString(5, subject.getDescription());
             statement.setInt(6, subject.getCategory_id());
