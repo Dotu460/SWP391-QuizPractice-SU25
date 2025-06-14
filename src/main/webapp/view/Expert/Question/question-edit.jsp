@@ -23,6 +23,8 @@
 
     <!-- CSS here -->
     <jsp:include page="../../common/user/link_css_common.jsp"></jsp:include>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.min.css">
     
     <!-- TinyMCE CDN -->
     <script src="https://cdn.tiny.cloud/1/1u2sqtwzv5mnznfeh0gp0y5wnpqarxf9yx4bn0pjzvot8xy2/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
@@ -204,6 +206,10 @@
                                 </a>
                             </div>
                             
+                            <c:if test="${not empty errorMessage}">
+                                <div class="alert alert-danger" style="margin-bottom: 20px;">${errorMessage}</div>
+                            </c:if>
+                            
                             <form action="${pageContext.request.contextPath}/questions-list" method="post" id="questionForm" enctype="multipart/form-data">
                                 <input type="hidden" name="action" value="saveQuestion">
                                 <input type="hidden" name="questionId" value="${question.id}">
@@ -326,6 +332,8 @@
 
     <!-- JS here -->
     <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/js/iziToast.min.js"></script>
 
     <script>
         $(document).ready(function() {
@@ -469,25 +477,6 @@
             return true;
         }
         
-        // Function to load lessons based on selected subject
-        function loadLessons() {
-            var subjectId = $('#subjectId').val();
-            if (subjectId) {
-                $.ajax({
-                    url: '${pageContext.request.contextPath}/api/lessons',
-                    type: 'GET',
-                    data: { subjectId: subjectId },
-                    success: function(data) {
-                        var lessonSelect = $('#lessonId');
-                        lessonSelect.empty().append('<option value="">-- Chọn bài học --</option>');
-                        data.forEach(function(lesson) {
-                            lessonSelect.append(`<option value="${lesson.id}">${lesson.title}</option>`);
-                        });
-                        loadQuizzes(); // Reset quizzes when subject changes
-                    }
-                });
-            }
-        }
         
         // Function to load quizzes based on selected lesson
         function loadQuizzes() {

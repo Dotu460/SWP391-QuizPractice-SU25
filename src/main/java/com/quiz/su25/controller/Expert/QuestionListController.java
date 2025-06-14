@@ -653,12 +653,6 @@ public class QuestionListController extends HttpServlet {
         String explanation = request.getParameter("explanation");
         String correctAnswerStr = request.getParameter("correctAnswer");
         String optionCountStr = request.getParameter("optionCount");
-        if (content == null || content.isEmpty()) {
-            request.getSession().setAttribute("toastMessage", "Question content is required");
-            request.getSession().setAttribute("toastType", "error");
-            response.sendRedirect(request.getContextPath() + "/questions-edit?questionId=" + questionId); 
-            return;
-        }
         try {
             int questionIdInt = Integer.parseInt(questionId);
             int quizIdInt = Integer.parseInt(quizId);
@@ -672,6 +666,15 @@ public class QuestionListController extends HttpServlet {
             } else {
                 question = questionDAO.findById(questionIdInt);
                 if (question == null) throw new Exception("Question not found");
+            }
+            // Validate dữ liệu
+            if (content == null || content.trim().isEmpty()) {
+                request.setAttribute("errorMessage", "Nội dung câu hỏi không được để trống!");
+                List<Quizzes> quizzesList = quizzesDAO.findAll();
+                request.setAttribute("quizzesList", quizzesList);
+                request.setAttribute("question", question);
+                request.getRequestDispatcher("/view/Expert/Question/question-edit.jsp").forward(request, response);
+                return;
             }
             // Cập nhật trường dữ liệu
             question.setContent(content);
@@ -688,7 +691,6 @@ public class QuestionListController extends HttpServlet {
                 questionDAO.update(question);
             }
             // --- XỬ LÝ ĐÁP ÁN GIỮ LẠI ID CŨ ---
-            // 1. Lấy danh sách đáp án cũ từ DB
             List<QuestionOption> oldOptions = questionOptionDAO.findByQuestionId(questionIdInt);
             List<Integer> formOptionIds = new ArrayList<>();
             for (int i = 1; i <= optionCount; i++) {
@@ -700,14 +702,12 @@ public class QuestionListController extends HttpServlet {
                 formOptionIds.add(optionId);
                 QuestionOption option;
                 if (optionId != 0) {
-                    // Đáp án cũ: update
                     option = questionOptionDAO.findById(optionId);
                     if (option == null) {
                         option = new QuestionOption();
                         option.setQuestion_id(questionIdInt);
                     }
                 } else {
-                    // Đáp án mới: insert
                     option = new QuestionOption();
                     option.setQuestion_id(questionIdInt);
                 }
@@ -727,10 +727,18 @@ public class QuestionListController extends HttpServlet {
             }
             request.getSession().setAttribute("toastMessage", "Question saved successfully");
             request.getSession().setAttribute("toastType", "success");
+            response.sendRedirect(request.getContextPath() + "/questions-list");
         } catch (Exception e) {
-            request.getSession().setAttribute("toastMessage", "Error saving question: " + e.getMessage());
-            request.getSession().setAttribute("toastType", "error");
+            request.setAttribute("errorMessage", "Lỗi khi lưu câu hỏi: " + e.getMessage());
+            List<Quizzes> quizzesList = quizzesDAO.findAll();
+            request.setAttribute("quizzesList", quizzesList);
+            // Nếu có thể, set lại question để giữ dữ liệu đã nhập
+            String questionIdStr = request.getParameter("questionId");
+            if (questionId != null && !questionId.equals("0")) {
+                Question question = questionDAO.findById(Integer.parseInt(questionId));
+                request.setAttribute("question", question);
+            }
+            request.getRequestDispatcher("/view/Expert/Question/question-edit.jsp").forward(request, response);
         }
-        response.sendRedirect(request.getContextPath() + "/questions-list");
     }
 }

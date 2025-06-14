@@ -23,6 +23,9 @@
 
     <!-- CSS here -->
     <jsp:include page="../../common/user/link_css_common.jsp"></jsp:include>
+    
+    <!-- Add iziToast CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.min.css">
 
     <style>
         .question-management {
@@ -218,16 +221,6 @@
                                     </a>
                                 </div>
                             </div>
-
-                            <!-- Alert Messages -->
-                            <c:if test="${not empty sessionScope.toastMessage}">
-                                <div class="alert alert-${sessionScope.toastType == 'success' ? 'success' : 'danger'} alert-dismissible fade show" role="alert">
-                                    ${sessionScope.toastMessage}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                                <c:remove var="toastMessage" scope="session"/>
-                                <c:remove var="toastType" scope="session"/>
-                            </c:if>
 
                             <!-- Filter Section -->
                             <div class="filter-section">
@@ -487,6 +480,7 @@
     <!-- JS here -->
     <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/js/iziToast.min.js"></script>
     <script>
         function resetFilter() {
             document.getElementById('content').value = '';
@@ -542,9 +536,11 @@
             iziToast.show({
                 title: toastType === 'success' ? 'Success' : 'Error',
                 message: toastMessage,
-                position: 'topRight',
+                position: 'bottomRight',
                 color: toastType === 'success' ? 'green' : 'red',
                 timeout: 5000,
+                progressBar: true,
+                closeOnClick: true,
                 onClosing: function () {
                     // Remove toast attributes from the session after displaying
                     fetch('${pageContext.request.contextPath}/remove-toast', {
