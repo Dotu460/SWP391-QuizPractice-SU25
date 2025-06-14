@@ -43,9 +43,7 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
 
     @Override
     public boolean update(Question t) {
-        String sql = "UPDATE Question SET quiz_id=?, type=?, content=?,"
-                + " media_url=?, level=?, status=?, explanation=? "
-                + "WHERE id=?";
+        String sql = "UPDATE Question SET quiz_id=?, type=?, content=?, media_url=?, level=?, status=?, explanation=? WHERE id=?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -56,9 +54,7 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
             statement.setString(5, t.getLevel());
             statement.setString(6, t.getStatus());
             statement.setString(7, t.getExplanation());
-            statement.setInt(8, t.getCreated_by());
-            statement.setInt(9, t.getId());
-            
+            statement.setInt(8, t.getId());
             return statement.executeUpdate() > 0;
         } catch (Exception e) {
             System.out.println("Error update at class QuestionDAO - update: " + e.getMessage());
@@ -283,8 +279,8 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
      * @param status Trạng thái mới
      * @return true nếu cập nhật thành công, false nếu thất bại
      */
-    public boolean updateStatus(Integer id, String status) {
-        String sql = "UPDATE Question SET status = ? WHERE id = ?";
+    public boolean updateStatus(int id, String status) {
+        String sql = "UPDATE Question SET status=? WHERE id=?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);

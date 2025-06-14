@@ -5,14 +5,8 @@
 
 package com.quiz.su25.controller.Expert;
 
-import com.quiz.su25.dal.impl.QuestionDAO;
-import com.quiz.su25.dal.impl.QuizzesDAO;
-import com.quiz.su25.dal.impl.SubjectDAO;
-import com.quiz.su25.dal.impl.LessonDAO;
-import com.quiz.su25.entity.Question;
-import com.quiz.su25.entity.Quizzes;
-import com.quiz.su25.entity.Subject;
-import com.quiz.su25.entity.Lesson;
+import com.quiz.su25.dal.impl.*;
+import com.quiz.su25.entity.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -27,6 +21,7 @@ import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.File;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -42,16 +37,18 @@ public class QuestionListController extends HttpServlet {
    
     private static final String LIST_PAGE = "view/Expert/Question/questions-list.jsp";
     private QuestionDAO questionDAO;
-    private QuizzesDAO quizzesDAO;
+    private QuestionOptionDAO questionOptionDAO;
     private SubjectDAO subjectDAO;
     private LessonDAO lessonDAO;
+    private QuizzesDAO quizzesDAO;
 
     @Override
     public void init() throws ServletException {
         questionDAO = new QuestionDAO();
-        quizzesDAO = new QuizzesDAO();
+        questionOptionDAO = new QuestionOptionDAO();
         subjectDAO = new SubjectDAO();
         lessonDAO = new LessonDAO();
+        quizzesDAO = new QuizzesDAO();
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -84,7 +81,7 @@ public class QuestionListController extends HttpServlet {
                 showAddQuestionForm(request, response);
                 break;
             case "edit":
-                showEditQuestionForm(request, response);
+                editQuestion(request, response);
                 break;
             case "downloadTemplate":
                 downloadTemplate(request, response);
@@ -123,7 +120,7 @@ public class QuestionListController extends HttpServlet {
                 toggleQuestionStatus(request, response);
                 break;
             default:
-                listQuestions(request, response);
+                saveQuestion(request, response);
                 break;
         }
     }
@@ -333,39 +330,36 @@ public class QuestionListController extends HttpServlet {
         }
     }
 
-    private void showEditQuestionForm(HttpServletRequest request, HttpServletResponse response)
+    private void editQuestion(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String questionId = request.getParameter("id");
+        if (questionId == null || questionId.isEmpty()) {
+            request.getSession().setAttribute("toastMessage", "Question ID is required");
+            request.getSession().setAttribute("toastType", "error");
+            response.sendRedirect(request.getContextPath() + "/questions-list");
+            return;
+        }
         try {
-            int questionId = Integer.parseInt(request.getParameter("id"));
-            Question question = questionDAO.findById(questionId);
-
+            int questionIdInt = Integer.parseInt(questionId);
+            Question question = questionDAO.findById(questionIdInt);
             if (question == null) {
-                request.setAttribute("error", "Question not found!");
+                request.getSession().setAttribute("toastMessage", "Question not found");
+                request.getSession().setAttribute("toastType", "error");
                 response.sendRedirect(request.getContextPath() + "/questions-list");
                 return;
             }
-
-            // Get all data for dropdowns
-            List<Subject> subjectsList = subjectDAO.findAll();
-            List<Lesson> lessonsList = lessonDAO.findAll();
+            // Lấy danh sách đáp án
+            List<QuestionOption> options = questionOptionDAO.findByQuestionId(questionIdInt);
+            question.setQuestionOptions(options);
+            // Lấy danh sách quiz cho dropdown
             List<Quizzes> quizzesList = quizzesDAO.findAll();
-            
-            // Set attributes for JSP
             request.setAttribute("question", question);
-            request.setAttribute("subjectsList", subjectsList);
-            request.setAttribute("lessonsList", lessonsList);
             request.setAttribute("quizzesList", quizzesList);
-            
-            // Forward to the edit question page
-            request.getRequestDispatcher("view/Expert/Question/editQuestion.jsp").forward(request, response);
-            
+            // Forward tới trang edit
+            request.getRequestDispatcher("/view/Expert/Question/question-edit.jsp").forward(request, response);
         } catch (NumberFormatException e) {
-            request.setAttribute("error", "Invalid question ID!");
-            response.sendRedirect(request.getContextPath() + "/questions-list");
-        } catch (Exception e) {
-            System.out.println("Error in showEditQuestionForm: " + e.getMessage());
-            e.printStackTrace();
-            request.setAttribute("error", "An error occurred while loading the question details.");
+            request.getSession().setAttribute("toastMessage", "Invalid question ID");
+            request.getSession().setAttribute("toastType", "error");
             response.sendRedirect(request.getContextPath() + "/questions-list");
         }
     }
@@ -645,6 +639,98 @@ public class QuestionListController extends HttpServlet {
             request.getSession().setAttribute("toastType", "danger");
         }
         
+        response.sendRedirect(request.getContextPath() + "/questions-list");
+    }
+
+    private void saveQuestion(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String questionId = request.getParameter("questionId");
+        String content = request.getParameter("content");
+        String quizId = request.getParameter("quizId");
+        String type = request.getParameter("type");
+        String level = request.getParameter("level");
+        String status = request.getParameter("status");
+        String explanation = request.getParameter("explanation");
+        String correctAnswerStr = request.getParameter("correctAnswer");
+        String optionCountStr = request.getParameter("optionCount");
+        if (content == null || content.isEmpty()) {
+            request.getSession().setAttribute("toastMessage", "Question content is required");
+            request.getSession().setAttribute("toastType", "error");
+            response.sendRedirect(request.getContextPath() + "/questions-edit?questionId=" + questionId); 
+            return;
+        }
+        try {
+            int questionIdInt = Integer.parseInt(questionId);
+            int quizIdInt = Integer.parseInt(quizId);
+            int optionCount = Integer.parseInt(optionCountStr);
+            int correctAnswer = Integer.parseInt(correctAnswerStr);
+            Question question;
+            boolean isNew = (questionIdInt == 0);
+            if (isNew) {
+                question = new Question();
+                question.setStatus("active");
+            } else {
+                question = questionDAO.findById(questionIdInt);
+                if (question == null) throw new Exception("Question not found");
+            }
+            // Cập nhật trường dữ liệu
+            question.setContent(content);
+            question.setQuiz_id(quizIdInt);
+            question.setType(type);
+            question.setLevel(level);
+            question.setStatus(status);
+            question.setExplanation(explanation);
+            // Lưu question
+            if (isNew) {
+                questionIdInt = questionDAO.insert(question);
+                question.setId(questionIdInt);
+            } else {
+                questionDAO.update(question);
+            }
+            // --- XỬ LÝ ĐÁP ÁN GIỮ LẠI ID CŨ ---
+            // 1. Lấy danh sách đáp án cũ từ DB
+            List<QuestionOption> oldOptions = questionOptionDAO.findByQuestionId(questionIdInt);
+            List<Integer> formOptionIds = new ArrayList<>();
+            for (int i = 1; i <= optionCount; i++) {
+                String optionText = request.getParameter("optionText_" + i);
+                String optionIdStr = request.getParameter("optionId_" + i);
+                if (optionText == null || optionText.isEmpty()) continue;
+                int optionId = 0;
+                try { optionId = Integer.parseInt(optionIdStr); } catch (Exception ignore) {}
+                formOptionIds.add(optionId);
+                QuestionOption option;
+                if (optionId != 0) {
+                    // Đáp án cũ: update
+                    option = questionOptionDAO.findById(optionId);
+                    if (option == null) {
+                        option = new QuestionOption();
+                        option.setQuestion_id(questionIdInt);
+                    }
+                } else {
+                    // Đáp án mới: insert
+                    option = new QuestionOption();
+                    option.setQuestion_id(questionIdInt);
+                }
+                option.setOption_text(optionText);
+                option.setCorrect_key(i == correctAnswer);
+                option.setDisplay_order(i);
+                if (optionId != 0) {
+                    questionOptionDAO.update(option);
+                } else {
+                    questionOptionDAO.insert(option);
+                }
+            }
+            for (QuestionOption oldOpt : oldOptions) {
+                if (!formOptionIds.contains(oldOpt.getId())) {
+                    questionOptionDAO.delete(oldOpt);
+                }
+            }
+            request.getSession().setAttribute("toastMessage", "Question saved successfully");
+            request.getSession().setAttribute("toastType", "success");
+        } catch (Exception e) {
+            request.getSession().setAttribute("toastMessage", "Error saving question: " + e.getMessage());
+            request.getSession().setAttribute("toastType", "error");
+        }
         response.sendRedirect(request.getContextPath() + "/questions-list");
     }
 }
