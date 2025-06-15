@@ -395,10 +395,19 @@ public class QuestionListController extends HttpServlet {
 
             int successCount = 0;
             int errorCount = 0;
+            int duplicateCount = 0;
             List<String> importErrors = new ArrayList<>();
 
             for (Question question : questions) {
                 try {
+                    // Check if question with same content already exists
+                    List<Question> existingQuestions = questionDAO.findByContent(question.getContent());
+                    if (!existingQuestions.isEmpty()) {
+                        duplicateCount++;
+                        importErrors.add("Duplicate question found: " + question.getContent());
+                        continue;
+                    }
+
                     int result = questionDAO.insert(question);
                     if (result > 0) { // Check if insert was successful (returns the new ID)
                         successCount++;
@@ -412,7 +421,7 @@ public class QuestionListController extends HttpServlet {
                 }
             }
 
-            String message = "Import completed: " + successCount + " successful, " + errorCount + " failed.";
+            String message = "Import completed: " + successCount + " successful, " + errorCount + " failed, " + duplicateCount + " duplicates.";
             if (!importErrors.isEmpty() && importErrors.size() <= 5) {
                 message += " Error details: " + String.join("; ", importErrors);
             }
@@ -651,6 +660,7 @@ public class QuestionListController extends HttpServlet {
         String level = request.getParameter("level");
         String status = request.getParameter("status");
         String explanation = request.getParameter("explanation");
+        String mediaUrl = request.getParameter("media_url");
         String correctAnswerStr = request.getParameter("correctAnswer");
         String optionCountStr = request.getParameter("optionCount");
         try {
@@ -683,6 +693,12 @@ public class QuestionListController extends HttpServlet {
             question.setLevel(level);
             question.setStatus(status);
             question.setExplanation(explanation);
+            
+            // Xử lý media_url
+            if (mediaUrl != null && !mediaUrl.trim().isEmpty()) {
+                question.setMedia_url(mediaUrl);
+            }
+            
             // Lưu question
             if (isNew) {
                 questionIdInt = questionDAO.insert(question);

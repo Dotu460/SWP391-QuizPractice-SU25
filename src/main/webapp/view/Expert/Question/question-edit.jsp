@@ -174,6 +174,21 @@
         .btn-remove-option:hover {
             color: #c82333;
         }
+
+        .media-container {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .media-container img {
+            max-width: 100%;
+            height: auto;
+        }
+        .media-container video {
+            max-width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 
@@ -261,8 +276,13 @@
                                     <div class="form-section-title">Question Content</div>
                                     <div class="form-group">
                                         <label class="form-label">Question Content</label>
-                                        <textarea class="form-control question-editor" name="content" rows="5">${question.content}</textarea>
-                                        <small class="form-text">You can add images, audio or text format.</small>
+                                        <input type="text" class="form-control" name="content" value="${question.content}" required>
+                                    </div>
+
+                                    <!-- Media URL -->
+                                    <div class="form-group">
+                                        <label class="form-label">Media (Images/Video)</label>
+                                        <textarea id="media_url" name="media_url">${question.media_url}</textarea>
                                     </div>
                                 </div>
                                 
@@ -538,6 +558,93 @@
                     timeout: 3000
                 });
             }
+        }
+
+        tinymce.init({
+            selector: '#media_url',
+            plugins: 'image media link code table lists',
+            toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | indent outdent | bullist numlist | image media link | code',
+            height: 300,
+            images_upload_url: '${pageContext.request.contextPath}/upload-media',
+            automatic_uploads: true,
+            file_picker_types: 'image media',
+            media_live_embeds: true,
+            media_url_resolver: function (data, resolve) {
+                resolve({
+                    html: '<div class="media-container">' + data.html + '</div>'
+                });
+            },
+            images_upload_handler: function (blobInfo, progress) {
+                return new Promise((resolve, reject) => {
+                    var xhr, formData;
+                    xhr = new XMLHttpRequest();
+                    xhr.withCredentials = false;
+                    xhr.open('POST', '${pageContext.request.contextPath}/upload-media');
+                    
+                    xhr.upload.onprogress = function (e) {
+                        progress(e.loaded / e.total * 100);
+                    };
+                    
+                    xhr.onload = function() {
+                        if (xhr.status === 403) {
+                            reject({ message: 'HTTP Error: ' + xhr.status, remove: true });
+                            return;
+                        }
+                        
+                        if (xhr.status < 200 || xhr.status >= 300) {
+                            reject('HTTP Error: ' + xhr.status);
+                            return;
+                        }
+                        
+                        var json;
+                        try {
+                            json = JSON.parse(xhr.responseText);
+                        } catch (e) {
+                            reject('Invalid JSON: ' + xhr.responseText);
+                            return;
+                        }
+                        
+                        if (!json || typeof json.location != 'string') {
+                            reject('Invalid JSON structure');
+                            return;
+                        }
+                        
+                        resolve(json.location);
+                    };
+                    
+                    xhr.onerror = function () {
+                        reject('Image upload failed due to a XHR Transport error');
+                    };
+                    
+                    formData = new FormData();
+                    formData.append('file', blobInfo.blob(), blobInfo.filename());
+                    xhr.send(formData);
+                });
+            },
+            setup: function(editor) {
+                editor.on('change', function() {
+                    editor.save();
+                });
+            }
+        });
+
+        // Add this function to handle form submission
+        function submitForm() {
+            // Get the content from TinyMCE
+            var mediaContent = tinymce.get('media_url').getContent();
+            
+            // Create or update hidden input for media_url
+            var mediaUrlInput = document.querySelector('input[name="media_url"]');
+            if (!mediaUrlInput) {
+                mediaUrlInput = document.createElement('input');
+                mediaUrlInput.type = 'hidden';
+                mediaUrlInput.name = 'media_url';
+                document.querySelector('form').appendChild(mediaUrlInput);
+            }
+            mediaUrlInput.value = mediaContent;
+            
+            // Submit the form
+            document.querySelector('form').submit();
         }
     </script>
 </body>

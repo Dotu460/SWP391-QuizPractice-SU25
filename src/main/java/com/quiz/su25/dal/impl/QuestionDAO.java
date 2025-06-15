@@ -471,7 +471,33 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
         }
         return 0;
     }
-    
+    /**
+     * Tìm câu hỏi theo nội dung
+     * @param content Nội dung câu hỏi
+     * @return Danh sách câu hỏi thỏa mãn điều kiện
+     */
+    public List<Question> findByContent(String content) {
+        String sql = "SELECT * FROM Question WHERE content = ?";
+        List<Question> list = new ArrayList<>();
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, content);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Question question = getFromResultSet(resultSet);
+                list.add(question);
+            }
+            // Load options cho tất cả questions
+            loadOptionsForQuestions(list);
+        } catch (Exception e) {
+            System.out.println("Error findByContent at class QuestionDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return list;
+    }
+
     public static void main(String[] args) {
         QuestionDAO questionDAO = new QuestionDAO();
         questionDAO.findAll().forEach(item -> {
