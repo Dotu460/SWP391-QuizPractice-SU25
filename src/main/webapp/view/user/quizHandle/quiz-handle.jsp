@@ -985,14 +985,14 @@
                                     <div class="dropdown-menu">
                                         <div class="dropdown-header">
                                             <c:choose>
-                                                <c:when test="${not empty sessionScope.user}">
+                                                <c:when test="${not empty sessionScope.account}">
                                                     <div class="user-info">
                                                         <div class="user-avatar">
-                                                            <img src="${pageContext.request.contextPath}/view/common/img/icons/user-avatar.png" alt="User Avatar">
+                                                            <img src="${pageContext.request.contextPath}/media/user-avatar.png" alt="User Avatar">
                                                         </div>
                                                         <div class="user-details">
-                                                            <span class="user-name">${sessionScope.user.fullName}</span>
-                                                            <span class="user-email">${sessionScope.user.email}</span>
+                                                            <span class="user-name">${sessionScope.account.full_name}</span>
+                                                            <span class="user-email">${sessionScope.account.email}</span>
                                                         </div>
                                                     </div>
                                                 </c:when>
@@ -1005,7 +1005,7 @@
                                     </div>
                                         <div class="dropdown-body">
                                             <c:choose>
-                                                <c:when test="${not empty sessionScope.user}">
+                                                <c:when test="${not empty sessionScope.account}">
                                                     <a href="my-profile" class="dropdown-item">
                                                         <i class="fas fa-user-circle"></i>
                                                         <span>My Profile</span>
@@ -2007,20 +2007,6 @@
                     });
                 }
 
-                // Select all columns button
-                document.getElementById('selectAllColumns').addEventListener('click', function () {
-                    document.querySelectorAll('input[type="checkbox"]').forEach(function (checkbox) {
-                        checkbox.checked = true;
-                    });
-                });
-
-                // Deselect all columns button
-                document.getElementById('deselectAllColumns').addEventListener('click', function () {
-                    document.querySelectorAll('input[type="checkbox"]').forEach(function (checkbox) {
-                        checkbox.checked = false;
-                    });
-                });
-
                 // Change page size function
                 window.changePageSize = function (newSize) {
                     var currentUrl = new URL(window.location);
@@ -2144,8 +2130,6 @@
                     });
                 });
                 
-                // Thiết lập các nút filter
-                setupFilterButtons();
             });
 
             // Hàm lưu trạng thái answered vào sessionStorage
@@ -2555,64 +2539,32 @@
                     method: 'POST',
                     body: formData
                 })
-                .then(async response => {
-                    const text = await response.text();
-                    console.log('Raw server response:', text);
-                    
-                    try {
-                        if (!text) {
-                            throw new Error('Empty response from server');
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
                     }
-                        return JSON.parse(text);
-                    } catch (e) {
-                        console.error('JSON parse error:', e);
-                        throw new Error('Invalid JSON response from server: ' + text);
-                    }
+                    return response.text();
                 })
-                .then(data => {
-                    console.log('Processed response data:', data);
-                    
-                    // Kiểm tra format của data
-                    if (!data || typeof data.score === 'undefined') {
-                        console.error('Invalid response data:', data);
-                        throw new Error('Invalid response format: missing score');
+                .then(text => {
+                    try {
+                        const data = JSON.parse(text);
+                        // Lưu điểm số vào session
+                        sessionStorage.setItem('quizScore', data.score);
+                        // Chuyển hướng đến trang kết quả
+                        window.location.href = '${pageContext.request.contextPath}/quiz-handle-score';
+                        
+                        // Xóa dữ liệu trong sessionStorage sau khi chấm điểm thành công
+                        sessionStorage.removeItem('selectedAnswers');
+                        sessionStorage.removeItem('answeredQuestions');
+                        sessionStorage.removeItem('markedQuestions');
+                    } catch (e) {
+                        console.error('Error parsing response:', e);
+                        throw new Error('Invalid response format');
                     }
-                    
-                    // Hiển thị điểm trong popup kết quả
-                    const score = parseFloat(data.score);
-                    document.getElementById('finalScore').textContent = score.toFixed(1);
-                    
-                    // Cập nhật thông điệp dựa trên điểm số
-                    const scoreMessage = document.getElementById('scoreMessage');
-                    if (score >= 8) {
-                        scoreMessage.textContent = "Xuất sắc! Thành tích tuyệt vời!";
-                        scoreMessage.style.backgroundColor = "#e6f7e6";
-                        scoreMessage.style.color = "#28a745";
-                    } else if (score >= 6.5) {
-                        scoreMessage.textContent = "Tốt! Bạn đã làm rất tốt!";
-                        scoreMessage.style.backgroundColor = "#fff3cd";
-                         scoreMessage.style.color = "#856404";
-                    } else if (score >= 5) {
-                        scoreMessage.textContent = "Đạt! Hãy tiếp tục luyện tập để cải thiện!";
-                        scoreMessage.style.backgroundColor = "#fff3cd";
-                        scoreMessage.style.color = "#856404";
-                    } else {
-                        scoreMessage.textContent = "Cố gắng lên! Bạn có thể làm tốt hơn!";
-                        scoreMessage.style.backgroundColor = "#f8d7da";
-                        scoreMessage.style.color = "#dc3545";
-                    }
-                    
-                    // Hiển thị popup kết quả
-                    document.getElementById('scoreResultPopup').style.display = 'flex';
-                    
-                    // Xóa dữ liệu trong sessionStorage sau khi chấm điểm thành công
-                    sessionStorage.removeItem('selectedAnswers');
-                    sessionStorage.removeItem('answeredQuestions');
-                    sessionStorage.removeItem('markedQuestions');
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Đã xảy ra lỗi khi chấm điểm: ' + error.message);
+                    alert('Đã xảy ra lỗi khi chấm điểm');
                 });
             }
 

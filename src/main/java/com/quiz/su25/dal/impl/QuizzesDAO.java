@@ -40,8 +40,8 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
 
     @Override
     public boolean update(Quizzes t) {
-        String sql = "UPDATE Quizzes SET name = ?, subject_id = ?, level = ?,"
-                + " number_of_questions_target = ?, duration_minutes = ?, pass_rate = ?, "
+        String sql = "UPDATE Quizzes SET name = ?, lesson_id = ?, level = ?,"
+                + " number_of_questions_target = ?, duration_minutes = ?,  "
                 + "quiz_type = ?, status = ? WHERE id = ?";
         try {
             connection = getConnection();
@@ -51,10 +51,9 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
             statement.setString(3, t.getLevel());
             statement.setInt(4, t.getNumber_of_questions_target());
             statement.setInt(5, t.getDuration_minutes());
-            statement.setDouble(6, t.getPass_rate());
-            statement.setString(7, t.getQuiz_type());
-            statement.setString(8, t.getStatus());
-            statement.setInt(9, t.getId());
+            statement.setString(6, t.getQuiz_type());
+            statement.setString(7, t.getStatus());
+            statement.setInt(8, t.getId());
             statement.executeUpdate();
             return true;
         } catch (SQLException e) {
@@ -84,8 +83,8 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
 
     @Override
     public int insert(Quizzes t) {
-        String sql = "INSERT INTO Quizzes (name, subject_id, level, number_of_questions_target,"
-                + " duration_minutes, pass_rate, quiz_type, status ) "
+        String sql = "INSERT INTO Quizzes (name, lesson_id, level, number_of_questions_target,"
+                + " duration_minutes, quiz_type, status) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             connection = getConnection();
@@ -107,6 +106,32 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
         }
         return 0;
     }
+
+    public int insertNewQuiz(Quizzes t) {
+        String sql = "INSERT INTO Quizzes (name, lesson_id, level, number_of_questions_target,"
+                + " duration_minutes, quiz_type, status) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, t.getName());
+            statement.setInt(2, t.getLesson_id());
+            statement.setString(3, t.getLevel());
+            statement.setInt(4, t.getNumber_of_questions_target());
+            statement.setInt(5, t.getDuration_minutes());
+            statement.setString(6, t.getQuiz_type());
+            statement.setString(7, t.getStatus());
+            statement.executeUpdate();
+            return 1;
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return 0;
+    }
+
+    
 
     @Override
     public Quizzes getFromResultSet(ResultSet resultSet) throws SQLException {
@@ -145,38 +170,42 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
         return null;
     }
 
-
-    public List<Quizzes> findQuizzesWithFilters(String quizName, String subjectId, 
-            String quizType, int page, int pageSize) {
-        StringBuilder sql = new StringBuilder("SELECT * FROM Quizzes WHERE 1=1");
+    public List<Quizzes> findQuizzesWithFilters(String quizName, Integer subjectId, 
+            Integer lessonId, String quizType, int page, int pageSize) {
+        StringBuilder sql = new StringBuilder(
+            "SELECT q.* FROM Quizzes q "
+            + "INNER JOIN Lessons l ON q.lesson_id = l.id "
+            + "INNER JOIN subject s ON l.subject_id = s.id "
+            + "WHERE 1=1"
+        );
         List<Object> parameters = new ArrayList<>();
         
-        // Add name filter
+        // Add quiz name filter
         if (quizName != null && !quizName.trim().isEmpty()) {
-            sql.append(" AND name LIKE ?");
-            String searchPattern = "%" + quizName.trim() + "%";
-            parameters.add(searchPattern);
+            sql.append(" AND q.name LIKE ?");
+            parameters.add("%" + quizName.trim() + "%");
         }
         
-        // Add subject filter
-        if (subjectId != null && !subjectId.trim().isEmpty()) {
-            try {
-                int subjectIdInt = Integer.parseInt(subjectId.trim());
-                sql.append(" AND subject_id = ?");
-                parameters.add(subjectIdInt);
-            } catch (NumberFormatException e) {
-                // Ignore invalid subject id
-            }
+        // Add subject id filter
+        if (subjectId != null) {
+            sql.append(" AND s.id = ?");
+            parameters.add(subjectId);
+        }
+        
+        // Add lesson id filter
+        if (lessonId != null) {
+            sql.append(" AND l.id = ?");
+            parameters.add(lessonId);
         }
         
         // Add quiz type filter
         if (quizType != null && !quizType.trim().isEmpty()) {
-            sql.append(" AND quiz_type = ?");
+            sql.append(" AND q.quiz_type = ?");
             parameters.add(quizType.trim());
         }
         
-        // Add pagination
-        sql.append(" ORDER BY id DESC LIMIT ? OFFSET ?");
+        // Add order by and pagination
+        sql.append(" ORDER BY q.id ASC LIMIT ? OFFSET ?");
         parameters.add(pageSize);
         parameters.add((page - 1) * pageSize);
         
@@ -203,34 +232,36 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
         return listQuizzes;
     }
     
-    /**
-     * Get total count of filtered quizzes
-     */
-    public int getTotalFilteredQuizzes(String quizName, String subjectId, String quizType) {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Quizzes WHERE 1=1");
+    public int getTotalFilteredQuizzes(String quizName, Integer subjectId, Integer lessonId, String quizType) {
+        StringBuilder sql = new StringBuilder(
+            "SELECT COUNT(*) FROM Quizzes q "
+            + "INNER JOIN Lessons l ON q.lesson_id = l.id "
+            + "INNER JOIN subject s ON l.subject_id = s.id "
+            + "WHERE 1=1"
+        );
         List<Object> parameters = new ArrayList<>();
         
-        // Add name filter
+        // Add quiz name filter
         if (quizName != null && !quizName.trim().isEmpty()) {
-            sql.append(" AND name LIKE ?");
-            String searchPattern = "%" + quizName.trim() + "%";
-            parameters.add(searchPattern);
+            sql.append(" AND q.name LIKE ?");
+            parameters.add("%" + quizName.trim() + "%");
         }
         
-        // Add subject filter
-        if (subjectId != null && !subjectId.trim().isEmpty()) {
-            try {
-                int subjectIdInt = Integer.parseInt(subjectId.trim());
-                sql.append(" AND subject_id = ?");
-                parameters.add(subjectIdInt);
-            } catch (NumberFormatException e) {
-                // Ignore invalid subject id
-            }
+        // Add subject id filter
+        if (subjectId != null) {
+            sql.append(" AND s.id = ?");
+            parameters.add(subjectId);
+        }
+        
+        // Add lesson id filter
+        if (lessonId != null) {
+            sql.append(" AND l.id = ?");
+            parameters.add(lessonId);
         }
         
         // Add quiz type filter
         if (quizType != null && !quizType.trim().isEmpty()) {
-            sql.append(" AND quiz_type = ?");
+            sql.append(" AND q.quiz_type = ?");
             parameters.add(quizType.trim());
         }
         
@@ -257,8 +288,8 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
 
     public static void main(String[] args) {
         QuizzesDAO quizzesDAO = new QuizzesDAO();
-        int total = quizzesDAO.getTotalFilteredQuizzes("Basic Math Quiz", "8", "Multiple Choice");
+        int total = quizzesDAO.getTotalFilteredQuizzes(null, null, null, null);
         System.out.println(total);
     }
-}
 
+}

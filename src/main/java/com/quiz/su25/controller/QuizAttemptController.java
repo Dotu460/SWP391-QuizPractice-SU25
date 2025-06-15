@@ -1,137 +1,198 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
+ */
 package com.quiz.su25.controller;
 
-import com.quiz.su25.dal.impl.UserQuizAttemptAnswersDAO;
+import com.quiz.su25.config.GlobalConfig;
 import com.quiz.su25.dal.impl.UserQuizAttemptsDAO;
-import com.quiz.su25.entity.UserQuizAttemptAnswers;
 import com.quiz.su25.entity.UserQuizAttempts;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Date;
-import java.util.List;
+import java.time.LocalDate;
 
-public class QuizAttemptController {
-    private final UserQuizAttemptsDAO attemptsDAO;
-    private final UserQuizAttemptAnswersDAO answersDAO;
+/**
+ *
+ * @author kenngoc
+ */
+@WebServlet(name = "QuizAttemptController", urlPatterns = {"/quiz-attempt"})
+public class QuizAttemptController extends HttpServlet {
 
-    public QuizAttemptController() {
-        this.attemptsDAO = new UserQuizAttemptsDAO();
-        this.answersDAO = new UserQuizAttemptAnswersDAO();
-    }
+    private final UserQuizAttemptsDAO attemptsDAO = new UserQuizAttemptsDAO();
 
     /**
-     * Start a new quiz attempt
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
+     * methods.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
      */
-    public UserQuizAttempts startQuizAttempt(Integer userId, Integer quizId) {
-        UserQuizAttempts attempt = UserQuizAttempts.builder()
-                .user_id(userId)
-                .quiz_id(quizId)
-                .start_time(new Date(System.currentTimeMillis())) // Current time as SQL Date
-                .status("in_progress")
-                .created_at(new Date(System.currentTimeMillis()))
-                .build();
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            /* TODO output your page here. You may use following sample code. */
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>Servlet QuizAttemptController</title>");            
+            out.println("</head>");
+            out.println("<body>");
+            out.println("<h1>Servlet QuizAttemptController at " + request.getContextPath() + "</h1>");
+            out.println("</body>");
+            out.println("</html>");
+        }
+    }
+
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /**
+     * Handles the HTTP <code>GET</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String action = request.getParameter("action");
         
-        attemptsDAO.insert(attempt);
-        return attempt;
-    }
+        if (action == null) {
+            response.sendRedirect("home");
+            return;
+        }
 
-    /**
-     * Save an answer during the quiz
-     */
-    public boolean saveAnswer(Integer attemptId, Integer questionId, Integer selectedOptionId, boolean isCorrect) {
-        UserQuizAttemptAnswers answer = UserQuizAttemptAnswers.builder()
-                .attempt_id(attemptId)
-                .quiz_question_id(questionId)
-                .selected_option_id(selectedOptionId)
-                .correct(isCorrect)
-                .answer_at(new Date(System.currentTimeMillis()))
-                .build();
-        
-        return answersDAO.insert(answer) > 0;
-    }
-
-    /**
-     * Complete a quiz attempt and calculate score
-     */
-    public double completeQuizAttempt(Integer attemptId) {
-        try {
-            // Get the attempt
-            UserQuizAttempts attempt = attemptsDAO.findById(attemptId);
-            if (attempt == null) return 0.0;
-
-            // Count correct answers
-            int correctAnswers = answersDAO.countCorrectAnswers(attemptId);
-            
-            // Get total questions answered
-            List<UserQuizAttemptAnswers> answers = answersDAO.findByAttemptId(attemptId);
-            int totalQuestions = answers.size();
-            
-            // Calculate score (as a number between 0 and 10)
-            double score = totalQuestions > 0 ? (correctAnswers * 10.0) / totalQuestions : 0.0;
-            
-            // Update attempt with score
-            attempt.setEnd_time(new Date(System.currentTimeMillis()));
-            attempt.setScore(score);
-            attempt.setPassed(score >= 5.0); // Passing score is 5.0
-            attempt.setStatus("completed");
-            attempt.setUpdate_at(new Date(System.currentTimeMillis()));
-            
-            if (attemptsDAO.update(attempt)) {
-                return score;
-            }
-            
-            return 0.0;
-            
-        } catch (Exception e) {
-            System.out.println("Error completing quiz attempt: " + e.getMessage());
-            e.printStackTrace();
-            return 0.0;
+        switch (action) {
+            case "start":
+                startQuizAttempt(request, response);
+                break;
+            case "end":
+                endQuizAttempt(request, response);
+                break;
+            default:
+                response.sendRedirect("home");
+                break;
         }
     }
 
     /**
-     * Get quiz attempt history for a user
+     * Handles the HTTP <code>POST</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
      */
-    public List<UserQuizAttempts> getUserAttemptHistory(Integer userId) {
-        return attemptsDAO.findByUserId(userId);
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
     }
 
     /**
-     * Get answers for a specific attempt
+     * Returns a short description of the servlet.
+     *
+     * @return a String containing servlet description
      */
-    public List<UserQuizAttemptAnswers> getAttemptAnswers(Integer attemptId) {
-        return answersDAO.findByAttemptId(attemptId);
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+
+    private void startQuizAttempt(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Integer userId = (Integer) session.getAttribute("userId");
+        String quizIdStr = request.getParameter("quizId");
+
+        if (userId == null || quizIdStr == null) {
+            response.sendRedirect("login");
+            return;
+        }
+
+        try {
+            Integer quizId = Integer.parseInt(quizIdStr);
+            
+            // Check if user already has an in-progress attempt
+            UserQuizAttempts existingAttempt = attemptsDAO.findLatestAttempt(userId, quizId);
+            if (existingAttempt != null && GlobalConfig.QUIZ_ATTEMPT_STATUS_IN_PROGRESS.equals(existingAttempt.getStatus())) {
+                // Redirect to the existing attempt
+                response.sendRedirect("quiz-attempt-answer?attemptId=" + existingAttempt.getId());
+                return;
+            }
+
+            // Create new attempt
+            UserQuizAttempts newAttempt = UserQuizAttempts.builder()
+                    .user_id(userId)
+                    .quiz_id(quizId)
+                    .start_time(Date.valueOf(LocalDate.now()))
+                    .status(GlobalConfig.QUIZ_ATTEMPT_STATUS_IN_PROGRESS)
+                    .created_at(Date.valueOf(LocalDate.now()))
+                    .update_at(Date.valueOf(LocalDate.now()))
+                    .build();
+
+            int attemptId = attemptsDAO.insert(newAttempt);
+            if (attemptId > 0) {
+                // Redirect to the quiz attempt page with the new attempt ID
+                response.sendRedirect("quiz-attempt-answer?attemptId=" + attemptId);
+            } else {
+                // Handle error - could not create attempt
+                request.setAttribute("error", "Could not start quiz attempt. Please try again.");
+                request.getRequestDispatcher("error.jsp").forward(request, response);
+            }
+            
+        } catch (NumberFormatException e) {
+            response.sendRedirect("home");
+        }
     }
 
-    /**
-     * Get the latest attempt for a quiz by a user
-     */
-    public UserQuizAttempts getLatestAttempt(Integer userId, Integer quizId) {
-        return attemptsDAO.findLatestAttempt(userId, quizId);
-    }
-
-    /**
-     * Save multiple answers at once (batch save)
-     */
-    public boolean saveAnswersBatch(List<UserQuizAttemptAnswers> answers) {
-        return answersDAO.batchInsertAnswers(answers);
-    }
-
-    /**
-     * Check if a user has any incomplete attempts for a quiz
-     */
-    public boolean hasIncompleteAttempt(Integer userId, Integer quizId) {
-        UserQuizAttempts latestAttempt = attemptsDAO.findLatestAttempt(userId, quizId);
-        return latestAttempt != null && "in_progress".equals(latestAttempt.getStatus());
-    }
-
-    /**
-     * Delete an attempt and all its answers
-     */
-    public boolean deleteAttempt(Integer attemptId) {
-        // First delete all answers
-        answersDAO.deleteByAttemptId(attemptId);
+    private void endQuizAttempt(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String attemptIdStr = request.getParameter("attemptId");
         
-        // Then delete the attempt
-        UserQuizAttempts attempt = new UserQuizAttempts();
-        attempt.setId(attemptId);
-        return attemptsDAO.delete(attempt);
+        if (attemptIdStr == null) {
+            response.sendRedirect("home");
+            return;
+        }
+
+        try {
+            Integer attemptId = Integer.parseInt(attemptIdStr);
+            UserQuizAttempts attempt = attemptsDAO.findById(attemptId);
+            
+            if (attempt != null) {
+                // Only update if the attempt is still in progress
+                if (GlobalConfig.QUIZ_ATTEMPT_STATUS_IN_PROGRESS.equals(attempt.getStatus())) {
+                    attempt.setEnd_time(Date.valueOf(LocalDate.now()));
+                    attempt.setStatus(GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED);
+                    attempt.setUpdate_at(Date.valueOf(LocalDate.now()));
+                    
+                    if (attemptsDAO.update(attempt)) {
+                        // Redirect to results page
+                        response.sendRedirect("quiz-results?attemptId=" + attemptId);
+                    } else {
+                        // Handle error - could not update attempt
+                        request.setAttribute("error", "Could not end quiz attempt. Please try again.");
+                        request.getRequestDispatcher("error.jsp").forward(request, response);
+                    }
+                } else {
+                    // Attempt is already completed
+                    response.sendRedirect("quiz-results?attemptId=" + attemptId);
+                }
+            } else {
+                response.sendRedirect("home");
+            }
+        } catch (NumberFormatException e) {
+            response.sendRedirect("home");
+        }
     }
-} 
+}

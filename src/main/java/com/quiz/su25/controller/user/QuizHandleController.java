@@ -9,12 +9,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.quiz.su25.controller.QuizAttemptController;
+import com.quiz.su25.controller.QuizAttemptAnswerController;
 import com.quiz.su25.dal.impl.QuestionDAO;
 import com.quiz.su25.dal.impl.QuestionOptionDAO;
 import com.quiz.su25.entity.Question;
 import com.quiz.su25.entity.QuestionOption;
 import com.quiz.su25.entity.User;
 import com.quiz.su25.entity.UserQuizAttempts;
+import com.quiz.su25.dal.impl.UserQuizAttemptsDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -29,6 +31,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.sql.Date;
+import java.time.LocalDate;
+import com.quiz.su25.config.GlobalConfig;
+import com.quiz.su25.dal.impl.UserDAO;
 
 /**
  *
@@ -36,32 +42,6 @@ import java.util.stream.Collectors;
  */
 @WebServlet(name = "QuizHandleController", urlPatterns = {"/quiz-handle"})
 public class QuizHandleController extends HttpServlet {
-
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet QuizHandleController</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet QuizHandleController at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -78,47 +58,74 @@ public class QuizHandleController extends HttpServlet {
         try {
             // Tạo attempt mới khi bắt đầu quiz
             HttpSession session = request.getSession();
-            
+            UserDAO userDAO = new UserDAO();
+
             // Set user ID cứng là 10 và quiz ID là 1 (hoặc ID thực tế của quiz)
             Integer userId = 10;
-            Integer quizId = 1; // Thay đổi theo quiz ID thực tế
+            session.setAttribute(GlobalConfig.SESSION_ACCOUNT, userDAO.findById(userId));
+
+            // Lấy quizId từ request thay vì gán cứng
+            String quizIdParam = request.getParameter("id");
+            Integer quizId = quizIdParam != null ? Integer.parseInt(quizIdParam) : 1;
             session.setAttribute("quizId", quizId);
-            
+
             // Kiểm tra xem đã có attempt đang chạy chưa
-            QuizAttemptController attemptController = new QuizAttemptController();
-            UserQuizAttempts currentAttempt = attemptController.getLatestAttempt(userId, quizId);
-            
+            UserQuizAttemptsDAO attemptsDAO = new UserQuizAttemptsDAO();
+            UserQuizAttempts currentAttempt = attemptsDAO.findLatestAttempt(userId, quizId);
+            System.out.println("Current attempt: " + (currentAttempt != null ? currentAttempt.getId() : "null"));
+
             // Nếu chưa có attempt hoặc attempt cuối cùng đã hoàn thành, tạo attempt mới
-            if (currentAttempt == null || "completed".equals(currentAttempt.getStatus())) {
-                currentAttempt = attemptController.startQuizAttempt(userId, quizId);
-                System.out.println("Created new attempt with ID: " + currentAttempt.getId());
-                session.setAttribute("currentAttemptId", currentAttempt.getId());
+            if (currentAttempt == null || GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED.equals(currentAttempt.getStatus())) {
+                // Tạo attempt mới
+                UserQuizAttempts newAttempt = UserQuizAttempts.builder()
+                        .user_id(userId)
+                        .quiz_id(quizId)
+                        .start_time(Date.valueOf(LocalDate.now()))
+                        .end_time(null)
+                        .score(0.0)
+                        .passed(false)
+                        .status(GlobalConfig.QUIZ_ATTEMPT_STATUS_IN_PROGRESS)
+                        .created_at(Date.valueOf(LocalDate.now()))
+                        .update_at(Date.valueOf(LocalDate.now()))
+                        .build();
+
+                int attemptId = attemptsDAO.insert(newAttempt);
+                if (attemptId > 0) {
+                    newAttempt.setId(attemptId);
+                    currentAttempt = newAttempt;
+                    System.out.println("Created new attempt with ID: " + currentAttempt.getId());
+                    session.setAttribute("currentAttemptId", currentAttempt.getId());
+                }
             } else {
                 // Nếu có attempt đang chạy, sử dụng attempt đó
                 session.setAttribute("currentAttemptId", currentAttempt.getId());
+                System.out.println("Using existing attempt with ID: " + currentAttempt.getId());
             }
-            
+
             // Lấy số thứ tự câu hỏi từ parameter, mặc định là 1
             String questionNumber = request.getParameter("questionNumber");
             int currentNumber = questionNumber != null ? Integer.parseInt(questionNumber) : 1;
-            
-            // Lấy danh sách câu hỏi từ database
+            System.out.println("Current question number: " + currentNumber);
+
+            // Lấy danh sách câu hỏi từ database theo quizId
             QuestionDAO questionDAO = new QuestionDAO();
-            List<Question> questions = questionDAO.findAll();
-            
+            List<Question> questions = questionDAO.findByQuizId(quizId);
+
             // Kiểm tra nếu có câu hỏi
             if (!questions.isEmpty() && currentNumber <= questions.size()) {
                 // Lấy câu hỏi hiện tại
                 Question currentQuestion = questions.get(currentNumber - 1);
-                
+                System.out.println("Current question ID: " + currentQuestion.getId());
+
                 // Lấy các options cho câu hỏi hiện tại
                 QuestionOptionDAO optionDAO = new QuestionOptionDAO();
                 List<QuestionOption> options = optionDAO.findByQuestionId(currentQuestion.getId());
                 currentQuestion.setQuestionOptions(options);
-                
+                System.out.println("Found " + options.size() + " options for question " + currentQuestion.getId());
+
                 // Lấy câu trả lời đã chọn từ session
                 Map<Integer, Object> userAnswers = (Map<Integer, Object>) session.getAttribute("userAnswers");
-                
+
                 if (userAnswers != null && userAnswers.containsKey(currentQuestion.getId())) {
                     Object answer = userAnswers.get(currentQuestion.getId());
                     if ("multiple".equals(currentQuestion.getType())) {
@@ -129,17 +136,33 @@ public class QuizHandleController extends HttpServlet {
                         request.setAttribute("selectedAnswers", (String) answer);
                     }
                 }
-                
+
                 // Set attributes cho JSP
                 request.setAttribute("question", currentQuestion);
                 request.setAttribute("currentNumber", currentNumber);
                 request.setAttribute("totalQuestions", questions.size());
                 request.setAttribute("questions", questions);
+                System.out.println("Set all attributes for JSP");
             }
-            
-            request.getRequestDispatcher("view/user/quizHandle/quiz-handle.jsp").forward(request, response);
-        } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/quiz-handle?questionNumber=1");
+
+            // Forward to the quiz handle page
+            String forwardPath = "/view/user/quizHandle/quiz-handle.jsp";
+            System.out.println("Forwarding to: " + forwardPath);
+            request.getRequestDispatcher(forwardPath).forward(request, response);
+
+        } catch (Exception e) {
+            System.out.println("=== Error in QuizHandleController ===");
+            System.out.println("Error message: " + e.getMessage());
+            System.out.println("Error class: " + e.getClass().getName());
+            e.printStackTrace();
+
+            // Hiển thị lỗi
+            response.setContentType("text/html;charset=UTF-8");
+            response.getWriter().println("<html><body>");
+            response.getWriter().println("<h1>Error occurred:</h1>");
+            response.getWriter().println("<p>" + e.getMessage() + "</p>");
+            response.getWriter().println("<p>Please check server logs for more details.</p>");
+            response.getWriter().println("</body></html>");
         }
     }
 
@@ -157,10 +180,10 @@ public class QuizHandleController extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
-        
+
         String action = request.getParameter("action");
         System.out.println("Received action: " + action);
-        
+
         if ("score".equals(action)) {
             try {
                 // Đọc dữ liệu từ request
@@ -170,19 +193,19 @@ public class QuizHandleController extends HttpServlet {
                 while ((line = reader.readLine()) != null) {
                     requestData.append(line);
                 }
-                
+
                 System.out.println("Raw request data: " + requestData.toString());
-                
+
                 // Parse JSON từ request body
                 JsonObject jsonRequest = JsonParser.parseString(requestData.toString()).getAsJsonObject();
                 JsonObject userAnswers = jsonRequest.getAsJsonObject("userAnswers");
-                
+
                 if (userAnswers == null) {
                     throw new IllegalArgumentException("Không tìm thấy dữ liệu câu trả lời trong request");
                 }
-                
+
                 System.out.println("Parsed user answers: " + userAnswers.toString());
-                
+
                 // Sử dụng user ID cứng là 10
                 Integer userId = 10;
                 HttpSession session = request.getSession();
@@ -190,55 +213,53 @@ public class QuizHandleController extends HttpServlet {
                 if (quizId == null) {
                     quizId = 1; // Mặc định quiz ID = 1 nếu không có trong session
                 }
-                
+
                 System.out.println("User ID: " + userId);
                 System.out.println("Quiz ID: " + quizId);
 
-                // Tạo QuizAttemptController để xử lý chấm điểm
-                QuizAttemptController attemptController = new QuizAttemptController();
-                
-                // Lấy attempt hiện tại từ session hoặc tạo mới
+                // Lấy attempt ID từ session
                 Integer currentAttemptId = (Integer) session.getAttribute("currentAttemptId");
-                UserQuizAttempts attempt = null;
-                
-                if (currentAttemptId != null) {
-                    attempt = attemptController.getLatestAttempt(userId, quizId);
+                if (currentAttemptId == null) {
+                    throw new IllegalStateException("Không tìm thấy attempt đang hoạt động trong session");
                 }
-                
-                // Nếu không có attempt hoặc không tìm thấy, tạo mới
+
+                // Tạo QuizAttemptController để xử lý chấm điểm
+                UserQuizAttemptsDAO attemptsDAO = new UserQuizAttemptsDAO();
+                UserQuizAttempts attempt = attemptsDAO.findById(currentAttemptId);
+
                 if (attempt == null) {
-                    attempt = attemptController.startQuizAttempt(userId, quizId);
-                    session.setAttribute("currentAttemptId", attempt.getId());
+                    throw new IllegalStateException("Không tìm thấy attempt hoặc attempt không khớp với session");
                 }
-                
+
                 System.out.println("Using attempt with ID: " + attempt.getId());
-                
+
                 int totalAnswered = 0;
                 int totalCorrect = 0;
-                
+
                 // Lưu các câu trả lời
+                QuizAttemptAnswerController answerController = new QuizAttemptAnswerController();
                 for (Map.Entry<String, JsonElement> entry : userAnswers.entrySet()) {
                     try {
                         Integer questionId = Integer.parseInt(entry.getKey());
                         JsonArray selectedAnswers = entry.getValue().getAsJsonArray();
                         System.out.println("Processing question " + questionId + " with answers: " + selectedAnswers);
-                        
+
                         // Kiểm tra đáp án đúng
                         QuestionOptionDAO optionDAO = new QuestionOptionDAO();
                         List<QuestionOption> correctOptions = optionDAO.findCorrectOptionsByQuestionId(questionId);
                         System.out.println("Correct options for question " + questionId + ": " + correctOptions);
-                        
+
                         // So sánh đáp án đã chọn với đáp án đúng
                         boolean isCorrect = false;
                         List<Integer> selectedOptionIds = new ArrayList<>();
                         for (JsonElement answer : selectedAnswers) {
                             selectedOptionIds.add(answer.getAsInt());
                         }
-                        
+
                         // Kiểm tra xem tất cả các đáp án đúng đã được chọn chưa
                         boolean allCorrectOptionsSelected = true;
                         boolean hasIncorrectSelection = false;
-                        
+
                         // Kiểm tra từng đáp án được chọn
                         for (Integer selectedId : selectedOptionIds) {
                             boolean isCorrectOption = false;
@@ -253,7 +274,7 @@ public class QuizHandleController extends HttpServlet {
                                 break;
                             }
                         }
-                        
+
                         // Kiểm tra xem đã chọn đủ tất cả đáp án đúng chưa
                         for (QuestionOption correctOption : correctOptions) {
                             if (!selectedOptionIds.contains(correctOption.getId())) {
@@ -261,55 +282,69 @@ public class QuizHandleController extends HttpServlet {
                                 break;
                             }
                         }
-                        
+
                         // Câu trả lời chỉ đúng khi chọn đủ và đúng tất cả các đáp án
                         isCorrect = allCorrectOptionsSelected && !hasIncorrectSelection;
-                        
+
                         System.out.println("Question " + questionId + " scoring:");
                         System.out.println("Selected options: " + selectedOptionIds);
                         System.out.println("Correct options: " + correctOptions.stream().map(QuestionOption::getId).collect(Collectors.toList()));
                         System.out.println("All correct selected: " + allCorrectOptionsSelected);
                         System.out.println("Has incorrect: " + hasIncorrectSelection);
                         System.out.println("Is correct: " + isCorrect);
-                        
+
                         if (isCorrect) {
                             totalCorrect++;
                         }
                         totalAnswered++;
-                        
+
                         // Lưu câu trả lời
                         for (JsonElement answer : selectedAnswers) {
-                            attemptController.saveAnswer(attempt.getId(), questionId, answer.getAsInt(), isCorrect);
+                            // Tạo request parameters cho QuizAttemptAnswerController
+                            request.setAttribute("attemptId", attempt.getId());
+                            request.setAttribute("questionId", questionId);
+                            request.setAttribute("selectedOptionId", answer.getAsInt());
+                            request.setAttribute("isCorrect", isCorrect);
+                            request.setAttribute("action", "save_answer");
+
+                            // Gọi phương thức saveAnswer của QuizAttemptAnswerController
+                            answerController.saveAnswer(request, response, attempt);
                         }
-                        
+
                         System.out.println("Saved answer for question " + questionId + ", correct: " + isCorrect);
-                        
+
                     } catch (Exception e) {
                         System.out.println("Error processing question: " + e.getMessage());
                         e.printStackTrace();
                     }
                 }
-                
+
                 System.out.println("Total answered: " + totalAnswered);
                 System.out.println("Total correct: " + totalCorrect);
-                
+
                 // Hoàn thành bài thi và tính điểm
-                double score = attemptController.completeQuizAttempt(attempt.getId());
+                double score = (double) totalCorrect / totalAnswered * 100;
+                attempt.setScore(score);
+                attempt.setStatus(GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED);
+                attempt.setEnd_time(Date.valueOf(LocalDate.now()));
+                attempt.setUpdate_at(Date.valueOf(LocalDate.now()));
+                attemptsDAO.update(attempt);
+
                 System.out.println("Final score: " + score);
-                
+
                 // Trả về kết quả
                 JsonObject result = new JsonObject();
                 result.addProperty("score", score);
                 result.addProperty("totalAnswered", totalAnswered);
                 result.addProperty("totalCorrect", totalCorrect);
                 out.write(result.toString());
-                
+
             } catch (Exception e) {
                 System.out.println("\n=== ERROR DETAILS ===");
                 System.out.println("Error Type: " + e.getClass().getName());
                 System.out.println("Error Message: " + e.getMessage());
                 e.printStackTrace(System.out);
-                
+
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 JsonObject errorResponse = new JsonObject();
                 errorResponse.addProperty("error", "Lỗi khi chấm điểm: " + e.getMessage());
@@ -321,21 +356,30 @@ public class QuizHandleController extends HttpServlet {
                 int questionId = Integer.parseInt(request.getParameter("questionId"));
                 String nextAction = request.getParameter("nextAction");
                 int currentNumber = Integer.parseInt(request.getParameter("questionNumber"));
-                
+
                 System.out.println("Saving answer for question ID: " + questionId);
-                
+
                 // Lấy câu hỏi để kiểm tra type
                 QuestionDAO questionDAO = new QuestionDAO();
                 Question question = questionDAO.findById(questionId);
-                
-                // Lấy hoặc tạo mới map lưu câu trả lời trong session
+
+                // Lấy attempt ID từ session
                 HttpSession session = request.getSession();
+                Integer currentAttemptId = (Integer) session.getAttribute("currentAttemptId");
+                if (currentAttemptId == null) {
+                    throw new IllegalStateException("Không tìm thấy attempt đang hoạt động trong session");
+                }
+
+                // Lấy hoặc tạo mới map lưu câu trả lời trong session
                 Map<Integer, Object> userAnswers = (Map<Integer, Object>) session.getAttribute("userAnswers");
                 if (userAnswers == null) {
                     userAnswers = new HashMap<>();
                     System.out.println("Created new userAnswers map");
                 }
-                
+
+                // Tạo QuizAttemptAnswerController để xử lý lưu câu trả lời
+                QuizAttemptAnswerController answerController = new QuizAttemptAnswerController();
+
                 if ("multiple".equals(question.getType())) {
                     // Xử lý câu hỏi trắc nghiệm
                     String[] selectedAnswerIds = request.getParameterValues("answer");
@@ -345,20 +389,73 @@ public class QuizHandleController extends HttpServlet {
                             answers.add(Integer.parseInt(answerId));
                         }
                         System.out.println("Saved multiple choice answers: " + answers);
+
+                        // Kiểm tra đáp án đúng
+                        QuestionOptionDAO optionDAO = new QuestionOptionDAO();
+                        List<QuestionOption> correctOptions = optionDAO.findCorrectOptionsByQuestionId(questionId);
+
+                        // So sánh đáp án đã chọn với đáp án đúng
+                        boolean allCorrectOptionsSelected = true;
+                        boolean hasIncorrectSelection = false;
+
+                        // Kiểm tra từng đáp án được chọn
+                        for (Integer selectedId : answers) {
+                            boolean isCorrectOption = false;
+                            for (QuestionOption correctOption : correctOptions) {
+                                if (correctOption.getId().equals(selectedId)) {
+                                    isCorrectOption = true;
+                                    break;
+                                }
+                            }
+                            if (!isCorrectOption) {
+                                hasIncorrectSelection = true;
+                                break;
+                            }
+                        }
+
+                        // Kiểm tra xem đã chọn đủ tất cả đáp án đúng chưa
+                        for (QuestionOption correctOption : correctOptions) {
+                            if (!answers.contains(correctOption.getId())) {
+                                allCorrectOptionsSelected = false;
+                                break;
+                            }
+                        }
+
+                        // Câu trả lời chỉ đúng khi chọn đủ và đúng tất cả các đáp án
+                        boolean isCorrect = allCorrectOptionsSelected && !hasIncorrectSelection;
+
+                        // Lưu từng câu trả lời vào database thông qua QuizAttemptAnswerController
+                        for (Integer answerId : answers) {
+                            // Tạo request parameters cho QuizAttemptAnswerController
+                            request.setAttribute("attemptId", currentAttemptId);
+                            request.setAttribute("questionId", questionId);
+                            request.setAttribute("selectedOptionId", answerId);
+                            request.setAttribute("isCorrect", isCorrect);
+                            request.setAttribute("action", "save_answer");
+
+                            // Gọi phương thức saveAnswer của QuizAttemptAnswerController
+                            answerController.saveAnswer(request, response,
+                                    UserQuizAttempts.builder().id(currentAttemptId).build());
+                        }
                     }
                     userAnswers.put(questionId, answers);
                 } else if ("essay".equals(question.getType())) {
                     // Xử lý câu hỏi tự luận
                     String essayAnswer = request.getParameter("essay_answer");
-                    if (essayAnswer == null) essayAnswer = "";
+                    if (essayAnswer == null) {
+                        essayAnswer = "";
+                    }
                     userAnswers.put(questionId, essayAnswer);
                     System.out.println("Saved essay answer with length: " + essayAnswer.length());
+
+                    // TODO: Xử lý lưu câu trả lời tự luận vào database
+                    // Hiện tại chưa có logic xử lý câu hỏi tự luận
                 }
-                
+
                 // Cập nhật session
                 session.setAttribute("userAnswers", userAnswers);
                 System.out.println("Updated session with answers: " + userAnswers);
-                
+
                 // Xác định số câu hỏi tiếp theo
                 int nextNumber = currentNumber;
                 if ("next".equals(nextAction)) {
@@ -366,7 +463,7 @@ public class QuizHandleController extends HttpServlet {
                 } else if ("previous".equals(nextAction)) {
                     nextNumber--;
                 }
-                
+
                 // Chuyển hướng đến câu hỏi tiếp theo
                 response.sendRedirect(request.getContextPath() + "/quiz-handle?questionNumber=" + nextNumber);
             } catch (Exception e) {

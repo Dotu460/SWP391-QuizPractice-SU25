@@ -31,6 +31,6 @@ public class UserQuizAttemptAnswers {
    private Integer attempt_id;
    private Integer quiz_question_id;
    private Integer selected_option_id;
-   private Boolean correct;
+   private Boolean correct;  //1 - correct 0 - incorrect
    private Date answer_at;
 }

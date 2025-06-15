@@ -22,7 +22,7 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             resultSet = statement.executeQuery();
-            while (resultSet.next()) {                
+            while (resultSet.next()) {
                 UserQuizAttempts attempt = getFromResultSet(resultSet);
                 listAttempts.add(attempt);
             }
@@ -68,7 +68,7 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
             statement.setString(7, t.getStatus());
             statement.setDate(8, t.getCreated_at());
             statement.setDate(9, t.getUpdate_at());
-            
+
             return statement.executeUpdate();
         } catch (Exception e) {
             System.out.println("Error insert at class UserQuizAttemptsDAO: " + e.getMessage());
@@ -94,7 +94,7 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
             statement.setDate(8, t.getCreated_at());
             statement.setDate(9, t.getUpdate_at());
             statement.setInt(10, t.getId());
-            
+
             return statement.executeUpdate() > 0;
         } catch (Exception e) {
             System.out.println("Error update at class UserQuizAttemptsDAO: " + e.getMessage());
@@ -111,7 +111,7 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setInt(1, t.getId());
-            
+
             return statement.executeUpdate() > 0;
         } catch (Exception e) {
             System.out.println("Error delete at class UserQuizAttemptsDAO: " + e.getMessage());
@@ -138,7 +138,6 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
     }
 
     // Additional methods for quiz attempts
-
     /**
      * Find all attempts by a specific user
      */
@@ -210,15 +209,16 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
     /**
      * Update the score and status of an attempt
      */
-    public boolean updateScore(Integer attemptId, Integer score, Boolean passed) {
-        String sql = "UPDATE UserQuizAttempts SET score = ?, passed = ?, status = 'completed', update_at = CURRENT_TIMESTAMP WHERE id = ?";
+    public boolean updateScore(Integer attemptId, Double score, Boolean passed) {
+        String sql = "UPDATE UserQuizAttempts SET score = ?, passed = ?, "
+                + "status = 'completed', update_at = CURRENT_TIMESTAMP WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setInt(1, score);
+            statement.setDouble(1, score);
             statement.setBoolean(2, passed);
             statement.setInt(3, attemptId);
-            
+
             return statement.executeUpdate() > 0;
         } catch (Exception e) {
             System.out.println("Error updateScore at class UserQuizAttemptsDAO: " + e.getMessage());
@@ -227,7 +227,7 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
             closeResources();
         }
     }
-    
+
     public static void main(String[] args) {
         UserQuizAttemptsDAO userQuizAttemptsDAO = new UserQuizAttemptsDAO();
         userQuizAttemptsDAO.findAll().forEach(item -> {
