@@ -1,5 +1,6 @@
 package com.quiz.su25.controller.user;
 
+import com.quiz.su25.config.GlobalConfig;
 import com.quiz.su25.dal.impl.QuizzesDAO;
 import com.quiz.su25.dal.impl.UserQuizAttemptsDAO;
 import com.quiz.su25.entity.Quizzes;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.HashMap;
 
 @WebServlet(name = "QuizHandleMenuController", urlPatterns = {"/quiz-handle-menu"})
 public class QuizHandleMenuController extends HttpServlet {
@@ -47,12 +49,17 @@ public class QuizHandleMenuController extends HttpServlet {
                 List<UserQuizAttempts> userAttempts = userQuizAttemptsDAO.findByUserId(userId);
                 
                 // Create a map of quiz_id to score
-                Map<Integer, Double> quizScores = userAttempts.stream()
-                    .collect(Collectors.toMap(
-                        UserQuizAttempts::getQuiz_id,
-                        UserQuizAttempts::getScore,
-                        (existing, replacement) -> existing // Keep the highest score if multiple attempts
-                    ));
+                Map<Integer, Double> quizScores = new HashMap<>();
+                for (Quizzes quiz : quizzesList) {
+                    UserQuizAttempts latestAttempt = userQuizAttemptsDAO.findLatestAttempt(userId, quiz.getId());
+                    if (latestAttempt != null && GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED.equals(latestAttempt.getStatus())) {
+                        // Lấy điểm trực tiếp từ attempt đã hoàn thành
+                        quizScores.put(quiz.getId(), latestAttempt.getScore());
+                    } else {
+                        // Nếu chưa có attempt nào hoàn thành, đặt điểm là null hoặc giá trị mặc định
+                        quizScores.put(quiz.getId(), null);
+                    }
+                }
                 
                 // Set the quizzes list and scores as attributes
                 request.setAttribute("quizzesList", quizzesList);

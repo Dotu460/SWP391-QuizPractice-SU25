@@ -140,6 +140,46 @@ public class QuizAttemptAnswerController extends HttpServlet {
     }
 
     /**
+     * Xóa tất cả các câu trả lời của một câu hỏi trong một lần thi.
+     * @param attemptId ID của lần thi
+     * @param questionId ID của câu hỏi
+     */
+    public void clearAnswersForQuestion(Integer attemptId, Integer questionId) {
+        try {
+            answersDAO.deleteByAttemptAndQuestionId(attemptId, questionId);
+        } catch (Exception e) {
+            System.err.println("Error in clearAnswersForQuestion: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Lưu một lựa chọn trả lời cho câu hỏi (chỉ thực hiện insert).
+     * @param attemptId ID của lần thi
+     * @param questionId ID của câu hỏi
+     * @param selectedOptionId ID của lựa chọn (có thể null)
+     * @param isCorrect Trạng thái đúng/sai của tổng thể câu hỏi
+     */
+    public void saveAnswer(Integer attemptId, Integer questionId, Integer selectedOptionId, boolean isCorrect) {
+        try {
+            // Chỉ insert, không update. Việc xóa các câu trả lời cũ được xử lý riêng.
+            if (selectedOptionId != null) {
+                UserQuizAttemptAnswers newAnswer = UserQuizAttemptAnswers.builder()
+                        .attempt_id(attemptId)
+                        .quiz_question_id(questionId)
+                        .selected_option_id(selectedOptionId)
+                        .correct(isCorrect)
+                        .answer_at(Date.valueOf(LocalDate.now()))
+                        .build();
+                answersDAO.insert(newAnswer);
+            }
+        } catch (Exception e) {
+            System.err.println("Error in saveAnswer (insert-only): " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Lưu câu trả lời cho một câu hỏi trong attempt
      *
      * @param request HttpServletRequest chứa thông tin câu trả lời
@@ -167,14 +207,13 @@ public class QuizAttemptAnswerController extends HttpServlet {
             if (attr != null) isCorrectStr = attr.toString();
         }
 
-        if (questionIdStr == null || selectedOptionIdStr == null || isCorrectStr == null) {
+        if (questionIdStr == null || isCorrectStr == null) { // selectedOptionIdStr can be null
             System.out.println("DEBUG PARAMS: questionIdStr=" + questionIdStr
                     + ", selectedOptionIdStr=" + selectedOptionIdStr
                     + ", isCorrectStr=" + isCorrectStr);
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                     "Missing required parameters: "
                     + (questionIdStr == null ? "questionId " : "")
-                    + (selectedOptionIdStr == null ? "selectedOptionId " : "")
                     + (isCorrectStr == null ? "isCorrect" : "")
             );
             return;
@@ -182,30 +221,14 @@ public class QuizAttemptAnswerController extends HttpServlet {
 
         try {
             Integer questionId = Integer.parseInt(questionIdStr);
-            Integer selectedOptionId = Integer.parseInt(selectedOptionIdStr);
+            Integer selectedOptionId = (selectedOptionIdStr != null && !selectedOptionIdStr.isEmpty()) 
+                                        ? Integer.parseInt(selectedOptionIdStr) : null;
             Boolean isCorrect = Boolean.parseBoolean(isCorrectStr);
-
-            // Check if answer already exists for this question
-            UserQuizAttemptAnswers existingAnswer = answersDAO.findByAttemptAndQuestionId(attempt.getId(), questionId);
-
-            if (existingAnswer != null) {
-                // Update existing answer
-                existingAnswer.setSelected_option_id(selectedOptionId);
-                existingAnswer.setCorrect(isCorrect);
-                existingAnswer.setAnswer_at(Date.valueOf(LocalDate.now()));
-                answersDAO.update(existingAnswer);
-            } else {
-                // Create new answer
-                UserQuizAttemptAnswers newAnswer = UserQuizAttemptAnswers.builder()
-                        .attempt_id(attempt.getId())
-                        .quiz_question_id(questionId)
-                        .selected_option_id(selectedOptionId)
-                        .correct(isCorrect)
-                        .answer_at(Date.valueOf(LocalDate.now()))
-                        .build();
-                answersDAO.insert(newAnswer);
-            }
-
+            // call the new saveAnswer method.
+            // First clear old answers, then save new ones.
+            clearAnswersForQuestion(attempt.getId(), questionId);
+            saveAnswer(attempt.getId(), questionId, selectedOptionId, isCorrect);
+            
             // Send success response
             response.setContentType("application/json");
             PrintWriter out = response.getWriter();

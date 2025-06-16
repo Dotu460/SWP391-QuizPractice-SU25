@@ -270,14 +270,15 @@ public class QuizHandleController extends HttpServlet {
                 try {
                     Integer questionId = Integer.parseInt(entry.getKey());
                     JsonArray selectedAnswers = entry.getValue().getAsJsonArray();
-                    System.out.println("Processing question " + questionId + " with answers: " + selectedAnswers);
+                    
+                    System.out.println("\n--- Scoring Question ID: " + questionId + " ---");
+
                     totalAnswered++;
                     
                     // Kiểm tra đáp án đúng
                     QuestionOptionDAO optionDAO = new QuestionOptionDAO();
                     List<QuestionOption> correctOptions = optionDAO.findCorrectOptionsByQuestionId(questionId);
-                    System.out.println("Correct options for question " + questionId + ": " + correctOptions);
-
+                    
                     // So sánh đáp án đã chọn với đáp án đúng
                     boolean isCorrect = false;
                     List<Integer> selectedOptionIds = new ArrayList<>();
@@ -295,30 +296,32 @@ public class QuizHandleController extends HttpServlet {
                         var selectedOptionIdsSet = selectedOptionIds.stream()
                                 .collect(Collectors.toSet());
 
+                        System.out.println("Correct Option IDs from DB: " + correctOptionIds);
+                        System.out.println("User Selected Option IDs:   " + selectedOptionIdsSet);
+
                         // Câu trả lời đúng khi và chỉ khi hai set bằng nhau
                         isCorrect = correctOptionIds.equals(selectedOptionIdsSet);
                     }
 
 
-                    System.out.println("Question " + questionId + " scoring:");
-                    System.out.println("Selected options: " + selectedOptionIds);
-                    System.out.println("Correct options: " + correctOptions.stream().map(QuestionOption::getId).collect(Collectors.toList()));
-                    System.out.println("Is correct: " + isCorrect);
+                    System.out.println("Comparison Result (isCorrect): " + isCorrect);
+                    System.out.println("------------------------------------");
+
 
                     if (isCorrect) {
                         totalCorrect++;
                     }
 
-//                    // Lưu câu trả lời
-//                    if (!selectedOptionIds.isEmpty()) {
-//                        for (Integer answerId : selectedOptionIds) {
-//                            answerController.saveAnswer(attempt.getId(), questionId, answerId, isCorrect);
-//                        }
-//                    } else {
-//                        // Lưu câu trả lời rỗng nếu người dùng không chọn gì
-//                        answerController.saveAnswer(attempt.getId(), questionId, null, false);
-//                    }
-
+                    // Xóa các câu trả lời cũ và lưu các câu trả lời mới
+                    answerController.clearAnswersForQuestion(attempt.getId(), questionId);
+                    if (!selectedOptionIds.isEmpty()) {
+                        for (Integer answerId : selectedOptionIds) {
+                            answerController.saveAnswer(attempt.getId(), questionId, answerId, isCorrect);
+                        }
+                    } else {
+                        // Câu hỏi được xem là đã trả lời (nhưng sai) ngay cả khi không có lựa chọn nào
+                        // nếu nó đã được người dùng tương tác. Dòng này không cần thiết nếu clear đã chạy.
+                    }
 
                     System.out.println("Saved answer for question " + questionId + ", correct: " + isCorrect);
 
@@ -328,6 +331,7 @@ public class QuizHandleController extends HttpServlet {
                 }
             }
 
+            System.out.println("\n=== Final Score Calculation ===");
             System.out.println("Total answered: " + totalAnswered);
             System.out.println("Total correct: " + totalCorrect);
             System.out.println("Total questions in quiz: " + totalQuestionsInQuiz);
@@ -335,7 +339,12 @@ public class QuizHandleController extends HttpServlet {
 
             // Hoàn thành bài thi và tính điểm
             double score = (totalQuestionsInQuiz > 0) ? ((double) totalCorrect / totalQuestionsInQuiz * 10.0) : 0.0;
+            System.out.println("Calculated Score (before rounding): " + score);
+            
             score = Math.round(score * 10.0) / 10.0; // Làm tròn đến 1 chữ số thập phân
+            
+            System.out.println("Final Score (after rounding): " + score);
+            System.out.println("===============================\n");
             
             attempt.setScore(score);
             attempt.setStatus(GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED);
