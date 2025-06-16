@@ -314,7 +314,14 @@
                                     <input type="hidden" name="id" value="${registration.id}">
                                     <input type="hidden" name="currentPage" value="edit">
 
-                                    <!-- Registration Details Section -->
+                                    <!-- 
+                                        Registration Details Section
+                                        Contains:
+                                        1. Subject selection
+                                        2. Package selection with price info
+                                        3. Valid from/to dates
+                                        4. Error handling for each field
+                                    -->
                                     <div class="section">
                                         <div class="section-header">
                                             <i class="fas fa-file-alt"></i>
@@ -343,7 +350,7 @@
                                                 <select id="package" name="packageId" class="${packageError != null ? 'is-invalid' : ''}">
                                                     <c:forEach items="${pricePackages}" var="pkg">
                                                         <option value="${pkg.id}" ${registration != null && registration.package_id == pkg.id ? 'selected' : ''}>
-                                                            ${pkg.name} - $${pkg.sale_price}
+                                                            ${pkg.name} - Original: $${pkg.list_price} - Sale: $${pkg.sale_price}
                                                         </option>
                                                     </c:forEach>
                                                 </select>
@@ -395,7 +402,14 @@
                                         </div>
                                     </div>
                                     
-                                    <!-- Personal Information Section -->
+                                    <!-- 
+                                        Personal Information Section
+                                        Contains:
+                                        1. User details (name, gender, email, mobile)
+                                        2. Email check functionality
+                                        3. New user account creation fields
+                                        4. Error handling for each field
+                                    -->
                                     <div class="section">
                                         <div class="section-header">
                                             <i class="fas fa-user"></i>
@@ -478,7 +492,13 @@
                                         </div>
                                     </div>
                                     
-                                    <!-- Status & Notes Section -->
+                                    <!-- 
+                                        Status & Notes Section
+                                        Contains:
+                                        1. Registration status selection
+                                        2. Email notification content
+                                        3. Status-specific styling
+                                    -->
                                     <div class="section">
                                         <div class="section-header">
                                             <i class="fas fa-credit-card"></i>
@@ -508,7 +528,12 @@
                                         </div>
                                     </div>
                                     
-                                    <!-- System Information Section -->
+                                    <!-- 
+                                        System Information Section
+                                        Shows:
+                                        1. Registration timestamp
+                                        2. Read-only system fields
+                                    -->
                                     <div class="section">
                                         <div class="section-header">
                                             <i class="fas fa-cog"></i>
@@ -517,6 +542,12 @@
                                         <div class="section-content">
                                             <div class="form-row">
                                                 <label for="registrationTime">Registration Time:</label>
+                                                <%-- 
+                                                    Display registration time in readonly input field
+                                                    The value comes directly from registration.registration_time
+                                                    No formatting is applied here since it's just for display
+                                                    The actual formatting is handled in the list view
+                                                --%>
                                                 <input type="text" id="registrationTime" class="readonly" readonly 
                                                        value="${registration != null ? registration.registration_time : ''}" />
                                             </div>
@@ -559,7 +590,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Handle package selection
+            // Handle package selection and display package information
             const packageSelect = document.getElementById('package');
             packageSelect.addEventListener('change', function() {
                 const selectedOption = this.options[this.selectedIndex];
@@ -569,7 +600,7 @@
                 const salePrice = document.getElementById('salePrice');
                 const packageDescription = document.getElementById('packageDescription');
                 
-                // Get package data from the selected option text
+                // Parse package information from selected option text
                 const packageText = selectedOption.textContent;
                 const packageMatch = packageText.match(/(.*?) - \$(\d+\.?\d*)/);
                 
@@ -577,6 +608,7 @@
                     const name = packageMatch[1];
                     const price = packageMatch[2];
                     
+                    // Update package information display
                     packageName.textContent = name;
                     salePrice.textContent = `$${price}`;
                     packageInfo.style.display = 'block';
@@ -585,22 +617,26 @@
                 }
             });
 
-            // Handle email check
+            // Handle email check functionality
             const emailInput = document.getElementById('email');
             const checkEmailBtn = document.getElementById('checkEmailBtn');
             
             checkEmailBtn.addEventListener('click', function() {
                 const email = emailInput.value;
                 
+                // Show loading state
                 this.disabled = true;
                 this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
                 
+                // Make AJAX call to check email
                 fetch('${pageContext.request.contextPath}/admin/registrations?action=check-user&email=' + encodeURIComponent(email))
                     .then(response => response.json())
                     .then(data => {
+                        // Reset button state
                         this.disabled = false;
                         this.innerHTML = '<i class="fas fa-search"></i> Check Email';
 
+                        // If user exists, populate form fields
                         if (data.exists) {
                             document.getElementById('fullName').value = data.user.full_name;
                             document.getElementById('gender').value = data.user.gender;
@@ -608,6 +644,7 @@
                         }
                     })
                     .catch(error => {
+                        // Handle errors
                         console.error('Error:', error);
                         this.disabled = false;
                         this.innerHTML = '<i class="fas fa-search"></i> Check Email';

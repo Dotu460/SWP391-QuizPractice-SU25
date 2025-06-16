@@ -15,17 +15,18 @@ import java.util.Map;
 import java.util.HashMap;
 
 /**
- * Lớp DAO (Data Access Object) cho thực thể Registration. Chịu trách nhiệm
- * tương tác với cơ sở dữ liệu liên quan đến các bản ghi đăng ký. Kế thừa từ
- * DBContext để quản lý kết nối cơ sở dữ liệu và triển khai I_DAO cho các hoạt
- * động CRUD cơ bản.
+ * Data Access Object (DAO) class for managing Registration entities.
+ * Handles all database operations related to registrations including:
+ * - Basic CRUD operations
+ * - Filtered searches with pagination
+ * - User-specific registration queries
+ * - Status management
  */
 public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
 
     /**
-     * Lấy tất cả các bản ghi đăng ký từ cơ sở dữ liệu.
-     *
-     * @return Danh sách các đối tượng Registration.
+     * Retrieves all registrations from the database
+     * @return List of all Registration objects
      */
     @Override
     public List<Registration> findAll() {
@@ -48,10 +49,9 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Cập nhật thông tin một bản ghi đăng ký trong cơ sở dữ liệu.
-     *
-     * @param t Đối tượng Registration chứa thông tin cần cập nhật.
-     * @return true nếu cập nhật thành công, false nếu thất bại.
+     * Updates an existing registration in the database
+     * @param t Registration object containing updated information
+     * @return true if update successful, false otherwise
      */
     @Override
     public boolean update(Registration t) {
@@ -82,10 +82,9 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Xóa một bản ghi đăng ký khỏi cơ sở dữ liệu.
-     *
-     * @param t Đối tượng Registration cần xóa (chỉ cần ID).
-     * @return true nếu xóa thành công, false nếu thất bại.
+     * Deletes a registration from the database
+     * @param t Registration object to delete (only ID is required)
+     * @return true if deletion successful, false otherwise
      */
     @Override
     public boolean delete(Registration t) {
@@ -105,11 +104,9 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Thêm một bản ghi đăng ký mới vào cơ sở dữ liệu.
-     *
-     * @param t Đối tượng Registration chứa thông tin cần thêm.
-     * @return ID của bản ghi mới được chèn (hiện tại đang trả về 0, có thể cần
-     * cải thiện để trả về ID thực).
+     * Inserts a new registration into the database
+     * @param t Registration object to insert
+     * @return ID of the newly inserted registration, or 0 if insertion failed
      */
     @Override
     public int insert(Registration t) {
@@ -145,11 +142,10 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Chuyển đổi một dòng từ ResultSet thành một đối tượng Registration.
-     *
-     * @param resultSet Đối tượng ResultSet chứa dữ liệu từ cơ sở dữ liệu.
-     * @return Đối tượng Registration được tạo từ dữ liệu.
-     * @throws SQLException Nếu có lỗi khi truy cập dữ liệu từ ResultSet.
+     * Maps a database row to a Registration object
+     * @param resultSet ResultSet containing the database row
+     * @return Registration object populated with data from ResultSet
+     * @throws SQLException if there's an error accessing the ResultSet
      */
     @Override
     public Registration getFromResultSet(ResultSet resultSet) throws SQLException {
@@ -167,10 +163,9 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Tìm một bản ghi đăng ký dựa trên ID.
-     *
-     * @param id ID của bản ghi đăng ký cần tìm.
-     * @return Đối tượng Registration nếu tìm thấy, null nếu không.
+     * Finds a registration by its ID
+     * @param id ID of the registration to find
+     * @return Registration object if found, null otherwise
      */
     @Override
     public Registration findById(Integer id) {
@@ -192,7 +187,13 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Đếm số bản ghi đăng ký của một user theo các bộ lọc
+     * Counts registrations for a specific user with optional filters
+     * @param userId ID of the user
+     * @param subjectId Optional subject filter
+     * @param status Optional status filter
+     * @param fromDate Optional start date filter
+     * @param toDate Optional end date filter
+     * @return Number of matching registrations
      */
     public int countByUserId(Integer userId, Integer subjectId, String status, Date fromDate, Date toDate) {
         // Xây dựng câu SQL cơ bản
@@ -239,19 +240,16 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Lấy danh sách đăng ký của một user cụ thể với phân trang và các bộ lọc:
-     * subjectId, status, fromDate, toDate.
-     *
-     * @param userId ID của user
-     * @param offset Vị trí bắt đầu.
-     * @param limit Số lượng bản ghi.
-     * @param subjectId ID môn học (null nếu không lọc).
-     * @param status Trạng thái (null hoặc rỗng nếu không lọc).
-     * @param fromDate Ngày bắt đầu (null nếu không lọc).
-     * @param toDate Ngày kết thúc (null nếu không lọc).
-     * @return Danh sách Registration.
+     * Retrieves paginated registrations for a specific user with filters
+     * @param userId ID of the user
+     * @param offset Starting position for pagination
+     * @param limit Number of records to retrieve
+     * @param subjectId Optional subject filter
+     * @param status Optional status filter
+     * @param fromDate Optional start date filter
+     * @param toDate Optional end date filter
+     * @return List of matching Registration objects
      */
-    // Truy vấn danh sách bản ghi của một user có phân trang và lọc
     public List<Registration> findByUserIdPaginated(Integer userId, int offset, int limit, Integer subjectId, String status, Date fromDate, Date toDate) {
         StringBuilder sql = new StringBuilder("SELECT r.* FROM registrations r WHERE r.user_id = ?");
         List<Object> params = new ArrayList<>();
@@ -313,18 +311,15 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Đếm số lượng bản ghi đăng ký của một user cụ thể dựa trên tìm kiếm tên
-     * môn học và các bộ lọc khác.
-     *
-     * @param userId ID của user
-     * @param subjectNameSearch Từ khóa tìm tên môn học (có thể null hoặc rỗng).
-     * @param subjectId ID môn học (null nếu không lọc).
-     * @param status Trạng thái (null hoặc rỗng nếu không lọc).
-     * @param fromDate Ngày bắt đầu (null nếu không lọc).
-     * @param toDate Ngày kết thúc (null nếu không lọc).
-     * @return Tổng số bản ghi.
+     * Counts registrations for a user with subject name search
+     * @param userId ID of the user
+     * @param subjectNameSearch Search term for subject name
+     * @param subjectId Optional subject filter
+     * @param status Optional status filter
+     * @param fromDate Optional start date filter
+     * @param toDate Optional end date filter
+     * @return Number of matching registrations
      */
-    // Đếm số bản ghi đăng ký của user, có thể tìm theo tên môn học
     public int countByUserIdAndSubjectNameSearch(Integer userId, String subjectNameSearch, Integer subjectId, String status, Date fromDate, Date toDate) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(DISTINCT r.id) FROM registrations r");
         List<Object> params = new ArrayList<>();
@@ -382,20 +377,17 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Lấy danh sách bản ghi đăng ký của một user cụ thể với phân trang và tìm
-     * kiếm tên môn học.
-     *
-     * @param userId ID của user
-     * @param subjectNameSearch Từ khóa tìm tên môn học (có thể null hoặc rỗng).
-     * @param offset Vị trí bắt đầu.
-     * @param limit Số lượng.
-     * @param subjectId ID môn học (null nếu không lọc).
-     * @param status Trạng thái (null hoặc rỗng nếu không lọc).
-     * @param fromDate Ngày bắt đầu (null nếu không lọc).
-     * @param toDate Ngày kết thúc (null nếu không lọc).
-     * @return Danh sách Registration.
+     * Retrieves paginated registrations for a user with subject name search
+     * @param userId ID of the user
+     * @param subjectNameSearch Search term for subject name
+     * @param offset Starting position for pagination
+     * @param limit Number of records to retrieve
+     * @param subjectId Optional subject filter
+     * @param status Optional status filter
+     * @param fromDate Optional start date filter
+     * @param toDate Optional end date filter
+     * @return List of matching Registration objects
      */
-    // Tìm danh sách bản ghi đăng ký của user với phân trang và tìm kiếm tên môn học
     public List<Registration> findByUserIdAndSubjectNameSearchPaginated(
             Integer userId, String subjectNameSearch, int offset, int limit,
             Integer subjectId, String status, Date fromDate, Date toDate) {
@@ -462,7 +454,17 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Find registrations with filters and sorting
+     * Finds registrations with various filters and sorting options
+     * @param emailSearch Optional email search term
+     * @param subjectSearch Optional subject search term
+     * @param status Optional status filter
+     * @param fromDate Optional start date filter
+     * @param toDate Optional end date filter
+     * @param sortBy Field to sort by
+     * @param sortOrder Sort order (asc/desc)
+     * @param page Page number
+     * @param pageSize Number of records per page
+     * @return List of matching Registration objects
      */
     public List<Registration> findRegistrationsWithFilters(
             String emailSearch, String subjectSearch, String status,
@@ -555,9 +557,9 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Recalculate pagination based on desired number of rows
+     * Calculates pagination details based on total records and desired page size
      * @param totalRecords Total number of records
-     * @param desiredRows Number of rows user wants to display
+     * @param desiredRows Desired number of rows per page
      * @return Map containing pageSize and totalPages
      */
     public Map<String, Integer> calculatePagination(int totalRecords, int desiredRows) {
@@ -583,7 +585,18 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Find registrations with dynamic columns and pagination
+     * Finds registrations with dynamic column selection and pagination
+     * @param emailSearch Optional email search term
+     * @param subjectSearch Optional subject search term
+     * @param status Optional status filter
+     * @param fromDate Optional start date filter
+     * @param toDate Optional end date filter
+     * @param sortBy Field to sort by
+     * @param sortOrder Sort order (asc/desc)
+     * @param page Page number
+     * @param pageSize Number of records per page
+     * @param selectedColumns Array of column names to include in result
+     * @return List of matching Registration objects
      */
     public List<Registration> findRegistrationsWithDynamicColumns(
             String emailSearch, String subjectSearch, String status,
@@ -698,7 +711,13 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Count total filtered registrations
+     * Counts total number of registrations matching filter criteria
+     * @param emailSearch Optional email search term
+     * @param subjectSearch Optional subject search term
+     * @param status Optional status filter
+     * @param fromDate Optional start date filter
+     * @param toDate Optional end date filter
+     * @return Number of matching registrations
      */
     public int countFilteredRegistrations(
             String emailSearch, String subjectSearch, String status,
@@ -761,7 +780,8 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Lấy tất cả các giá trị status duy nhất từ bảng registrations
+     * Retrieves all unique status values from registrations
+     * @return List of unique status values
      */
     public List<String> getAllStatuses() {
         List<String> statuses = new ArrayList<>();

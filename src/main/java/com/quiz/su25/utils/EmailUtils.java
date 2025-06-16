@@ -69,18 +69,31 @@ public class EmailUtils {
 //        }
 //    }
 
+    // SMTP configuration constants
     private static final String SMTP_HOST = "smtp.gmail.com";
     private static final String SMTP_PORT = "587";
     private static final String SMTP_USERNAME = "tienhoang1524@gmail.com"; // Replace with your email
     private static final String SMTP_PASSWORD = "rdzs hcay eesp wfiy"; // Replace with your app password
 
+    /**
+     * Sends a registration confirmation email with detailed information
+     * @param toEmail Recipient email address
+     * @param fullName Recipient's full name
+     * @param password Account password (null for existing users)
+     * @param subjectTitle Title of the registered subject
+     * @param validFrom Registration validity start date
+     * @param validTo Registration validity end date
+     * @param notes Additional notes to include in the email
+     */
     public static void sendRegistrationEmail(String toEmail, String fullName, String password, String subjectTitle, String validFrom, String validTo, String notes) {
+        // Configure email properties
         Properties props = new Properties();
         props.put("mail.smtp.host", SMTP_HOST);
         props.put("mail.smtp.port", SMTP_PORT);
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
 
+        // Create email session with authentication
         Session session = Session.getInstance(props, new jakarta.mail.Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
@@ -89,11 +102,13 @@ public class EmailUtils {
         });
 
         try {
+            // Create and configure email message
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(SMTP_USERNAME));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
             message.setSubject("Welcome to Quiz Practice - Your Account Information");
 
+            // Generate HTML email content with styling
             String emailContent = String.format("""
                 <!DOCTYPE html>
                 <html>
@@ -192,7 +207,7 @@ public class EmailUtils {
                                 <span class="label">Password:</span>
                                 <span class="value">%s</span>
                             </div>
-                            <a href="http://localhost:8080/quiz-practice/login" class="button">Login Now</a>
+                            <a href="http://localhost:9999/SWP391_QuizPractice/login" class="button">Login Now</a>
                         </div>
                         
                         <div class="section">
@@ -241,6 +256,7 @@ public class EmailUtils {
                         </div>
                         """, notes) : "");
 
+            // Set email content and send
             message.setContent(emailContent, "text/html; charset=UTF-8");
             Transport.send(message);
             System.out.println("Registration email sent successfully to: " + toEmail);
@@ -251,6 +267,187 @@ public class EmailUtils {
         }
     }
 
+    /**
+     * Sends a payment confirmation email with detailed information
+     * @param toEmail Recipient email address
+     * @param fullName Recipient's full name
+     * @param subjectTitle Title of the registered subject
+     * @param validFrom Registration validity start date
+     * @param validTo Registration validity end date
+     * @param notes Additional notes to include in the email
+     */
+    public static void sendPaymentConfirmationEmail(String toEmail, String fullName, String subjectTitle, String validFrom, String validTo, String notes) {
+        // Configure email properties
+        Properties props = new Properties();
+        props.put("mail.smtp.host", SMTP_HOST);
+        props.put("mail.smtp.port", SMTP_PORT);
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+
+        // Create email session with authentication
+        Session session = Session.getInstance(props, new jakarta.mail.Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(SMTP_USERNAME, SMTP_PASSWORD);
+            }
+        });
+
+        try {
+            // Create and configure email message
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(SMTP_USERNAME));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+            message.setSubject("Payment Confirmation - Quiz Practice");
+
+            // Generate HTML email content with styling
+            String emailContent = String.format("""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            line-height: 1.6;
+                            color: #333;
+                            max-width: 600px;
+                            margin: 0 auto;
+                            padding: 20px;
+                        }
+                        .header {
+                            background-color: #28a745;
+                            color: white;
+                            padding: 20px;
+                            text-align: center;
+                            border-radius: 5px 5px 0 0;
+                        }
+                        .content {
+                            background-color: #ffffff;
+                            padding: 20px;
+                            border: 1px solid #e0e0e0;
+                            border-radius: 0 0 5px 5px;
+                        }
+                        .section {
+                            margin-bottom: 20px;
+                            padding: 15px;
+                            background-color: #f8f9fa;
+                            border-radius: 5px;
+                        }
+                        .section-title {
+                            color: #28a745;
+                            font-weight: bold;
+                            margin-bottom: 10px;
+                        }
+                        .info-item {
+                            margin: 10px 0;
+                        }
+                        .label {
+                            font-weight: bold;
+                            color: #666;
+                        }
+                        .value {
+                            color: #333;
+                        }
+                        .button {
+                            display: inline-block;
+                            padding: 10px 20px;
+                            background-color: #28a745;
+                            color: white;
+                            text-decoration: none;
+                            border-radius: 5px;
+                            margin: 20px 0;
+                        }
+                        .footer {
+                            text-align: center;
+                            margin-top: 20px;
+                            padding-top: 20px;
+                            border-top: 1px solid #e0e0e0;
+                            color: #666;
+                            font-size: 0.9em;
+                        }
+                        .important {
+                            background-color: #d4edda;
+                            border-left: 4px solid #28a745;
+                            padding: 10px;
+                            margin: 10px 0;
+                        }
+                        .notes {
+                            background-color: #e3f2fd;
+                            border-left: 4px solid #2196f3;
+                            padding: 10px;
+                            margin: 10px 0;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>Payment Confirmation</h1>
+                    </div>
+                    <div class="content">
+                        <p>Dear %s,</p>
+                        
+                        <p>We are pleased to confirm that your payment has been successfully processed. Your registration is now active!</p>
+                        
+                        <div class="section">
+                            <div class="section-title">📚 Registration Details</div>
+                            <div class="info-item">
+                                <span class="label">Subject:</span>
+                                <span class="value">%s</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Valid From:</span>
+                                <span class="value">%s</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Valid To:</span>
+                                <span class="value">%s</span>
+                            </div>
+                        </div>
+                        
+                        %s
+                        
+                        <div class="important">
+                            <strong>Important Notes:</strong>
+                            <ul>
+                                <li>You can now access all features of the course</li>
+                                <li>Your access will be valid until the end date specified above</li>
+                                <li>If you have any questions, please contact our support team</li>
+                            </ul>
+                        </div>
+                        
+                        <a href="http://localhost:9999/SWP391_QuizPractice/login" class="button">Access Your Course</a>
+                        
+                        <div class="footer">
+                            <p>Best regards,<br>Quiz Practice Team</p>
+                            <p>This is an automated message, please do not reply directly to this email.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """,
+                fullName, subjectTitle, validFrom, validTo,
+                notes != null && !notes.trim().isEmpty() ?
+                    String.format("""
+                        <div class="notes">
+                            <div class="section-title">📝 Additional Notes</div>
+                            <p>%s</p>
+                        </div>
+                        """, notes) : "");
+
+            // Set email content and send
+            message.setContent(emailContent, "text/html; charset=UTF-8");
+            Transport.send(message);
+            System.out.println("Payment confirmation email sent successfully to: " + toEmail);
+
+        } catch (MessagingException e) {
+            System.out.println("Error sending payment confirmation email: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Main method for testing email functionality
+     */
     public static void main(String[] args) {
         System.out.println("=== Testing Email Sending ===");
         
