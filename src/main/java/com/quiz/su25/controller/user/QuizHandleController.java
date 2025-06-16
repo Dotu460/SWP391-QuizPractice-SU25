@@ -424,20 +424,17 @@ public class QuizHandleController extends HttpServlet {
                         // Câu trả lời chỉ đúng khi chọn đủ và đúng tất cả các đáp án
                         boolean isCorrect = allCorrectOptionsSelected && !hasIncorrectSelection;
 
-                        // Lưu từng câu trả lời vào database thông qua QuizAttemptAnswerController
+                        // Gọi answerController.saveAnswer ở đây
                         for (Integer answerId : answers) {
-                            // Tạo request parameters cho QuizAttemptAnswerController
                             request.setAttribute("attemptId", currentAttemptId);
                             request.setAttribute("questionId", questionId);
                             request.setAttribute("selectedOptionId", answerId);
                             request.setAttribute("isCorrect", isCorrect);
                             request.setAttribute("action", "save_answer");
-
-                            // Gọi phương thức saveAnswer của QuizAttemptAnswerController
-                            answerController.saveAnswer(request, response,
-                                    UserQuizAttempts.builder().id(currentAttemptId).build());
+                            answerController.saveAnswer(request, response, UserQuizAttempts.builder().id(currentAttemptId).build());
                         }
                     }
+                    // Nếu không có đáp án, KHÔNG gọi answerController.saveAnswer
                     userAnswers.put(questionId, answers);
                 } else if ("essay".equals(question.getType())) {
                     // Xử lý câu hỏi tự luận
@@ -469,7 +466,10 @@ public class QuizHandleController extends HttpServlet {
             } catch (Exception e) {
                 System.out.println("Error in saveAnswer: " + e.getMessage());
                 e.printStackTrace();
-                response.sendRedirect(request.getContextPath() + "/quiz-handle?questionNumber=1");
+                if (!response.isCommitted()) {
+                    response.sendRedirect(request.getContextPath() + "/quiz-handle?questionNumber=1");
+                }
+                // Nếu đã committed thì không làm gì nữa
             }
         }
     }

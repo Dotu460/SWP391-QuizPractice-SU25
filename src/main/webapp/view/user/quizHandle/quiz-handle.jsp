@@ -1618,7 +1618,7 @@
                                 </c:if>
                                 <c:if test="${currentNumber == totalQuestions}">
                                     <button type="button" class="btn-nav btn-score" onclick="openScoreExamConfirmation()">
-                                        Score Exam
+                                        Submit Exam
                                         <i class="fas fa-check"></i>
                                     </button>
                                 </c:if>
@@ -2487,12 +2487,15 @@
 
             // Thêm debounce để tránh gửi quá nhiều request
             let timeoutId;
-            document.querySelector('.essay-answer').addEventListener('input', function(e) {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => {
-                    autoSaveEssayAnswer(e.target.value);
-                }, 1000); // Đợi 1 giây sau khi người dùng ngừng gõ
-            });
+            const essayInput = document.querySelector('.essay-answer');
+            if (essayInput) {
+                essayInput.addEventListener('input', function(e) {
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(() => {
+                        autoSaveEssayAnswer(e.target.value);
+                    }, 1000); // Đợi 1 giây sau khi người dùng ngừng gõ
+                });
+            }
         </script>
 
         <script>

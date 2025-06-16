@@ -49,7 +49,7 @@ public class QuizAttemptAnswerController extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet QuizAttemptAnswerController</title>");            
+            out.println("<title>Servlet QuizAttemptAnswerController</title>");
             out.println("</head>");
             out.println("<body>");
             out.println("<h1>Servlet QuizAttemptAnswerController at " + request.getContextPath() + "</h1>");
@@ -71,7 +71,7 @@ public class QuizAttemptAnswerController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String attemptIdStr = request.getParameter("attemptId");
-        
+
         if (attemptIdStr == null) {
             response.sendRedirect("home");
             return;
@@ -80,7 +80,7 @@ public class QuizAttemptAnswerController extends HttpServlet {
         try {
             Integer attemptId = Integer.parseInt(attemptIdStr);
             UserQuizAttempts attempt = attemptsDAO.findById(attemptId);
-            
+
             if (attempt == null || !GlobalConfig.QUIZ_ATTEMPT_STATUS_IN_PROGRESS.equals(attempt.getStatus())) {
                 response.sendRedirect("home");
                 return;
@@ -89,9 +89,10 @@ public class QuizAttemptAnswerController extends HttpServlet {
             // Forward to the quiz attempt page
             request.setAttribute("attempt", attempt);
             request.getRequestDispatcher("quiz-attempt.jsp").forward(request, response);
-            
+
         } catch (NumberFormatException e) {
             response.sendRedirect("home");
+            return;
         }
     }
 
@@ -108,7 +109,7 @@ public class QuizAttemptAnswerController extends HttpServlet {
             throws ServletException, IOException {
         String attemptIdStr = request.getParameter("attemptId");
         String action = request.getParameter("action");
-        
+
         if (attemptIdStr == null) {
             response.sendRedirect("home");
             return;
@@ -117,7 +118,7 @@ public class QuizAttemptAnswerController extends HttpServlet {
         try {
             Integer attemptId = Integer.parseInt(attemptIdStr);
             UserQuizAttempts attempt = attemptsDAO.findById(attemptId);
-            
+
             if (attempt == null || !GlobalConfig.QUIZ_ATTEMPT_STATUS_IN_PROGRESS.equals(attempt.getStatus())) {
                 response.sendRedirect("home");
                 return;
@@ -129,15 +130,18 @@ public class QuizAttemptAnswerController extends HttpServlet {
                 submitQuiz(request, response, attempt);
             } else {
                 response.sendRedirect("home");
+                return;
             }
-            
+
         } catch (NumberFormatException e) {
             response.sendRedirect("home");
+            return;
         }
     }
 
     /**
      * Lưu câu trả lời cho một câu hỏi trong attempt
+     *
      * @param request HttpServletRequest chứa thông tin câu trả lời
      * @param response HttpServletResponse
      * @param attempt UserQuizAttempts object
@@ -148,11 +152,31 @@ public class QuizAttemptAnswerController extends HttpServlet {
             throws ServletException, IOException {
         // Get the answer data from the request
         String questionIdStr = request.getParameter("questionId");
+        if (questionIdStr == null) {
+            Object attr = request.getAttribute("questionId");
+            if (attr != null) questionIdStr = attr.toString();
+        }
         String selectedOptionIdStr = request.getParameter("selectedOptionId");
+        if (selectedOptionIdStr == null) {
+            Object attr = request.getAttribute("selectedOptionId");
+            if (attr != null) selectedOptionIdStr = attr.toString();
+        }
         String isCorrectStr = request.getParameter("isCorrect");
-        
+        if (isCorrectStr == null) {
+            Object attr = request.getAttribute("isCorrect");
+            if (attr != null) isCorrectStr = attr.toString();
+        }
+
         if (questionIdStr == null || selectedOptionIdStr == null || isCorrectStr == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing required parameters");
+            System.out.println("DEBUG PARAMS: questionIdStr=" + questionIdStr
+                    + ", selectedOptionIdStr=" + selectedOptionIdStr
+                    + ", isCorrectStr=" + isCorrectStr);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                    "Missing required parameters: "
+                    + (questionIdStr == null ? "questionId " : "")
+                    + (selectedOptionIdStr == null ? "selectedOptionId " : "")
+                    + (isCorrectStr == null ? "isCorrect" : "")
+            );
             return;
         }
 
@@ -163,7 +187,7 @@ public class QuizAttemptAnswerController extends HttpServlet {
 
             // Check if answer already exists for this question
             UserQuizAttemptAnswers existingAnswer = answersDAO.findByAttemptAndQuestionId(attempt.getId(), questionId);
-            
+
             if (existingAnswer != null) {
                 // Update existing answer
                 existingAnswer.setSelected_option_id(selectedOptionId);
@@ -181,14 +205,15 @@ public class QuizAttemptAnswerController extends HttpServlet {
                         .build();
                 answersDAO.insert(newAnswer);
             }
-            
+
             // Send success response
             response.setContentType("application/json");
             PrintWriter out = response.getWriter();
             out.print("{\"success\": true}");
-            
+            return;
         } catch (NumberFormatException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid parameters");
+            return;
         }
     }
 
@@ -197,21 +222,21 @@ public class QuizAttemptAnswerController extends HttpServlet {
         // Calculate final score
         int totalQuestions = answersDAO.findByAttemptId(attempt.getId()).size();
         int correctAnswers = answersDAO.countCorrectAnswers(attempt.getId());
-        
+
         if (totalQuestions > 0) {
             double score = (double) correctAnswers / totalQuestions * 100;
             boolean passed = score >= 60; // Assuming 60% is passing score
-            
+
             // Update attempt with final score
             attempt.setScore(score);
             attempt.setPassed(passed);
             attempt.setEnd_time(Date.valueOf(LocalDate.now()));
             attempt.setStatus(GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED);
             attempt.setUpdate_at(Date.valueOf(LocalDate.now()));
-            
+
             attemptsDAO.update(attempt);
         }
-        
+
         // Redirect to results page
         response.sendRedirect("quiz-results?attemptId=" + attempt.getId());
     }
