@@ -437,6 +437,29 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
         return 0;
     }
     
+    /**
+     * Đếm tổng số câu hỏi thuộc một quiz cụ thể.
+     * @param quizId ID của quiz.
+     * @return Tổng số câu hỏi trong quiz.
+     */
+    public int countQuestionsByQuizId(Integer quizId) {
+        String sql = "SELECT COUNT(*) as total FROM Question WHERE quiz_id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, quizId);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt("total");
+            }
+        } catch (Exception e) {
+            System.out.println("Error countQuestionsByQuizId at class QuestionDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return 0;
+    }
+    
     public static void main(String[] args) {
         QuestionDAO questionDAO = new QuestionDAO();
         questionDAO.findAll().forEach(item -> {

@@ -2324,9 +2324,30 @@
 
             // Hàm xử lý điều hướng
             function handleNavigation(action) {
+                console.log('=== handleNavigation Debug ===');
+                console.log('Action:', action);
                 saveCurrentState();
+                
+                const form = document.getElementById('answerForm');
+                const formData = new FormData(form);
+                
+                console.log('Form elements:', {
+                    action: form.querySelector('input[name="action"]').value,
+                    nextAction: document.getElementById('nextAction').value,
+                    questionId: formData.get('questionId'),
+                    questionNumber: formData.get('questionNumber'),
+                    answers: formData.getAll('answer')
+                });
+                
+                form.querySelector('input[name="action"]').value = 'saveAnswer';
                 document.getElementById('nextAction').value = action;
-                document.getElementById('answerForm').submit();
+                
+                console.log('Updated form data:', {
+                    action: form.querySelector('input[name="action"]').value,
+                    nextAction: document.getElementById('nextAction').value
+                });
+                
+                form.submit();
             }
 
             // Hàm lưu trạng thái hiện tại
@@ -2394,8 +2415,44 @@
                 
                 // Thêm event listener cho nút confirm
                 confirmButton.onclick = function() {
+                    console.log('=== Score Exam Debug ===');
                     closeScoreExamPopup();
-                    handleScoreExam();
+                    
+                    const form = document.getElementById('answerForm');
+                    const formData = new FormData(form);
+                    
+                    // Log form data trước khi thay đổi
+                    console.log('Initial form data:', {
+                        action: formData.get('action'),
+                        questionId: formData.get('questionId'),
+                        questionNumber: formData.get('questionNumber'),
+                        answers: formData.getAll('answer')
+                    });
+                    
+                    // Lấy dữ liệu từ sessionStorage
+                    const savedAnswers = JSON.parse(sessionStorage.getItem('selectedAnswers') || '{}');
+                    console.log('Saved answers from session:', savedAnswers);
+                    
+                    // Thêm hidden input cho userAnswers nếu chưa có
+                    let userAnswersInput = form.querySelector('input[name="userAnswers"]');
+                    if (!userAnswersInput) {
+                        userAnswersInput = document.createElement('input');
+                        userAnswersInput.type = 'hidden';
+                        userAnswersInput.name = 'userAnswers';
+                        form.appendChild(userAnswersInput);
+                    }
+                    userAnswersInput.value = JSON.stringify(savedAnswers);
+                    
+                    form.querySelector('input[name="action"]').value = 'score';
+                    
+                    // Log form data sau khi thay đổi
+                    const updatedFormData = new FormData(form);
+                    console.log('Updated form data:', {
+                        action: updatedFormData.get('action'),
+                        userAnswers: updatedFormData.get('userAnswers')
+                    });
+                    
+                    form.submit();
                 };
                 
                 // Hiển thị popup
@@ -2502,7 +2559,51 @@
             // Hàm xử lý khi bấm nút Score Exam trong popup xác nhận
             function handleScoreExam() {
                 try {
-                    submitQuiz();
+                    // Đóng popup xác nhận
+                    closeScoreExamPopup();
+                    
+                    // Lấy dữ liệu từ sessionStorage và chuyển thành object
+                    const savedAnswers = JSON.parse(sessionStorage.getItem('selectedAnswers') || '{}');
+                    
+                    // Tạo object chứa dữ liệu gửi đi
+                    const requestData = {
+                        action: 'score',
+                        userAnswers: savedAnswers
+                    };
+                    
+                    // Log để debug
+                    console.log('Sending data:', requestData);
+                    
+                    // Gửi request bằng fetch API
+                    fetch('${pageContext.request.contextPath}/quiz-handle', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Success:', data);
+                        if (data.score !== undefined) {
+                            // Lưu điểm vào sessionStorage
+                            sessionStorage.setItem('quizScore', data.score);
+                            // Redirect về trang quiz-handle-menu
+                            window.location.href = '${pageContext.request.contextPath}/quiz-handle-menu';
+                            
+                            // Xóa dữ liệu trong sessionStorage
+                            sessionStorage.removeItem('selectedAnswers');
+                            sessionStorage.removeItem('answeredQuestions');
+                            sessionStorage.removeItem('markedQuestions');
+                        } else if (data.error) {
+                            throw new Error(data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Đã xảy ra lỗi khi chấm điểm: ' + error.message);
+                    });
+                    
                 } catch (error) {
                     console.error('Error in handleScoreExam:', error);
                     alert('Đã xảy ra lỗi khi xử lý dữ liệu: ' + error.message);
