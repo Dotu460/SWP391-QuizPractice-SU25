@@ -2551,10 +2551,10 @@
                 .then(text => {
                     try {
                         const data = JSON.parse(text);
-                        // Lưu điểm số vào session
+                        // Lưu điểm vào sessionStorage (hoặc localStorage)
                         sessionStorage.setItem('quizScore', data.score);
-                        // Chuyển hướng đến trang kết quả
-                        window.location.href = '${pageContext.request.contextPath}/quiz-handle-score';
+                        //rediẻc về trang quiz-handle-menu.jsp để hiển thị điểm
+                        window.location.href = '${pageContext.request.contextPath}/quiz-handle-menu';
                         
                         // Xóa dữ liệu trong sessionStorage sau khi chấm điểm thành công
                         sessionStorage.removeItem('selectedAnswers');

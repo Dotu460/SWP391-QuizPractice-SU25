@@ -159,5 +159,16 @@
                 }
             });
         </script>
+        
+        <script>
+            //hiển thị điểm vừa đạt
+            document.addEventListener('DOMContentLoaded', function() {
+                const score = sessionStorage.getItem('quizScore');
+                if (score) {
+                    alert('Your score: ' + score);
+                    sessionStorage.removeItem('quizScore');
+                }
+            });
+  </script>
     </body>
 </html>
