@@ -536,11 +536,12 @@
                                                                 <c:when test="${column == 'subject'}">${subjectTitles[reg.subject_id]}</c:when>
                                                                 <c:when test="${column == 'package'}">${packageNames[reg.package_id]}</c:when>
                                                                 <c:when test="${column == 'total_cost'}">$${reg.total_cost}</c:when>
-                                                                <c:when test="${column == 'status'}">
-                                                                    <span class="badge ${reg.status == 'pending' ? 'bg-warning' : reg.status == 'paid' ? 'bg-success' : 'bg-danger'}">
-                                                                        ${reg.status}
-                                                                    </span>
-                                                                </c:when>
+<%--                                                                <c:when test="${column == 'status'}">--%>
+<%--                                                                    <span class="badge ${reg.status == 'pending' ? 'bg-warning' : reg.status == 'paid' ? 'bg-success' : 'bg-danger'}">--%>
+<%--                                                                        ${reg.status}--%>
+<%--                                                                    </span>--%>
+<%--                                                                </c:when> --%>
+                                                                <c:when test="${column == 'status'}">${reg.status}</c:when>
                                                                 <c:when test="${column == 'valid_from'}">
                                                                     <fmt:formatDate value="${reg.valid_from}" pattern="yyyy-MM-dd"/>
                                                                 </c:when>
@@ -548,7 +549,7 @@
                                                                     <fmt:formatDate value="${reg.valid_to}" pattern="yyyy-MM-dd"/>
                                                                 </c:when>
                                                                 <c:when test="${column == 'registration_time'}">
-                                                                    <fmt:formatDate value="${reg.registration_time}" pattern="yyyy-MM-dd HH:mm:ss"/>
+                                                                    <fmt:formatDate value="${reg.registration_time}" pattern="yyyy-MM-dd"/>
                                                                 </c:when>
                                                             </c:choose>
                                                         </td>
@@ -573,7 +574,7 @@
                                                 <label class="input-group-text" for="pageSize">Rows per page</label>
                                                 <input type="number" class="form-control" id="pageSize" name="pageSize" 
                                                        min="1" max="1000" value="${pageSize}" 
-                                                       placeholder="Rows per page">
+                                                       placeholder="Enter number of rows">
                                             </div>
                                         </div>
                                         <div class="col-md-3">
@@ -581,7 +582,7 @@
                                                 <c:set var="startRow" value="${(page-1)*pageSize + 1}"/>
                                                 <c:set var="endRow" value="${page*pageSize}"/>
                                                 <c:set var="displayEndRow" value="${endRow > totalRecords ? totalRecords : endRow}"/>
-<%--                                                Showing ${startRow} to ${displayEndRow} of ${totalRecords} entries--%>
+                                                Showing ${startRow} to ${displayEndRow} of ${totalRecords} entries
                                             </p>
                                         </div>
                                         <div class="col-md-6">
@@ -589,7 +590,7 @@
                                                 <ul class="pagination justify-content-end mb-0">
                                                     <!-- Previous page -->
                                                     <li class="page-item ${page == 1 ? 'disabled' : ''}">
-                                                        <a class="page-link" href="${pageContext.request.contextPath}/admin/registrations?page=${page-1}&pageSize=${pageSize}&emailSearch=${emailSearch}&subjectSearch=${subjectSearch}&status=${status}&fromDate=${fromDate}&toDate=${toDate}&sortBy=${sortBy}&sortOrder=${sortOrder}" aria-label="Previous">
+                                                        <a class="page-link" href="${pageContext.request.contextPath}/admin/registrations?page=${page-1}&pageSize=${pageSize}&emailSearch=${emailSearch}&subjectSearch=${subjectSearch}&status=${status}&fromDate=${fromDate}&toDate=${toDate}&sortBy=${sortBy}&sortOrder=${sortOrder}<c:forEach items="${selectedColumns}" var="col">&selectedColumns=${col}</c:forEach>" aria-label="Previous">
                                                             <span aria-hidden="true">&laquo;</span>
                                                         </a>
                                                     </li>
@@ -597,13 +598,13 @@
                                                     <!-- Page numbers -->
                                                     <c:forEach begin="1" end="${totalPages}" var="i">
                                                         <li class="page-item ${page == i ? 'active' : ''}">
-                                                            <a class="page-link" href="${pageContext.request.contextPath}/admin/registrations?page=${i}&pageSize=${pageSize}&emailSearch=${emailSearch}&subjectSearch=${subjectSearch}&status=${status}&fromDate=${fromDate}&toDate=${toDate}&sortBy=${sortBy}&sortOrder=${sortOrder}">${i}</a>
+                                                            <a class="page-link" href="${pageContext.request.contextPath}/admin/registrations?page=${i}&pageSize=${pageSize}&emailSearch=${emailSearch}&subjectSearch=${subjectSearch}&status=${status}&fromDate=${fromDate}&toDate=${toDate}&sortBy=${sortBy}&sortOrder=${sortOrder}<c:forEach items="${selectedColumns}" var="col">&selectedColumns=${col}</c:forEach>">${i}</a>
                                                         </li>
                                                     </c:forEach>
                                                     
                                                     <!-- Next page -->
                                                     <li class="page-item ${page == totalPages ? 'disabled' : ''}">
-                                                        <a class="page-link" href="${pageContext.request.contextPath}/admin/registrations?page=${page+1}&pageSize=${pageSize}&emailSearch=${emailSearch}&subjectSearch=${subjectSearch}&status=${status}&fromDate=${fromDate}&toDate=${toDate}&sortBy=${sortBy}&sortOrder=${sortOrder}" aria-label="Next">
+                                                        <a class="page-link" href="${pageContext.request.contextPath}/admin/registrations?page=${page+1}&pageSize=${pageSize}&emailSearch=${emailSearch}&subjectSearch=${subjectSearch}&status=${status}&fromDate=${fromDate}&toDate=${toDate}&sortBy=${sortBy}&sortOrder=${sortOrder}<c:forEach items="${selectedColumns}" var="col">&selectedColumns=${col}</c:forEach>" aria-label="Next">
                                                             <span aria-hidden="true">&raquo;</span>
                                                         </a>
                                                     </li>
@@ -630,15 +631,15 @@
     <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
 
     <script>
-        // Handle form submission
+        // Handle form submission for filtering and pagination
         document.getElementById('filterForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // Get date values
+            // Get date values for validation
             const fromDate = document.querySelector('input[name="fromDate"]').value;
             const toDate = document.querySelector('input[name="toDate"]').value;
             
-            // Validate dates if both are provided
+            // Validate date range if both dates are provided
             if (fromDate && toDate) {
                 if (new Date(fromDate) > new Date(toDate)) {
                     alert('End date must be greater than or equal to start date');
@@ -646,11 +647,40 @@
                 }
             }
             
-            // Submit form if validation passes
+            // Validate column selection - at least one column must be selected
+            var checkedColumns = document.querySelectorAll('.column-selector:checked');
+            if (checkedColumns.length === 0) {
+                alert('Please select at least one column to display');
+                return;
+            }
+            
+            // Validate and adjust page size
+            const pageSizeInput = document.getElementById('pageSize');
+            let pageSize = parseInt(pageSizeInput.value);
+            
+            if (isNaN(pageSize) || pageSize < 1) {
+                alert('Page size must be at least 1');
+                pageSizeInput.value = 1;
+                pageSize = 1;
+            }
+            if (pageSize > 1000) {
+                alert('Page size cannot exceed 1000');
+                pageSizeInput.value = 1000;
+                pageSize = 1000;
+            }
+            
+            // Add validated page size to form data
+            const hiddenPageSizeInput = document.createElement('input');
+            hiddenPageSizeInput.type = 'hidden';
+            hiddenPageSizeInput.name = 'pageSize';
+            hiddenPageSizeInput.value = pageSize;
+            this.appendChild(hiddenPageSizeInput);
+            
+            // Submit form if all validations pass
             this.submit();
         });
 
-        // Handle date input changes
+        // Handle date input changes for real-time validation
         document.querySelector('input[name="fromDate"]').addEventListener('change', function() {
             const toDate = document.querySelector('input[name="toDate"]');
             if (this.value && toDate.value && new Date(this.value) > new Date(toDate.value)) {
@@ -667,31 +697,9 @@
             }
         });
 
-        // Handle page size change
-        document.getElementById('pageSize').addEventListener('change', function() {
-            // Reset to page 1 when changing page size
-            const pageInput = document.createElement('input');
-            pageInput.type = 'hidden';
-            pageInput.name = 'page';
-            pageInput.value = '1';
-            this.form.appendChild(pageInput);
-            this.form.submit();
-        });
-
-        // Add JavaScript to handle form submission
-        document.getElementById('filterForm').addEventListener('submit', function(e) {
-            // Get all checked columns
-            var checkedColumns = document.querySelectorAll('.column-selector:checked');
-            if (checkedColumns.length === 0) {
-                e.preventDefault();
-                alert('Please select at least one column to display');
-                return;
-            }
-        });
-
-        // Initialize checkboxes on page load
+        // Initialize column selection on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // If no checkboxes are checked and no selectedColumns in URL, check all by default
+            // Check all columns by default if no selection exists
             var checkedColumns = document.querySelectorAll('.column-selector:checked');
             var hasSelectedColumns = window.location.search.includes('selectedColumns=');
             

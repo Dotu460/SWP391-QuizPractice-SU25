@@ -16,24 +16,39 @@ import jakarta.mail.internet.MimeMessage;
 import java.util.logging.Level;
 
 /**
- *
- * @author LENOVO
+ * Utility class for handling email operations in the application.
+ * Provides functionality for:
+ * - Sending general emails
+ * - Sending OTP verification emails
+ * - Sending registration confirmation emails
  */
 public class EmailUtils {
 //    private static final String USERNAME_EMAIL = "trinhkhanhlinh60@gmail.com";
 //    private static final String PASSWORD_APP_EMAIL = "nkbm sttl hpaj pmrw";
 
+    // Email configuration constants
     private static final String USERNAME_EMAIL = "tienhoang1524@gmail.com";
     private static final String PASSWORD_APP_EMAIL = "rdzs hcay eesp wfiy";
 
     
+    /**
+     * Sends a general email with HTML content
+     * @param to Recipient email address
+     * @param subject Email subject
+     * @param content HTML content of the email
+     * @return true if email sent successfully
+     * @throws AddressException if email address is invalid
+     * @throws MessagingException if there's an error sending the email
+     */
     public static boolean sendMail(String to, String subject, String content) throws AddressException, MessagingException{
+        // Configure email properties
         Properties props = new Properties();
         props.put("mail.smtp.host","smtp.gmail.com");
         props.put("mail.smtp.port","587");
         props.put("mail.smtp.auth","true");
         props.put("mail.smtp.starttls.enable","true");
         
+        // Create email session with authentication
         Session session = Session.getInstance(props, new jakarta.mail.Authenticator(){
             @Override
             protected PasswordAuthentication getPasswordAuthentication(){
@@ -46,10 +61,17 @@ public class EmailUtils {
         message.setSubject(subject);
         message.setContent(content,"text/html; charset=UTF-8");
         
+        // Send the email
         Transport.send(message);
         return true;
     }
+    /**
+     * Sends an OTP verification email
+     * @param to Recipient email address
+     * @return Generated OTP as a string
+     */
     public static String sendOTPMail(String to){
+        // Generate 6-digit OTP
         int otp = generateOTP(6);
         String subject = "Ma OTP";
         String content = " Ma OTP cua ban la: " + otp;
@@ -61,10 +83,15 @@ public class EmailUtils {
         }
         return String.valueOf(otp);
     }
-        private static int generateOTP(int i) {
-            int otp = (int)(Math.random() * Math.pow(10,i));
-            return otp;
-        }
+    /**
+     * Generates a random OTP of specified length
+     * @param i Length of the OTP
+     * @return Generated OTP as an integer
+     */
+    private static int generateOTP(int i) {
+        int otp = (int)(Math.random() * Math.pow(10,i));
+        return otp;
+    }
 //    public static void main(String[] args){
 //        try {
 //            sendMail("khanhlinhtrinh323@gmail.com","test tao mail","helooo");
@@ -73,18 +100,31 @@ public class EmailUtils {
 //        }
 //    }
 
+    // SMTP configuration constants
     private static final String SMTP_HOST = "smtp.gmail.com";
     private static final String SMTP_PORT = "587";
     private static final String SMTP_USERNAME = "tienhoang1524@gmail.com"; // Replace with your email
     private static final String SMTP_PASSWORD = "rdzs hcay eesp wfiy"; // Replace with your app password
 
+    /**
+     * Sends a registration confirmation email with detailed information
+     * @param toEmail Recipient email address
+     * @param fullName Recipient's full name
+     * @param password Account password (null for existing users)
+     * @param subjectTitle Title of the registered subject
+     * @param validFrom Registration validity start date
+     * @param validTo Registration validity end date
+     * @param notes Additional notes to include in the email
+     */
     public static void sendRegistrationEmail(String toEmail, String fullName, String password, String subjectTitle, String validFrom, String validTo, String notes) {
+        // Configure email properties
         Properties props = new Properties();
         props.put("mail.smtp.host", SMTP_HOST);
         props.put("mail.smtp.port", SMTP_PORT);
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
 
+        // Create email session with authentication
         Session session = Session.getInstance(props, new jakarta.mail.Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
@@ -93,11 +133,13 @@ public class EmailUtils {
         });
 
         try {
+            // Create and configure email message
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(SMTP_USERNAME));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
             message.setSubject("Welcome to Quiz Practice - Your Account Information");
 
+            // Generate HTML email content with styling
             String emailContent = String.format("""
                 <!DOCTYPE html>
                 <html>
@@ -196,7 +238,7 @@ public class EmailUtils {
                                 <span class="label">Password:</span>
                                 <span class="value">%s</span>
                             </div>
-                            <a href="http://localhost:8080/quiz-practice/login" class="button">Login Now</a>
+                            <a href="http://localhost:9999/SWP391_QuizPractice/login" class="button">Login Now</a>
                         </div>
                         
                         <div class="section">
@@ -245,6 +287,7 @@ public class EmailUtils {
                         </div>
                         """, notes) : "");
 
+            // Set email content and send
             message.setContent(emailContent, "text/html; charset=UTF-8");
             Transport.send(message);
             System.out.println("Registration email sent successfully to: " + toEmail);
@@ -255,6 +298,9 @@ public class EmailUtils {
         }
     }
 
+    /**
+     * Main method for testing email functionality
+     */
     public static void main(String[] args) {
         System.out.println("=== Testing Email Sending ===");
         
