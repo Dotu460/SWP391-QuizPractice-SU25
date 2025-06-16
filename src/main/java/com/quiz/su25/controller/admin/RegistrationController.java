@@ -106,7 +106,7 @@ public class RegistrationController extends HttpServlet {
             String[] selectedColumns = request.getParameterValues("selectedColumns");
             if (selectedColumns == null || selectedColumns.length == 0) {
                 // Default columns if none selected
-                selectedColumns = new String[]{"id", "email", "subject", "package", "total_cost", "status", "valid_from", "valid_to", "registration_time"};
+                selectedColumns = new String[]{"id", "email", "subject", "package", "total_cost", "status", "valid_from", "valid_to", "registration_time", "last_updated_by"};
             }
             
             // Handle pagination parameters
@@ -490,6 +490,23 @@ public class RegistrationController extends HttpServlet {
         // Insert registration
         int registrationId = registrationDAO.insert(registration);
         if (registrationId > 0) {
+            // Check if status is "paid" and send email
+            if ("paid".equals(status)) {
+                // Get subject title
+                Subject subject = subjectDAO.findById(subjectId);
+                String subjectTitle = subject != null ? subject.getTitle() : "Unknown Subject";
+                
+                // Send payment confirmation email
+                EmailUtils.sendPaymentConfirmationEmail(
+                    email,
+                    fullName,
+                    subjectTitle,
+                    validFrom.toString(),
+                    validTo.toString(),
+                    request.getParameter("notes") // Use the custom email content
+                );
+            }
+            
             // Clear any error messages from session
             clearSessionErrors(request.getSession());
             // Redirect to list with success message
@@ -607,11 +624,10 @@ public class RegistrationController extends HttpServlet {
                 Subject subject = subjectDAO.findById(subjectId);
                 String subjectTitle = subject != null ? subject.getTitle() : "Unknown Subject";
                 
-                // Send confirmation email
-                EmailUtils.sendRegistrationEmail(
+                // Send payment confirmation email
+                EmailUtils.sendPaymentConfirmationEmail(
                     email,
                     fullName,
-                    null, // No password needed for existing users
                     subjectTitle,
                     validFrom.toString(),
                     validTo.toString(),

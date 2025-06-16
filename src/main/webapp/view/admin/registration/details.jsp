@@ -350,7 +350,7 @@
                                                 <select id="package" name="packageId" class="${packageError != null ? 'is-invalid' : ''}">
                                                     <c:forEach items="${pricePackages}" var="pkg">
                                                         <option value="${pkg.id}" ${registration != null && registration.package_id == pkg.id ? 'selected' : ''}>
-                                                            ${pkg.name} - $${pkg.sale_price}
+                                                            ${pkg.name} - Original: $${pkg.list_price} - Sale: $${pkg.sale_price}
                                                         </option>
                                                     </c:forEach>
                                                 </select>
