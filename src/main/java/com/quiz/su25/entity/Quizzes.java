@@ -20,14 +20,18 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter
 @Setter
-
-public class Lesson {
+public class Quizzes {
     private Integer id;
-    private Integer subject_id;
-    private String title;
-    private String content_text;
-    private String content_url;
-    private Integer order_in_subject;
+    private String name;
+    private Integer lesson_id;
+    private String level;
+    private Integer number_of_questions_target;
+    private Integer duration_minutes;
+    private Double pass_rate;
+    private String quiz_type;
     private String status;
+    private Date created_at;
+    private Date updated_at;
+    private Integer created_by;
 
 }

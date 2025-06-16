@@ -16,39 +16,20 @@ import jakarta.mail.internet.MimeMessage;
 import java.util.logging.Level;
 
 /**
- * Utility class for handling email operations in the application.
- * Provides functionality for:
- * - Sending general emails
- * - Sending OTP verification emails
- * - Sending registration confirmation emails
+ *
+ * @author LENOVO
  */
 public class EmailUtils {
-//    private static final String USERNAME_EMAIL = "trinhkhanhlinh60@gmail.com";
-//    private static final String PASSWORD_APP_EMAIL = "nkbm sttl hpaj pmrw";
-
-    // Email configuration constants
-    private static final String USERNAME_EMAIL = "tienhoang1524@gmail.com";
-    private static final String PASSWORD_APP_EMAIL = "rdzs hcay eesp wfiy";
-
+    private static final String USERNAME_EMAIL = "trinhkhanhlinh60@gmail.com";
+    private static final String PASSWORD_APP_EMAIL = "ygut kwfj pcol wnrs";
     
-    /**
-     * Sends a general email with HTML content
-     * @param to Recipient email address
-     * @param subject Email subject
-     * @param content HTML content of the email
-     * @return true if email sent successfully
-     * @throws AddressException if email address is invalid
-     * @throws MessagingException if there's an error sending the email
-     */
     public static boolean sendMail(String to, String subject, String content) throws AddressException, MessagingException{
-        // Configure email properties
         Properties props = new Properties();
         props.put("mail.smtp.host","smtp.gmail.com");
         props.put("mail.smtp.port","587");
         props.put("mail.smtp.auth","true");
         props.put("mail.smtp.starttls.enable","true");
         
-        // Create email session with authentication
         Session session = Session.getInstance(props, new jakarta.mail.Authenticator(){
             @Override
             protected PasswordAuthentication getPasswordAuthentication(){
@@ -61,17 +42,10 @@ public class EmailUtils {
         message.setSubject(subject);
         message.setContent(content,"text/html; charset=UTF-8");
         
-        // Send the email
         Transport.send(message);
         return true;
     }
-    /**
-     * Sends an OTP verification email
-     * @param to Recipient email address
-     * @return Generated OTP as a string
-     */
     public static String sendOTPMail(String to){
-        // Generate 6-digit OTP
         int otp = generateOTP(6);
         String subject = "Ma OTP";
         String content = " Ma OTP cua ban la: " + otp;
@@ -83,15 +57,10 @@ public class EmailUtils {
         }
         return String.valueOf(otp);
     }
-    /**
-     * Generates a random OTP of specified length
-     * @param i Length of the OTP
-     * @return Generated OTP as an integer
-     */
-    private static int generateOTP(int i) {
-        int otp = (int)(Math.random() * Math.pow(10,i));
-        return otp;
-    }
+        private static int generateOTP(int i) {
+            int otp = (int)(Math.random() * Math.pow(10,i));
+            return otp;
+        }
 //    public static void main(String[] args){
 //        try {
 //            sendMail("khanhlinhtrinh323@gmail.com","test tao mail","helooo");
@@ -455,9 +424,9 @@ public class EmailUtils {
                     </div>
                 </body>
                 </html>
-                """, 
+                """,
                 fullName, subjectTitle, validFrom, validTo,
-                notes != null && !notes.trim().isEmpty() ? 
+                notes != null && !notes.trim().isEmpty() ?
                     String.format("""
                         <div class="notes">
                             <div class="section-title">📝 Additional Notes</div>

@@ -10,11 +10,12 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>Quiz Practice - Home</title>
+        <title>SkillGro - Home</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
         <jsp:include page="../common/user/link_css_common.jsp"/>
         <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css"/> 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/view/common/css/main.css"/>
+        <link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/view/common/img/favicon.png">
         
         <style>
             /* Đảm bảo chỉ hiện slide đang active */

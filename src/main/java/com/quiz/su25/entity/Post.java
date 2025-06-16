@@ -22,6 +22,7 @@ import java.sql.Date;
 public class Post {
     private Integer id;
     private String title;
+    private String category;
     private String thumbnail_url;
     private String brief_info;
     private String content;
