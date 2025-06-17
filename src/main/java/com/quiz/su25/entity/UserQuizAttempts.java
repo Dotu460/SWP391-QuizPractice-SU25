@@ -3,6 +3,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.quiz.su25.entity;
+/**
+ *
+ * @author quangmingdoc
+ */
 
 import java.sql.Date;
 import lombok.AllArgsConstructor;
@@ -20,17 +24,17 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Quizzes {
+
+public class UserQuizAttempts {
     private Integer id;
-    private String name;
-    private Integer lesson_id;
-    private String level;
-    private Integer number_of_questions_target;
-    private Integer duration_minutes;
-    private Double pass_rate;
-    private String quiz_type;
-    private String status;
-    private Date created_at;
-    private Date updated_at;
-    private Integer created_by;
+    private Integer user_id;
+    private Integer quiz_id;
+    private Date start_time;
+    private Date end_time;
+    private Double score;
+    private Boolean passed;   //1 - passed n 0 - not passed
+    private String status;    //in_progress - completed
+    private Date created_at;  
+    private Date update_at;
+    
 }

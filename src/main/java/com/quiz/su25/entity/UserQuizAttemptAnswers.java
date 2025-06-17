@@ -4,6 +4,11 @@
  */
 package com.quiz.su25.entity;
 
+/**
+ *
+ * @author quangmingdoc
+ */
+
 import java.sql.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,17 +25,12 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Quizzes {
-    private Integer id;
-    private String name;
-    private Integer lesson_id;
-    private String level;
-    private Integer number_of_questions_target;
-    private Integer duration_minutes;
-    private Double pass_rate;
-    private String quiz_type;
-    private String status;
-    private Date created_at;
-    private Date updated_at;
-    private Integer created_by;
+
+public class UserQuizAttemptAnswers {
+   private Integer id;
+   private Integer attempt_id;
+   private Integer quiz_question_id;
+   private Integer selected_option_id;
+   private Boolean correct;  //1 - correct 0 - incorrect
+   private Date answer_at;
 }
