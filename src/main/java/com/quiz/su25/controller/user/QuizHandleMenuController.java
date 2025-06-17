@@ -23,6 +23,7 @@ public class QuizHandleMenuController extends HttpServlet {
     private final QuizzesDAO quizzesDAO = new QuizzesDAO();
     private final UserQuizAttemptsDAO userQuizAttemptsDAO = new UserQuizAttemptsDAO();
     
+    //all
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
