@@ -243,9 +243,9 @@
                                             </select>
                                         </div>
                                         <div class="col-md-2">
-                                            <label for="lessonId">Lesson:</label>
+                                            <label for="lessonId">Lesson: </label>
                                             <select class="form-control" id="lessonId" name="lessonId">
-                                                <option value="">-- All lessons --</option>
+                                                <option value="">-- All Lessons --</option>
                                                 <c:forEach items="${lessonsList}" var="lesson">
                                                     <option value="${lesson.id}" ${param.lessonId == lesson.id ? 'selected' : ''}>
                                                         ${lesson.title}
@@ -254,9 +254,9 @@
                                             </select>
                                         </div>
                                         <div class="col-md-2">
-                                            <label for="quizId">Quiz:</label>
+                                            <label for="quizId">Dimension:</label>
                                             <select class="form-control" id="quizId" name="quizId">
-                                                <option value="">-- All quizzes --</option>
+                                                <option value="">-- All Dimensions --</option>
                                                 <c:forEach items="${quizzesList}" var="quiz">
                                                     <option value="${quiz.id}" ${param.quizId == quiz.id ? 'selected' : ''}>
                                                         ${quiz.name}
@@ -297,7 +297,7 @@
                                                     <th>Content</th>
                                                     <th>Subject</th>
                                                     <th>Lesson</th>
-                                                    <th>Quiz</th>
+                                                    <th>Dimension</th>
                                                     <th>Level</th>
                                                     <th>Status</th>
                                                     <th>Actions</th>
