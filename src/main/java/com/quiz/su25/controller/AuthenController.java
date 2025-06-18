@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpSession;
 
 import com.quiz.su25.config.GlobalConfig;
 import com.quiz.su25.utils.EmailUtils;
-@WebServlet(name="AuthenController", urlPatterns={"/login","/logout","/register","/verifyOTP","/forgot-password","/reset-password","/resendOTP","/newpassword","/registerverifyOTP"})
+@WebServlet(name="AuthenController", urlPatterns={"/login","/logout","/register","/verifyOTP","/forgot-password","/reset-password","/resendOTP","/newpassword","/registerverifyOTP","/change-password"})
 public class AuthenController extends HttpServlet {
     private UserDAO userDAO = new UserDAO();
 
@@ -49,6 +49,9 @@ public class AuthenController extends HttpServlet {
                 break;  
             case "/newpassword":
                 request.getRequestDispatcher("view/authen/register/newpassword.jsp").forward(request, response);
+                break;
+            case "/change-password":
+                request.getRequestDispatcher("view/authen/login/changepassword.jsp").forward(request, response);
                 break;
             default:
                 request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
@@ -88,6 +91,9 @@ public class AuthenController extends HttpServlet {
                 break;
             case "/newpassword":
                 newPassword(request, response);
+                break;
+            case "/change-password":
+                changePassword(request, response);
                 break;
             default:
                 login(request, response);
@@ -433,6 +439,78 @@ public class AuthenController extends HttpServlet {
             e.printStackTrace();
             request.setAttribute("error", "An error occurred during registration: " + e.getMessage());
             request.getRequestDispatcher("view/authen/register/newpassword.jsp").forward(request, response);
+        }
+    }
+    private void changePassword(HttpServletRequest request, HttpServletResponse response) 
+    throws ServletException, IOException {
+        String currentPassword = request.getParameter("current_password");
+        String newPassword = request.getParameter("new_password");
+        String confirmPassword = request.getParameter("confirm_password");
+        
+        // Get the current user from session
+        HttpSession session = request.getSession();
+        User currentUser = (User) session.getAttribute(GlobalConfig.SESSION_ACCOUNT);
+        
+        try {
+            // Check if user is logged in
+            if (currentUser == null) {
+                response.sendRedirect(request.getContextPath() + "/login");
+                return;
+            }
+            
+            // Validate all fields are provided
+            if (currentPassword == null || newPassword == null || confirmPassword == null ||
+                currentPassword.trim().isEmpty() || newPassword.trim().isEmpty() || confirmPassword.trim().isEmpty()) {
+                request.setAttribute("error", "All password fields are required.");
+                request.getRequestDispatcher("view/authen/login/changepassword.jsp").forward(request, response);
+                return;
+            }
+            
+            // Check if new password matches confirm password
+            if (!newPassword.equals(confirmPassword)) {
+                request.setAttribute("error", "New passwords do not match.");
+                request.getRequestDispatcher("view/authen/login/changepassword.jsp").forward(request, response);
+                return;
+            }
+            
+            // Check if new password is different from current password
+            if (currentPassword.equals(newPassword)) {
+                request.setAttribute("error", "New password must be different from current password.");
+                request.getRequestDispatcher("view/authen/login/changepassword.jsp").forward(request, response);
+                return;
+            }
+            
+            // Verify current password matches the one in database
+            User verifiedUser = userDAO.findByEmailAndPassword(currentUser.getEmail(), currentPassword);
+            if (verifiedUser == null) {
+                request.setAttribute("error", "Current password is incorrect.");
+                request.getRequestDispatcher("view/authen/login/changepassword.jsp").forward(request, response);
+                return;
+            }
+            
+            // Update password in database
+            boolean success = userDAO.updatePassword(currentUser.getEmail(), newPassword);
+            
+            if (success) {
+                // Password updated successfully
+                request.setAttribute("message", "Password changed successfully! Please login with your new password.");
+                request.setAttribute("type", "success");
+                
+                // Invalidate the current session to force re-login with new password
+                session.invalidate();
+                
+                // Redirect to login page
+                request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
+            } else {
+                request.setAttribute("error", "Failed to update password. Please try again.");
+                request.getRequestDispatcher("view/authen/login/changepassword.jsp").forward(request, response);
+            }
+            
+        } catch (Exception e) {
+            System.out.println("Error in changePassword: " + e.getMessage());
+            e.printStackTrace();
+            request.setAttribute("error", "An error occurred while changing password: " + e.getMessage());
+            request.getRequestDispatcher("view/authen/login/changepassword.jsp").forward(request, response);
         }
     }
 }
