@@ -213,7 +213,7 @@
                                 <h4 class="mb-0">
                                     <c:choose>
                                         <c:when test="${question.id == 0}">Thêm câu hỏi mới</c:when>
-                                        <c:otherwise>Chỉnh sửa câu hỏi</c:otherwise>
+                                        <c:otherwise>Question details</c:otherwise>
                                     </c:choose>
                                 </h4>
                                 <a href="${pageContext.request.contextPath}/questions-list" class="btn btn-outline-secondary">
@@ -231,7 +231,8 @@
                                 
                                 <div class="form-section">
                                     <div class="form-section-title">Question Information</div>
-                                    <div class="form-group">
+                                    
+                                     <div class="form-group">
                                         <label class="form-label">Quiz</label>
                                         <select class="form-control" id="quizId" name="quizId" required>
                                             <option value="">-- Select Quiz --</option>
@@ -242,7 +243,7 @@
                                             </c:forEach>
                                         </select>
                                     </div>
-
+                                    
                                     <!-- Question Type -->
                                     <div class="form-group">
                                         <label class="form-label">Question Type</label>
@@ -357,114 +358,164 @@
 
     <script>
         $(document).ready(function() {
-            // Initialize TinyMCE for question content
-            initTinyMCE('.question-editor');
-            
-            // Form submission
+            // Initialize TinyMCE for media_url
+            tinymce.init({
+                selector: '#media_url',
+                plugins: 'image media link code table lists',
+                toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | indent outdent | bullist numlist | image media link | code',
+                height: 300,
+                images_upload_url: '${pageContext.request.contextPath}/upload-media',
+                automatic_uploads: true,
+                file_picker_types: 'image media',
+                media_live_embeds: true,
+                images_upload_handler: function (blobInfo, progress) {
+                    return new Promise((resolve, reject) => {
+                        const formData = new FormData();
+                        formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+                        fetch('${pageContext.request.contextPath}/upload-media', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.location) {
+                                resolve(result.location);
+                            } else {
+                                reject({ message: result.message || 'Upload failed' });
+                            }
+                        })
+                        .catch(error => {
+                            reject({ message: 'HTTP Error: ' + error.message });
+                        });
+                    });
+                },
+                file_picker_callback: function(cb, value, meta) {
+                    var input = document.createElement('input');
+                    input.setAttribute('type', 'file');
+                    
+                    if (meta.filetype === 'image') {
+                        input.setAttribute('accept', 'image/*');
+                    } else if (meta.filetype === 'media') {
+                        input.setAttribute('accept', 'video/*');
+                    }
+
+                    input.onchange = function() {
+                        var file = this.files[0];
+                        var formData = new FormData();
+                        formData.append('file', file);
+
+                        fetch('${pageContext.request.contextPath}/upload-media', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.location) {
+                                cb(result.location);
+                            } else {
+                                throw new Error(result.message || 'Upload failed');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Upload failed: ' + error.message);
+                        });
+                    };
+
+                    input.click();
+                },
+                setup: function(editor) {
+                    editor.on('change', function() {
+                        editor.save();
+                    });
+
+                    // Xử lý khi paste hoặc drop ảnh
+                    editor.on('paste drop', function(e) {
+                        var clipboardData = e.clipboardData || e.dataTransfer;
+                        if (clipboardData && clipboardData.files.length > 0) {
+                            e.preventDefault();
+                            var file = clipboardData.files[0];
+                            var formData = new FormData();
+                            formData.append('file', file);
+
+                            fetch('${pageContext.request.contextPath}/upload-media', {
+                                method: 'POST',
+                                body: formData
+                            })
+                            .then(response => response.json())
+                            .then(result => {
+                                if (result.location) {
+                                    editor.insertContent(result.location);
+                                }
+                            });
+                        }
+                    });
+                },
+                // Tắt các định dạng HTML mặc định
+                paste_as_text: true,
+                paste_data_images: false,
+                // Chỉ cho phép các elements cần thiết
+                valid_elements: 'p',
+                // Không tự động thêm thẻ p
+                forced_root_block: false,
+                // Không convert URL thành link
+                convert_urls: false,
+                // Không tự động format
+                verify_html: false
+            });
+
+            // Form validation
             $('#questionForm').submit(function(e) {
-                // Save TinyMCE content before submitting
                 tinymce.triggerSave();
                 
-                // Validate form
                 if (!validateForm()) {
                     e.preventDefault();
                     return false;
                 }
                 
+                // Get media content và clean up
+                var mediaContent = tinymce.get('media_url').getContent();
+                // Extract only the URL from content
+                var mediaUrl = '';
+                if (mediaContent) {
+                    // Tìm URL trong nội dung
+                    var matches = mediaContent.match(/src="([^"]+)"|uploads\/media\/[^"'\s]+/g);
+                    if (matches) {
+                        // Lấy URL đầu tiên tìm được
+                        mediaUrl = matches[0].replace(/src="|"/g, '');
+                    } else {
+                        // Nếu content là URL thuần
+                        mediaUrl = mediaContent.trim();
+                    }
+                }
+                
+                // Update hidden input for media_url
+                var mediaUrlInput = document.querySelector('input[name="media_url"]');
+                if (!mediaUrlInput) {
+                    mediaUrlInput = document.createElement('input');
+                    mediaUrlInput.type = 'hidden';
+                    mediaUrlInput.name = 'media_url';
+                    this.appendChild(mediaUrlInput);
+                }
+                mediaUrlInput.value = mediaUrl;
+                
                 return true;
             });
         });
-        
-        // Function to initialize TinyMCE
-        function initTinyMCE(selector, options = {}) {
-            const defaultOptions = {
-                selector: selector,
-                plugins: 'image media code table lists link',
-                toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image media insertAudio | table | code',
-                height: 250,
-                image_caption: true,
-                automatic_uploads: true,
-                media_live_embeds: true,
-                file_picker_types: 'image',
-                file_picker_callback: function(cb, value, meta) {
-                    if (meta.filetype === 'image') {
-                        const input = document.createElement('input');
-                        input.setAttribute('type', 'file');
-                        input.setAttribute('accept', 'image/*');
-                        input.click();
-                        input.onchange = function () {
-                            const file = this.files[0];
-                            const reader = new FileReader();
-                            reader.onload = function () {
-                                const id = 'blobid' + (new Date()).getTime();
-                                const blobCache = tinymce.activeEditor.editorUpload.blobCache;
-                                const base64 = reader.result.split(',')[1];
-                                const blobInfo = blobCache.create(id, file, base64);
-                                blobCache.add(blobInfo);
-                                cb(blobInfo.blobUri(), { title: file.name });
-                            };
-                            reader.readAsDataURL(file);
-                        };
-                    }
-                },
-                setup: function (editor) {
-                    // Add custom audio upload button
-                    editor.ui.registry.addButton('insertAudio', {
-                        text: 'Upload Audio',
-                        icon: 'audio',
-                        onAction: function () {
-                            const input = document.createElement('input');
-                            input.type = 'file';
-                            input.accept = 'audio/*';
-                            input.click();
-        
-                            input.onchange = function () {
-                                const file = input.files[0];
-                                const formData = new FormData();
-                                formData.append('audio', file);
-        
-                                fetch('${pageContext.request.contextPath}/uploadAudioServlet', {
-                                    method: 'POST',
-                                    body: formData
-                                })
-                                .then(res => res.text())
-                                .then(url => {
-                                    editor.insertContent(
-                                        '<p>🎧 File âm thanh:</p>' +
-                                        '<audio controls>' +
-                                        '<source src=\"' + url + '\" type=\"' + file.type + '\">' +
-                                        'Trình duyệt của bạn không hỗ trợ audio.' +
-                                        '</audio><br>'
-                                    );
-                                });
-                            };
-                        }
-                    });
-        
-                    editor.on('change', function () {
-                        editor.save();
-                    });
-                }
-            };
-            
-            tinymce.init({...defaultOptions, ...options});
-        }
-        
-        // Function to validate form
+
         function validateForm() {
-            // Check if question text is not empty
-            var questionText = tinymce.get('content').getContent();
-            if (!questionText || questionText.trim() === '') {
+            var content = $('input[name="content"]').val();
+            if (!content || content.trim() === '') {
                 iziToast.error({
                     title: 'Error',
-                    message: 'Question text cannot be empty',
+                    message: 'Question content cannot be empty',
                     position: 'topRight',
                     timeout: 3000
                 });
                 return false;
             }
             
-            // Check if at least one answer is selected as correct
             if (!$('input[name="correctAnswer"]:checked').length) {
                 iziToast.error({
                     title: 'Error',
@@ -475,12 +526,11 @@
                 return false;
             }
             
-            // Check if all answer fields are filled
             var allFilled = true;
             $('input[name^="optionText_"]').each(function() {
                 if ($(this).val().trim() === '') {
                     allFilled = false;
-                    return false; // break the loop
+                    return false;
                 }
             });
             
@@ -495,26 +545,6 @@
             }
             
             return true;
-        }
-        
-        
-        // Function to load quizzes based on selected lesson
-        function loadQuizzes() {
-            var lessonId = $('#lessonId').val();
-            if (lessonId) {
-                $.ajax({
-                    url: '${pageContext.request.contextPath}/api/quizzes',
-                    type: 'GET',
-                    data: { lessonId: lessonId },
-                    success: function(data) {
-                        var quizSelect = $('#quizId');
-                        quizSelect.empty().append('<option value="">-- Chọn bài kiểm tra --</option>');
-                        data.forEach(function(quiz) {
-                            quizSelect.append(`<option value="${quiz.id}">${quiz.name}</option>`);
-                        });
-                    }
-                });
-            }
         }
 
         function addOption() {
@@ -540,6 +570,7 @@
                 $(`#answer-${optionNumber}`).remove();
                 optionCount--;
                 $('#optionCount').val(optionCount);
+                
                 // Reorder remaining options
                 var index = 1;
                 $('.answer-option').each(function() {
@@ -558,93 +589,6 @@
                     timeout: 3000
                 });
             }
-        }
-
-        tinymce.init({
-            selector: '#media_url',
-            plugins: 'image media link code table lists',
-            toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | indent outdent | bullist numlist | image media link | code',
-            height: 300,
-            images_upload_url: '${pageContext.request.contextPath}/upload-media',
-            automatic_uploads: true,
-            file_picker_types: 'image media',
-            media_live_embeds: true,
-            media_url_resolver: function (data, resolve) {
-                resolve({
-                    html: '<div class="media-container">' + data.html + '</div>'
-                });
-            },
-            images_upload_handler: function (blobInfo, progress) {
-                return new Promise((resolve, reject) => {
-                    var xhr, formData;
-                    xhr = new XMLHttpRequest();
-                    xhr.withCredentials = false;
-                    xhr.open('POST', '${pageContext.request.contextPath}/upload-media');
-                    
-                    xhr.upload.onprogress = function (e) {
-                        progress(e.loaded / e.total * 100);
-                    };
-                    
-                    xhr.onload = function() {
-                        if (xhr.status === 403) {
-                            reject({ message: 'HTTP Error: ' + xhr.status, remove: true });
-                            return;
-                        }
-                        
-                        if (xhr.status < 200 || xhr.status >= 300) {
-                            reject('HTTP Error: ' + xhr.status);
-                            return;
-                        }
-                        
-                        var json;
-                        try {
-                            json = JSON.parse(xhr.responseText);
-                        } catch (e) {
-                            reject('Invalid JSON: ' + xhr.responseText);
-                            return;
-                        }
-                        
-                        if (!json || typeof json.location != 'string') {
-                            reject('Invalid JSON structure');
-                            return;
-                        }
-                        
-                        resolve(json.location);
-                    };
-                    
-                    xhr.onerror = function () {
-                        reject('Image upload failed due to a XHR Transport error');
-                    };
-                    
-                    formData = new FormData();
-                    formData.append('file', blobInfo.blob(), blobInfo.filename());
-                    xhr.send(formData);
-                });
-            },
-            setup: function(editor) {
-                editor.on('change', function() {
-                    editor.save();
-                });
-            }
-        });
-
-        // Add this function to handle form submission
-        function submitForm() {
-            // Get the content from TinyMCE
-            var mediaContent = tinymce.get('media_url').getContent();
-            
-            // Create or update hidden input for media_url
-            var mediaUrlInput = document.querySelector('input[name="media_url"]');
-            if (!mediaUrlInput) {
-                mediaUrlInput = document.createElement('input');
-                mediaUrlInput.type = 'hidden';
-                mediaUrlInput.name = 'media_url';
-                document.querySelector('form').appendChild(mediaUrlInput);
-            }
-            mediaUrlInput.value = mediaContent;
-            
-            // Submit the form
-            document.querySelector('form').submit();
         }
     </script>
 </body>

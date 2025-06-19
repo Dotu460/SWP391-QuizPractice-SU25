@@ -27,7 +27,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
-@WebServlet("/questions-list")
+@WebServlet(name = "QuestionListController", urlPatterns = {"/questions-list", "/upload-media"})
 @MultipartConfig(
     fileSizeThreshold = 1024 * 1024, // 1 MB
     maxFileSize = 1024 * 1024 * 10,  // 10 MB
@@ -36,6 +36,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 public class QuestionListController extends HttpServlet {
    
     private static final String LIST_PAGE = "view/Expert/Question/questions-list.jsp";
+    private static final String UPLOAD_DIRECTORY = "uploads/media";
     private QuestionDAO questionDAO;
     private QuestionOptionDAO questionOptionDAO;
     private SubjectDAO subjectDAO;
@@ -103,7 +104,14 @@ public class QuestionListController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
+        String path = request.getServletPath();
         String action = request.getParameter("action");
+
+        if ("/upload-media".equals(path)) {
+            handleMediaUpload(request, response);
+            return;
+        }
+
         if (action == null) {
             action = "list";
         }
@@ -756,5 +764,91 @@ public class QuestionListController extends HttpServlet {
             }
             request.getRequestDispatcher("/view/Expert/Question/question-edit.jsp").forward(request, response);
         }
+    }
+
+    private void handleMediaUpload(HttpServletRequest request, HttpServletResponse response) 
+    throws ServletException, IOException {
+        response.setContentType("application/json");
+        PrintWriter out = response.getWriter();
+        StringBuilder jsonResponse = new StringBuilder();
+        jsonResponse.append("{");
+
+        try {
+            Part filePart = request.getPart("file");
+
+            if (filePart == null) {
+                jsonResponse.append("\"success\": false,");
+                jsonResponse.append("\"message\": \"No file found in the request\"");
+                jsonResponse.append("}");
+                out.print(jsonResponse.toString());
+                return;
+            }
+
+            String fileName = getFileName(filePart);
+            if (fileName == null || fileName.isEmpty()) {
+                jsonResponse.append("\"success\": false,");
+                jsonResponse.append("\"message\": \"Invalid file name\"");
+                jsonResponse.append("}");
+                out.print(jsonResponse.toString());
+                return;
+            }
+
+            // Validate file type
+            String fileType = filePart.getContentType();
+            if (!fileType.startsWith("image/") && !fileType.startsWith("video/")) {
+                jsonResponse.append("\"success\": false,");
+                jsonResponse.append("\"message\": \"Only image and video files are allowed\"");
+                jsonResponse.append("}");
+                out.print(jsonResponse.toString());
+                return;
+            }
+
+            // Create year/month based subdirectories
+            String timestamp = String.valueOf(System.currentTimeMillis());
+            String uniqueFileName = timestamp + "_" + fileName;
+            
+            // Create upload directory if it doesn't exist
+            String uploadPath = getServletContext().getRealPath("/" + UPLOAD_DIRECTORY);
+            File uploadDir = new File(uploadPath);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs();
+            }
+
+            String filePath = uploadPath + File.separator + uniqueFileName;
+            filePart.write(filePath);
+
+            String fileUrl = request.getContextPath() + "/" + UPLOAD_DIRECTORY + "/" + uniqueFileName;
+
+            // Return response based on TinyMCE requirements
+            if (fileType.startsWith("image/")) {
+                jsonResponse.append("\"location\": \"").append(fileUrl).append("\"");
+            } else {
+                // For video, return both location and additional info
+                jsonResponse.append("\"location\": \"").append(fileUrl).append("\",");
+                jsonResponse.append("\"title\": \"").append(fileName).append("\",");
+                jsonResponse.append("\"success\": true");
+            }
+
+        } catch (Exception e) {
+            jsonResponse.append("\"success\": false,");
+            jsonResponse.append("\"message\": \"Error uploading file: ").append(e.getMessage()).append("\"");
+            e.printStackTrace();
+        }
+
+        jsonResponse.append("}");
+        out.print(jsonResponse.toString());
+    }
+
+    private String getFileName(Part part) {
+        String contentDisposition = part.getHeader("content-disposition");
+        String[] elements = contentDisposition.split(";");
+
+        for (String element : elements) {
+            if (element.trim().startsWith("filename")) {
+                return element.substring(element.indexOf('=') + 1).trim().replace("\"", "");
+            }
+        }
+
+        return null;
     }
 }
