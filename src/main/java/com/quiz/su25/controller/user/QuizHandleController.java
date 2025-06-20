@@ -8,13 +8,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.quiz.su25.controller.QuizAttemptController;
 import com.quiz.su25.controller.QuizAttemptAnswerController;
 import com.quiz.su25.dal.impl.QuestionDAO;
 import com.quiz.su25.dal.impl.QuestionOptionDAO;
 import com.quiz.su25.entity.Question;
 import com.quiz.su25.entity.QuestionOption;
-import com.quiz.su25.entity.User;
 import com.quiz.su25.entity.UserQuizAttempts;
 import com.quiz.su25.dal.impl.UserQuizAttemptsDAO;
 import jakarta.servlet.ServletException;
@@ -23,11 +21,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -211,6 +207,7 @@ public class QuizHandleController extends HttpServlet {
 
     private void handleScoreAction(HttpServletRequest request, HttpServletResponse response, PrintWriter out) throws IOException {
         try {
+            // 1. Lấy userAnswers từ request (JSON)
             HttpSession session = request.getSession();
             String userAnswersJson = request.getParameter("userAnswers");
 
@@ -228,7 +225,7 @@ public class QuizHandleController extends HttpServlet {
 
             System.out.println("Parsed user answers: " + userAnswers.toString());
 
-            // Get session and validate required parameters
+            // 2. Lấy thông tin attempt hiện tại từ session
             if (session == null) {
                 throw new IllegalStateException("No active session found");
             }
@@ -249,7 +246,6 @@ public class QuizHandleController extends HttpServlet {
                 throw new IllegalStateException("No active attempt found in session");
             }
 
-            // Tạo QuizAttemptController để xử lý chấm điểm
             UserQuizAttemptsDAO attemptsDAO = new UserQuizAttemptsDAO();
             UserQuizAttempts attempt = attemptsDAO.findById(currentAttemptId);
 
@@ -264,7 +260,7 @@ public class QuizHandleController extends HttpServlet {
             int totalQuestionsInQuiz = new QuestionDAO().countQuestionsByQuizId(quizId);
 
 
-            // Lưu các câu trả lời
+            // 4. Gọi QuizAttemptAnswerController để lưu đáp án
             QuizAttemptAnswerController answerController = new QuizAttemptAnswerController();
             for (Map.Entry<String, JsonElement> entry : userAnswers.entrySet()) {
                 try {
@@ -278,7 +274,7 @@ public class QuizHandleController extends HttpServlet {
                     // Kiểm tra đáp án đúng
                     QuestionOptionDAO optionDAO = new QuestionOptionDAO();
                     List<QuestionOption> correctOptions = optionDAO.findCorrectOptionsByQuestionId(questionId);
-                    
+
                     // So sánh đáp án đã chọn với đáp án đúng
                     boolean isCorrect = false;
                     List<Integer> selectedOptionIds = new ArrayList<>();
@@ -291,13 +287,10 @@ public class QuizHandleController extends HttpServlet {
                         var correctOptionIds = correctOptions.stream()
                                 .map(QuestionOption::getId)
                                 .collect(Collectors.toSet());
-                        
+
                         // Lấy set ID của các đáp án đã chọn
                         var selectedOptionIdsSet = selectedOptionIds.stream()
                                 .collect(Collectors.toSet());
-
-                        System.out.println("Correct Option IDs from DB: " + correctOptionIds);
-                        System.out.println("User Selected Option IDs:   " + selectedOptionIdsSet);
 
                         // Câu trả lời đúng khi và chỉ khi hai set bằng nhau
                         isCorrect = correctOptionIds.equals(selectedOptionIdsSet);
@@ -337,7 +330,7 @@ public class QuizHandleController extends HttpServlet {
             System.out.println("Total questions in quiz: " + totalQuestionsInQuiz);
 
 
-            // Hoàn thành bài thi và tính điểm
+            // 6. Tính điểm: score = (totalCorrect / totalQuestions) * 10
             double score = (totalQuestionsInQuiz > 0) ? ((double) totalCorrect / totalQuestionsInQuiz * 10.0) : 0.0;
             System.out.println("Calculated Score (before rounding): " + score);
             
@@ -346,6 +339,7 @@ public class QuizHandleController extends HttpServlet {
             System.out.println("Final Score (after rounding): " + score);
             System.out.println("===============================\n");
             
+            // 7. Cập nhật trạng thái attempt thành COMPLETED, lưu điểm
             attempt.setScore(score);
             attempt.setStatus(GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED);
             attempt.setEnd_time(Date.valueOf(LocalDate.now()));
@@ -354,14 +348,14 @@ public class QuizHandleController extends HttpServlet {
 
             System.out.println("Final score: " + score);
 
-            // Lưu điểm và các thông tin khác vào session để hiển thị ở trang sau
+            // 8. Lưu thông tin vào session (quizScore, totalCorrect, ...)
             session.setAttribute("quizScore", score);
             session.setAttribute("totalCorrect", totalCorrect);
             session.setAttribute("totalQuestions", totalQuestionsInQuiz);
             session.setAttribute("toastMessage", "Quiz submitted successfully!");
             session.setAttribute("toastType", "success");
             
-            // Redirect to the quiz menu page
+            // 9. Redirect về /quiz-handle-menu
             response.sendRedirect(request.getContextPath() + "/quiz-handle-menu");
 
         } catch (Exception e) {
@@ -500,7 +494,8 @@ public class QuizHandleController extends HttpServlet {
         }
         userAnswers.put(questionId, essayAnswer);
         System.out.println("Saved essay answer with length: " + essayAnswer.length());
-        // TODO: Implement essay answer saving logic
+               
+        // Implement code để lưu câu hỏi tự luận vào DB
     }
 
     private void handleError(HttpServletResponse response, Exception e) throws IOException {

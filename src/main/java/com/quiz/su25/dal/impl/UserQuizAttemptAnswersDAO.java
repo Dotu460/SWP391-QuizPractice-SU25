@@ -213,6 +213,25 @@ public class UserQuizAttemptAnswersDAO extends DBContext implements I_DAO<UserQu
     }
 
     /**
+     * Delete all answers for a question in an attempt
+     */
+    public boolean deleteByAttemptAndQuestionId(Integer attemptId, Integer questionId) {
+        String sql = "DELETE FROM UserQuizAttemptAnswers WHERE attempt_id = ? AND quiz_question_id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, attemptId);
+            statement.setInt(2, questionId);
+            return statement.executeUpdate() > 0;
+        } catch (Exception e) {
+            System.out.println("Error deleteByAttemptAndQuestionId at class UserQuizAttemptAnswersDAO: " + e.getMessage());
+            return false;
+        } finally {
+            closeResources();
+        }
+    }
+
+    /**
      * Batch insert multiple answers
      */
     public boolean batchInsertAnswers(List<UserQuizAttemptAnswers> answers) {
