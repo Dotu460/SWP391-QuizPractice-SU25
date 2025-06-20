@@ -132,11 +132,9 @@
                                                 </ul>
                                             </li>
                                             <li class="menu-item-has-children">
-                                                <a href="blog.html">Blog</a>
+                                                <a>Blog</a>
                                                 <ul class="sub-menu">
-                                                    <li><a href="blog.html">Blog Right Sidebar</a></li>
-                                                    <li><a href="blog-2.html">Blog Left Sidebar</a></li>
-                                                    <li><a href="blog-3.html">Blog Full Width</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/blog">Blog List</a></li>
                                                     <li><a href="blog-details.html">Blog Details</a></li>
                                                 </ul>
                                             </li>
@@ -144,6 +142,23 @@
                                             <li><a href="registration.html">Student Registration</a></li>
                                             <li><a href="404.html">404 Page</a></li>
                                             <li><a href="contact.html">contact</a></li>
+                                            <!-- Login/Logout button -->
+                                            <c:choose>
+                                                <c:when test="${not empty sessionScope.user}">
+                                                    <li>
+                                                        <a href="${pageContext.request.contextPath}/logout" class="logout-btn">
+                                                            <i class="fas fa-sign-out-alt"></i> Logout
+                                                        </a>
+                                                    </li>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <li>
+                                                        <a href="${pageContext.request.contextPath}/login" class="login-btn" >
+                                                            <i class="fas fa-sign-in-alt"></i> Login
+                                                        </a>
+                                                    </li>
+                                                </c:otherwise>
+                                            </c:choose>
                                         </ul>
                                     </li>
                                     <li class="menu-item-has-children"><a href="#">Dashboard</a>
@@ -184,9 +199,9 @@
                             <div class="tgmenu__action">
                                 <ul class="list-wrap">                                   
                                     <c:choose>
-                                        <c:when test="${not empty sessionScope.user}">
+                                        <c:when test="${not empty sessionScope.account}">
                                         <!-- Nút Log out -->
-                                            <a href="login?action=logout" class="button-style">Log out</a>
+                                            <a href="logout" class="button-style">Log out</a>
                                         </c:when>
                                         <c:otherwise>
                                         <!-- Nút Log in -->
@@ -302,6 +317,24 @@
         }
         .header-menu {
             margin-top: -10px;
+        }
+        .button-style {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #6559F5; /* màu tím */
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            border: 2px solid #0D006C; /* tím đậm hơn một chút */
+            border-radius: 999px; /* bo tròn hoàn toàn */
+            box-shadow: 0 4px 12px rgba(128, 0, 128, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .button-style:hover {
+            background-color: #6559F5;
+            box-shadow: 0 6px 15px rgba(128, 0, 128, 0.3);
         }
         .navbar {
             padding: 0;

@@ -146,7 +146,7 @@ public class QuizAttemptAnswerController extends HttpServlet {
      */
     public void clearAnswersForQuestion(Integer attemptId, Integer questionId) {
         try {
-            answersDAO.deleteByAttemptAndQuestionId(attemptId, questionId);
+            //answersDAO.deleteByAttemptAndQuestionId(attemptId, questionId);
         } catch (Exception e) {
             System.err.println("Error in clearAnswersForQuestion: " + e.getMessage());
             e.printStackTrace();

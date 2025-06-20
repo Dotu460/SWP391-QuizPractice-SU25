@@ -9,19 +9,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.sql.Date;
 import java.util.function.BiConsumer;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
- * Lớp DAO (Data Access Object) cho thực thể Registration. Chịu trách nhiệm
- * tương tác với cơ sở dữ liệu liên quan đến các bản ghi đăng ký. Kế thừa từ
- * DBContext để quản lý kết nối cơ sở dữ liệu và triển khai I_DAO cho các hoạt
- * động CRUD cơ bản.
+ * Data Access Object (DAO) class for managing Registration entities.
+ * Handles all database operations related to registrations including:
+ * - Basic CRUD operations
+ * - Filtered searches with pagination
+ * - User-specific registration queries
+ * - Status management
  */
 public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
 
     /**
-     * Lấy tất cả các bản ghi đăng ký từ cơ sở dữ liệu.
-     *
-     * @return Danh sách các đối tượng Registration.
+     * Retrieves all registrations from the database
+     * @return List of all Registration objects
      */
     @Override
     public List<Registration> findAll() {
@@ -44,10 +49,9 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Cập nhật thông tin một bản ghi đăng ký trong cơ sở dữ liệu.
-     *
-     * @param t Đối tượng Registration chứa thông tin cần cập nhật.
-     * @return true nếu cập nhật thành công, false nếu thất bại.
+     * Updates an existing registration in the database
+     * @param t Registration object containing updated information
+     * @return true if update successful, false otherwise
      */
     @Override
     public boolean update(Registration t) {
@@ -78,10 +82,9 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Xóa một bản ghi đăng ký khỏi cơ sở dữ liệu.
-     *
-     * @param t Đối tượng Registration cần xóa (chỉ cần ID).
-     * @return true nếu xóa thành công, false nếu thất bại.
+     * Deletes a registration from the database
+     * @param t Registration object to delete (only ID is required)
+     * @return true if deletion successful, false otherwise
      */
     @Override
     public boolean delete(Registration t) {
@@ -101,11 +104,9 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Thêm một bản ghi đăng ký mới vào cơ sở dữ liệu.
-     *
-     * @param t Đối tượng Registration chứa thông tin cần thêm.
-     * @return ID của bản ghi mới được chèn (hiện tại đang trả về 0, có thể cần
-     * cải thiện để trả về ID thực).
+     * Inserts a new registration into the database
+     * @param t Registration object to insert
+     * @return ID of the newly inserted registration, or 0 if insertion failed
      */
     @Override
     public int insert(Registration t) {
@@ -141,11 +142,10 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Chuyển đổi một dòng từ ResultSet thành một đối tượng Registration.
-     *
-     * @param resultSet Đối tượng ResultSet chứa dữ liệu từ cơ sở dữ liệu.
-     * @return Đối tượng Registration được tạo từ dữ liệu.
-     * @throws SQLException Nếu có lỗi khi truy cập dữ liệu từ ResultSet.
+     * Maps a database row to a Registration object
+     * @param resultSet ResultSet containing the database row
+     * @return Registration object populated with data from ResultSet
+     * @throws SQLException if there's an error accessing the ResultSet
      */
     @Override
     public Registration getFromResultSet(ResultSet resultSet) throws SQLException {
@@ -163,10 +163,9 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Tìm một bản ghi đăng ký dựa trên ID.
-     *
-     * @param id ID của bản ghi đăng ký cần tìm.
-     * @return Đối tượng Registration nếu tìm thấy, null nếu không.
+     * Finds a registration by its ID
+     * @param id ID of the registration to find
+     * @return Registration object if found, null otherwise
      */
     @Override
     public Registration findById(Integer id) {
@@ -188,7 +187,13 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Đếm số bản ghi đăng ký của một user theo các bộ lọc
+     * Counts registrations for a specific user with optional filters
+     * @param userId ID of the user
+     * @param subjectId Optional subject filter
+     * @param status Optional status filter
+     * @param fromDate Optional start date filter
+     * @param toDate Optional end date filter
+     * @return Number of matching registrations
      */
     public int countByUserId(Integer userId, Integer subjectId, String status, Date fromDate, Date toDate) {
         // Xây dựng câu SQL cơ bản
@@ -235,19 +240,16 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Lấy danh sách đăng ký của một user cụ thể với phân trang và các bộ lọc:
-     * subjectId, status, fromDate, toDate.
-     *
-     * @param userId ID của user
-     * @param offset Vị trí bắt đầu.
-     * @param limit Số lượng bản ghi.
-     * @param subjectId ID môn học (null nếu không lọc).
-     * @param status Trạng thái (null hoặc rỗng nếu không lọc).
-     * @param fromDate Ngày bắt đầu (null nếu không lọc).
-     * @param toDate Ngày kết thúc (null nếu không lọc).
-     * @return Danh sách Registration.
+     * Retrieves paginated registrations for a specific user with filters
+     * @param userId ID of the user
+     * @param offset Starting position for pagination
+     * @param limit Number of records to retrieve
+     * @param subjectId Optional subject filter
+     * @param status Optional status filter
+     * @param fromDate Optional start date filter
+     * @param toDate Optional end date filter
+     * @return List of matching Registration objects
      */
-    // Truy vấn danh sách bản ghi của một user có phân trang và lọc
     public List<Registration> findByUserIdPaginated(Integer userId, int offset, int limit, Integer subjectId, String status, Date fromDate, Date toDate) {
         StringBuilder sql = new StringBuilder("SELECT r.* FROM registrations r WHERE r.user_id = ?");
         List<Object> params = new ArrayList<>();
@@ -309,18 +311,15 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Đếm số lượng bản ghi đăng ký của một user cụ thể dựa trên tìm kiếm tên
-     * môn học và các bộ lọc khác.
-     *
-     * @param userId ID của user
-     * @param subjectNameSearch Từ khóa tìm tên môn học (có thể null hoặc rỗng).
-     * @param subjectId ID môn học (null nếu không lọc).
-     * @param status Trạng thái (null hoặc rỗng nếu không lọc).
-     * @param fromDate Ngày bắt đầu (null nếu không lọc).
-     * @param toDate Ngày kết thúc (null nếu không lọc).
-     * @return Tổng số bản ghi.
+     * Counts registrations for a user with subject name search
+     * @param userId ID of the user
+     * @param subjectNameSearch Search term for subject name
+     * @param subjectId Optional subject filter
+     * @param status Optional status filter
+     * @param fromDate Optional start date filter
+     * @param toDate Optional end date filter
+     * @return Number of matching registrations
      */
-    // Đếm số bản ghi đăng ký của user, có thể tìm theo tên môn học
     public int countByUserIdAndSubjectNameSearch(Integer userId, String subjectNameSearch, Integer subjectId, String status, Date fromDate, Date toDate) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(DISTINCT r.id) FROM registrations r");
         List<Object> params = new ArrayList<>();
@@ -378,20 +377,17 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
     }
 
     /**
-     * Lấy danh sách bản ghi đăng ký của một user cụ thể với phân trang và tìm
-     * kiếm tên môn học.
-     *
-     * @param userId ID của user
-     * @param subjectNameSearch Từ khóa tìm tên môn học (có thể null hoặc rỗng).
-     * @param offset Vị trí bắt đầu.
-     * @param limit Số lượng.
-     * @param subjectId ID môn học (null nếu không lọc).
-     * @param status Trạng thái (null hoặc rỗng nếu không lọc).
-     * @param fromDate Ngày bắt đầu (null nếu không lọc).
-     * @param toDate Ngày kết thúc (null nếu không lọc).
-     * @return Danh sách Registration.
+     * Retrieves paginated registrations for a user with subject name search
+     * @param userId ID of the user
+     * @param subjectNameSearch Search term for subject name
+     * @param offset Starting position for pagination
+     * @param limit Number of records to retrieve
+     * @param subjectId Optional subject filter
+     * @param status Optional status filter
+     * @param fromDate Optional start date filter
+     * @param toDate Optional end date filter
+     * @return List of matching Registration objects
      */
-    // Tìm danh sách bản ghi đăng ký của user với phân trang và tìm kiếm tên môn học
     public List<Registration> findByUserIdAndSubjectNameSearchPaginated(
             Integer userId, String subjectNameSearch, int offset, int limit,
             Integer subjectId, String status, Date fromDate, Date toDate) {
@@ -455,6 +451,487 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
             closeResources();
         }
         return listRegistration;
+    }
+
+    /**
+     * Finds registrations with various filters and sorting options
+     * @param emailSearch Optional email search term
+     * @param subjectSearch Optional subject search term
+     * @param status Optional status filter
+     * @param fromDate Optional start date filter
+     * @param toDate Optional end date filter
+     * @param sortBy Field to sort by
+     * @param sortOrder Sort order (asc/desc)
+     * @param page Page number
+     * @param pageSize Number of records per page
+     * @return List of matching Registration objects
+     */
+    public List<Registration> findRegistrationsWithFilters(
+            String emailSearch, String subjectSearch, String status,
+            Date fromDate, Date toDate, String sortBy, String sortOrder,
+            int page, int pageSize) {
+        
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT DISTINCT r.* FROM registrations r ");
+        sql.append("JOIN users u ON r.user_id = u.id ");
+        sql.append("JOIN subject s ON r.subject_id = s.id ");
+        sql.append("WHERE 1=1 ");
+        
+        List<Object> parameters = new ArrayList<>();
+        
+        // Add filters
+        if (emailSearch != null && !emailSearch.trim().isEmpty()) {
+            sql.append("AND u.email LIKE ? ");
+            parameters.add("%" + emailSearch.trim() + "%");
+        }
+        
+        if (subjectSearch != null && !subjectSearch.trim().isEmpty()) {
+            sql.append("AND s.title LIKE ? ");
+            parameters.add("%" + subjectSearch.trim() + "%");
+        }
+        
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append("AND r.status = ? ");
+            parameters.add(status.trim());
+        }
+        
+        if (fromDate != null) {
+            sql.append("AND r.registration_time >= ? ");
+            parameters.add(fromDate);
+        }
+        
+        if (toDate != null) {
+            sql.append("AND r.registration_time <= ? ");
+            parameters.add(toDate);
+        }
+        
+        // Add sorting
+        if (sortBy != null && !sortBy.trim().isEmpty()) {
+            sql.append("ORDER BY ");
+            switch (sortBy) {
+                case "email":
+                    sql.append("u.email");
+                    break;
+                case "subject":
+                    sql.append("s.title");
+                    break;
+                default:
+                    sql.append("r.").append(sortBy);
+            }
+            
+            if ("desc".equalsIgnoreCase(sortOrder)) {
+                sql.append(" DESC");
+            } else {
+                sql.append(" ASC");
+            }
+        } else {
+            sql.append("ORDER BY r.id DESC");
+        }
+        
+        // Add pagination
+        sql.append(" LIMIT ? OFFSET ?");
+        parameters.add(pageSize);
+        parameters.add((page - 1) * pageSize);
+        
+        List<Registration> registrations = new ArrayList<>();
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+            
+            // Set parameters
+            for (int i = 0; i < parameters.size(); i++) {
+                statement.setObject(i + 1, parameters.get(i));
+            }
+            
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                registrations.add(getFromResultSet(resultSet));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in findRegistrationsWithFilters: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        
+        return registrations;
+    }
+
+    /**
+     * Calculates pagination details based on total records and desired page size
+     * @param totalRecords Total number of records
+     * @param desiredRows Desired number of rows per page
+     * @return Map containing pageSize and totalPages
+     */
+    public Map<String, Integer> calculatePagination(int totalRecords, int desiredRows) {
+        Map<String, Integer> result = new HashMap<>();
+        
+        // Validate and adjust desiredRows
+        int pageSize = desiredRows;
+        if (pageSize <= 0) {
+            pageSize = 10; // Default page size
+        } else if (pageSize > 1000) {
+            pageSize = 1000; // Maximum page size
+        }
+        
+        // Calculate total pages
+        int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
+        if (totalPages < 1) {
+            totalPages = 1; // At least 1 page
+        }
+        
+        result.put("pageSize", pageSize);
+        result.put("totalPages", totalPages);
+        return result;
+    }
+
+    /**
+     * Finds registrations with dynamic column selection and pagination
+     * @param emailSearch Optional email search term
+     * @param subjectSearch Optional subject search term
+     * @param status Optional status filter
+     * @param fromDate Optional start date filter
+     * @param toDate Optional end date filter
+     * @param sortBy Field to sort by
+     * @param sortOrder Sort order (asc/desc)
+     * @param page Page number
+     * @param pageSize Number of records per page
+     * @param selectedColumns Array of column names to include in result
+     * @return List of matching Registration objects
+     */
+    public List<Registration> findRegistrationsWithDynamicColumns(
+            String emailSearch, String subjectSearch, String status,
+            Date fromDate, Date toDate, String sortBy, String sortOrder,
+            int page, int pageSize, String[] selectedColumns) {
+        List<Registration> registrations = new ArrayList<>();
+        
+        // Validate page and pageSize
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 10;
+        if (pageSize > 1000) pageSize = 1000;
+        
+        String sql = "SELECT r.* FROM registrations r " +
+                    "INNER JOIN users u ON r.user_id = u.id " +
+                    "INNER JOIN subject s ON r.subject_id = s.id " +
+                    "WHERE 1=1 ";
+        
+        // Add filters
+        if (emailSearch != null && !emailSearch.isEmpty()) {
+            sql += "AND u.email LIKE ? ";
+        }
+        if (subjectSearch != null && !subjectSearch.isEmpty()) {
+            sql += "AND s.title LIKE ? ";
+        }
+        if (status != null && !status.isEmpty()) {
+            sql += "AND r.status = ? ";
+        }
+        if (fromDate != null) {
+            sql += "AND r.valid_from >= ? ";
+        }
+        if (toDate != null) {
+            sql += "AND r.valid_to <= ? ";
+        }
+
+        // Add sorting
+        if (sortBy != null && !sortBy.isEmpty()) {
+            sql += "ORDER BY ";
+            switch (sortBy) {
+                case "id":
+                    sql += "r.id ";
+                    break;
+                case "email":
+                    sql += "u.email ";
+                    break;
+                case "subject":
+                    sql += "s.title ";
+                    break;
+                case "package":
+                    sql += "r.package_id ";
+                    break;
+                case "total_cost":
+                    sql += "r.total_cost ";
+                    break;
+                case "status":
+                    sql += "r.status ";
+                    break;
+                case "valid_from":
+                    sql += "r.valid_from ";
+                    break;
+                case "valid_to":
+                    sql += "r.valid_to ";
+                    break;
+                case "registration_time":
+                    sql += "r.registration_time ";
+                    break;
+                default:
+                    sql += "r.id ";
+            }
+            sql += (sortOrder != null && sortOrder.equalsIgnoreCase("desc")) ? "DESC " : "ASC ";
+        } else {
+            sql += "ORDER BY r.id DESC "; // Default sorting
+        }
+
+        // Add pagination for MySQL
+        sql += "LIMIT ? OFFSET ?";
+
+        try (Connection conn = getConnection();
+             PreparedStatement stm = conn.prepareStatement(sql)) {
+            
+            int paramIndex = 1;
+            
+            // Set filter parameters
+            if (emailSearch != null && !emailSearch.isEmpty()) {
+                stm.setString(paramIndex++, "%" + emailSearch + "%");
+            }
+            if (subjectSearch != null && !subjectSearch.isEmpty()) {
+                stm.setString(paramIndex++, "%" + subjectSearch + "%");
+            }
+            if (status != null && !status.isEmpty()) {
+                stm.setString(paramIndex++, status);
+            }
+            if (fromDate != null) {
+                stm.setDate(paramIndex++, fromDate);
+            }
+            if (toDate != null) {
+                stm.setDate(paramIndex++, toDate);
+            }
+
+            // Set pagination parameters for MySQL
+            stm.setInt(paramIndex++, pageSize);
+            stm.setInt(paramIndex, (page - 1) * pageSize);
+
+            try (ResultSet rs = stm.executeQuery()) {
+                while (rs.next()) {
+                    registrations.add(getFromResultSet(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return registrations;
+    }
+
+    /**
+     * Counts total number of registrations matching filter criteria
+     * @param emailSearch Optional email search term
+     * @param subjectSearch Optional subject search term
+     * @param status Optional status filter
+     * @param fromDate Optional start date filter
+     * @param toDate Optional end date filter
+     * @return Number of matching registrations
+     */
+    public int countFilteredRegistrations(
+            String emailSearch, String subjectSearch, String status,
+            Date fromDate, Date toDate) {
+        
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT COUNT(DISTINCT r.id) FROM registrations r ");
+        sql.append("JOIN users u ON r.user_id = u.id ");
+        sql.append("JOIN subject s ON r.subject_id = s.id ");
+        sql.append("WHERE 1=1 ");
+        
+        List<Object> parameters = new ArrayList<>();
+        
+        // Add filters
+        if (emailSearch != null && !emailSearch.trim().isEmpty()) {
+            sql.append("AND u.email LIKE ? ");
+            parameters.add("%" + emailSearch.trim() + "%");
+        }
+        
+        if (subjectSearch != null && !subjectSearch.trim().isEmpty()) {
+            sql.append("AND s.title LIKE ? ");
+            parameters.add("%" + subjectSearch.trim() + "%");
+        }
+        
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append("AND r.status = ? ");
+            parameters.add(status.trim());
+        }
+        
+        if (fromDate != null) {
+            sql.append("AND r.registration_time >= ? ");
+            parameters.add(fromDate);
+        }
+        
+        if (toDate != null) {
+            sql.append("AND r.registration_time <= ? ");
+            parameters.add(toDate);
+        }
+        
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+            
+            // Set parameters
+            for (int i = 0; i < parameters.size(); i++) {
+                statement.setObject(i + 1, parameters.get(i));
+            }
+            
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in countFilteredRegistrations: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        
+        return 0;
+    }
+
+    /**
+     * Retrieves all unique status values from registrations
+     * @return List of unique status values
+     */
+    public List<String> getAllStatuses() {
+        List<String> statuses = new ArrayList<>();
+        String sql = "SELECT DISTINCT status FROM registrations ORDER BY status ASC";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                statuses.add(resultSet.getString("status"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getAllStatuses at class RegistrationDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return statuses;
+    }
+
+    public static void main(String[] args) {
+        // Create DAO instances
+        RegistrationDAO dao = new RegistrationDAO();
+
+        System.out.println("===== TESTING BASIC CRUD OPERATIONS =====");
+
+        // Test findAll
+        System.out.println("\n----- Testing findAll() -----");
+        List<Registration> allRegistrations = dao.findAll();
+        printRegistrations(allRegistrations);
+
+        // Test insert
+        System.out.println("\n----- Testing insert() -----");
+        // Create a sample registration for testing
+        Date currentDate = new Date(System.currentTimeMillis());
+        Date validFrom = new Date(System.currentTimeMillis());
+        // Valid to date is 30 days from now
+        Date validTo = new Date(System.currentTimeMillis() + 30L * 24 * 60 * 60 * 1000);
+
+        Registration newRegistration = Registration.builder()
+                .user_id(1) // Assuming user with ID 1 exists
+                .subject_id(4) // Assuming subject with ID 1 exists
+                .package_id(1) // Assuming package with ID 1 exists
+                .registration_time(currentDate)
+                .total_cost(99.99)
+                .status("pending")
+                .valid_from(validFrom)
+                .valid_to(validTo)
+                .build();
+
+        int newId = dao.insert(newRegistration);
+        System.out.println("Inserted new registration with ID: " + newId);
+
+
+        // Test findById
+        System.out.println("\n----- Testing findById() -----");
+        Registration retrievedRegistration = dao.findById(newId);
+        printRegistration(retrievedRegistration);
+
+        // Test update
+        System.out.println("\n----- Testing update() -----");
+        retrievedRegistration.setStatus("approved");
+        retrievedRegistration.setTotal_cost(89.99);
+        boolean updateSuccess = dao.update(retrievedRegistration);
+        System.out.println("Update successful: " + updateSuccess);
+        System.out.println("Updated registration:");
+        printRegistration(dao.findById(newId));
+
+        System.out.println("\n===== TESTING SPECIALIZED METHODS =====");
+
+        // Test countByUserId
+        System.out.println("\n----- Testing countByUserId() -----");
+        int userId = 1; // Assuming user with ID 1 exists and has registrations
+        int countForUser = dao.countByUserId(userId, null, null, null, null);
+        System.out.println("Total registrations for user " + userId + ": " + countForUser);
+
+        // Test with filters
+        System.out.println("Total 'approved' registrations for user " + userId + ": " +
+                dao.countByUserId(userId, null, "approved", null, null));
+
+        // Test findByUserIdPaginated
+        System.out.println("\n----- Testing findByUserIdPaginated() -----");
+        List<Registration> userRegistrations = dao.findByUserIdPaginated(userId, 0, 5, null, null, null, null);
+        System.out.println("First 5 registrations for user " + userId + ":");
+        printRegistrations(userRegistrations);
+
+        // Test countByUserIdAndSubjectNameSearch
+        System.out.println("\n----- Testing countByUserIdAndSubjectNameSearch() -----");
+        String searchTerm = "Java"; // Adjust based on your data
+        int searchCount = dao.countByUserIdAndSubjectNameSearch(userId, searchTerm, null, null, null, null);
+        System.out.println("Count for user " + userId + " with subject name containing '" + searchTerm + "': " + searchCount);
+
+        // Test findByUserIdAndSubjectNameSearchPaginated
+        System.out.println("\n----- Testing findByUserIdAndSubjectNameSearchPaginated() -----");
+        List<Registration> searchResults = dao.findByUserIdAndSubjectNameSearchPaginated(
+                userId, searchTerm, 0, 5, null, null, null, null);
+        System.out.println("Search results for user " + userId + " with subject name containing '" + searchTerm + "':");
+        printRegistrations(searchResults);
+
+        // Test findRegistrationsWithFilters
+        System.out.println("\n----- Testing findRegistrationsWithFilters() -----");
+        String emailSearch = "user"; // Adjust based on your data
+        List<Registration> filteredRegistrations = dao.findRegistrationsWithFilters(
+                emailSearch, null, "approved", null, null, "registration_time", "desc", 1, 5);
+        System.out.println("Filtered registrations (email contains '" + emailSearch + "', status='approved'):");
+        printRegistrations(filteredRegistrations);
+
+        // Test countFilteredRegistrations
+        System.out.println("\n----- Testing countFilteredRegistrations() -----");
+        int filteredCount = dao.countFilteredRegistrations(emailSearch, null, "approved", null, null);
+        System.out.println("Count of filtered registrations: " + filteredCount);
+
+        // Test delete
+        System.out.println("\n----- Testing delete() -----");
+        boolean deleteSuccess = dao.delete(retrievedRegistration);
+        System.out.println("Delete successful: " + deleteSuccess);
+        System.out.println("Registration after deletion: " + dao.findById(newId));
+    }
+
+    private static void printRegistration(Registration registration) {
+        if (registration == null) {
+            System.out.println("Registration not found");
+            return;
+        }
+
+        System.out.println("ID: " + registration.getId());
+        System.out.println("User ID: " + registration.getUser_id());
+        System.out.println("Subject ID: " + registration.getSubject_id());
+        System.out.println("Package ID: " + registration.getPackage_id());
+        System.out.println("Registration Time: " + registration.getRegistration_time());
+        System.out.println("Total Cost: $" + registration.getTotal_cost());
+        System.out.println("Status: " + registration.getStatus());
+        System.out.println("Valid From: " + registration.getValid_from());
+        System.out.println("Valid To: " + registration.getValid_to());
+    }
+
+    private static void printRegistrations(List<Registration> registrations) {
+        if (registrations == null || registrations.isEmpty()) {
+            System.out.println("No registrations found");
+            return;
+        }
+
+        System.out.println("Found " + registrations.size() + " registrations:");
+        for (int i = 0; i < Math.min(registrations.size(), 5); i++) {
+            System.out.println("\n--- Registration " + (i+1) + " ---");
+            printRegistration(registrations.get(i));
+        }
+
+        if (registrations.size() > 5) {
+            System.out.println("\n... and " + (registrations.size() - 5) + " more registrations");
+        }
     }
 
 }

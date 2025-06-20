@@ -49,7 +49,7 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
 
     @Override
     public boolean update(Role t) {
-        String sql = "UPDATE Role SET role_name = ?, description = ?, created_at = ? WHERE id = ?";
+        String sql = "UPDATE role SET role_name = ?, description = ?, created_at = ? WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -69,7 +69,7 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
 
     @Override
     public boolean delete(Role t) {
-        String sql = "DELETE FROM Role WHERE id = ?";
+        String sql = "DELETE FROM role WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -86,7 +86,7 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
 
     @Override
     public int insert(Role t) {
-        String sql = "INSERT INTO Role (role_name, description, created_at) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO  (role_name, description, created_at) VALUES (?, ?, ?)";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
