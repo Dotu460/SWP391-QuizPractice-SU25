@@ -119,6 +119,13 @@
             align-items: center;
             margin-bottom: 10px;
             gap: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .answer-option:hover {
+            background-color: #f8f9fa;
         }
         
         .answer-option input[type="radio"] {
@@ -169,10 +176,26 @@
             color: #dc3545;
             cursor: pointer;
             padding: 5px;
+            border: none;
+            background: none;
+            transition: all 0.3s ease;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
         }
 
         .btn-remove-option:hover {
-            color: #c82333;
+            color: #fff;
+            background-color: #dc3545;
+            transform: scale(1.1);
+        }
+
+        .btn-remove-option i {
+            font-size: 16px;
         }
 
         .media-container {
@@ -297,7 +320,14 @@
                                                     <c:forEach items="${question.questionOptions}" var="option" varStatus="status">
                                                         <div class="answer-option" id="answer-${status.index + 1}">
                                                             <input type="radio" name="correctAnswer" value="${status.index + 1}" ${option.correct_key ? 'checked' : ''}>
-                                                            <input type="text" class="form-control" name="optionText_${status.index + 1}" value="${option.option_text}" placeholder="Answer ${status.index + 1}" required>
+                                                            <c:choose>
+                                                                <c:when test="${empty option.option_text}">
+                                                                    <input type="text" class="form-control" name="answerText_${status.index + 1}" value="${option.answer_text}" placeholder="Answer Text ${status.index + 1}" required>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <input type="text" class="form-control" name="optionText_${status.index + 1}" value="${option.option_text}" placeholder="Answer ${status.index + 1}" required>
+                                                                </c:otherwise>
+                                                            </c:choose>
                                                             <input type="hidden" name="optionId_${status.index + 1}" value="${option.id}">
                                                             <button type="button" class="btn-remove-option" onclick="removeOption(${status.index + 1})">
                                                                 <i class="fas fa-times"></i>
@@ -309,7 +339,14 @@
                                                     <c:forEach begin="1" end="4" var="i">
                                                         <div class="answer-option" id="answer-${i}">
                                                             <input type="radio" name="correctAnswer" value="${i}" ${i == 1 ? 'checked' : ''}>
-                                                            <input type="text" class="form-control" name="optionText_${i}" placeholder="Answer ${i}" required>
+                                                            <c:choose>
+                                                                <c:when test="${question.type == 'essay'}">
+                                                                    <input type="text" class="form-control" name="answerText_${i}" placeholder="Answer Text ${i}" required>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <input type="text" class="form-control" name="optionText_${i}" placeholder="Answer ${i}" required>
+                                                                </c:otherwise>
+                                                            </c:choose>
                                                             <input type="hidden" name="optionId_${i}" value="0">
                                                             <button type="button" class="btn-remove-option" onclick="removeOption(${i})">
                                                                 <i class="fas fa-times"></i>

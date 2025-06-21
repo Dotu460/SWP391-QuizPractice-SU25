@@ -7,6 +7,8 @@
 
  import com.quiz.su25.dal.impl.*;
  import com.quiz.su25.entity.*;
+ import com.quiz.su25.entity.User;
+ import com.quiz.su25.config.GlobalConfig;
  import jakarta.servlet.ServletException;
  import jakarta.servlet.annotation.WebServlet;
  import jakarta.servlet.annotation.MultipartConfig;
@@ -136,6 +138,10 @@
      private void listQuestions(HttpServletRequest request, HttpServletResponse response)
              throws ServletException, IOException {
          try {
+             // Lấy thông tin user từ session
+             User currentUser = (User) request.getSession().getAttribute(GlobalConfig.SESSION_ACCOUNT);
+             request.setAttribute("currentUser", currentUser);
+             
              // Get and validate filter parameters
              String content = request.getParameter("content");
              if (content != null && content.trim().isEmpty()) {
@@ -719,8 +725,9 @@
              List<Integer> formOptionIds = new ArrayList<>();
              for (int i = 1; i <= optionCount; i++) {
                  String optionText = request.getParameter("optionText_" + i);
+                 String answerText = request.getParameter("answerText_" + i);
                  String optionIdStr = request.getParameter("optionId_" + i);
-                 if (optionText == null || optionText.isEmpty()) continue;
+                 if ((optionText == null || optionText.isEmpty()) && (answerText == null || answerText.isEmpty())) continue;
                  int optionId = 0;
                  try { optionId = Integer.parseInt(optionIdStr); } catch (Exception ignore) {}
                  formOptionIds.add(optionId);
@@ -735,7 +742,15 @@
                      option = new QuestionOption();
                      option.setQuestion_id(questionIdInt);
                  }
-                 option.setOption_text(optionText);
+                 
+                 if (optionText != null && !optionText.isEmpty()) {
+                     option.setOption_text(optionText);
+                     option.setAnswer_text(null);
+                 } else {
+                     option.setOption_text(null);
+                     option.setAnswer_text(answerText);
+                 }
+                 
                  option.setCorrect_key(i == correctAnswer);
                  option.setDisplay_order(i);
                  if (optionId != 0) {
