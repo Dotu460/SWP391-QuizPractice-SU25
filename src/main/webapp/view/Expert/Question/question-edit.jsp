@@ -358,84 +358,91 @@
 
     <script>
         $(document).ready(function() {
-            // Initialize TinyMCE for media_url
-            tinymce.init({
-                selector: '#media_url',
-                plugins: 'image media link code table lists',
-                toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | indent outdent | bullist numlist | image media link | code',
-                height: 300,
-                images_upload_url: '${pageContext.request.contextPath}/upload-media',
-                automatic_uploads: true,
-                file_picker_types: 'image media',
-                media_live_embeds: true,
-                images_upload_handler: function (blobInfo, progress) {
-                    return new Promise((resolve, reject) => {
-                        const formData = new FormData();
-                        formData.append('file', blobInfo.blob(), blobInfo.filename());
+            function initTinyMCE(selector = '#media_url') {
+                tinymce.init({
+                    selector: selector,
+                    plugins: 'image media link code table lists preview paste',
+                    toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright | image media | preview code | removeformat',
+                    height: 400,
+                    images_upload_url: '${pageContext.request.contextPath}/upload-media',
+                    automatic_uploads: true,
+                    file_picker_types: 'image media',
+                    media_live_embeds: true,
+                    paste_data_images: true,
+                    paste_as_text: false,
+                    paste_enable_default_filters: true,
+                    paste_word_valid_elements: "b,strong,i,em,h1,h2,h3,p,br,img[src],video,source",
+                    paste_retain_style_properties: "all",
+                    extended_valid_elements: 'img[class|src|alt|title|width|height|style],video[*],source[*]',
+                    content_style: 'img { max-width: 100%; height: auto; } video { max-width: 100%; height: auto; }',
+                    images_upload_handler: function (blobInfo, progress) {
+                        return new Promise((resolve, reject) => {
+                            // Nếu là paste từ clipboard
+                            if (blobInfo.blob().type.indexOf('image') !== -1) {
+                                const formData = new FormData();
+                                formData.append('file', blobInfo.blob(), blobInfo.filename());
 
-                        fetch('${pageContext.request.contextPath}/upload-media', {
-                            method: 'POST',
-                            body: formData
-                        })
-                        .then(response => response.json())
-                        .then(result => {
-                            if (result.location) {
-                                resolve(result.location);
-                            } else {
-                                reject({ message: result.message || 'Upload failed' });
+                                fetch('${pageContext.request.contextPath}/upload-media', {
+                                    method: 'POST',
+                                    body: formData
+                                })
+                                .then(response => response.json())
+                                .then(result => {
+                                    if (result.location) {
+                                        resolve(result.location);
+                                    } else {
+                                        reject({ message: result.message || 'Upload failed' });
+                                    }
+                                })
+                                .catch(error => {
+                                    reject({ message: 'HTTP Error: ' + error.message });
+                                });
+                            } 
+                            // Nếu là URL hình ảnh từ web khác
+                            else if (blobInfo.blob() instanceof String || typeof blobInfo.blob() === 'string') {
+                                resolve(blobInfo.blob());
                             }
-                        })
-                        .catch(error => {
-                            reject({ message: 'HTTP Error: ' + error.message });
                         });
-                    });
-                },
-                file_picker_callback: function(cb, value, meta) {
-                    var input = document.createElement('input');
-                    input.setAttribute('type', 'file');
-                    
-                    if (meta.filetype === 'image') {
-                        input.setAttribute('accept', 'image/*');
-                    } else if (meta.filetype === 'media') {
-                        input.setAttribute('accept', 'video/*');
-                    }
-
-                    input.onchange = function() {
-                        var file = this.files[0];
-                        var formData = new FormData();
-                        formData.append('file', file);
-
-                        fetch('${pageContext.request.contextPath}/upload-media', {
-                            method: 'POST',
-                            body: formData
-                        })
-                        .then(response => response.json())
-                        .then(result => {
-                            if (result.location) {
-                                cb(result.location);
-                            } else {
-                                throw new Error(result.message || 'Upload failed');
+                    },
+                    paste_preprocess: function(plugin, args) {
+                        // Giữ lại các thẻ img và thuộc tính src
+                        var content = args.content;
+                        
+                        // Xử lý các thẻ img
+                        content = content.replace(/<img[^>]+src="([^">]+)"[^>]*>/g, function(match, src) {
+                            return '<img src="' + src + '" style="max-width: 100%; height: auto;">';
+                        });
+                        
+                        args.content = content;
+                    },
+                    paste_postprocess: function(plugin, args) {
+                        // Xử lý sau khi paste
+                        args.node.querySelectorAll('img').forEach(function(img) {
+                            if (img.src.startsWith('data:')) {
+                                // Xử lý base64 images
+                                var blobInfo = plugin.editor.editorUpload.blobCache.create({
+                                    base64: img.src.split(',')[1]
+                                });
+                                plugin.editor.editorUpload.uploadImages([blobInfo]);
                             }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Upload failed: ' + error.message);
+                            // Thêm class và style cho ảnh
+                            img.className = 'img-fluid';
+                            img.style.maxWidth = '100%';
+                            img.style.height = 'auto';
                         });
-                    };
+                    },
+                    file_picker_callback: function(cb, value, meta) {
+                        var input = document.createElement('input');
+                        input.setAttribute('type', 'file');
+                        
+                        if (meta.filetype === 'image') {
+                            input.setAttribute('accept', 'image/*');
+                        } else if (meta.filetype === 'media') {
+                            input.setAttribute('accept', 'video/*');
+                        }
 
-                    input.click();
-                },
-                setup: function(editor) {
-                    editor.on('change', function() {
-                        editor.save();
-                    });
-
-                    // Xử lý khi paste hoặc drop ảnh
-                    editor.on('paste drop', function(e) {
-                        var clipboardData = e.clipboardData || e.dataTransfer;
-                        if (clipboardData && clipboardData.files.length > 0) {
-                            e.preventDefault();
-                            var file = clipboardData.files[0];
+                        input.onchange = function() {
+                            var file = this.files[0];
                             var formData = new FormData();
                             formData.append('file', file);
 
@@ -446,24 +453,96 @@
                             .then(response => response.json())
                             .then(result => {
                                 if (result.location) {
-                                    editor.insertContent(result.location);
+                                    if (meta.filetype === 'image') {
+                                        cb(result.location, { title: file.name });
+                                    } else {
+                                        var videoHtml = '<video controls width="100%"><source src="' + result.location + '" type="' + file.type + '"></video>';
+                                        tinymce.activeEditor.insertContent(videoHtml);
+                                    }
+                                } else {
+                                    throw new Error(result.message || 'Upload failed');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('Upload failed: ' + error.message);
+                            });
+                        };
+
+                        input.click();
+                    },
+                    setup: function(editor) {
+                        // Thêm nút xóa cho từng phần tử
+                        editor.on('init', function() {
+                            editor.on('click', function(e) {
+                                var target = e.target;
+                                
+                                // Xóa tất cả nút xóa hiện tại
+                                var existingButtons = editor.getBody().getElementsByClassName('delete-button');
+                                while(existingButtons[0]) {
+                                    existingButtons[0].parentNode.removeChild(existingButtons[0]);
+                                }
+                                
+                                // Kiểm tra nếu click vào ảnh, video hoặc đoạn văn bản
+                                if (target.nodeName === 'IMG' || target.nodeName === 'VIDEO' || target.nodeName === 'P') {
+                                    // Tạo nút xóa
+                                    var deleteButton = editor.dom.create('button', {
+                                        'class': 'delete-button',
+                                        'style': 'position: absolute; top: 0; right: 0; background: red; color: white; border: none; padding: 2px 5px; cursor: pointer; z-index: 1000;'
+                                    }, 'X');
+                                    
+                                    // Thêm sự kiện click cho nút xóa
+                                    deleteButton.onclick = function(e) {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        
+                                        // Xóa phần tử
+                                        target.remove();
+                                        deleteButton.remove();
+                                        
+                                        editor.fire('change');
+                                    };
+                                    
+                                    // Thêm nút xóa vào cạnh phần tử
+                                    var wrapper = editor.dom.create('div', {
+                                        'style': 'position: relative; display: inline-block;'
+                                    });
+                                    target.parentNode.insertBefore(wrapper, target);
+                                    wrapper.appendChild(target);
+                                    wrapper.appendChild(deleteButton);
                                 }
                             });
-                        }
-                    });
-                },
-                // Tắt các định dạng HTML mặc định
-                paste_as_text: true,
-                paste_data_images: false,
-                // Chỉ cho phép các elements cần thiết
-                valid_elements: 'p',
-                // Không tự động thêm thẻ p
-                forced_root_block: false,
-                // Không convert URL thành link
-                convert_urls: false,
-                // Không tự động format
-                verify_html: false
-            });
+                        });
+
+                        editor.on('change', function() {
+                            editor.save();
+                        });
+                        
+                        // Xử lý paste trực tiếp
+                        editor.on('paste', function(e) {
+                            var clipboardData = e.clipboardData || window.clipboardData;
+                            if (!clipboardData) return;
+                            
+                            var items = clipboardData.items;
+                            if (!items) return;
+                            
+                            for (var i = 0; i < items.length; i++) {
+                                if (items[i].type.indexOf('image') !== -1) {
+                                    var blob = items[i].getAsFile();
+                                    var blobInfo = editor.editorUpload.blobCache.create({
+                                        blob: blob,
+                                        name: 'mceclip-' + (new Date()).getTime()
+                                    });
+                                    editor.editorUpload.uploadImages([blobInfo]);
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Initialize TinyMCE for media_url
+            initTinyMCE();
 
             // Form validation
             $('#questionForm').submit(function(e) {
@@ -473,33 +552,6 @@
                     e.preventDefault();
                     return false;
                 }
-                
-                // Get media content và clean up
-                var mediaContent = tinymce.get('media_url').getContent();
-                // Extract only the URL from content
-                var mediaUrl = '';
-                if (mediaContent) {
-                    // Tìm URL trong nội dung
-                    var matches = mediaContent.match(/src="([^"]+)"|uploads\/media\/[^"'\s]+/g);
-                    if (matches) {
-                        // Lấy URL đầu tiên tìm được
-                        mediaUrl = matches[0].replace(/src="|"/g, '');
-                    } else {
-                        // Nếu content là URL thuần
-                        mediaUrl = mediaContent.trim();
-                    }
-                }
-                
-                // Update hidden input for media_url
-                var mediaUrlInput = document.querySelector('input[name="media_url"]');
-                if (!mediaUrlInput) {
-                    mediaUrlInput = document.createElement('input');
-                    mediaUrlInput.type = 'hidden';
-                    mediaUrlInput.name = 'media_url';
-                    this.appendChild(mediaUrlInput);
-                }
-                mediaUrlInput.value = mediaUrl;
-                
                 return true;
             });
         });
