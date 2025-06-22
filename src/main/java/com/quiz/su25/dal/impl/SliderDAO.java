@@ -163,4 +163,81 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
         }
         return list;
     }
+
+    public List<Slider> findSlidersWithFilters(String status, String search, int page, int pageSize) {
+        List<Slider> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM slider WHERE 1=1");
+        
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND status = ?");
+        }
+        if (search != null && !search.isEmpty()) {
+            sql.append(" AND (title LIKE ? OR backlink_url LIKE ?)");
+        }
+        
+        sql.append(" ORDER BY id LIMIT ? OFFSET ?");
+        
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+            
+            int paramIndex = 1;
+            if (status != null && !status.isEmpty()) {
+                statement.setBoolean(paramIndex++, "active".equalsIgnoreCase(status));
+            }
+            if (search != null && !search.isEmpty()) {
+                statement.setString(paramIndex++, "%" + search + "%");
+                statement.setString(paramIndex++, "%" + search + "%");
+            }
+            
+            statement.setInt(paramIndex++, pageSize);
+            statement.setInt(paramIndex++, (page - 1) * pageSize);
+            
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                list.add(getFromResultSet(resultSet));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error findSlidersWithFilters at class SliderDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return list;
+    }
+
+    public int getTotalFilteredSliders(String status, String search) {
+        int total = 0;
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM slider WHERE 1=1");
+
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND status = ?");
+        }
+        if (search != null && !search.isEmpty()) {
+            sql.append(" AND (title LIKE ? OR backlink_url LIKE ?)");
+        }
+
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+
+            int paramIndex = 1;
+            if (status != null && !status.isEmpty()) {
+                statement.setBoolean(paramIndex++, "active".equalsIgnoreCase(status));
+            }
+            if (search != null && !search.isEmpty()) {
+                statement.setString(paramIndex++, "%" + search + "%");
+                statement.setString(paramIndex++, "%" + search + "%");
+            }
+
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                total = resultSet.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getTotalFilteredSliders at class SliderDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return total;
+    }
 }
