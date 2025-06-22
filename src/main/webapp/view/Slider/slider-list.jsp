@@ -114,6 +114,19 @@
             .column-hidden {
                 display: none;
             }
+            .column-checkbox {
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+            }
+            .column-checkbox input[type="checkbox"] {
+                margin-right: 8px;
+            }
+            .column-checkbox label {
+                margin-bottom: 0;
+                user-select: none;
+                cursor: pointer;
+            }
         </style>
     </head>
     
@@ -156,7 +169,7 @@
                                             <button type="button" class="add-btn" onclick="location.href='${pageContext.request.contextPath}/slider-list?action=add'">
                                                 <i class="fas fa-plus"></i> Add New Slider
                                             </button>
-                                            <button type="button" class="settings-btn ml-2" data-bs-toggle="modal" data-bs-target="#settingModal">
+                                            <button type="button" class="settings-btn ml-2" id="columnSettingsBtn">
                                                 <i class="fa fa-cog"></i> Display Settings
                                             </button>
                                         </div>
@@ -225,27 +238,27 @@
                                         <table class="table table-striped table-hover" id="sliderTable">
                                             <thead>
                                                 <tr>
-                                                    <th>ID</th>
-                                                    <th>Title</th>
-                                                    <th>Image</th>
-                                                    <th>Backlink</th>
-                                                    <th>Status</th>
-                                                    <th>Actions</th>
+                                                    <th class="column-id">ID</th>
+                                                    <th class="column-title">Title</th>
+                                                    <th class="column-image">Image</th>
+                                                    <th class="column-backlink">Backlink</th>
+                                                    <th class="column-status">Status</th>
+                                                    <th class="column-actions">Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <c:forEach items="${sliders}" var="slider">
                                                     <tr>
-                                                        <td>${slider.id}</td>
-                                                        <td><strong>${slider.title}</strong></td>
-                                                        <td><img src="${slider.image_url}" alt="${slider.title}" class="slider-image"/></td>
-                                                        <td><a href="${slider.backlink_url}" target="_blank">${slider.backlink_url}</a></td>
-                                                        <td>
+                                                        <td class="column-id">${slider.id}</td>
+                                                        <td class="column-title"><strong>${slider.title}</strong></td>
+                                                        <td class="column-image"><img src="${slider.image_url}" alt="${slider.title}" class="slider-image"/></td>
+                                                        <td class="column-backlink"><a href="${slider.backlink_url}" target="_blank">${slider.backlink_url}</a></td>
+                                                        <td class="column-status">
                                                             <span class="slider-status ${slider.status ? 'status-active' : 'status-inactive'}">
                                                                 ${slider.status ? 'Active' : 'Inactive'}
                                                             </span>
                                                         </td>
-                                                        <td>
+                                                        <td class="column-actions">
                                                             <div class="table-actions">
                                                                 <a href="${pageContext.request.contextPath}/slider-list?action=edit&id=${slider.id}" class="action-edit">
                                                                     <i class="fas fa-edit"></i> Edit
@@ -307,56 +320,46 @@
         </main>
         <!-- main-area-end -->  
                 
-        <!-- Settings Modal -->
-        <div class="modal fade" id="settingModal" tabindex="-1" role="dialog" aria-labelledby="settingModalLabel" aria-hidden="true">
+        <!-- Column Settings Modal -->
+        <div class="modal fade" id="columnSettingsModal" tabindex="-1" role="dialog" aria-labelledby="columnSettingsModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="settingModalLabel">Display Settings</h5>
+                        <h5 class="modal-title" id="columnSettingsModalLabel">Customize Column Display</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label class="font-weight-bold mb-3">Select columns to display:</label>
-                            <div class="d-flex justify-content-end mb-3">
-                                <button type="button" class="btn btn-sm btn-outline-primary mr-2" id="selectAllColumns">Select All</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" id="deselectAllColumns">Deselect All</button>
+                        <form id="columnSettingsForm">
+                            <div class="column-checkbox">
+                                <input type="checkbox" id="col-id" value="id" checked>
+                                <label for="col-id">ID</label>
                             </div>
-                            <div class="column-option">
-                                <div class="form-check">
-                                    <input class="form-check-input column-toggle" type="checkbox" value="id" id="idColumn" data-column-index="0">
-                                    <label class="form-check-label" for="idColumn">ID</label>
-                                </div>
+                            <div class="column-checkbox">
+                                <input type="checkbox" id="col-title" value="title" checked>
+                                <label for="col-title">Title</label>
                             </div>
-                            <div class="column-option">
-                                <div class="form-check">
-                                    <input class="form-check-input column-toggle" type="checkbox" value="title" id="titleColumn" data-column-index="1">
-                                    <label class="form-check-label" for="titleColumn">Title</label>
-                                </div>
+                            <div class="column-checkbox">
+                                <input type="checkbox" id="col-image" value="image" checked>
+                                <label for="col-image">Image</label>
                             </div>
-                            <div class="column-option">
-                                <div class="form-check">
-                                    <input class="form-check-input column-toggle" type="checkbox" value="image" id="imageColumn" data-column-index="2">
-                                    <label class="form-check-label" for="imageColumn">Image</label>
-                                </div>
+                            <div class="column-checkbox">
+                                <input type="checkbox" id="col-backlink" value="backlink" checked>
+                                <label for="col-backlink">Backlink</label>
                             </div>
-                            <div class="column-option">
-                                <div class="form-check">
-                                    <input class="form-check-input column-toggle" type="checkbox" value="backlink" id="backlinkColumn" data-column-index="3">
-                                    <label class="form-check-label" for="backlinkColumn">Backlink</label>
-                                </div>
+                            <div class="column-checkbox">
+                                <input type="checkbox" id="col-status" value="status" checked>
+                                <label for="col-status">Status</label>
                             </div>
-                            <div class="column-option">
-                                <div class="form-check">
-                                    <input class="form-check-input column-toggle" type="checkbox" value="status" id="statusColumn" data-column-index="4">
-                                    <label class="form-check-label" for="statusColumn">Status</label>
-                                </div>
-                            </div>
+                        </form>
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="selectAllBtn">Select All</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="deselectAllBtn">Deselect All</button>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" id="applySettings">Apply</button>
+                        <button type="button" class="btn btn-primary" id="applySettingsBtn">Apply</button>
                     </div>
                 </div>
             </div>
@@ -373,71 +376,96 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/css/iziToast.min.css">
         <script src="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/js/iziToast.min.js"></script>       
         <script>
+            // Function to change page size
             function changePageSize(newSize) {
                 const url = new URL(window.location);
                 url.searchParams.set('pageSize', newSize);
                 url.searchParams.set('page', '1'); // Reset to first page
                 window.location.href = url.toString();
             }
-            
-            document.addEventListener('DOMContentLoaded', function() {
-                const table = document.getElementById('sliderTable');
-                const checkboxes = document.querySelectorAll('.column-toggle');
-                const SLIDER_COLUMN_PREFS_KEY = 'sliderColumnPrefs';
+
+            $(document).ready(function() {
+                const storageKey = 'sliderColumnPrefs';
+
+                // --- Main Event Handlers ---
+
+                // When click on Customize column display button
+                $('#columnSettingsBtn').click(function() {
+                    syncModal();
+                    $('#columnSettingsModal').modal('show');
+                });
+
+                // When click on Apply button
+                $('#applySettingsBtn').click(function() {
+                    saveAndApplySettings();
+                });
+
+                // When click on Select All button
+                $('#selectAllBtn').click(function() {
+                    $('#columnSettingsForm input[type="checkbox"]').prop('checked', true);
+                });
+
+                // When click on Deselect All button
+                $('#deselectAllBtn').click(function() {
+                    $('#columnSettingsForm input[type="checkbox"]').prop('checked', false);
+                });
+
+                // --- Helper Functions ---
+
+                function getPrefsFromStorage() {
+                    const savedPrefs = localStorage.getItem(storageKey);
+                    if (savedPrefs) {
+                        return JSON.parse(savedPrefs);
+                    }
+                    // Default: show all columns
+                    return { id: true, title: true, image: true, backlink: true, status: true };
+                }
+
+                function savePrefsToStorage() {
+                    const prefs = {};
+                    $('#columnSettingsForm input[type="checkbox"]').each(function() {
+                        prefs[this.value] = this.checked;
+                    });
+                    localStorage.setItem(storageKey, JSON.stringify(prefs));
+                    return prefs;
+                }
 
                 function applyColumnVisibility(prefs) {
-                    checkboxes.forEach(checkbox => {
-                        const columnIndex = parseInt(checkbox.dataset.columnIndex, 10) + 1;
-                        const isVisible = !prefs || prefs[checkbox.value] !== false;
-
-                        // Toggle visibility for header
-                        table.querySelector(`thead th:nth-child(${columnIndex})`).classList.toggle('column-hidden', !isVisible);
-
-                        // Toggle visibility for all cells in this column
-                        table.querySelectorAll(`tbody tr td:nth-child(${columnIndex})`).forEach(cell => {
-                            cell.classList.toggle('column-hidden', !isVisible);
-                        });
+                    // Use toggle(boolean) to show/hide based on preferences
+                    $('#sliderTable .column-id').toggle(prefs.id);
+                    $('#sliderTable .column-title').toggle(prefs.title);
+                    $('#sliderTable .column-image').toggle(prefs.image);
+                    $('#sliderTable .column-backlink').toggle(prefs.backlink);
+                    $('#sliderTable .column-status').toggle(prefs.status);
+                }
+                
+                function syncModal() {
+                    const prefs = getPrefsFromStorage();
+                    $('#columnSettingsForm input[type="checkbox"]').each(function() {
+                        // If a preference exists, use it. Otherwise, default to true (checked).
+                        this.checked = prefs[this.value] !== false;
                     });
                 }
-
-                function loadPrefsIntoModal() {
-                    const prefs = JSON.parse(localStorage.getItem(SLIDER_COLUMN_PREFS_KEY));
-                    if (prefs) {
-                        checkboxes.forEach(checkbox => {
-                            checkbox.checked = prefs[checkbox.value] !== false;
-                        });
-                    } else {
-                        checkboxes.forEach(checkbox => checkbox.checked = true);
-                    }
+                
+                function loadAndApplySettings() {
+                    const prefs = getPrefsFromStorage();
+                    applyColumnVisibility(prefs);
                 }
 
-                const settingModalEl = document.getElementById('settingModal');
-                settingModalEl.addEventListener('show.bs.modal', loadPrefsIntoModal);
-
-                document.getElementById('applySettings').addEventListener('click', () => {
-                    const currentPrefs = {};
-                    checkboxes.forEach(checkbox => {
-                        currentPrefs[checkbox.value] = checkbox.checked;
-                    });
-
-                    localStorage.setItem(SLIDER_COLUMN_PREFS_KEY, JSON.stringify(currentPrefs));
-                    applyColumnVisibility(currentPrefs);
+                function saveAndApplySettings() {
+                    const prefs = savePrefsToStorage();
+                    applyColumnVisibility(prefs);
                     
-                    const modalInstance = bootstrap.Modal.getInstance(settingModalEl);
-                    modalInstance.hide();
-                });
-
-                document.getElementById('selectAllColumns').addEventListener('click', () => {
-                    checkboxes.forEach(cb => cb.checked = true);
-                });
-
-                document.getElementById('deselectAllColumns').addEventListener('click', () => {
-                    checkboxes.forEach(cb => cb.checked = false);
-                });
-
-                // Initial load
-                const initialPrefs = JSON.parse(localStorage.getItem(SLIDER_COLUMN_PREFS_KEY));
-                applyColumnVisibility(initialPrefs);
+                    $('#columnSettingsModal').modal('hide');
+                    iziToast.success({
+                        title: 'Success',
+                        message: 'Display settings updated successfully!',
+                        position: 'topRight'
+                    });
+                }
+                
+                // --- Initial Load ---
+                loadAndApplySettings();
             });
         </script>
     </body>
