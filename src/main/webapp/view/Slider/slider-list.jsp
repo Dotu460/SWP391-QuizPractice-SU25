@@ -251,7 +251,7 @@
                                                     <tr>
                                                         <td class="column-id">${slider.id}</td>
                                                         <td class="column-title"><strong>${slider.title}</strong></td>
-                                                        <td class="column-image"><img src="${slider.image_url}" alt="${slider.title}" class="slider-image"/></td>
+                                                        <td class="column-image"><img src="${pageContext.request.contextPath}${slider.image_url}" alt="${slider.title}" class="slider-image"/></td>
                                                         <td class="column-backlink"><a href="${slider.backlink_url}" target="_blank">${slider.backlink_url}</a></td>
                                                         <td class="column-status">
                                                             <span class="slider-status ${slider.status ? 'status-active' : 'status-inactive'}">
@@ -378,6 +378,8 @@
         <script>
             // Function to change page size
             function changePageSize(newSize) {
+                // Set a flag to indicate navigation is due to pagination
+                sessionStorage.setItem('isSliderPaginating', 'true');
                 const url = new URL(window.location);
                 url.searchParams.set('pageSize', newSize);
                 url.searchParams.set('page', '1'); // Reset to first page
@@ -386,34 +388,36 @@
 
             $(document).ready(function() {
                 const storageKey = 'sliderColumnPrefs';
+                const navigationFlag = 'isSliderPaginating';
 
                 // --- Main Event Handlers ---
-
-                // When click on Customize column display button
                 $('#columnSettingsBtn').click(function() {
                     syncModal();
                     $('#columnSettingsModal').modal('show');
                 });
 
-                // When click on Apply button
                 $('#applySettingsBtn').click(function() {
                     saveAndApplySettings();
                 });
 
-                // When click on Select All button
                 $('#selectAllBtn').click(function() {
                     $('#columnSettingsForm input[type="checkbox"]').prop('checked', true);
                 });
 
-                // When click on Deselect All button
                 $('#deselectAllBtn').click(function() {
                     $('#columnSettingsForm input[type="checkbox"]').prop('checked', false);
                 });
 
-                // --- Helper Functions ---
+                // Add listener for pagination link clicks
+                $('.pagination a').on('click', function(e) {
+                    if (!$(this).parent().hasClass('disabled')) {
+                        sessionStorage.setItem(navigationFlag, 'true');
+                    }
+                });
 
-                function getPrefsFromStorage() {
-                    const savedPrefs = localStorage.getItem(storageKey);
+                // --- Helper Functions ---
+                function getPrefsFromSession() {
+                    const savedPrefs = sessionStorage.getItem(storageKey);
                     if (savedPrefs) {
                         return JSON.parse(savedPrefs);
                     }
@@ -421,41 +425,34 @@
                     return { id: true, title: true, image: true, backlink: true, status: true };
                 }
 
-                function savePrefsToStorage() {
+                function savePrefsToSession() {
                     const prefs = {};
                     $('#columnSettingsForm input[type="checkbox"]').each(function() {
                         prefs[this.value] = this.checked;
                     });
-                    localStorage.setItem(storageKey, JSON.stringify(prefs));
+                    sessionStorage.setItem(storageKey, JSON.stringify(prefs));
                     return prefs;
                 }
 
                 function applyColumnVisibility(prefs) {
-                    // Use toggle(boolean) to show/hide based on preferences
-                    $('#sliderTable .column-id').toggle(prefs.id);
-                    $('#sliderTable .column-title').toggle(prefs.title);
-                    $('#sliderTable .column-image').toggle(prefs.image);
-                    $('#sliderTable .column-backlink').toggle(prefs.backlink);
-                    $('#sliderTable .column-status').toggle(prefs.status);
+                    prefs = prefs || { id: true, title: true, image: true, backlink: true, status: true };
+                    $('#sliderTable .column-id').toggle(!!prefs.id);
+                    $('#sliderTable .column-title').toggle(!!prefs.title);
+                    $('#sliderTable .column-image').toggle(!!prefs.image);
+                    $('#sliderTable .column-backlink').toggle(!!prefs.backlink);
+                    $('#sliderTable .column-status').toggle(!!prefs.status);
                 }
                 
                 function syncModal() {
-                    const prefs = getPrefsFromStorage();
+                    const prefs = getPrefsFromSession();
                     $('#columnSettingsForm input[type="checkbox"]').each(function() {
-                        // If a preference exists, use it. Otherwise, default to true (checked).
                         this.checked = prefs[this.value] !== false;
                     });
                 }
-                
-                function loadAndApplySettings() {
-                    const prefs = getPrefsFromStorage();
-                    applyColumnVisibility(prefs);
-                }
 
                 function saveAndApplySettings() {
-                    const prefs = savePrefsToStorage();
+                    const prefs = savePrefsToSession();
                     applyColumnVisibility(prefs);
-                    
                     $('#columnSettingsModal').modal('hide');
                     iziToast.success({
                         title: 'Success',
@@ -463,9 +460,27 @@
                         position: 'topRight'
                     });
                 }
+
+                function resetToDefault() {
+                    const defaultPrefs = { id: true, title: true, image: true, backlink: true, status: true };
+                    applyColumnVisibility(defaultPrefs);
+                    $('#columnSettingsForm input[type="checkbox"]').prop('checked', true);
+                    sessionStorage.setItem(storageKey, JSON.stringify(defaultPrefs));
+                }
                 
-                // --- Initial Load ---
-                loadAndApplySettings();
+                // --- Initial Load Logic ---
+                function initializeView() {
+                    if (sessionStorage.getItem(navigationFlag) === 'true') {
+                        const prefs = getPrefsFromSession();
+                        applyColumnVisibility(prefs);
+                        sessionStorage.removeItem(navigationFlag); // Consume the flag
+                    } else {
+                        resetToDefault();
+                    }
+                }
+                
+                // Run on page load
+                initializeView();
             });
         </script>
     </body>
