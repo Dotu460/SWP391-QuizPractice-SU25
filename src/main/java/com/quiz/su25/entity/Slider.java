@@ -28,4 +28,6 @@ public class Slider {
     private String image_url;
     private String backlink_url;
     private Boolean status;
+    private Integer display_order;
+    private String notes;
 }

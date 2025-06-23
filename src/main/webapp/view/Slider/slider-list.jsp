@@ -59,6 +59,10 @@
             .action-edit {
                 background-color: #17a2b8;
             }
+
+            .action-details {
+                background-color: #5751e1;
+            }
             
             .action-delete {
                 background-color: #dc3545;
@@ -127,6 +131,12 @@
                 user-select: none;
                 cursor: pointer;
             }
+            .column-title {
+                width: 40%;
+                max-width: 250px;
+                white-space: normal;
+                word-wrap: break-word;
+            }
         </style>
     </head>
     
@@ -159,6 +169,13 @@
                                 <c:if test="${not empty param.pageSize}">
                                     <c:param name="pageSize" value="${param.pageSize}" />
                                 </c:if>
+                            </c:url>
+
+                            <c:url value="" var="currentParams">
+                                <c:if test="${not empty statusFilter}"><c:param name="status" value="${statusFilter}" /></c:if>
+                                <c:if test="${not empty searchFilter}"><c:param name="search" value="${searchFilter}" /></c:if>
+                                <c:if test="${not empty pageSize}"><c:param name="pageSize" value="${pageSize}" /></c:if>
+                                <c:if test="${not empty currentPage}"><c:param name="page" value="${currentPage}" /></c:if>
                             </c:url>
 
                             <div class="col-xl-9">
@@ -260,7 +277,10 @@
                                                         </td>
                                                         <td class="column-actions">
                                                             <div class="table-actions">
-                                                                <a href="${pageContext.request.contextPath}/slider-list?action=edit&id=${slider.id}" class="action-edit">
+                                                                <a href="${pageContext.request.contextPath}/slider-list?action=details&id=${slider.id}&${fn:substringAfter(currentParams, '?')}" class="action-details">
+                                                                    <i class="fas fa-eye"></i> Details
+                                                                </a>
+                                                                <a href="${pageContext.request.contextPath}/slider-list?action=edit&id=${slider.id}&${fn:substringAfter(currentParams, '?')}" class="action-edit">
                                                                     <i class="fas fa-edit"></i> Edit
                                                                 </a>
                                                                 <form action="${pageContext.request.contextPath}/slider-list" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this slider?');">
