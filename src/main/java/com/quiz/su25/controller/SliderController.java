@@ -153,6 +153,8 @@ public class SliderController extends HttpServlet {
             createSlider(request, response);
         } else if ("update".equals(action)) {
             updateSlider(request, response);
+        } else if ("delete".equals(action)) {
+            deleteSlider(request, response);
         } else {
             // For now, POST requests can be redirected to GET for simplicity
             // Later, this will handle create, update, delete actions
@@ -240,6 +242,36 @@ public class SliderController extends HttpServlet {
             request.setAttribute("returnQueryString", returnQueryString);
             request.getRequestDispatcher("/view/Slider/slider-edit.jsp").forward(request, response);
         }
+    }
+
+    private void deleteSlider(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String returnQueryString = request.getParameter("returnQueryString");
+        try {
+            String idStr = request.getParameter("id");
+            if (idStr == null || idStr.trim().isEmpty()) {
+                request.getSession().setAttribute("toastMessage", "Slider ID is required for deletion");
+                request.getSession().setAttribute("toastType", "error");
+            } else {
+                int id = Integer.parseInt(idStr);
+                boolean success = sliderDAO.deleteById(id);
+
+                if (success) {
+                    request.getSession().setAttribute("toastMessage", "Slider deleted successfully");
+                    request.getSession().setAttribute("toastType", "success");
+                } else {
+                    request.getSession().setAttribute("toastMessage", "Failed to delete slider. It might be in use.");
+                    request.getSession().setAttribute("toastType", "error");
+                }
+            }
+        } catch (NumberFormatException e) {
+            request.getSession().setAttribute("toastMessage", "Invalid slider ID");
+            request.getSession().setAttribute("toastType", "error");
+        } catch (Exception e) {
+            request.getSession().setAttribute("toastMessage", "An error occurred: " + e.getMessage());
+            request.getSession().setAttribute("toastType", "error");
+        }
+
+        response.sendRedirect(request.getContextPath() + "/slider-list?" + (returnQueryString != null ? returnQueryString : ""));
     }
 
     private void createSlider(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

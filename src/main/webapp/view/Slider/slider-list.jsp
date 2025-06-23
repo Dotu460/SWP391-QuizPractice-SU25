@@ -286,6 +286,7 @@
                                                                 <form action="${pageContext.request.contextPath}/slider-list" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this slider?');">
                                                                     <input type="hidden" name="action" value="delete">
                                                                     <input type="hidden" name="id" value="${slider.id}">
+                                                                    <input type="hidden" name="returnQueryString" value="${fn:substringAfter(currentParams, '?')}">
                                                                     <button type="submit" class="action-delete">
                                                                         <i class="fas fa-trash"></i> Delete
                                                                     </button>
@@ -396,6 +397,30 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/css/iziToast.min.css">
         <script src="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/js/iziToast.min.js"></script>       
         <script>
+            // Toast message display
+            var toastMessage = "${sessionScope.toastMessage}";
+            var toastType = "${sessionScope.toastType}";
+            if (toastMessage) {
+                iziToast.show({
+                    title: toastType === 'success' ? 'Success' : 'Error',
+                    message: toastMessage,
+                    position: 'topRight',
+                    color: toastType === 'success' ? 'green' : 'red',
+                    timeout: 5000,
+                    onClosing: function () {
+                        // Use fetch to call a servlet to remove session attributes
+                        fetch('${pageContext.request.contextPath}/remove-toast', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                        }).catch(error => console.error('Error removing toast session attributes:', error));
+                    }
+                });
+                
+                // Clear the attributes from the session scope in JS to prevent re-showing on refresh
+                '<% session.removeAttribute("toastMessage"); %>';
+                '<% session.removeAttribute("toastType"); %>';
+            }
+
             // Function to change page size
             function changePageSize(newSize) {
                 // Set a flag to indicate navigation is due to pagination
