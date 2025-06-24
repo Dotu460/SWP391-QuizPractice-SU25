@@ -947,6 +947,50 @@
                         justify-content: center;
                     }
                 }
+
+                /* --- New Answer Option Styles --- */
+                .form-check-input { display: none; }
+                .form-check-label {
+                    display: flex;
+                    align-items: center;
+                    padding: 1rem 1.25rem;
+                    border: 1px solid #dee2e6;
+                    border-radius: 0.5rem;
+                    margin-bottom: 0.75rem;
+                    transition: all 0.2s ease-in-out;
+                    cursor: pointer;
+                    position: relative;
+                    background-color: #f8f9fa;
+                }
+                .form-check-label::before {
+                    font-family: "Font Awesome 5 Free";
+                    font-weight: 900;
+                    font-size: 1.2em;
+                    width: 24px;
+                    margin-right: 1rem;
+                    content: '\f111'; /* circle */
+                    color: #adb5bd;
+                    transition: all 0.2s ease-in-out;
+                }
+                .form-check-label:hover {
+                    border-color: #8B7FD2;
+                    background-color: #f8f7ff;
+                }
+                .form-check-input:checked + .form-check-label {
+                    background-color: #f8f7ff;
+                    border-color: #5751E1;
+                    color: #5751E1;
+                    font-weight: 500;
+                }
+                .form-check-input:checked + .form-check-label::before {
+                    content: '\f058'; /* check-circle */
+                    color: #5751E1;
+                }
+
+                /* Style cho nút Peek */
+                .btn-peek:hover {
+                    background: #f0f0f0;
+                }
             </style>
     </head>
 
@@ -1505,12 +1549,20 @@
                                     </div>
                                 </c:when>
                                 <c:when test="${question.type eq 'multiple'}">
+                                    <%-- Count correct options to determine input type (radio/checkbox) --%>
+                                    <c:set var="correctOptionsCount" value="0" />
+                                    <c:forEach items="${question.questionOptions}" var="opt">
+                                        <c:if test="${opt.correct_key}">
+                                            <c:set var="correctOptionsCount" value="${correctOptionsCount + 1}" />
+                                        </c:if>
+                                    </c:forEach>
+                                    
                                     <!-- Multiple Choice Question -->
                                     <c:forEach items="${question.questionOptions}" var="option">
                                         <div class="answer-option mb-3">
                                             <div class="form-check">
                                                 <input class="form-check-input" 
-                                                       type="${question.questionOptions.size() > 1 ? 'checkbox' : 'radio'}"
+                                                       type="${correctOptionsCount > 1 ? 'checkbox' : 'radio'}"
                                                        name="answer" 
                                                        id="option${option.id}" 
                                                        value="${option.id}"
