@@ -1,17 +1,248 @@
 <%-- 
     Document   : quiz-handle-review
-    Created on : Jun 23, 2025, 10:30:50 PM
-    Author     : kenngoc
+    Created on : Jun 24, 2025, 10:30:50 PM
+    Author     : quangmingdoc
 --%>
 
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>SkillGro - Quiz Review: ${quiz.name}</title>
+        <meta name="description" content="SkillGro - Quiz Review">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/view/common/img/favicon.png">
+        <jsp:include page="../../common/user/link_css_common.jsp"></jsp:include>
+        
+        <!-- All styles from quiz-handle.jsp -->
+        <style>
+            .header-top-wrap{background:#1A1B3D;padding:8px 0;color:#fff;position:relative}.header-logo{position:relative;z-index:2;display:flex;align-items:center}.header-logo a{display:block;width:auto;height:100%}.header-logo img{max-height:50px;width:auto;height:auto;display:block;object-fit:contain;filter:brightness(0) invert(1)}.header-top{display:flex;align-items:center;justify-content:space-between;min-height:60px}.header-right{display:flex;align-items:center}.user-menu{position:relative}.user-icon{width:40px;height:40px;border-radius:50%;background:#5751E1;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s ease}.user-icon i{color:#fff;font-size:18px}.user-icon:hover{background:#7A6DC0;transform:translateY(-1px)}.dropdown-menu{position:absolute;top:120%;right:0;width:280px;background:#fff;border-radius:8px;box-shadow:0 5px 15px rgba(0,0,0,.15);opacity:0;visibility:hidden;transform:translateY(10px);transition:all .3s ease;z-index:1000}.dropdown-menu.show{opacity:1;visibility:visible;transform:translateY(0)}.dropdown-header{padding:16px;border-bottom:1px solid #eee}.user-info{display:flex;align-items:center;gap:12px}.user-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden}.user-avatar img{width:100%;height:100%;object-fit:cover}.user-details{display:flex;flex-direction:column}.user-name{font-weight:600;color:#1A1B3D;font-size:14px}.user-email{color:#666;font-size:12px}.guest-info{padding:8px 0;color:#666;font-size:14px}.dropdown-body{padding:8px 0}.dropdown-item{display:flex;align-items:center;padding:10px 16px;color:#1A1B3D;text-decoration:none;transition:background-color .3s ease}.dropdown-item:hover{background-color:#f8f9fa}.dropdown-item i{width:20px;margin-right:12px;font-size:16px}.dropdown-item span{font-size:14px}.text-danger{color:#dc3545!important}.dropdown-divider{height:1px;background-color:#eee;margin:8px 0}
+            .question-header{padding:20px 0;border-bottom:1px solid #eee}.media-content{width:40%}.question-info{display:flex;justify-content:space-between;align-items:center;font-size:16px;color:#1A1B3D}.question-number{font-weight:500}.question-id{color:#1A1B3D}.navigation-footer{display:flex;justify-content:space-between;align-items:center;padding:20px 0;margin-top:30px;border-top:1px solid #eee}.btn-review-back{background:#5751E1;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .3s ease; text-decoration: none;}.btn-review-back:hover{background:#7A6DC0;transform:translateY(-1px)}.navigation-buttons{display:flex;flex-direction:column;align-items:flex-end;gap:10px;margin-left:auto;width:auto}.action-buttons{display:flex;gap:8px}.nav-buttons{display:flex;justify-content:flex-end;width:100%}.nav-group{display:flex;gap:8px;width:fit-content}.btn-action,.btn-nav{background:#fff;border:2px solid #5751E1;border-radius:8px;padding:8px 16px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all .3s ease;color:#1A1B3D;width:100px;justify-content:center}.btn-peek:hover{background:#f0f0f0}.btn-prev{justify-content:flex-start}.btn-next{justify-content:flex-end}.btn-nav:hover{background:#8B7FD2;color:#fff}.peek-popup{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1000;justify-content:center;align-items:center}.peek-popup.show{display:flex}.peek-popup .popup-content{background:#fff;border-radius:12px;width:90%;max-width:500px;padding:24px;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.15)}.peek-popup .popup-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid #eee}.peek-popup .popup-header h3{font-size:20px;font-weight:600;color:#1A1B3D;margin:0}.peek-popup .close-btn{background:0 0;border:none;font-size:20px;color:#666;cursor:pointer;padding:4px;transition:color .3s ease}.peek-popup .close-btn:hover{color:#1A1B3D}.peek-popup .explanation-text{font-size:16px;line-height:1.6;color:#4B5563;padding:16px;background:#f8f9fa;border-radius:8px}
+            .question-content{margin:40px 0;padding:30px;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}.question-text{font-size:18px;color:#1A1B3D;line-height:1.6;margin-bottom:30px;font-weight:500}.answers-container{display:flex;flex-direction:column;gap:16px}.answer-option{position:relative}
+            
+            /* --- Improved Review Mode Styles --- */
+            .form-check-input { display: none; }
+            .form-check-label {
+                display: flex;
+                align-items: center;
+                padding: 1rem 1.25rem;
+                border: 1px solid #dee2e6;
+                border-radius: 0.5rem;
+                margin-bottom: 0.75rem;
+                transition: all 0.2s ease-in-out;
+                cursor: default;
+                position: relative;
+                background-color: #f8f9fa;
+            }
+            .form-check-label::before {
+                font-family: "Font Awesome 5 Free";
+                font-weight: 900;
+                font-size: 1.2em;
+                width: 24px;
+                margin-right: 1rem;
+            }
+            /* Style for CORRECT answer selected by user */
+            .form-check-label.correct-answer {
+                background-color: #e9f7ef;
+                border-color: #28a745;
+                color: #155724;
+                font-weight: 500;
+                box-shadow: 0 0 10px rgba(40, 167, 69, 0.15);
+            }
+            .form-check-label.correct-answer::before {
+                content: '\f058'; /* check-circle */
+                color: #28a745;
+            }
+            /* Style for INCORRECT answer selected by user */
+            .form-check-label.incorrect-answer {
+                background-color: #fdeeee;
+                border-color: #dc3545;
+                color: #721c24;
+                font-weight: 500;
+                box-shadow: 0 0 10px rgba(220, 53, 69, 0.15);
+            }
+            .form-check-label.incorrect-answer::before {
+                content: '\f057'; /* times-circle */
+                color: #dc3545;
+            }
+            /* Style for the correct answer that user MISSED */
+            .form-check-label.missed-correct-answer {
+                background-color: #fff;
+                border: 2px solid #28a745;
+            }
+            .form-check-label.missed-correct-answer::before {
+                content: '\f00c'; /* check */
+                color: #28a745;
+            }
+            /* Style for other incorrect, unselected options */
+            .form-check-label.unselected-option::before {
+                content: '\f10c'; /* circle (empty) */
+                color: #adb5bd;
+            }
+            .essay-answer-review { background-color: #f8f9fa; border: 1px solid #dee2e6; color: #495057; padding: 1rem; border-radius: 0.5rem;}
+            .explanation { margin-top: 20px; padding: 20px; background-color: #f1f7fe; border-left: 5px solid #007bff; border-radius: 0 8px 8px 0; }
+        </style>
     </head>
+
     <body>
-        <h1>Hello World!</h1>
+        <c:set var="currentNumber" value="${not empty param.questionNumber ? param.questionNumber : 1}" />
+        <c:set var="question" value="${questions[currentNumber - 1]}" />
+
+        <header>
+            <div class="header-top-wrap">
+                <div class="container">
+                    <div class="header-top">
+                        <div class="logo header-logo">
+                            <a href="${pageContext.request.contextPath}/home"><img src="${pageContext.request.contextPath}/view/common/img/logo/logo.svg" alt="Logo"></a>
+                        </div>
+                        <div class="header-right">
+                            <!-- User menu can be added here if needed -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="header-fixed-height"></div>
+        </header>
+
+        <main>
+            <div class="container">
+                <div class="question-header">
+                    <div class="question-info">
+                        <div class="question-number">Reviewing Question ${currentNumber}/${fn:length(questions)}</div>
+                        <div class="question-id">Question ID: ${question.id}</div>
+                    </div>
+                </div>
+
+                <div class="question-content">
+                    <div class="question-text">${question.content}</div>
+                    
+                    <c:if test="${not empty question.media_url}">
+                       <!-- Media display logic here -->
+                    </c:if>
+
+                    <div class="answers-container mt-4">
+                        <form id="answerForm">
+                             <c:choose>
+                                <c:when test="${question.type eq 'multiple'}">
+                                    <%-- Count correct options to determine input type (radio/checkbox) --%>
+                                    <c:set var="correctOptionsCount" value="0" />
+                                    <c:forEach items="${question.questionOptions}" var="opt">
+                                        <c:if test="${opt.correct_key}">
+                                            <c:set var="correctOptionsCount" value="${correctOptionsCount + 1}" />
+                                        </c:if>
+                                    </c:forEach>
+
+                                    <c:forEach items="${question.questionOptions}" var="option">
+                                        <c:set var="isUserSelected" value="${fn:contains(userAnswerMap[question.id], option.id)}" />
+                                        <c:set var="isCorrect" value="${option.correct_key}" />
+                                        
+                                        <c:set var="labelClass" value="" />
+                                        <c:if test="${isUserSelected && isCorrect}"><c:set var="labelClass" value="correct-answer" /></c:if>
+                                        <c:if test="${isUserSelected && !isCorrect}"><c:set var="labelClass" value="incorrect-answer" /></c:if>
+                                        <c:if test="${!isUserSelected && isCorrect}"><c:set var="labelClass" value="missed-correct-answer" /></c:if>
+                                        <c:if test="${!isUserSelected && !isCorrect}"><c:set var="labelClass" value="unselected-option" /></c:if>
+
+                                        <div class="form-check">
+                                            <input class="form-check-input" 
+                                                   type="${correctOptionsCount > 1 ? 'checkbox' : 'radio'}"
+                                                   name="answer_${question.id}" 
+                                                   id="option${option.id}" 
+                                                   value="${option.id}"
+                                                   <c:if test="${isUserSelected}">checked</c:if>
+                                                   disabled>
+                                            <label class="form-check-label ${labelClass}" for="option${option.id}">
+                                                ${option.option_text}
+                                            </label>
+                                        </div>
+                                    </c:forEach>
+                                </c:when>
+                                <c:otherwise>
+                                     <!-- Essay Review not fully implemented, showing readonly textarea -->
+                                     <div class="essay-answer-container">
+                                        <textarea class="form-control essay-answer-review" 
+                                                  name="essay_answer" 
+                                                  rows="6" 
+                                                  readonly>${userAnswerMap[question.id][0]}</textarea>
+                                    </div>
+                                    <c:if test="${not empty question.explanation}">
+                                       <div class="explanation mt-3"><strong>Explanation: </strong> ${question.explanation}</div>
+                                    </c:if>
+                                </c:otherwise>
+                            </c:choose>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="navigation-footer">
+                     <a href="${pageContext.request.contextPath}/quiz-handle-menu" class="btn-review-back">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Quizzes
+                    </a>
+
+                    <div class="navigation-buttons">
+                        <div class="action-buttons">
+                            <button class="btn-action btn-peek" onclick="openPeekPopup()">
+                                <i class="fas fa-eye"></i>
+                                Explanation
+                            </button>
+                        </div>
+                        <div class="nav-buttons">
+                            <div class="nav-group">
+                                <c:if test="${currentNumber > 1}">
+                                    <a href="quiz-review?quizId=${quiz.id}&questionNumber=${currentNumber - 1}" class="btn-nav btn-prev">
+                                        <i class="fas fa-arrow-left"></i>
+                                        Previous
+                                    </a>
+                                </c:if>
+                                <c:if test="${currentNumber < fn:length(questions)}">
+                                    <a href="quiz-review?quizId=${quiz.id}&questionNumber=${currentNumber + 1}" class="btn-nav btn-next">
+                                        Next
+                                        <i class="fas fa-arrow-right"></i>
+                                    </a>
+                                </c:if>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="peekPopup" class="peek-popup">
+                    <div class="popup-content">
+                        <div class="popup-header">
+                            <h3>Explanation</h3>
+                            <button class="close-btn" onclick="closePeekPopup()"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="popup-body">
+                            <div class="explanation-text">
+                                ${not empty question.explanation ? question.explanation : 'No explanation available for this question.'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <jsp:include page="../../common/user/footer.jsp"></jsp:include>
+        <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
+
+        <script>
+            function openPeekPopup() {
+                document.getElementById('peekPopup').classList.add('show');
+            }
+            function closePeekPopup() {
+                document.getElementById('peekPopup').classList.remove('show');
+            }
+            document.addEventListener('click', function(event) {
+                const peekPopup = document.getElementById('peekPopup');
+                if (event.target === peekPopup) {
+                    closePeekPopup();
+                }
+            });
+        </script>
     </body>
 </html>

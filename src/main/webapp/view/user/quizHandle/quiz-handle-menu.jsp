@@ -87,6 +87,7 @@
             color: #6c757d;
             font-style: italic;
         }
+        .header-top-wrap{background:#1A1B3D;padding:8px 0;color:#fff;position:relative}.header-logo{position:relative;z-index:2;display:flex;align-items:center}.header-logo a{display:block;width:auto;height:100%}.header-logo img{max-height:50px;width:auto;height:auto;display:block;object-fit:contain;filter:brightness(0) invert(1)}.header-top{display:flex;align-items:center;justify-content:space-between;min-height:60px}.header-right{display:flex;align-items:center;gap:15px}.user-menu,.settings-menu{position:relative}.user-icon,.settings-icon{width:40px;height:40px;border-radius:50%;background:#5751E1;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s ease}.user-icon i,.settings-icon i{color:#fff;font-size:18px}.user-icon:hover,.settings-icon:hover{background:#7A6DC0;transform:translateY(-1px)}.dropdown-menu,.settings-dropdown{position:absolute;top:120%;right:0;width:280px;background:#fff;border-radius:8px;box-shadow:0 5px 15px rgba(0,0,0,.15);opacity:0;visibility:hidden;transform:translateY(10px);transition:all .3s ease;z-index:1000}.settings-dropdown{width:200px}.dropdown-menu.show,.settings-dropdown.show{opacity:1;visibility:visible;transform:translateY(0)}.dropdown-header{padding:16px;border-bottom:1px solid #eee}.user-info{display:flex;align-items:center;gap:12px}.user-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden}.user-avatar img{width:100%;height:100%;object-fit:cover}.user-details{display:flex;flex-direction:column}.user-name{font-weight:600;color:#1A1B3D;font-size:14px}.user-email{color:#666;font-size:12px}.dropdown-body{padding:8px 0}.dropdown-item{display:flex;align-items:center;padding:10px 16px;color:#1A1B3D;text-decoration:none;transition:background-color .3s ease}.dropdown-item:hover{background-color:#f8f9fa}.dropdown-item i{width:20px;margin-right:12px;font-size:16px}.dropdown-item span{font-size:14px}.text-danger{color:#dc3545!important}.dropdown-divider{height:1px;background-color:#eee;margin:8px 0}
     </style>
 </head>
 
@@ -98,7 +99,84 @@
     <!-- Scroll-top-end-->
 
     <!-- header-area -->
-    <jsp:include page="../../common/user/header.jsp"></jsp:include>
+    <header>
+        <div class="header-top-wrap">
+            <div class="container">
+                <div class="header-top">
+                    <div class="logo header-logo">
+                        <a href="${pageContext.request.contextPath}/home"><img src="${pageContext.request.contextPath}/view/common/img/logo/logo.svg" alt="Logo"></a>
+                    </div>
+                    <div class="header-right">
+                        <div class="settings-menu">
+                            <div class="settings-icon" onclick="toggleSettingsDropdown()">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <div class="settings-dropdown">
+                                <!-- No specific settings for menu page -->
+                            </div>
+                        </div>
+                        <div class="user-menu">
+                            <div class="user-icon" onclick="toggleDropdown()">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-header">
+                                    <c:choose>
+                                        <c:when test="${not empty sessionScope.account}">
+                                            <div class="user-info">
+                                                <div class="user-avatar">
+                                                    <img src="${pageContext.request.contextPath}/media/user-avatar.png" alt="User Avatar">
+                                                </div>
+                                                <div class="user-details">
+                                                    <span class="user-name">${sessionScope.account.full_name}</span>
+                                                    <span class="user-email">${sessionScope.account.email}</span>
+                                                </div>
+                                            </div>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="guest-info">
+                                                <span>Welcome, Guest!</span>
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                                <div class="dropdown-body">
+                                    <c:choose>
+                                        <c:when test="${not empty sessionScope.account}">
+                                            <a href="${pageContext.request.contextPath}/my-profile" class="dropdown-item">
+                                                <i class="fas fa-user-circle"></i>
+                                                <span>My Profile</span>
+                                            </a>
+                                            <a href="${pageContext.request.contextPath}/my-courses" class="dropdown-item">
+                                                <i class="fas fa-graduation-cap"></i>
+                                                <span>My Courses</span>
+                                            </a>
+                                            <div class="dropdown-divider"></div>
+                                            <a href="${pageContext.request.contextPath}/login?action=logout" class="dropdown-item text-danger">
+                                                <i class="fas fa-sign-out-alt"></i>
+                                                <span>Log out</span>
+                                            </a>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <a href="${pageContext.request.contextPath}/login" class="dropdown-item">
+                                                <i class="fas fa-sign-in-alt"></i>
+                                                <span>Log in</span>
+                                            </a>
+                                            <a href="${pageContext.request.contextPath}/register" class="dropdown-item">
+                                                <i class="fas fa-user-plus"></i>
+                                                <span>Register</span>
+                                            </a>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="header-fixed-height"></div>
+    </header>
     <!-- header-area-end -->
 
     <!-- main-area -->  
@@ -138,7 +216,19 @@
                                                             </c:otherwise>
                                                         </c:choose>
                                                     </div>
-                                                    <button class="btn btn-primary w-100 mt-3" onclick="startQuiz('${quiz.id}')">Start Quiz</button>
+                                                    <div class="mt-3">
+                                                        <c:choose>
+                                                            <c:when test="${not empty quizScores[quiz.id]}">
+                                                                <div class="d-flex gap-2">
+                                                                    <button class="btn btn-primary flex-grow-1" onclick="startQuiz('${quiz.id}')">Retake Quiz</button>
+                                                                    <button class="btn btn-secondary flex-grow-1" onclick="reviewQuiz('${quiz.id}')">Review Quiz</button>
+                                                                </div>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <button class="btn btn-primary w-100" onclick="startQuiz('${quiz.id}')">Start Quiz</button>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -164,11 +254,34 @@
             console.log("Starting quiz with ID:", quizId);
             window.location.href = '${pageContext.request.contextPath}/quiz-handle?id=' + quizId;
         }
+
+        function reviewQuiz(quizId) {
+            console.log("Reviewing quiz with ID:", quizId);
+            window.location.href = '${pageContext.request.contextPath}/quiz-review?quizId=' + quizId;
+        }
         
-        // Initialize Select2 if needed (might not be required anymore)
         $(document).ready(function() {
             if($.fn.select2) {
                 $('.select2').select2();
+            }
+        });
+        
+        function toggleDropdown() {
+            const dropdown = document.querySelector('.user-menu .dropdown-menu');
+            dropdown.classList.toggle('show');
+        }
+
+        function toggleSettingsDropdown() {
+            const dropdown = document.querySelector('.settings-menu .settings-dropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.user-menu')) {
+                document.querySelector('.user-menu .dropdown-menu').classList.remove('show');
+            }
+            if (!event.target.closest('.settings-menu')) {
+                document.querySelector('.settings-menu .settings-dropdown').classList.remove('show');
             }
         });
     </script>
