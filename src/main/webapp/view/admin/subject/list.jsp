@@ -193,7 +193,7 @@
 
               <!-- Filters Section -->
               <div class="dashboard__subjects-filter">
-                <form method="get" action="${pageContext.request.contextPath}/subjects">
+                <form method="get" action="${pageContext.request.contextPath}/admin/subjects">
                   <div class="form-group">
                     <label for="category">Category:</label>
                     <select name="category" id="category" class="form-select">
@@ -299,7 +299,7 @@
               <!-- Pagination -->
               <div class="pagination">
                 <c:if test="${page > 1}">
-                  <a href="${pageContext.request.contextPath}/subjects?page=${page - 1}&pageSize=${pageSize}&category=${categoryFilter}&status=${statusFilter}&search=${searchTerm}">
+                  <a href="${pageContext.request.contextPath}/admin/subjects?page=${page - 1}&pageSize=${pageSize}&category=${categoryFilter}&status=${statusFilter}&search=${searchTerm}">
                     <i class="fas fa-chevron-left"></i> Previous
                   </a>
                 </c:if>
@@ -307,7 +307,7 @@
                 <span>Page ${page} of ${totalPages}</span>
 
                 <c:if test="${page < totalPages}">
-                  <a href="${pageContext.request.contextPath}/subjects?page=${page + 1}&pageSize=${pageSize}&category=${categoryFilter}&status=${statusFilter}&search=${searchTerm}">
+                  <a href="${pageContext.request.contextPath}/admin/subjects?page=${page + 1}&pageSize=${pageSize}&category=${categoryFilter}&status=${statusFilter}&search=${searchTerm}">
                     Next <i class="fas fa-chevron-right"></i>
                   </a>
                 </c:if>
