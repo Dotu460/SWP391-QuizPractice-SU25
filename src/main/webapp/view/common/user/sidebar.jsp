@@ -67,7 +67,7 @@
                                                         Announcements
                                                     </a>
                                                 </li>
-                                                <li class="active">
+                                                <li>
                                                     <a href="instructor-quiz.html">
                                                         <i class="skillgro-chat"></i>
                                                         Quiz Attempts
