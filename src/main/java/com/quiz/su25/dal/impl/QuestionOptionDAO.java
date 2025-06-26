@@ -231,4 +231,22 @@ public class QuestionOptionDAO extends DBContext implements I_DAO<QuestionOption
             e.printStackTrace();
         }
     }
+
+    public boolean updateOptionTextAndAnswerText(int optionId, String optionText, String answerText) {
+        String sql = "UPDATE QuestionOption SET option_text = ?, answer_text = ? WHERE id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, optionText);
+            statement.setString(2, answerText);
+            statement.setInt(3, optionId);
+            
+            return statement.executeUpdate() > 0;
+        } catch (Exception e) {
+            System.out.println("Error updateOptionTextAndAnswerText at class QuestionOptionDAO: " + e.getMessage());
+            return false;
+        } finally {
+            closeResources();
+        }
+    }
 }   
