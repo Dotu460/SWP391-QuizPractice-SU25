@@ -286,12 +286,12 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
      * @param categoryId The category ID
      * @return Total number of posts in the category
      */
-    public int countPostsByCategoryName(String categoryName) {
+    public int countPostsByCategoryName(String category) {
         String sql = "SELECT COUNT(*) FROM post WHERE category = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setString(1, categoryName);
+            statement.setString(1, category);
             resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return resultSet.getInt(1);
@@ -572,13 +572,13 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
      * @param limit Number of related posts to retrieve
      * @return List of related posts
      */
-    public List<Post> getPostsByCategoryName(String categoryName, int pageNumber, int pageSize) {
+    public List<Post> getPostsByCategoryName(String category, int pageNumber, int pageSize) {
         List<Post> list = new ArrayList<>();
         String sql = "SELECT * FROM post WHERE category = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setString(1, categoryName);
+            statement.setString(1, category);
             statement.setInt(2, pageSize);
             statement.setInt(3, (pageNumber - 1) * pageSize);
             resultSet = statement.executeQuery();

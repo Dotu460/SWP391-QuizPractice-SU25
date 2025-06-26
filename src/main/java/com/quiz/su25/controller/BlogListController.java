@@ -53,9 +53,9 @@ public class BlogListController extends HttpServlet {
         List<Map<String, Object>> postsWithDetails = new ArrayList<>();
         
         if (searchQuery != null && !searchQuery.trim().isEmpty()) {
-            // Gọi method search từ PostDAO
-            posts = postDAO.getPostsByCategoryName(categoryName, page, pageSize);
-            totalCount = postDAO.countPostsByCategoryName(categoryName);
+            // Đúng: Gọi searchPosts để tìm theo từ khóa
+            posts = postDAO.searchPosts(searchQuery.trim(), true, true, true, false, null, null, page, pageSize);
+            totalCount = postDAO.countSearchResults(searchQuery.trim(), true, true, true, false, null, null);
         } else if (categoryName != null) {
             // Filter by category
             posts = postDAO.getPostsByCategoryName(categoryName, page, pageSize);
