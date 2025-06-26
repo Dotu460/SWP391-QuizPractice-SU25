@@ -247,8 +247,8 @@
                                             </div>
 
                                             <!-- Preserve other parameters -->
-                                            <c:if test="${not empty categoryId}">
-                                                <input type="hidden" name="category" value="${categoryId}">
+                                            <c:if test="${not empty categoryName}">
+                                                <input type="hidden" name="categoryName" value="${categoryName}">
                                             </c:if>
                                             <c:if test="${not empty searchQuery}">
                                                 <input type="hidden" name="search" value="${searchQuery}">
@@ -273,13 +273,13 @@
                                     <p class="text-muted">
                                         <i class="fas fa-search"></i>
                                         Found ${totalCount} results for "<strong>${searchQuery}</strong>"
-                                        <c:if test="${not empty categoryId}">
+                                        <c:if test="${not empty categoryName}">
                                             in category "<strong>${param.categoryName}</strong>"
                                         </c:if>
                                         (Showing ${(currentPage-1)*pageSize + 1} - ${currentPage*pageSize > totalCount ? totalCount : currentPage*pageSize} of ${totalCount})
                                     </p>
                                 </c:when>
-                                <c:when test="${not empty categoryId}">
+                                <c:when test="${not empty categoryName}">
                                     <p class="text-muted">
                                         <i class="fas fa-folder-open"></i>
                                         Showing ${totalCount} posts in category
@@ -320,7 +320,7 @@
                                     <!-- Category - Only show if Category is selected -->
                                     <c:if test="${fn:contains(displayOptions, 'category')}">
                                         <div class="category" style="margin-bottom: 8px;">
-                                            <span style="color: #666; font-size: 14px;">${postItem.category}</span>
+                                            <span style="color: #666; font-size: 14px;">${postItem.categoryName}</span>
                                         </div>
                                     </c:if>
 
@@ -358,8 +358,8 @@
                                 <ul class="pagination">
                                     <!-- Build query parameters -->
                                     <c:set var="queryParams" value="pageSize=${pageSize}" />
-                                    <c:if test="${not empty categoryId}">
-                                        <c:set var="queryParams" value="${queryParams}&category=${categoryId}" />
+                                    <c:if test="${not empty categoryName}">
+                                        <c:set var="queryParams" value="${queryParams}&categoryName=${categoryName}" />
                                     </c:if>
                                     <c:if test="${not empty searchQuery}">
                                         <c:set var="queryParams" value="${queryParams}&search=${searchQuery}" />
@@ -459,6 +459,27 @@
                                 </form>
                             </div>
 
+                            <!-- Post Categories -->
+                            <div class="post-categories">
+                                <h4 class="sidebar-title">Post Categories</h4>
+                                <ul class="category-list">
+                                    <li>
+                                        <a href="${pageContext.request.contextPath}/blog?category=Grammar">
+                                            <i class="fas fa-book"></i> Grammar
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="${pageContext.request.contextPath}/blog?category=Vocabulary">
+                                            <i class="fas fa-language"></i> Vocabulary
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="${pageContext.request.contextPath}/blog?category=Listening">
+                                            <i class="fas fa-headphones"></i> Listening
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
 
                             <!-- Latest Posts -->
                             <div class="latest-posts">

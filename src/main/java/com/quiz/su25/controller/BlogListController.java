@@ -37,8 +37,7 @@ public class BlogListController extends HttpServlet {
         // Parse parameters with defaults
         int page = (pageParam != null && !pageParam.isEmpty()) ? Integer.parseInt(pageParam) : 1;
         int pageSize = (pageSizeParam != null && !pageSizeParam.isEmpty()) ? Integer.parseInt(pageSizeParam) : 6;
-        Integer categoryId = (categoryParam != null && !categoryParam.isEmpty()) ? Integer.parseInt(categoryParam) : null;
-        
+        String categoryName = categoryParam;        
         // Xử lý display options
         List<String> displayOptions = new ArrayList<>();
         if (displayOptionsArray != null && displayOptionsArray.length > 0) {
@@ -55,12 +54,12 @@ public class BlogListController extends HttpServlet {
         
         if (searchQuery != null && !searchQuery.trim().isEmpty()) {
             // Gọi method search từ PostDAO
-            posts = postDAO.searchPosts(searchQuery.trim(), true, true, true, false, null, null, page, pageSize);
-            totalCount = postDAO.countSearchResults(searchQuery.trim(), true, true, true, false, null, null);
-        } else if (categoryId != null) {
+            posts = postDAO.getPostsByCategoryName(categoryName, page, pageSize);
+            totalCount = postDAO.countPostsByCategoryName(categoryName);
+        } else if (categoryName != null) {
             // Filter by category
-            posts = postDAO.getPostsByCategory(categoryId, page, pageSize);
-            totalCount = postDAO.countPostsByCategory(categoryId);
+            posts = postDAO.getPostsByCategoryName(categoryName, page, pageSize);
+            totalCount = postDAO.countPostsByCategoryName(categoryName);
         } else {
             // Get all posts with pagination
             posts = postDAO.getPostsPaginated(page, pageSize);
@@ -73,9 +72,7 @@ public class BlogListController extends HttpServlet {
             postDetails.put("post", post);
             
             // Get category name using the category_id
-            String categoryName = postDAO.findCategory(post.getCategory_id());
-            postDetails.put("category", categoryName);
-            
+            postDetails.put("categoryName",post.getCategory());
             postsWithDetails.add(postDetails);
         }
         
@@ -93,7 +90,7 @@ public class BlogListController extends HttpServlet {
         request.setAttribute("totalCount", totalCount);
         request.setAttribute("pageSize", pageSize);
         request.setAttribute("searchQuery", searchQuery);
-        request.setAttribute("categoryId", categoryId);
+        request.setAttribute("categoryName", categoryName);
         request.setAttribute("displayOptions", displayOptions);
         
         // Forward to JSP

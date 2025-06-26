@@ -33,11 +33,12 @@ public class PostController extends HttpServlet {
             String postId = request.getParameter("id");
 //            // Log 2: Kiểm tra ID nhận được
 //            System.out.println("Received post ID: " + postId);
-            
-            
+
             Post post = postDAO.findById(Integer.parseInt(postId));
-            String contentUrl = post.getContent();
-            response.sendRedirect(contentUrl);
+//            String contentUrl = post.getContent();
+//            response.sendRedirect(contentUrl);
+            request.setAttribute("post", post);
+            request.getRequestDispatcher("/view/post/post.jsp").forward(request, response);
 //            // Log 3: Kiểm tra post có được tìm thấy không
 //            System.out.println("Found post: " + (post != null));
 //            if (post != null) {

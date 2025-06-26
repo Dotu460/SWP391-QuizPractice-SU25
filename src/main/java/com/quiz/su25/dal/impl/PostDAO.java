@@ -37,7 +37,7 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
         return list;
     }
 
-    @Override
+   @Override
     public Post findById(Integer id) {
         String sql = "SELECT * FROM post WHERE id = ?";
         Post post = null;
@@ -70,7 +70,7 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
             statement.setString(4, post.getBrief_info());
             statement.setString(5, post.getContent());
             statement.setInt(6, post.getCategory_id());
-            statement.setInt(7, post.getAuthor_id());
+            statement.setString(7, post.getAuthor());
             statement.setDate(8, post.getPublished_at());
             statement.setDate(9, post.getUpdated_at());
             statement.setDate(10, post.getCreated_at());
@@ -102,7 +102,7 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
             statement.setString(3, post.getBrief_info());
             statement.setString(4, post.getContent());
             statement.setInt(5, post.getCategory_id());
-            statement.setInt(6, post.getAuthor_id());
+            statement.setString(6, post.getAuthor());
             statement.setDate(7, post.getPublished_at());
             statement.setDate(8, post.getUpdated_at());
             statement.setDate(9, post.getCreated_at());
@@ -156,7 +156,7 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
                 .brief_info(resultSet.getString("brief_info"))
                 .content(resultSet.getString("content"))
                 .category_id(resultSet.getInt("category_id"))
-                .author_id(resultSet.getInt("author_id"))
+                .author(resultSet.getString("author"))
                 .published_at(resultSet.getDate("published_at"))
                 .updated_at(resultSet.getDate("updated_at"))
                 .created_at(resultSet.getDate("created_at"))
@@ -286,18 +286,18 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
      * @param categoryId The category ID
      * @return Total number of posts in the category
      */
-    public int countPostsByCategory(int categoryId) {
-        String sql = "SELECT COUNT(*) FROM post WHERE category_id = ?";
+    public int countPostsByCategoryName(String categoryName) {
+        String sql = "SELECT COUNT(*) FROM post WHERE category = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setInt(1, categoryId);
+            statement.setString(1, categoryName);
             resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return resultSet.getInt(1);
             }
         } catch (SQLException e) {
-            System.out.println("Error countPostsByCategory at class PostDAO: " + e.getMessage());
+            System.out.println("Error countPostsByCategoryName at class PostDAO: " + e.getMessage());
         } finally {
             closeResources();
         }
@@ -572,21 +572,21 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
      * @param limit Number of related posts to retrieve
      * @return List of related posts
      */
-    public List<Post> getRelatedPostsByCategory(int categoryId, int currentPostId, int limit) {
+    public List<Post> getPostsByCategoryName(String categoryName, int pageNumber, int pageSize) {
         List<Post> list = new ArrayList<>();
-        String sql = "SELECT * FROM post WHERE category_id = ? AND id != ? ORDER BY updated_at DESC LIMIT ?";
+        String sql = "SELECT * FROM post WHERE category = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setInt(1, categoryId);
-            statement.setInt(2, currentPostId);
-            statement.setInt(3, limit);
+            statement.setString(1, categoryName);
+            statement.setInt(2, pageSize);
+            statement.setInt(3, (pageNumber - 1) * pageSize);
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 list.add(getFromResultSet(resultSet));
             }
         } catch (SQLException e) {
-            System.out.println("Error getRelatedPostsByCategory at class PostDAO: " + e.getMessage());
+            System.out.println("Error getPostsByCategoryName at class PostDAO: " + e.getMessage());
         } finally {
             closeResources();
         }
@@ -622,26 +622,26 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
      * @param categoryId The category ID
      * @return Category name or "Uncategorized" if not found
      */
-    public String findCategory(Integer categoryId) {
-        if (categoryId == null) {
+    public String findCategory(String categoryName) {
+        if (categoryName == null || categoryName.trim().isEmpty()) {
             return "Uncategorized";
         }
 
-        String sql = "SELECT p.category FROM quiz_practice_su25.post p WHERE p.category_id = ?";
+        String sql = "SELECT p.category FROM post p WHERE p.category = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setInt(1, categoryId);
+            statement.setString(1, categoryName.trim());
 
             System.out.println("Executing SQL: " + sql); // Debug log
-            System.out.println("With category ID: " + categoryId); // Debug log
+            System.out.println("With category name: " + categoryName); // Debug log
 
             resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                String categoryName = resultSet.getString("category");
-                System.out.println("Found category: " + categoryName); // Debug log
-                return categoryName != null ? categoryName : "Uncategorized";
+                String foundCategory = resultSet.getString("category");
+                System.out.println("Found category: " + foundCategory); // Debug log
+                return foundCategory != null ? foundCategory : "Uncategorized";
             }
         } catch (SQLException e) {
             System.out.println("Error findCategory at class PostDAO: " + e.getMessage());
