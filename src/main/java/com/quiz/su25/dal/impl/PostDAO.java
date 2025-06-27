@@ -59,22 +59,22 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
 
     @Override
     public int insert(Post post) {
-        String sql = "INSERT INTO post (title,category, thumbnail_url,category, brief_info, content, category_id, author_id, published_at, updated_at, created_at, status, featured_flag) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO post (category, title, thumbnail_url,category, brief_info, content, category_id, author_id, published_at, updated_at, created_at, status, featured_flag) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         int generatedId = -1;
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            statement.setString(1, post.getTitle());
-            statement.setString(2, post.getCategory());
-            statement.setString(3, post.getThumbnail_url());
-            statement.setString(4, post.getBrief_info());
-            statement.setString(5, post.getContent());
-            statement.setInt(6, post.getCategory_id());
-            statement.setString(7, post.getAuthor());
-            statement.setDate(8, post.getPublished_at());
-            statement.setDate(9, post.getUpdated_at());
-            statement.setDate(10, post.getCreated_at());
-            statement.setString(11, post.getStatus());
+            statement.setString(1, post.getCategory());           // category (chuỗi)
+            statement.setString(2, post.getTitle());              // title
+            statement.setString(3, post.getThumbnail_url());      // thumbnail_url
+            statement.setString(4, post.getBrief_info());         // brief_info
+            statement.setString(5, post.getContent());            // content
+            statement.setInt(6, post.getCategory_id());           // category_id
+            statement.setString(7, post.getAuthor());             // author (chuỗi)
+            statement.setDate(8, post.getPublished_at());         // published_at
+            statement.setDate(9, post.getUpdated_at());           // updated_at
+            statement.setDate(10, post.getCreated_at());          // created_at
+            statement.setString(11, post.getStatus());            // status
             statement.setBoolean(12, post.getFeatured_flag());
 
             statement.executeUpdate();
@@ -92,23 +92,24 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
 
     @Override
     public boolean update(Post post) {
-        String sql = "UPDATE post SET title = ?, thumbnail_url = ?, brief_info = ?, content = ?, category_id = ?, author_id = ?, published_at = ?, updated_at = ?, created_at = ?, status = ?, featured_flag = ? WHERE id = ?";
+        String sql = "UPDATE post SET category = ?, title = ?, thumbnail_url = ?, brief_info = ?, content = ?, category_id = ?, author = ?, published_at = ?, updated_at = ?, created_at = ?, status = ?, featured_flag = ? WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setString(1, post.getTitle());
-            statement.setString(2, post.getThumbnail_url());
-            statement.setString(3, post.getBrief_info());
-            statement.setString(4, post.getContent());
-            statement.setInt(5, post.getCategory_id());
-            statement.setString(6, post.getAuthor());
-            statement.setDate(7, post.getPublished_at());
-            statement.setDate(8, post.getUpdated_at());
-            statement.setDate(9, post.getCreated_at());
-            statement.setString(10, post.getStatus());
-            statement.setBoolean(11, post.getFeatured_flag());
-            statement.setInt(12, post.getId());
+            statement.setString(1, post.getCategory());           // category (chuỗi)
+            statement.setString(2, post.getTitle());              // title
+            statement.setString(3, post.getThumbnail_url());      // thumbnail_url
+            statement.setString(4, post.getBrief_info());         // brief_info
+            statement.setString(5, post.getContent());            // content
+            statement.setInt(6, post.getCategory_id());           // category_id
+            statement.setString(7, post.getAuthor());             // author (chuỗi)
+            statement.setDate(8, post.getPublished_at());         // published_at
+            statement.setDate(9, post.getUpdated_at());           // updated_at
+            statement.setDate(10, post.getCreated_at());          // created_at
+            statement.setString(11, post.getStatus());            // status
+            statement.setBoolean(12, post.getFeatured_flag());    // featured_flag
+            statement.setInt(13, post.getId());
 
             int rowsAffected = statement.executeUpdate();
             success = rowsAffected > 0;

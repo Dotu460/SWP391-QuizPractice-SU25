@@ -337,7 +337,7 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
         
         <script>
-            // Initialize TinyMCE with simplified configuration
+            // Initialize TinyMCE with image upload functionality
             function initTinyMCE(selector = '#media_url') {
                 tinymce.init({
                     selector: selector,
@@ -354,10 +354,65 @@
                         'removeformat | help | image media link | code fullscreen',
                     content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
                     
-                    // Basic image handling
+                    // Image handling with file picker
                     image_advtab: true,
                     image_title: true,
                     image_description: true,
+                    
+                    // File picker callback for browsing local files
+                    file_picker_callback: function (callback, value, meta) {
+                        // Create file input element
+                        const input = document.createElement('input');
+                        input.setAttribute('type', 'file');
+                        input.setAttribute('accept', 'image/*');
+                        
+                        input.addEventListener('change', function (e) {
+                            const file = e.target.files[0];
+                            if (file) {
+                                const reader = new FileReader();
+                                reader.onload = function () {
+                                    // Create a blob URL for immediate preview
+                                    const id = 'blobid' + (new Date()).getTime();
+                                    const blobCache = tinymce.activeEditor.editorUpload.blobCache;
+                                    const base64 = reader.result.split(',')[1];
+                                    const blobInfo = blobCache.create(id, file, base64);
+                                    blobCache.add(blobInfo);
+                                    
+                                    // Call the callback with the blob URL
+                                    callback(blobInfo.blobUri(), { title: file.name });
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                        });
+                        
+                        input.click();
+                    },
+                    
+                    // Automatic upload of pasted images
+                    automatic_uploads: true,
+                    
+                    // Images upload handler
+                    images_upload_handler: function (blobInfo, success, failure, progress) {
+                        const formData = new FormData();
+                        formData.append('file', blobInfo.blob(), blobInfo.filename());
+                        
+                        // Upload to server
+                        fetch('${pageContext.request.contextPath}/upload-image', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.success) {
+                                success(result.location);
+                            } else {
+                                failure('Image upload failed: ' + (result.error || 'Unknown error'));
+                            }
+                        })
+                        .catch(error => {
+                            failure('Image upload failed: ' + error.message);
+                        });
+                    },
                     
                     // Basic media handling
                     media_live_embeds: true,
