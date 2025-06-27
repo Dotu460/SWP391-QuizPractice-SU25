@@ -130,21 +130,7 @@
                 min-height: 400px;
             }
 
-            .btn-primary-custom {
-                background: linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%);
-                border: none;
-                color: white;
-                padding: 10px 25px;
-                border-radius: 25px;
-                font-weight: 600;
-                transition: all 0.3s ease;
-            }
-
-            .btn-primary-custom:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
-                color: white;
-            }
+            
         </style>
     </head>
 
@@ -198,7 +184,7 @@
                     <a href="${pageContext.request.contextPath}/blog" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Back to Blog
                     </a>
-                    <button type="submit" form="postDetailsForm" class="btn btn-primary-custom">
+                    <button type="submit" form="postDetailsForm" class="btn btn-secondary">
                         <i class="fas fa-save"></i> 
                         <c:choose>
                             <c:when test="${isNewPost}">Create Post</c:when>
