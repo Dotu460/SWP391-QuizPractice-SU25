@@ -15,20 +15,32 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>SkillGro - Post Details</title>
         <link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/view/common/img/favicon.png">
+        
+        <!-- Include common CSS -->
+        <jsp:include page="../common/user/link_css_common.jsp"></jsp:include>
+        <link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/view/common/img/favicon.png">
 
-
-        <!-- Bootstrap CSS -->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        
         <!-- Font Awesome -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <!-- TinyMCE -->
         <script src="https://cdn.tiny.cloud/1/5ynsnptn3yryfyduzpqdheibiiqvgbz5oe6ypn6t4vnl1154/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
 
         <style>
+            /* Main content area */
+            .post-details-main {
+                padding: 100px 0 50px;
+                background-color: #f8f9fa;
+                min-height: calc(100vh - 200px);
+            }
+            
             .post-details-container {
                 max-width: 1200px;
                 margin: 0 auto;
                 padding: 20px;
+                background: #fff;
+                border-radius: 15px;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.1);
             }
 
             .form-section {
@@ -39,7 +51,7 @@
                 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             }
 
-            .section-title {
+                        .section-title {
                 color: #6C5CE7;
                 font-size: 20px;
                 font-weight: 600;
@@ -55,30 +67,7 @@
                 margin-top: 10px;
             }
 
-            .media-item {
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                padding: 15px;
-                margin-bottom: 15px;
-                background: #f8f9fa;
-            }
-
-            .media-preview {
-                max-width: 150px;
-                max-height: 100px;
-                border-radius: 5px;
-                margin-top: 10px;
-            }
-
-            .btn-remove-media {
-                background: #dc3545;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                padding: 5px 10px;
-                font-size: 12px;
-                margin-top: 10px;
-            }
+ 
 
             .status-toggle {
                 display: flex;
@@ -137,58 +126,8 @@
                 transform: translateX(26px);
             }
 
-            .drag-drop-area {
-                border: 2px dashed #6C5CE7;
-                border-radius: 10px;
-                padding: 40px;
-                text-align: center;
-                background: #f8f9ff;
-                margin-bottom: 20px;
-                cursor: pointer;
-                transition: all 0.3s ease;
-            }
-
-            .drag-drop-area:hover {
-                background: #f0f0ff;
-                border-color: #5a4fcf;
-            }
-
-            .drag-drop-area.dragover {
-                background: #e8e5ff;
-                border-color: #5a4fcf;
-            }
-
-            .upload-section {
-                background: #f8f9fa;
-                border: 2px dashed #dee2e6;
-                border-radius: 8px;
-                padding: 20px;
-                text-align: center;
-                transition: all 0.3s ease;
-                margin-bottom: 15px;
-            }
-
-            .upload-section:hover {
-                border-color: #6C5CE7;
-                background: #f0f2ff;
-            }
-
-            .upload-section h5 {
-                color: #6C5CE7;
-                margin-bottom: 15px;
-            }
-
             #media_url {
                 min-height: 400px;
-            }
-
-            #mediaContainer {
-                max-height: 400px;
-                overflow-y: auto;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                padding: 15px;
-                background: #fafafa;
             }
 
             .btn-primary-custom {
@@ -210,7 +149,13 @@
     </head>
 
     <body>
-        <div class="post-details-container">
+        <!-- Header -->
+        <jsp:include page="../common/user/header.jsp"></jsp:include>
+        
+        <!-- Main Content -->
+        <main class="post-details-main">
+            <div class="container">
+                <div class="post-details-container">
             <!-- Success/Error Messages -->
             <c:if test="${not empty param.success}">
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -272,7 +217,7 @@
                 <div class="form-section">
                     <h3 class="section-title"><i class="fas fa-info-circle"></i> Basic Information</h3>
 
-                    <div class="row">
+                                        <div class="row">
                         <div class="col-md-8">
                             <!-- Title -->
                             <div class="mb-3">
@@ -398,233 +343,46 @@
                     </c:if>
                 </div>
             </form>
-        </div>
+                </div>
+            </div>
+        </main>
 
         <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
         
         <script>
-            let mediaCounter = 0;
-            
-            // Initialize TinyMCE with the specified selector
+            // Initialize TinyMCE with simplified configuration
             function initTinyMCE(selector = '#media_url') {
                 tinymce.init({
                     selector: selector,
                     height: 500,
                     menubar: true,
                     plugins: [
-                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'print', 'preview',
+                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
                         'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                        'insertdatetime', 'media', 'table', 'paste', 'code', 'help', 'wordcount'
+                        'insertdatetime', 'media', 'table', 'paste', 'help', 'wordcount'
                     ],
                     toolbar: 'undo redo | formatselect | ' +
                         'bold italic backcolor | alignleft aligncenter ' +
                         'alignright alignjustify | bullist numlist outdent indent | ' +
-                        'removeformat | help | image media | code fullscreen | uploadmedia',
+                        'removeformat | help | image media link | code fullscreen',
                     content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
                     
-                    // Enhanced image handling
+                    // Basic image handling
                     image_advtab: true,
-                    image_uploadtab: true,
                     image_title: true,
                     image_description: true,
-                    image_dimensions: true,
                     
-                    // Enhanced media handling
+                    // Basic media handling
                     media_live_embeds: true,
-                    media_alt_source: true,
-                    media_poster: true,
-                    media_dimensions: true,
-                    
-                    // File picker for both images and videos
-                    file_picker_types: 'image media',
-                    file_picker_callback: function (cb, value, meta) {
-                        var input = document.createElement('input');
-                        input.setAttribute('type', 'file');
-                        
-                        // Set accept attribute based on file type
-                        if (meta.filetype === 'image') {
-                            input.setAttribute('accept', 'image/*');
-                        } else if (meta.filetype === 'media') {
-                            input.setAttribute('accept', 'video/*,audio/*');
-                        } else {
-                            input.setAttribute('accept', 'image/*,video/*,audio/*');
-                        }
-
-                        input.onchange = function () {
-                            var file = this.files[0];
-                            var reader = new FileReader();
-                            
-                            reader.onload = function () {
-                                var id = 'blobid' + (new Date()).getTime();
-                                var blobCache = tinymce.activeEditor.editorUpload.blobCache;
-                                var base64 = reader.result.split(',')[1];
-                                var blobInfo = blobCache.create(id, file, base64);
-                                blobCache.add(blobInfo);
-                                
-                                // Return the file URL and metadata
-                                cb(blobInfo.blobUri(), { 
-                                    title: file.name,
-                                    alt: file.name
-                                });
-                            };
-                            
-                            reader.readAsDataURL(file);
-                        };
-
-                        input.click();
-                    },
-                    
-                    // Media URL resolver for custom video handling
-                    media_url_resolver: function (data, resolve) {
-                        if (data.url.indexOf('blob:') === 0) {
-                            // Handle blob URLs (local files)
-                            resolve({
-                                html: '<video controls style="max-width: 100%; height: auto;">' +
-                                      '<source src="' + data.url + '" type="video/mp4">' +
-                                      'Your browser does not support the video tag.' +
-                                      '</video>'
-                            });
-                        } else {
-                            // Let TinyMCE handle other URLs (YouTube, Vimeo, etc.)
-                            resolve({url: data.url});
-                        }
-                    },
                     
                     setup: function (editor) {
                         editor.on('change', function () {
                             editor.save();
                         });
-                        
-                        // Add custom button for local media upload
-                        editor.ui.registry.addButton('uploadmedia', {
-                            text: 'Upload Media',
-                            icon: 'upload',
-                            tooltip: 'Upload Image/Video from Computer',
-                            onAction: function () {
-                                openMediaUploadDialog(editor);
-                            }
-                        });
                     }
                 });
             }
-            
-            // Custom media upload dialog
-            function openMediaUploadDialog(editor) {
-                editor.windowManager.open({
-                    title: 'Upload Media from Computer',
-                    body: {
-                        type: 'panel',
-                        items: [
-                            {
-                                type: 'htmlpanel',
-                                html: '<div style="padding: 20px;">' +
-                                      '<div style="margin-bottom: 15px;">' +
-                                      '<label><strong>Select Media File:</strong></label>' +
-                                      '<input type="file" id="mediaUploadInput" accept="image/*,video/*,audio/*" style="width: 100%; margin-top: 5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">' +
-                                      '</div>' +
-                                      '<div id="mediaPreviewDialog" style="margin-top: 15px; text-align: center; min-height: 100px; border: 2px dashed #ddd; border-radius: 8px; padding: 20px;">' +
-                                      '<p style="color: #666; margin: 0;">Select a file to see preview</p>' +
-                                      '</div>' +
-                                      '<div style="margin-top: 15px;">' +
-                                      '<label><strong>Alt Text / Caption:</strong></label>' +
-                                      '<input type="text" id="mediaAltTextDialog" placeholder="Enter description..." style="width: 100%; margin-top: 5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">' +
-                                      '</div>' +
-                                      '</div>'
-                            }
-                        ]
-                    },
-                    buttons: [
-                        {
-                            type: 'cancel',
-                            text: 'Cancel'
-                        },
-                        {
-                            type: 'submit',
-                            text: 'Insert Media',
-                            primary: true
-                        }
-                    ],
-                    onSubmit: function (api) {
-                        var input = document.getElementById('mediaUploadInput');
-                        var altText = document.getElementById('mediaAltTextDialog').value;
-                        
-                        if (input.files && input.files[0]) {
-                            var file = input.files[0];
-                            var reader = new FileReader();
-                            
-                            reader.onload = function () {
-                                var fileUrl = reader.result;
-                                var isVideo = file.type.startsWith('video/');
-                                var isAudio = file.type.startsWith('audio/');
-                                var isImage = file.type.startsWith('image/');
-                                
-                                var content = '';
-                                
-                                if (isVideo) {
-                                    content = '<p><video controls style="max-width: 100%; height: auto;">' +
-                                             '<source src="' + fileUrl + '" type="' + file.type + '">' +
-                                             'Your browser does not support the video tag.' +
-                                             '</video></p>';
-                                } else if (isAudio) {
-                                    content = '<p><audio controls style="width: 100%;">' +
-                                             '<source src="' + fileUrl + '" type="' + file.type + '">' +
-                                             'Your browser does not support the audio tag.' +
-                                             '</audio></p>';
-                                } else if (isImage) {
-                                    content = '<p><img src="' + fileUrl + '" alt="' + (altText || file.name) + '" style="max-width: 100%; height: auto;"></p>';
-                                }
-                                
-                                if (content) {
-                                    editor.insertContent(content);
-                                    api.close();
-                                    showSuccessMessage('Media inserted successfully!');
-                                } else {
-                                    alert('Unsupported file type. Please select an image, video, or audio file.');
-                                }
-                            };
-                            
-                            reader.readAsDataURL(file);
-                        } else {
-                            alert('Please select a file to upload.');
-                        }
-                    }
-                });
-                
-                // Add event listener after dialog opens
-                setTimeout(function() {
-                    var input = document.getElementById('mediaUploadInput');
-                    if (input) {
-                        input.addEventListener('change', function() {
-                            var preview = document.getElementById('mediaPreviewDialog');
-                            
-                            if (this.files && this.files[0]) {
-                                var file = this.files[0];
-                                var reader = new FileReader();
-                                
-                                reader.onload = function() {
-                                    var isVideo = file.type.startsWith('video/');
-                                    var isAudio = file.type.startsWith('audio/');
-                                    var isImage = file.type.startsWith('image/');
-                                    
-                                    if (isVideo) {
-                                        preview.innerHTML = '<video controls style="max-width: 100%; max-height: 200px;"><source src="' + reader.result + '" type="' + file.type + '">Your browser does not support the video tag.</video>';
-                                    } else if (isAudio) {
-                                        preview.innerHTML = '<audio controls style="width: 100%;"><source src="' + reader.result + '" type="' + file.type + '">Your browser does not support the audio tag.</audio>';
-                                    } else if (isImage) {
-                                        preview.innerHTML = '<img src="' + reader.result + '" style="max-width: 100%; max-height: 200px; border-radius: 4px;">';
-                                    } else {
-                                        preview.innerHTML = '<p style="color: #666;">Unsupported file type</p>';
-                                    }
-                                };
-                                
-                                reader.readAsDataURL(file);
-                            }
-                        });
-                    }
-                }, 200);
-            }
-
             // Initialize TinyMCE when page loads
             document.addEventListener('DOMContentLoaded', function() {
                 initTinyMCE('#media_url');
@@ -648,156 +406,6 @@
                     };
                     reader.readAsDataURL(input.files[0]);
                 }
-            }
-
-            // Handle video upload
-            function handleVideoUpload(input) {
-                if (input.files && input.files.length > 0) {
-                    Array.from(input.files).forEach(file => {
-                        if (file.type.startsWith('video/')) {
-                            addMediaToContainer(file, 'video');
-                        } else {
-                            alert('Please select only video files.');
-                        }
-                    });
-                }
-            }
-            
-            // Handle image upload
-            function handleImageUpload(input) {
-                if (input.files && input.files.length > 0) {
-                    Array.from(input.files).forEach(file => {
-                        if (file.type.startsWith('image/')) {
-                            addMediaToContainer(file, 'image');
-                        } else {
-                            alert('Please select only image files.');
-                        }
-                    });
-                }
-            }
-
-            // Drag and drop functionality
-            const dropArea = document.getElementById('mediaDropArea');
-            const mediaInput = document.getElementById('mediaFiles');
-
-            dropArea.addEventListener('click', () => mediaInput.click());
-
-            dropArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dropArea.classList.add('dragover');
-            });
-
-            dropArea.addEventListener('dragleave', () => {
-                dropArea.classList.remove('dragover');
-            });
-
-            dropArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dropArea.classList.remove('dragover');
-                const files = e.dataTransfer.files;
-                handleMediaUpload(files);
-            });
-
-            function handleMediaUpload(files) {
-                Array.from(files).forEach(file => {
-                    if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
-                        addMediaToContainer(file, file.type.startsWith('video/') ? 'video' : 'image');
-                    }
-                });
-            }
-
-            // Add media to container
-            function addMediaToContainer(file, type) {
-                const mediaId = 'media_' + (++mediaCounter);
-                const fileSize = (file.size / 1024 / 1024).toFixed(2);
-                const fileUrl = URL.createObjectURL(file);
-                
-                let mediaPreview = '';
-                let icon = '';
-                
-                if (type === 'video') {
-                    mediaPreview = `<video class="media-preview" controls><source src="${fileUrl}" type="${file.type}">Your browser does not support the video tag.</video>`;
-                    icon = '<i class="fas fa-video text-primary"></i>';
-                } else {
-                    mediaPreview = `<img class="media-preview" src="${fileUrl}" alt="${file.name}">`;
-                    icon = '<i class="fas fa-image text-success"></i>';
-                }
-                
-                const mediaItem = `
-                    <div class="media-item" id="${mediaId}">
-                        <div class="row align-items-center">
-                            <div class="col-md-3">
-                                ${mediaPreview}
-                            </div>
-                            <div class="col-md-6">
-                                <h6>${icon} ${file.name}</h6>
-                                <p class="text-muted mb-1">Size: ${fileSize} MB</p>
-                                <p class="text-muted mb-0">Type: ${file.type}</p>
-                                <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="insertMediaToEditor('${mediaId}', '${file.name}', '${type == 'video'}')">
-                                    <i class="fas fa-plus"></i> Insert to Content
-                                </button>
-                            </div>
-                            <div class="col-md-3 text-end">
-                                <button type="button" class="btn-remove-media" onclick="removeMedia('${mediaId}')">
-                                    <i class="fas fa-trash"></i> Remove
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                document.getElementById('mediaContainer').insertAdjacentHTML('beforeend', mediaItem);
-                showSuccessMessage(`${type.charAt(0).toUpperCase() + type.slice(1)} uploaded successfully: ${file.name}`);
-            }
-
-            // Insert media to TinyMCE editor
-            function insertMediaToEditor(mediaId, fileName, isVideo) {
-                if (tinymce.activeEditor) {
-                    const mediaElement = document.getElementById(mediaId);
-                    if (mediaElement) {
-                        let content = '';
-                        if (isVideo) {
-                            const videoElement = mediaElement.querySelector('video source');
-                            if (videoElement) {
-                                content = `<p><video controls style="max-width: 100%; height: auto;"><source src="${videoElement.src}" type="${videoElement.type}">Your browser does not support the video tag.</video></p>`;
-                            }
-                        } else {
-                            const imgElement = mediaElement.querySelector('img');
-                            if (imgElement) {
-                                content = `<p><img src="${imgElement.src}" alt="${fileName}" style="max-width: 100%; height: auto;"></p>`;
-                            }
-                        }
-                        
-                        if (content) {
-                            tinymce.activeEditor.insertContent(content);
-                            showSuccessMessage('Media inserted into content successfully!');
-                        }
-                    }
-                } else {
-                    alert('Editor is not ready. Please try again.');
-                }
-            }
-
-            // Remove media
-            function removeMedia(mediaId) {
-                document.getElementById(mediaId).remove();
-                showSuccessMessage('Media removed successfully!');
-            }
-
-            // Show success message
-            function showSuccessMessage(message) {
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
-                alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-                alertDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
-                
-                document.body.appendChild(alertDiv);
-                
-                setTimeout(() => {
-                    if (alertDiv.parentNode) {
-                        alertDiv.parentNode.removeChild(alertDiv);
-                    }
-                }, 3000);
             }
 
             // Form submission
@@ -832,5 +440,11 @@
                 console.log('Form submitted with content:', content);
             });
         </script>
+        
+        <!-- Footer -->
+        <jsp:include page="../common/user/footer.jsp"></jsp:include>
+
+        <!-- Include common JS -->
+        <jsp:include page="../common/user/link_js_common.jsp"></jsp:include>
     </body>
 </html>

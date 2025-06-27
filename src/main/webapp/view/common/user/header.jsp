@@ -135,7 +135,7 @@
                                                 <a>Blog</a>
                                                 <ul class="sub-menu">
                                                     <li><a href="${pageContext.request.contextPath}/blog">Blog List</a></li>
-                                                    <li><a href="blog-details.html">Blog Details</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/post-details">Post Details</a></li>
                                                 </ul>
                                             </li>
                                             <li><a href="login.html">Student Login</a></li>

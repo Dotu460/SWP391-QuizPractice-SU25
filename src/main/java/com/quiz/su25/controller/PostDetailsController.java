@@ -117,9 +117,9 @@ public class PostDetailsController extends HttpServlet {
                     status = "draft";
                 }
                 
-                // TODO: Set author_id from session when authentication is implemented
-                // For now, set a default author_id (you should change this)
-                post.setAuthor_id(1);
+                // TODO: Set author from session when authentication is implemented
+                // For now, set a default author (you should change this)
+                post.setAuthor("Admin");
                 
             } else {
                 // Update existing post
@@ -141,8 +141,8 @@ public class PostDetailsController extends HttpServlet {
                 }
             }
 
-            // Handle media files upload and process description
-            String processedDescription = processMediaFiles(request, description);
+            // Content is handled directly by TinyMCE
+            String processedDescription = description;
 
             // Update post object with form data
             post.setTitle(title.trim());
@@ -150,12 +150,13 @@ public class PostDetailsController extends HttpServlet {
             post.setBrief_info(briefInfo != null ? briefInfo.trim() : "");
             post.setContent(processedDescription);
             post.setStatus(status);
-            post.setFeatured_flag(featuredFlag);
+            post.setFeatured_flag(Boolean.valueOf(featuredFlag));
 
             // Save to database
             boolean success;
             if (isNewPost) {
-                success = postDAO.insert(post);
+                int result = postDAO.insert(post);
+                success = (result > 0);
                 if (success) {
                     // Get the ID of the newly created post for redirect
                     response.sendRedirect(request.getContextPath() + "/blog?success=post_created");
@@ -163,7 +164,8 @@ public class PostDetailsController extends HttpServlet {
                     response.sendRedirect(request.getContextPath() + "/post-details?error=create_failed");
                 }
             } else {
-                success = postDAO.update(post);
+                boolean result = postDAO.update(post);
+                success = (result);
                 if (success) {
                     response.sendRedirect(request.getContextPath() + "/post-details?id=" + post.getId() + "&success=updated");
                 } else {
@@ -175,7 +177,7 @@ public class PostDetailsController extends HttpServlet {
             e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/blog?error=system_error");
         }
-    }
+        }
 
     private String handleFileUpload(Part filePart, String subfolder, HttpServletRequest request) {
         try {
@@ -201,40 +203,5 @@ public class PostDetailsController extends HttpServlet {
             e.printStackTrace();
             return null;
         }
-    }
-
-    private String processMediaFiles(HttpServletRequest request, String description) throws IOException, ServletException {
-        String processedDescription = description;
-        
-        // Get all media files
-        for (Part part : request.getParts()) {
-            if (part.getName().equals("mediaFiles") && part.getSize() > 0) {
-                String mediaPath = handleFileUpload(part, "media", request);
-                
-                if (mediaPath != null) {
-                    String fileName = Paths.get(part.getSubmittedFileName()).getFileName().toString();
-                    String contentType = part.getContentType();
-                    
-                    // Create media HTML based on type
-                    String mediaHtml;
-                    if (contentType.startsWith("image/")) {
-                        mediaHtml = "<img src=\"" + request.getContextPath() + mediaPath + "\" alt=\"" + fileName + "\" style=\"max-width: 100%; height: auto; margin: 10px 0;\">";
-                    } else if (contentType.startsWith("video/")) {
-                        mediaHtml = "<video controls style=\"max-width: 100%; height: auto; margin: 10px 0;\">" +
-                                   "<source src=\"" + request.getContextPath() + mediaPath + "\" type=\"" + contentType + "\">" +
-                                   "Your browser does not support the video tag." +
-                                   "</video>";
-                    } else {
-                        continue; // Skip unsupported file types
-                    }
-                    
-                    // Replace placeholder with actual media HTML
-                    String placeholder = "[" + (contentType.startsWith("image/") ? "IMAGE" : "VIDEO") + ": " + fileName + "]";
-                    processedDescription = processedDescription.replace(placeholder, mediaHtml);
-                }
-            }
-        }
-        
-        return processedDescription;
     }
 }
