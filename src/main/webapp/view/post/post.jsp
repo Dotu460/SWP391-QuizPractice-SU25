@@ -188,23 +188,34 @@
                     <div class="col-lg-8">
                         <!-- Post Header -->
                         <div class="post-header">
-                            <span class="post-category">
-                                ${post.category}
-                            </span>
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="post-category">
+                                        ${post.category}
+                                    </span>
 
-                            <h1 class="post-title">
-                                ${post.title}
-                            </h1>
+                                    <h1 class="post-title">
+                                        ${post.title}
+                                    </h1>
 
-                            <div class="post-meta">
-                                <span>
-                                    <i class="fas fa-calendar-alt"></i>
-                                    <fmt:formatDate value="${post.updated_at}" pattern="MMMM d, yyyy"/>
-                                </span>
-                                <span>
-                                    <i class="fas fa-user"></i>
-                                    ${post.author != null ? post.author : 'Author Name'}
-                                </span>
+                                    <div class="post-meta">
+                                        <span>
+                                            <i class="fas fa-calendar-alt"></i>
+                                            <fmt:formatDate value="${post.updated_at}" pattern="MMMM d, yyyy"/>
+                                        </span>
+                                        <span>
+                                            <i class="fas fa-user"></i>
+                                            ${post.author != null ? post.author : 'Author Name'}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Edit Button (for authorized users) -->
+                                <div class="post-actions">
+                                    <a href="${pageContext.request.contextPath}/post-details?id=${post.id}" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-edit"></i> Edit Post
+                                    </a>
+                                </div>
                             </div>
                         </div>
 

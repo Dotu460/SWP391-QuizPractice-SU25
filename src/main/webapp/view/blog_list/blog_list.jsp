@@ -177,8 +177,11 @@
                     <div class="row">
                         <!-- Blog Posts -->
                         <div class="col-lg-8">
-                            <!-- Settings Button -->
-                            <div class="text-end mb-4">
+                            <!-- Action Buttons -->
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <a href="${pageContext.request.contextPath}/post-details" class="btn btn-success">
+                                    <i class="fas fa-plus"></i> Create New Post
+                                </a>
                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#displaySettingsModal">
                                     <i class="fas fa-cog"></i> Display Settings
                                 </button>
