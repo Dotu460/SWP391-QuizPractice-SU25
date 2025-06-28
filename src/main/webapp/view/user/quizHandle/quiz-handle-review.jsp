@@ -87,6 +87,249 @@
             }
             .essay-answer-review { background-color: #f8f9fa; border: 1px solid #dee2e6; color: #495057; padding: 1rem; border-radius: 0.5rem;}
             .explanation { margin-top: 20px; padding: 20px; background-color: #f1f7fe; border-left: 5px solid #007bff; border-radius: 0 8px 8px 0; }
+            
+            /* Review Popup Styles */
+            .review-popup {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1000;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .review-popup.show {
+                display: flex;
+            }
+
+            .popup-content {
+                background: white;
+                border-radius: 12px;
+                width: 90%;
+                max-width: 600px;
+                padding: 24px;
+                position: relative;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            }
+
+            .popup-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+
+            .popup-header h3 {
+                font-size: 20px;
+                font-weight: 600;
+                color: #1A1B3D;
+                margin: 0;
+            }
+
+            .close-btn {
+                background: none;
+                border: none;
+                font-size: 20px;
+                color: #666;
+                cursor: pointer;
+                padding: 4px;
+                transition: color 0.3s ease;
+            }
+
+            .close-btn:hover {
+                color: #1A1B3D;
+            }
+
+            .review-subtitle {
+                font-size: 16px;
+                color: #666;
+                margin-bottom: 16px;
+            }
+
+            /* Review buttons styles */
+            .btn-review {
+                background: #5751E1;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                padding: 12px 24px;
+                font-size: 14px;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            
+            .btn-review:hover {
+                background: #7A6DC0;
+                transform: translateY(-1px);
+            }
+
+            .review-buttons {
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+                margin-bottom: 20px;
+            }
+
+            .review-btn {
+                flex: 1;
+                min-width: 120px;
+                padding: 12px;
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                background: white;
+                color: #1A1B3D;
+                font-size: 14px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .btn-unanswered {
+                border-color: #dc3545;
+                color: #dc3545;
+            }
+
+            .btn-unanswered:hover {
+                background: #fff5f5;
+            }
+
+            .btn-answered {
+                border-color: #28a745;
+                color: #28a745;
+            }
+
+            .btn-answered:hover {
+                background: #f0fff4;
+            }
+
+            .btn-all {
+                border-color: #8B7FD2;
+                color: #8B7FD2;
+            }
+
+            .btn-all:hover {
+                background: #f8f7ff;
+            }
+
+            .review-btn.active {
+                color: white;
+            }
+
+            .btn-unanswered.active {
+                background-color: #dc3545;
+            }
+
+            .btn-answered.active {
+                background-color: #28a745;
+            }
+
+            .btn-all.active {
+                background-color: #8B7FD2;
+            }
+
+            /* Question Grid Styles */
+            .question-grid {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 12px;
+                margin-top: 24px;
+                padding: 16px;
+                background: #f8f9fa;
+                border-radius: 8px;
+            }
+
+            .question-box {
+                aspect-ratio: 1;
+                background: white;
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                position: relative;
+            }
+
+            .question-box:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+
+            .question-number {
+                font-size: 16px;
+                font-weight: 500;
+                color: #1A1B3D;
+            }
+
+            /* Question box states */
+            .question-box.unanswered {
+                border-color: #dc3545;
+                background: #fff5f5;
+            }
+
+            .question-box.answered {
+                border-color: #28a745;
+                background: #f0fff4;
+                font-weight: 700;
+            }
+
+            .question-box.current {
+                border-color: #8B7FD2;
+                background: #f8f7ff;
+                box-shadow: 0 2px 8px rgba(139, 127, 210, 0.2);
+            }
+
+            @media (max-width: 576px) {
+                .question-grid {
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: 8px;
+                    padding: 12px;
+                }
+
+                .question-number {
+                    font-size: 14px;
+                }
+            }
+
+            /* Left buttons container styles */
+            .left-buttons {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+            }
+            
+            /* Media queries for responsive design */
+            @media (max-width: 768px) {
+                .navigation-footer {
+                    flex-direction: column;
+                    align-items: stretch;
+                    gap: 20px;
+                }
+                
+                .left-buttons {
+                    flex-direction: column;
+                    gap: 12px;
+                    width: 100%;
+                }
+                
+                .btn-review-back, .btn-review {
+                    width: 100%;
+                    justify-content: center;
+                }
+                
+                .navigation-buttons {
+                    width: 100%;
+                }
+            }
         </style>
     </head>
 
@@ -180,10 +423,17 @@
                 </div>
 
                 <div class="navigation-footer">
-                     <a href="${pageContext.request.contextPath}/quiz-handle-menu" class="btn-review-back">
-                        <i class="fas fa-arrow-left"></i>
-                        Back to Quizzes
-                    </a>
+                     <div class="left-buttons">
+                         <a href="${pageContext.request.contextPath}/quiz-handle-menu" class="btn-review-back">
+                            <i class="fas fa-arrow-left"></i>
+                            Back to Quizzes
+                        </a>
+                        <!-- Review Progress Button -->
+                        <button class="btn-review" onclick="openReviewPopup()">
+                            <i class="fas fa-tasks"></i>
+                            Review Progress
+                        </button>
+                     </div>
 
                     <div class="navigation-buttons">
                         <div class="action-buttons">
@@ -206,6 +456,65 @@
                                         <i class="fas fa-arrow-right"></i>
                                     </a>
                                 </c:if>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Review Progress Popup -->
+                <div id="reviewPopup" class="review-popup">
+                    <div class="popup-content">
+                        <div class="popup-header">
+                            <h3>Review Progress</h3>
+                            <button class="close-btn" onclick="closeReviewPopup()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="popup-body">
+                            <p class="review-subtitle">Filter questions:</p>
+                            <div class="review-buttons">
+                                <button class="review-btn btn-unanswered" onclick="filterQuestions('unanswered')">
+                                    Incorrect
+                                </button>
+                                <button class="review-btn btn-answered" onclick="filterQuestions('answered')">
+                                    Correct
+                                </button>
+                                <button class="review-btn btn-all active" onclick="filterQuestions('all')">
+                                    All Questions
+                                </button>
+                            </div>
+                            
+                            <!-- Question Grid -->
+                            <div class="question-grid">
+                                <c:forEach begin="1" end="${fn:length(questions)}" var="i">
+                                    <c:set var="currentQ" value="${questions[i-1]}" />
+                                    <c:set var="isCorrect" value="false" />
+                                    
+                                    <c:if test="${not empty userAnswerMap[currentQ.id]}">
+                                        <c:set var="hasAllCorrectAnswers" value="true" />
+                                        <c:set var="hasIncorrectAnswers" value="false" />
+                                        
+                                        <c:forEach items="${currentQ.questionOptions}" var="opt">
+                                            <c:if test="${opt.correct_key && !fn:contains(userAnswerMap[currentQ.id], opt.id)}">
+                                                <c:set var="hasAllCorrectAnswers" value="false" />
+                                            </c:if>
+                                            <c:if test="${!opt.correct_key && fn:contains(userAnswerMap[currentQ.id], opt.id)}">
+                                                <c:set var="hasIncorrectAnswers" value="true" />
+                                            </c:if>
+                                        </c:forEach>
+                                        
+                                        <c:if test="${hasAllCorrectAnswers && !hasIncorrectAnswers}">
+                                            <c:set var="isCorrect" value="true" />
+                                        </c:if>
+                                    </c:if>
+                                    
+                                    <div class="question-box ${i == currentNumber ? 'current' : ''} ${isCorrect ? 'answered' : 'unanswered'}" 
+                                         data-question-id="${questions[i-1].id}"
+                                         data-status="${isCorrect ? 'correct' : 'incorrect'}"
+                                         onclick="navigateToQuestion('${i}')">
+                                        <span class="question-number">${i}</span>
+                                    </div>
+                                </c:forEach>
                             </div>
                         </div>
                     </div>
@@ -242,6 +551,66 @@
                 if (event.target === peekPopup) {
                     closePeekPopup();
                 }
+            });
+            
+            // Review Progress Functions
+            function openReviewPopup() {
+                document.getElementById('reviewPopup').classList.add('show');
+            }
+            
+            function closeReviewPopup() {
+                document.getElementById('reviewPopup').classList.remove('show');
+            }
+            
+            // Close popup when clicking outside
+            document.addEventListener('click', function(event) {
+                const reviewPopup = document.getElementById('reviewPopup');
+                if (event.target === reviewPopup) {
+                    closeReviewPopup();
+                }
+            });
+            
+            // Filter questions by status (correct/incorrect/all)
+            function filterQuestions(type) {
+                const boxes = document.querySelectorAll('.question-box');
+                
+                boxes.forEach(box => {
+                    const status = box.getAttribute('data-status');
+                    let shouldShow = false;
+                    
+                    switch(type) {
+                        case 'unanswered': // Incorrect
+                            shouldShow = status === 'incorrect';
+                            break;
+                        case 'answered': // Correct
+                            shouldShow = status === 'correct';
+                            break;
+                        case 'all':
+                            shouldShow = true;
+                            break;
+                    }
+                    
+                    box.style.display = shouldShow ? 'flex' : 'none';
+                });
+                
+                // Highlight active button
+                const buttons = document.querySelectorAll('.review-btn');
+                buttons.forEach(button => {
+                    button.classList.remove('active');
+                    if (button.classList.contains('btn-' + type)) {
+                        button.classList.add('active');
+                    }
+                });
+            }
+            
+            // Navigate to question
+            function navigateToQuestion(questionNumber) {
+                window.location.href = 'quiz-review?quizId=${quiz.id}&questionNumber=' + questionNumber;
+            }
+            
+            // Initialize: set all questions button as active initially
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelector('.btn-all').classList.add('active');
             });
         </script>
     </body>
