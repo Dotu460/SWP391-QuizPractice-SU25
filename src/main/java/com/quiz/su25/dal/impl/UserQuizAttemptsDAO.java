@@ -228,6 +228,139 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
         }
     }
 
+    /**
+     * Check if an attempt exists in the database
+     */
+    public boolean checkAttemptExists(Integer attemptId) {
+        String sql = "SELECT COUNT(*) FROM UserQuizAttempts WHERE id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, attemptId);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                int count = resultSet.getInt(1);
+                System.out.println("Checking if attempt ID " + attemptId + " exists: " + (count > 0));
+                return count > 0;
+            }
+        } catch (Exception e) {
+            System.out.println("Error checkAttemptExists at class UserQuizAttemptsDAO: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+        return false;
+    }
+
+    /**
+     * Update only status of an attempt
+     */
+    public boolean updateStatus(Integer attemptId, String status) {
+        String sql = "UPDATE UserQuizAttempts SET status = ?, update_at = CURRENT_TIMESTAMP WHERE id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, status);
+            statement.setInt(2, attemptId);
+
+            int result = statement.executeUpdate();
+            System.out.println("Updating status of attempt ID " + attemptId + " to " + status + ": " + (result > 0 ? "SUCCESS" : "FAILED"));
+            return result > 0;
+        } catch (Exception e) {
+            System.out.println("Error updateStatus at class UserQuizAttemptsDAO: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        } finally {
+            closeResources();
+        }
+    }
+
+    /**
+     * Mark all in-progress attempts for a user and quiz as abandoned
+     * This is useful when starting a new attempt to ensure only one is in-progress
+     */
+    public int markAllInProgressAsAbandoned(Integer userId, Integer quizId) {
+        String sql = "UPDATE UserQuizAttempts SET status = ?, update_at = CURRENT_TIMESTAMP " +
+                     "WHERE user_id = ? AND quiz_id = ? AND status = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, "abandoned");
+            statement.setInt(2, userId);
+            statement.setInt(3, quizId);
+            statement.setString(4, "in_progress");
+
+            int updatedCount = statement.executeUpdate();
+            System.out.println("Marked " + updatedCount + " in-progress attempts as abandoned for user " + 
+                              userId + " and quiz " + quizId);
+            return updatedCount;
+        } catch (Exception e) {
+            System.out.println("Error markAllInProgressAsAbandoned at class UserQuizAttemptsDAO: " + e.getMessage());
+            e.printStackTrace();
+            return 0;
+        } finally {
+            closeResources();
+        }
+    }
+
+    /**
+     * Find the latest in-progress attempt by a user for a specific quiz
+     */
+    public UserQuizAttempts findLatestInProgressAttempt(Integer userId, Integer quizId) {
+        String sql = "SELECT * FROM UserQuizAttempts WHERE user_id = ? AND quiz_id = ? AND status = ? ORDER BY created_at DESC LIMIT 1";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, userId);
+            statement.setInt(2, quizId);
+            statement.setString(3, "in_progress");
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                UserQuizAttempts attempt = getFromResultSet(resultSet);
+                System.out.println("Found latest in-progress attempt: ID=" + attempt.getId());
+                return attempt;
+            }
+            System.out.println("No in-progress attempt found for user " + userId + " and quiz " + quizId);
+        } catch (Exception e) {
+            System.out.println("Error findLatestInProgressAttempt at class UserQuizAttemptsDAO: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+        return null;
+    }
+
+    /**
+     * Find all completed attempts for a specific user and quiz, ordered by newest first
+     */
+    public List<UserQuizAttempts> findCompletedAttemptsByQuizId(Integer userId, Integer quizId) {
+        String sql = "SELECT * FROM UserQuizAttempts WHERE user_id = ? AND quiz_id = ? AND status = 'completed' ORDER BY end_time DESC, created_at DESC";
+        List<UserQuizAttempts> completedAttempts = new ArrayList<>();
+        
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, userId);
+            statement.setInt(2, quizId);
+            resultSet = statement.executeQuery();
+            
+            while (resultSet.next()) {
+                UserQuizAttempts attempt = getFromResultSet(resultSet);
+                completedAttempts.add(attempt);
+            }
+            
+            System.out.println("Found " + completedAttempts.size() + " completed attempts for user " + userId + " and quiz " + quizId);
+            
+        } catch (Exception e) {
+            System.out.println("Error findCompletedAttemptsByQuizId at class UserQuizAttemptsDAO: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+        
+        return completedAttempts;
+    }
+
     public static void main(String[] args) {
         UserQuizAttemptsDAO userQuizAttemptsDAO = new UserQuizAttemptsDAO();
         userQuizAttemptsDAO.findAll().forEach(item -> {

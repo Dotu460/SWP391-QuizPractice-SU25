@@ -55,22 +55,37 @@ public class QuizReviewController extends HttpServlet {
             int quizId = Integer.parseInt(quizIdStr);
             int userId = 10; // Hardcoded user ID as requested
 
-            UserQuizAttempts latestAttempt = attemptsDAO.findLatestAttempt(userId, quizId);
+            System.out.println("\n===== QUIZ REVIEW =====");
+            System.out.println("Reviewing quiz ID: " + quizId + " for user ID: " + userId);
 
-            if (latestAttempt == null || !GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED.equals(latestAttempt.getStatus())) {
+            // Tìm attempt mới nhất đã hoàn thành (status=completed)
+            List<UserQuizAttempts> completedAttempts = attemptsDAO.findCompletedAttemptsByQuizId(userId, quizId);
+            
+            if (completedAttempts == null || completedAttempts.isEmpty()) {
+                System.out.println("No completed attempts found");
                 session.setAttribute("toastMessage", "No completed quiz attempt found to review.");
                 session.setAttribute("toastType", "error");
                 response.sendRedirect(request.getContextPath() + "/quiz-handle-menu");
                 return;
             }
 
+            // Lấy attempt đã hoàn thành mới nhất (đầu tiên trong danh sách đã sắp xếp)
+            UserQuizAttempts latestAttempt = completedAttempts.get(0);
+            System.out.println("Found latest completed attempt: ID=" + latestAttempt.getId() + 
+                              ", Score=" + latestAttempt.getScore() +
+                              ", Date=" + latestAttempt.getEnd_time());
+
             Quizzes quiz = quizDAO.findById(quizId);
             List<Question> questions = questionDAO.findByQuizId(quizId);
             List<UserQuizAttemptAnswers> userAnswers = userAnswersDAO.findByAttemptId(latestAttempt.getId());
 
+            System.out.println("Found " + userAnswers.size() + " answer records for this attempt");
+
             Map<Integer, List<Integer>> userAnswerMap = userAnswers.stream()
                     .collect(Collectors.groupingBy(UserQuizAttemptAnswers::getQuiz_question_id,
                             Collectors.mapping(UserQuizAttemptAnswers::getSelected_option_id, Collectors.toList())));
+
+            System.out.println("User answer map: " + userAnswerMap);
 
             for (Question q : questions) {
                 List<QuestionOption> options = optionDAO.findByQuestionId(q.getId());
@@ -85,6 +100,11 @@ public class QuizReviewController extends HttpServlet {
             request.getRequestDispatcher("view/user/quizHandle/quiz-handle-review.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
+            System.out.println("Error parsing quiz ID: " + e.getMessage());
+            response.sendRedirect("home");
+        } catch (Exception e) {
+            System.out.println("Error in QuizReviewController: " + e.getMessage());
+            e.printStackTrace();
             response.sendRedirect("home");
         }
     }

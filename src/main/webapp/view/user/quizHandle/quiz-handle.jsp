@@ -2431,7 +2431,7 @@
         </script>
 
         <script>
-            // Hàm mở popup xác nhận score exam
+            // Hàm xử lý popup xác nhận score exam
             function openScoreExamConfirmation() {
                 const popup = document.getElementById('scoreExamPopup');
                 const title = document.getElementById('popupTitle');
@@ -2495,12 +2495,27 @@
                     }
                     userAnswersInput.value = JSON.stringify(savedAnswers);
                     
+                    // Thêm quizId từ URL nếu có
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const quizId = urlParams.get('id');
+                    if (quizId) {
+                        let quizIdInput = form.querySelector('input[name="quizId"]');
+                        if (!quizIdInput) {
+                            quizIdInput = document.createElement('input');
+                            quizIdInput.type = 'hidden';
+                            quizIdInput.name = 'quizId';
+                            quizIdInput.value = quizId;
+                            form.appendChild(quizIdInput);
+                        }
+                    }
+                    
                     form.querySelector('input[name="action"]').value = 'score';
                     
                     // Log form data sau khi thay đổi
                     const updatedFormData = new FormData(form);
                     console.log('Updated form data:', {
                         action: updatedFormData.get('action'),
+                        quizId: updatedFormData.get('quizId'),
                         userAnswers: updatedFormData.get('userAnswers')
                     });
                     
@@ -2676,6 +2691,13 @@
                 // Tạo FormData object
                 const formData = new FormData();
                 formData.append('action', 'scoreExam');
+                
+                // Thêm quizId từ URL nếu có
+                const urlParams = new URLSearchParams(window.location.search);
+                const quizId = urlParams.get('id');
+                if (quizId) {
+                    formData.append('quizId', quizId);
+                }
                 
                 // Chuyển đổi object thành mảng các câu trả lời
                 const answersArray = Object.entries(savedAnswers).map(([questionId, answers]) => ({

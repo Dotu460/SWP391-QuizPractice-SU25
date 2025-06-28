@@ -216,16 +216,16 @@
                                                             </c:otherwise>
                                                         </c:choose>
                                                     </div>
-                                                    <div class="mt-3">
+                                                                                                                    <div class="mt-3">
                                                         <c:choose>
                                                             <c:when test="${not empty quizScores[quiz.id]}">
                                                                 <div class="d-flex gap-2">
-                                                                    <button class="btn btn-primary flex-grow-1" onclick="startQuiz('${quiz.id}')">Retake Quiz</button>
+                                                                    <button class="btn btn-primary flex-grow-1" onclick="startQuiz('${quiz.id}', true)">Retake Quiz</button>
                                                                     <button class="btn btn-secondary flex-grow-1" onclick="reviewQuiz('${quiz.id}')">Review Quiz</button>
                                                                 </div>
                                                             </c:when>
                                                             <c:otherwise>
-                                                                <button class="btn btn-primary w-100" onclick="startQuiz('${quiz.id}')">Start Quiz</button>
+                                                                <button class="btn btn-primary w-100" onclick="startQuiz('${quiz.id}', false)">Start Quiz</button>
                                                             </c:otherwise>
                                                         </c:choose>
                                                     </div>
@@ -250,9 +250,18 @@
     <!-- JS here -->
     <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
     <script>
-        function startQuiz(quizId) {
-            console.log("Starting quiz with ID:", quizId);
-            window.location.href = '${pageContext.request.contextPath}/quiz-handle?id=' + quizId;
+        function startQuiz(quizId, isRetake) {
+            console.log("Starting quiz with ID:", quizId, isRetake ? "(retake)" : "");
+            if (isRetake) {
+                // Clear all browser session storage for the quiz
+                sessionStorage.removeItem('answeredQuestions');
+                sessionStorage.removeItem('markedQuestions');
+                sessionStorage.removeItem('selectedAnswers');
+                
+                window.location.href = '${pageContext.request.contextPath}/quiz-handle?id=' + quizId + '&retake=true';
+            } else {
+                window.location.href = '${pageContext.request.contextPath}/quiz-handle?id=' + quizId;
+            }
         }
 
         function reviewQuiz(quizId) {

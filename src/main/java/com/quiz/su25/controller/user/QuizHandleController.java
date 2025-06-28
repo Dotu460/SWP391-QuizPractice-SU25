@@ -53,6 +53,15 @@ public class QuizHandleController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
+            // In ra tất cả các tham số request để debug
+            System.out.println("\n===== QUIZ HANDLE REQUEST PARAMS =====");
+            java.util.Enumeration<String> paramNames = request.getParameterNames();
+            while (paramNames.hasMoreElements()) {
+                String name = paramNames.nextElement();
+                System.out.println(name + ": " + request.getParameter(name));
+            }
+            System.out.println("====================================\n");
+            
             // Tạo attempt mới khi bắt đầu quiz
             HttpSession session = request.getSession();
             UserDAO userDAO = new UserDAO();
@@ -66,14 +75,63 @@ public class QuizHandleController extends HttpServlet {
             Integer quizId = quizIdParam != null ? Integer.parseInt(quizIdParam) : 1;
             session.setAttribute("quizId", quizId);
 
-            // Kiểm tra xem đã có attempt đang chạy chưa
+            // Tạo DAO để thao tác với attempt
             UserQuizAttemptsDAO attemptsDAO = new UserQuizAttemptsDAO();
-            UserQuizAttempts currentAttempt = attemptsDAO.findLatestAttempt(userId, quizId);
-            System.out.println("Current attempt: " + (currentAttempt != null ? currentAttempt.getId() : "null"));
 
-            // Nếu chưa có attempt hoặc attempt cuối cùng đã hoàn thành, tạo attempt mới
-            if (currentAttempt == null || GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED.equals(currentAttempt.getStatus())) {
-                // Tạo attempt mới
+            // Kiểm tra xem đây có phải là request retake hay không
+            String isRetake = request.getParameter("retake");
+            String action = request.getParameter("action");
+            
+            // Xác định xem có cần tạo attempt mới không
+            boolean shouldCreateNewAttempt = false;
+            
+            // TH1: Nếu là retake, luôn tạo attempt mới và đánh dấu tất cả các attempt đang in_progress thành abandoned
+            if ("true".equals(isRetake)) {
+                System.out.println("===== RETAKE QUIZ =====");
+                // Clear all quiz related session attributes
+                session.removeAttribute("userAnswers");
+                session.removeAttribute("currentAttemptId");
+                
+                // Đánh dấu tất cả các attempt đang in_progress thành abandoned
+                int markedCount = attemptsDAO.markAllInProgressAsAbandoned(userId, quizId);
+                System.out.println("Marked " + markedCount + " in-progress attempts as abandoned before starting new attempt");
+                
+                // Đánh dấu cần tạo attempt mới
+                shouldCreateNewAttempt = true;
+            } 
+            // TH2: Nếu không phải retake, kiểm tra có attempt đang chạy không
+            else {
+                // Lấy attempt hiện tại từ session
+                Integer currentAttemptId = (Integer) session.getAttribute("currentAttemptId");
+                UserQuizAttempts currentAttempt = null;
+                
+                // Nếu có attempt ID trong session, kiểm tra trong database
+                if (currentAttemptId != null) {
+                    currentAttempt = attemptsDAO.findById(currentAttemptId);
+                    System.out.println("Found attempt in session: " + 
+                                       (currentAttempt != null ? currentAttempt.getId() + ", status: " + currentAttempt.getStatus() : "null"));
+                }
+                
+                // Nếu không tìm thấy attempt trong session hoặc attempt đã completed, tìm attempt in_progress mới nhất
+                if (currentAttempt == null || !GlobalConfig.QUIZ_ATTEMPT_STATUS_IN_PROGRESS.equals(currentAttempt.getStatus())) {
+                    // Tìm attempt in_progress mới nhất
+                    UserQuizAttempts inProgressAttempt = attemptsDAO.findLatestInProgressAttempt(userId, quizId);
+                    
+                    if (inProgressAttempt != null) {
+                        // Có attempt in_progress, sử dụng nó
+                        currentAttempt = inProgressAttempt;
+                        session.setAttribute("currentAttemptId", currentAttempt.getId());
+                        System.out.println("Using existing in-progress attempt: " + currentAttempt.getId());
+                    } else {
+                        // Không có attempt in_progress, cần tạo mới
+                        shouldCreateNewAttempt = true;
+                    }
+                }
+            }
+            
+            // Nếu cần tạo attempt mới
+            if (shouldCreateNewAttempt) {
+                System.out.println("Creating new attempt...");
                 UserQuizAttempts newAttempt = UserQuizAttempts.builder()
                         .user_id(userId)
                         .quiz_id(quizId)
@@ -89,15 +147,19 @@ public class QuizHandleController extends HttpServlet {
                 int attemptId = attemptsDAO.insert(newAttempt);
                 if (attemptId > 0) {
                     newAttempt.setId(attemptId);
-                    currentAttempt = newAttempt;
-                    System.out.println("Created new attempt with ID: " + currentAttempt.getId());
-                    session.setAttribute("currentAttemptId", currentAttempt.getId());
+                    session.setAttribute("currentAttemptId", attemptId);
+                    System.out.println("Created new attempt with ID: " + attemptId);
+                } else {
+                    System.out.println("Failed to create new attempt");
                 }
-            } else {
-                // Nếu có attempt đang chạy, sử dụng attempt đó
-                session.setAttribute("currentAttemptId", currentAttempt.getId());
-                System.out.println("Using existing attempt with ID: " + currentAttempt.getId());
             }
+            
+            // Lấy attempt ID hiện tại từ session để sử dụng
+            Integer currentAttemptId = (Integer) session.getAttribute("currentAttemptId");
+            if (currentAttemptId == null) {
+                throw new IllegalStateException("No active attempt ID in session");
+            }
+            System.out.println("Using attempt ID: " + currentAttemptId);
 
             // Lấy số thứ tự câu hỏi từ parameter, mặc định là 1
             String questionNumber = request.getParameter("questionNumber");
@@ -207,6 +269,8 @@ public class QuizHandleController extends HttpServlet {
 
     private void handleScoreAction(HttpServletRequest request, HttpServletResponse response, PrintWriter out) throws IOException {
         try {
+            System.out.println("\n===== SCORE QUIZ ACTION =====");
+            
             // 1. Lấy userAnswers từ request (JSON)
             HttpSession session = request.getSession();
             String userAnswersJson = request.getParameter("userAnswers");
@@ -234,7 +298,10 @@ public class QuizHandleController extends HttpServlet {
             Integer userId = 10;
             Integer quizId = (Integer) session.getAttribute("quizId");
             if (quizId == null) {
-                quizId = 1; // Mặc định quiz ID = 1 nếu không có trong session
+                // Thử lấy từ parameter nếu không có trong session
+                String quizIdParam = request.getParameter("quizId");
+                quizId = quizIdParam != null ? Integer.parseInt(quizIdParam) : 1;
+                System.out.println("Quiz ID from parameter: " + quizId);
             }
 
             System.out.println("User ID: " + userId);
@@ -242,18 +309,63 @@ public class QuizHandleController extends HttpServlet {
 
             // Validate attempt
             Integer currentAttemptId = (Integer) session.getAttribute("currentAttemptId");
-            if (currentAttemptId == null) {
-                throw new IllegalStateException("No active attempt found in session");
-            }
-
             UserQuizAttemptsDAO attemptsDAO = new UserQuizAttemptsDAO();
-            UserQuizAttempts attempt = attemptsDAO.findById(currentAttemptId);
+            UserQuizAttempts attempt = null;
 
+            if (currentAttemptId != null) {
+                attempt = attemptsDAO.findById(currentAttemptId);
+                System.out.println("Found attempt by ID from session: " + currentAttemptId);
+            } 
+            
+            // Nếu không tìm thấy attempt từ session, thử tìm attempt đang in-progress mới nhất
+            if (attempt == null) {
+                System.out.println("No valid attempt found in session, searching for in-progress attempt");
+                attempt = attemptsDAO.findLatestInProgressAttempt(userId, quizId);
+                
+                if (attempt != null) {
+                    System.out.println("Found active in-progress attempt: " + attempt.getId());
+                    // Cập nhật session với attempt ID mới tìm được
+                    session.setAttribute("currentAttemptId", attempt.getId());
+                } else {
+                    // Nếu không tìm thấy attempt đang in-progress, tìm attempt mới nhất
+                    attempt = attemptsDAO.findLatestAttempt(userId, quizId);
+                    
+                    if (attempt != null) {
+                        System.out.println("Found latest attempt (any status): " + attempt.getId() + ", status: " + attempt.getStatus());
+                        session.setAttribute("currentAttemptId", attempt.getId());
+                    } else {
+                        // Nếu không tìm thấy attempt nào, tạo mới
+                        System.out.println("Creating new attempt as fallback");
+                        UserQuizAttempts newAttempt = UserQuizAttempts.builder()
+                                .user_id(userId)
+                                .quiz_id(quizId)
+                                .start_time(Date.valueOf(LocalDate.now()))
+                                .end_time(null)
+                                .score(0.0)
+                                .passed(false)
+                                .status(GlobalConfig.QUIZ_ATTEMPT_STATUS_IN_PROGRESS)
+                                .created_at(Date.valueOf(LocalDate.now()))
+                                .update_at(Date.valueOf(LocalDate.now()))
+                                .build();
+
+                        int attemptId = attemptsDAO.insert(newAttempt);
+                        if (attemptId > 0) {
+                            newAttempt.setId(attemptId);
+                            attempt = newAttempt;
+                            System.out.println("Created new attempt with ID: " + attempt.getId());
+                            session.setAttribute("currentAttemptId", attempt.getId());
+                        } else {
+                            throw new IllegalStateException("Failed to create new attempt");
+                        }
+                    }
+                }
+            }
+            
             if (attempt == null) {
                 throw new IllegalStateException("Không tìm thấy attempt hoặc attempt không khớp với session");
             }
-
-            System.out.println("Using attempt with ID: " + attempt.getId());
+            
+            System.out.println("Using attempt with ID: " + attempt.getId() + " with status: " + attempt.getStatus());
 
             int totalAnswered = 0;
             int totalCorrect = 0;
@@ -344,10 +456,28 @@ public class QuizHandleController extends HttpServlet {
             attempt.setStatus(GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED);
             attempt.setEnd_time(Date.valueOf(LocalDate.now()));
             attempt.setUpdate_at(Date.valueOf(LocalDate.now()));
-            attemptsDAO.update(attempt);
-
+            
+            // Sử dụng phương thức updateScore để đảm bảo cập nhật thành công
+            boolean updateScoreResult = attemptsDAO.updateScore(attempt.getId(), score, score >= 5.0);
+            
+            if (updateScoreResult) {
+                System.out.println("Successfully updated attempt status to COMPLETED with score: " + score);
+            } else {
+                // Thử dùng update() nếu updateScore() không thành công
+                boolean updateResult = attemptsDAO.update(attempt);
+                System.out.println("Updated attempt using update() method: " + updateResult);
+            }
+            
+            // In ra thông tin của attempt sau khi cập nhật để kiểm tra
+            UserQuizAttempts updatedAttempt = attemptsDAO.findById(attempt.getId());
+            if (updatedAttempt != null) {
+                System.out.println("Attempt after update - ID: " + updatedAttempt.getId() +
+                                  ", Status: " + updatedAttempt.getStatus() +
+                                  ", Score: " + updatedAttempt.getScore());
+            }
+            
             System.out.println("Final score: " + score);
-
+            
             // 8. Lưu thông tin vào session (quizScore, totalCorrect, ...)
             session.setAttribute("quizScore", score);
             session.setAttribute("totalCorrect", totalCorrect);
@@ -355,7 +485,10 @@ public class QuizHandleController extends HttpServlet {
             session.setAttribute("toastMessage", "Quiz submitted successfully!");
             session.setAttribute("toastType", "success");
             
-            // 9. Redirect về /quiz-handle-menu
+            // 9. Xóa dữ liệu từ session để tránh việc retake quiz sẽ hiển thị dữ liệu cũ
+            session.removeAttribute("userAnswers");
+            
+            // 10. Redirect về /quiz-handle-menu
             response.sendRedirect(request.getContextPath() + "/quiz-handle-menu");
 
         } catch (Exception e) {
