@@ -33,4 +33,5 @@ public class UserQuizAttemptAnswers {
    private Integer selected_option_id;
    private Boolean correct;  //1 - correct 0 - incorrect
    private Date answer_at;
+   private String essay_answer;
 }

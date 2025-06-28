@@ -628,7 +628,30 @@ public class QuizHandleController extends HttpServlet {
         userAnswers.put(questionId, essayAnswer);
         System.out.println("Saved essay answer with length: " + essayAnswer.length());
                
-        // Implement code để lưu câu hỏi tự luận vào DB
+        try {
+            // Lấy attempt ID từ session
+            HttpSession session = request.getSession();
+            Integer currentAttemptId = (Integer) session.getAttribute("currentAttemptId");
+            
+            if (currentAttemptId != null) {
+                // Tạo QuizAttemptAnswerController để lưu câu trả lời tự luận
+                QuizAttemptAnswerController answerController = new QuizAttemptAnswerController();
+                
+                // Lưu câu trả lời tự luận vào database
+                boolean saved = answerController.saveEssayAnswer(currentAttemptId, questionId, essayAnswer);
+                
+                if (saved) {
+                    System.out.println("Essay answer saved to database successfully");
+                } else {
+                    System.out.println("Failed to save essay answer to database");
+                }
+            } else {
+                System.out.println("Cannot save essay answer: No active attempt found in session");
+            }
+        } catch (Exception e) {
+            System.out.println("Error saving essay answer to database: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void handleError(HttpServletResponse response, Exception e) throws IOException {

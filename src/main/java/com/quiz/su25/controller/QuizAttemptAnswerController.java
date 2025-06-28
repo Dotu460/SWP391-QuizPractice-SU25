@@ -180,6 +180,27 @@ public class QuizAttemptAnswerController extends HttpServlet {
     }
 
     /**
+     * Lưu câu trả lời tự luận cho câu hỏi.
+     * @param attemptId ID của lần thi
+     * @param questionId ID của câu hỏi
+     * @param essayAnswer Nội dung câu trả lời tự luận
+     * @return true nếu lưu thành công, false nếu thất bại
+     */
+    public boolean saveEssayAnswer(Integer attemptId, Integer questionId, String essayAnswer) {
+        try {
+            // Xóa các câu trả lời cũ
+            clearAnswersForQuestion(attemptId, questionId);
+            
+            // Lưu câu trả lời tự luận mới
+            return answersDAO.saveEssayAnswer(attemptId, questionId, essayAnswer);
+        } catch (Exception e) {
+            System.err.println("Error in saveEssayAnswer: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
      * Lưu câu trả lời cho một câu hỏi trong attempt
      *
      * @param request HttpServletRequest chứa thông tin câu trả lời

@@ -411,7 +411,7 @@
                                         <textarea class="form-control essay-answer-review" 
                                                   name="essay_answer" 
                                                   rows="6" 
-                                                  readonly>${userAnswerMap[question.id][0]}</textarea>
+                                                  readonly>${essayAnswerMap[question.id]}</textarea>
                                     </div>
                                     <c:if test="${not empty question.explanation}">
                                        <div class="explanation mt-3"><strong>Explanation: </strong> ${question.explanation}</div>

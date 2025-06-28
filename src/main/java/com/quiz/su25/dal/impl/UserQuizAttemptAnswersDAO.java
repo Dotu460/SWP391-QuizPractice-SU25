@@ -11,6 +11,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.sql.Date;
+import java.time.LocalDate;
 
 public class UserQuizAttemptAnswersDAO extends DBContext implements I_DAO<UserQuizAttemptAnswers> {
 
@@ -55,15 +57,16 @@ public class UserQuizAttemptAnswersDAO extends DBContext implements I_DAO<UserQu
 
     @Override
     public int insert(UserQuizAttemptAnswers t) {
-        String sql = "INSERT INTO UserQuizAttemptAnswers (attempt_id, quiz_question_id, selected_option_id, correct, answer_at) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO UserQuizAttemptAnswers (attempt_id, quiz_question_id, selected_option_id, correct, answer_at, essay_answer) VALUES (?, ?, ?, ?, ?, ?)";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setInt(1, t.getAttempt_id());
             statement.setInt(2, t.getQuiz_question_id());
-            statement.setInt(3, t.getSelected_option_id());
+            statement.setInt(3, t.getSelected_option_id() != null ? t.getSelected_option_id() : 0);
             statement.setBoolean(4, t.getCorrect());
             statement.setDate(5, t.getAnswer_at());
+            statement.setString(6, t.getEssay_answer());
             
             return statement.executeUpdate();
         } catch (Exception e) {
@@ -76,16 +79,17 @@ public class UserQuizAttemptAnswersDAO extends DBContext implements I_DAO<UserQu
 
     @Override
     public boolean update(UserQuizAttemptAnswers t) {
-        String sql = "UPDATE UserQuizAttemptAnswers SET attempt_id=?, quiz_question_id=?, selected_option_id=?, correct=?, answer_at=? WHERE id=?";
+        String sql = "UPDATE UserQuizAttemptAnswers SET attempt_id=?, quiz_question_id=?, selected_option_id=?, correct=?, answer_at=?, essay_answer=? WHERE id=?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setInt(1, t.getAttempt_id());
             statement.setInt(2, t.getQuiz_question_id());
-            statement.setInt(3, t.getSelected_option_id());
+            statement.setInt(3, t.getSelected_option_id() != null ? t.getSelected_option_id() : 0);
             statement.setBoolean(4, t.getCorrect());
             statement.setDate(5, t.getAnswer_at());
-            statement.setInt(6, t.getId());
+            statement.setString(6, t.getEssay_answer());
+            statement.setInt(7, t.getId());
             
             return statement.executeUpdate() > 0;
         } catch (Exception e) {
@@ -122,6 +126,7 @@ public class UserQuizAttemptAnswersDAO extends DBContext implements I_DAO<UserQu
                 .selected_option_id(resultSet.getInt("selected_option_id"))
                 .correct(resultSet.getBoolean("correct"))
                 .answer_at(resultSet.getDate("answer_at"))
+                .essay_answer(resultSet.getString("essay_answer"))
                 .build();
     }
 
@@ -235,7 +240,7 @@ public class UserQuizAttemptAnswersDAO extends DBContext implements I_DAO<UserQu
      * Batch insert multiple answers
      */
     public boolean batchInsertAnswers(List<UserQuizAttemptAnswers> answers) {
-        String sql = "INSERT INTO UserQuizAttemptAnswers (attempt_id, quiz_question_id, selected_option_id, correct, answer_at) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO UserQuizAttemptAnswers (attempt_id, quiz_question_id, selected_option_id, correct, answer_at, essay_answer) VALUES (?, ?, ?, ?, ?, ?)";
         try {
             connection = getConnection();
             connection.setAutoCommit(false);
@@ -244,9 +249,10 @@ public class UserQuizAttemptAnswersDAO extends DBContext implements I_DAO<UserQu
             for (UserQuizAttemptAnswers answer : answers) {
                 statement.setInt(1, answer.getAttempt_id());
                 statement.setInt(2, answer.getQuiz_question_id());
-                statement.setInt(3, answer.getSelected_option_id());
+                statement.setInt(3, answer.getSelected_option_id() != null ? answer.getSelected_option_id() : 0);
                 statement.setBoolean(4, answer.getCorrect());
                 statement.setDate(5, answer.getAnswer_at());
+                statement.setString(6, answer.getEssay_answer());
                 statement.addBatch();
             }
             
@@ -273,6 +279,24 @@ public class UserQuizAttemptAnswersDAO extends DBContext implements I_DAO<UserQu
             }
             closeResources();
         }
+    }
+
+    // Thêm phương thức để lưu câu trả lời tự luận
+    public boolean saveEssayAnswer(Integer attemptId, Integer questionId, String essayAnswer) {
+        // Xóa câu trả lời cũ trước khi lưu câu trả lời mới
+        deleteByAttemptAndQuestionId(attemptId, questionId);
+        
+        // Lưu câu trả lời mới
+        UserQuizAttemptAnswers answer = UserQuizAttemptAnswers.builder()
+                .attempt_id(attemptId)
+                .quiz_question_id(questionId)
+                .selected_option_id(0) // Giá trị mặc định cho câu trả lời tự luận
+                .correct(false) // Mặc định là false vì câu trả lời tự luận cần được chấm thủ công
+                .answer_at(Date.valueOf(LocalDate.now()))
+                .essay_answer(essayAnswer)
+                .build();
+                
+        return insert(answer) > 0;
     }
     
     public static void main(String[] args) {

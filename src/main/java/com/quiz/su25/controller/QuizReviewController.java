@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 /**
  *
@@ -81,11 +83,31 @@ public class QuizReviewController extends HttpServlet {
 
             System.out.println("Found " + userAnswers.size() + " answer records for this attempt");
 
-            Map<Integer, List<Integer>> userAnswerMap = userAnswers.stream()
-                    .collect(Collectors.groupingBy(UserQuizAttemptAnswers::getQuiz_question_id,
-                            Collectors.mapping(UserQuizAttemptAnswers::getSelected_option_id, Collectors.toList())));
+            // Tạo map cho câu trả lời trắc nghiệm
+            Map<Integer, List<Integer>> userAnswerMap = new HashMap<>();
+            
+            // Tạo map cho câu trả lời tự luận
+            Map<Integer, String> essayAnswerMap = new HashMap<>();
+            
+            // Phân loại câu trả lời
+            for (UserQuizAttemptAnswers answer : userAnswers) {
+                int questionId = answer.getQuiz_question_id();
+                
+                // Nếu có câu trả lời tự luận
+                if (answer.getEssay_answer() != null && !answer.getEssay_answer().isEmpty()) {
+                    essayAnswerMap.put(questionId, answer.getEssay_answer());
+                } 
+                // Nếu là câu trả lời trắc nghiệm
+                else {
+                    if (!userAnswerMap.containsKey(questionId)) {
+                        userAnswerMap.put(questionId, new ArrayList<>());
+                    }
+                    userAnswerMap.get(questionId).add(answer.getSelected_option_id());
+                }
+            }
 
             System.out.println("User answer map: " + userAnswerMap);
+            System.out.println("Essay answer map: " + essayAnswerMap);
 
             for (Question q : questions) {
                 List<QuestionOption> options = optionDAO.findByQuestionId(q.getId());
@@ -95,6 +117,7 @@ public class QuizReviewController extends HttpServlet {
             request.setAttribute("quiz", quiz);
             request.setAttribute("questions", questions);
             request.setAttribute("userAnswerMap", userAnswerMap);
+            request.setAttribute("essayAnswerMap", essayAnswerMap);
             request.setAttribute("attempt", latestAttempt);
 
             request.getRequestDispatcher("view/user/quizHandle/quiz-handle-review.jsp").forward(request, response);
