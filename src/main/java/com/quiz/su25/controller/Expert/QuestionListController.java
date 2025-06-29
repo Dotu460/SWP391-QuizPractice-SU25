@@ -383,13 +383,35 @@ public class QuestionListController extends HttpServlet {
         String status = request.getParameter("status");
         String explanation = request.getParameter("explanation");
         String mediaUrl = request.getParameter("media_url");
-        String correctAnswerStr = request.getParameter("correctAnswer");
+        String[] correctAnswers = request.getParameterValues("correctAnswers");
         String optionCountStr = request.getParameter("optionCount");
         try {
             int questionIdInt = Integer.parseInt(questionId);
             int quizIdInt = Integer.parseInt(quizId);
             int optionCount = Integer.parseInt(optionCountStr);
-            int correctAnswer = Integer.parseInt(correctAnswerStr);
+            
+            // Validate that at least one correct answer is selected
+            if (correctAnswers == null || correctAnswers.length == 0) {
+                request.setAttribute("errorMessage", "Please select at least one correct answer!");
+                List<Quizzes> quizzesList = quizzesDAO.findAll();
+                request.setAttribute("quizzesList", quizzesList);
+                if (questionIdInt != 0) {
+                    Question existingQuestion = questionDAO.findById(questionIdInt);
+                    if (existingQuestion != null) {
+                        List<QuestionOption> options = questionOptionDAO.findByQuestionId(questionIdInt);
+                        existingQuestion.setQuestionOptions(options);
+                        request.setAttribute("question", existingQuestion);
+                    }
+                }
+                request.getRequestDispatcher("/view/Expert/Question/question-edit.jsp").forward(request, response);
+                return;
+            }
+            
+            // Convert correctAnswers to Set for easier lookup
+            java.util.Set<Integer> correctAnswerSet = new java.util.HashSet<>();
+            for (String answerStr : correctAnswers) {
+                correctAnswerSet.add(Integer.parseInt(answerStr));
+            }
             Question question;
             boolean isNew = (questionIdInt == 0);
             if (isNew) {
@@ -466,7 +488,7 @@ public class QuestionListController extends HttpServlet {
                     option.setAnswer_text(answerText);
                 }
 
-                option.setCorrect_key(i == correctAnswer);
+                option.setCorrect_key(correctAnswerSet.contains(i));
                 option.setDisplay_order(i);
                 if (optionId != 0) {
                     questionOptionDAO.update(option);
