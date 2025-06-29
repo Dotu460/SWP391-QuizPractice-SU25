@@ -1040,13 +1040,8 @@
                                                         </div>
                                                     </div>
                                                 </c:when>
-                                                <c:otherwise>
-                                                    <div class="guest-info">
-                                                        <span>Welcome, Quang Minh!</span>
-                                                    </div>
-                                                </c:otherwise>
                                             </c:choose>
-                                    </div>
+                                        </div>
                                         <div class="dropdown-body">
                                             <c:choose>
                                                 <c:when test="${not empty sessionScope.account}">
@@ -1064,24 +1059,8 @@
                                                         <span>Log out</span>
                                                     </a>
                                                 </c:when>
-                                                <c:otherwise>
-                                                    <!---------------HIỆN TẠM, XONG XOÁ--------------------------------->
-                                                    <a href="my-profile" class="dropdown-item">
-                                                        <i class="fas fa-user-circle"></i>
-                                                        <span>My Profile</span>
-                                                    </a>
-                                                    <!------------------------------------------------>
-                                                    <a href="login" class="dropdown-item">
-                                                        <i class="fas fa-sign-in-alt"></i>
-                                                        <span>Log in</span>
-                                                    </a>
-                                                    <a href="register" class="dropdown-item">
-                                                        <i class="fas fa-user-plus"></i>
-                                                        <span>Register</span>
-                                                    </a>
-                                                </c:otherwise>
                                             </c:choose>
-                                    </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1090,10 +1069,8 @@
                 </div>
             </div>
             <div id="header-fixed-height"></div>
-            <!-- header-top-end -->
-
-            <!-- header-area -->
-
+                <!-- header-top-end -->
+                
             <!-- header-area-end -->
 
             <style>

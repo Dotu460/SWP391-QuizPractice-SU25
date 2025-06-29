@@ -367,8 +367,76 @@
                     
                     <c:if test="${not empty question.media_url}">
                        <!-- Media display logic here -->
+                       <div class="media-content mt-3">
+                            <c:choose>
+                                <c:when test="${fn:endsWith(question.media_url, '.mp4') 
+                                            || fn:endsWith(question.media_url, '.webm') 
+                                            || fn:endsWith(question.media_url, '.ogg')
+                                            || fn:endsWith(question.media_url, '.mov')
+                                            || fn:endsWith(question.media_url, '.MOV')}">
+                                    <video controls playsinline style="max-width:100%; border-radius:8px;">
+                                        <c:choose>
+                                            <c:when test="${fn:startsWith(question.media_url, 'http://') || fn:startsWith(question.media_url, 'https://')}">
+                                                <source src="${question.media_url}" type="video/mp4">
+                                            </c:when>
+                                            <c:otherwise>
+                                                <source src="${pageContext.request.contextPath}/media/${question.media_url}" type="video/mp4">
+                                            </c:otherwise>
+                                        </c:choose>
+                                        <p>Your browser does not support HTML5 video.</p>
+                                    </video>
+                                    
+                                    <div id="videoError" style="display:none; color: red; margin-top: 10px; padding: 10px; background: #fff5f5; border-radius: 4px;"></div>
+                                    
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function() {
+                                            const video = document.querySelector('video');
+                                            const errorDiv = document.getElementById('videoError');
+                                            
+                                            if (video) {
+                                                video.addEventListener('error', function(e) {
+                                                    console.error('Video error:', e);
+                                                    errorDiv.style.display = 'block';
+                                                    errorDiv.innerHTML = `
+                                                        <strong>Error loading video:</strong><br>
+                                                        Path: ${question.media_url}<br>
+                                                        Error: ${video.error ? video.error.message : 'Unknown error'}<br>
+                                                        <small>Please check if the URL is correct and accessible.</small>
+                                                    `;
+                                                });
+                                            }
+                                        });
+                                    </script>
+                                </c:when>
+                                <c:otherwise>
+                                    <!-- Image with error handling -->
+                                    <c:choose>
+                                        <c:when test="${fn:startsWith(question.media_url, 'http://') || fn:startsWith(question.media_url, 'https://')}">
+                                            <img src="${question.media_url}" 
+                                                 alt="Question Media" 
+                                                 class="img-fluid" 
+                                                 style="max-width:100%; border-radius:8px;"
+                                                 onerror="this.onerror=null; this.style.display='none'; document.getElementById('imageError').style.display='block';">
+                                        </c:when>
+                                        <c:otherwise>
+                                            <img src="${pageContext.request.contextPath}/media/${question.media_url}" 
+                                                 alt="Question Media" 
+                                                 class="img-fluid" 
+                                                 style="max-width:100%; border-radius:8px;"
+                                                 onerror="this.onerror=null; this.style.display='none'; document.getElementById('imageError').style.display='block';">
+                                        </c:otherwise>
+                                    </c:choose>
+                                    
+                                    <div id="imageError" style="display:none; color: red; margin-top: 10px; padding: 10px; background: #fff5f5; border-radius: 4px;">
+                                        <strong>Error loading image:</strong><br>
+                                        Path: ${question.media_url}<br>
+                                        <small>Please check if the URL is correct and accessible.</small>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
                     </c:if>
-
+                       
                     <div class="answers-container mt-4">
                         <form id="answerForm">
                              <c:choose>
