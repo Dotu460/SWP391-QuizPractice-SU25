@@ -314,12 +314,13 @@
                                         <div class="form-section-title">Answers</div>
                                         <div class="form-group">
                                             <label class="form-label">Answers</label>
+                                            <small class="form-text">Tick multiple checkboxes to select multiple correct answers</small>
                                             <div id="answers-container">
                                                 <c:choose>
                                                     <c:when test="${not empty question.questionOptions}">
                                                         <c:forEach items="${question.questionOptions}" var="option" varStatus="status">
                                                             <div class="answer-option" id="answer-${status.index + 1}">
-                                                                <input type="radio" name="correctAnswer" value="${status.index + 1}" ${option.correct_key ? 'checked' : ''}>
+                                                                <input type="checkbox" name="correctAnswers" value="${status.index + 1}" ${option.correct_key ? 'checked' : ''}>
                                                                 <c:choose>
                                                                     <c:when test="${not empty option.answer_text}">
                                                                         <input type="text" class="form-control" name="answerText_${status.index + 1}" value="${option.answer_text}" placeholder="Answer Text ${status.index + 1}" required>
@@ -338,7 +339,7 @@
                                                     <c:otherwise>
                                                         <c:forEach begin="1" end="4" var="i">
                                                             <div class="answer-option" id="answer-${i}">
-                                                                <input type="radio" name="correctAnswer" value="${i}" ${i == 1 ? 'checked' : ''}>
+                                                                <input type="checkbox" name="correctAnswers" value="${i}" ${i == 1 ? 'checked' : ''}>
                                                                 <input type="text" class="form-control" name="optionText_${i}" placeholder="Answer ${i}" required>
                                                                 <input type="hidden" name="optionId_${i}" value="0">
                                                                 <button type="button" class="btn-remove-option" onclick="removeOption(${i})">
@@ -603,10 +604,10 @@
                                                         return false;
                                                     }
 
-                                                    if (!$('input[name="correctAnswer"]:checked').length) {
+                                                    if (!$('input[name="correctAnswers"]:checked').length) {
                                                         iziToast.error({
                                                             title: 'Error',
-                                                            message: 'Please select a correct answer',
+                                                            message: 'Please select at least one correct answer',
                                                             position: 'topRight',
                                                             timeout: 3000
                                                         });
@@ -652,7 +653,7 @@
                                                     optionCount++;
 
                                                     var newOptionHtml = '<div class="answer-option" id="answer-' + optionCount + '">' +
-                                                            '<input type="radio" name="correctAnswer" value="' + optionCount + '">' +
+                                                            '<input type="checkbox" name="correctAnswers" value="' + optionCount + '">' +
                                                             '<input type="text" class="form-control" name="optionText_' + optionCount + '" placeholder="Answer ' + optionCount + '" required>' +
                                                             '<input type="hidden" name="optionId_' + optionCount + '" value="0">' +
                                                             '<button type="button" class="btn-remove-option" onclick="removeOption(' + optionCount + ')">' +
@@ -739,7 +740,7 @@
                                                         var newIndex = index + 1;
 
                                                         $(this).attr('id', 'answer-' + newIndex);
-                                                        $(this).find('input[type="radio"]').attr('value', newIndex);
+                                                        $(this).find('input[type="checkbox"]').attr('value', newIndex);
                                                         $(this).find('input[type="text"]').attr('name', 'optionText_' + newIndex);
                                                         $(this).find('input[type="text"]').attr('placeholder', 'Answer ' + newIndex);
                                                         $(this).find('input[type="hidden"]').attr('name', 'optionId_' + newIndex);
