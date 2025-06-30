@@ -1,6 +1,4 @@
-
 package com.quiz.su25.entity;
-import jakarta.persistence.Entity;
 import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,21 +17,11 @@ import lombok.ToString;
 @Getter
 @Setter
 
-
-//public class Subject {
-//    private Integer id;
-//    private String title;
-//    private String thumbnail_url;
-//    private String brief_info;
-//    private String description;
-//    private Integer subjectcategories_id;
-//    private String status;
-//}
-
 public class Subject {
     private Integer id;
     private String title;
     private String thumbnail_url;
+    private String video_url;
     private String tag_line;
     private String brief_info;
     private String description;
