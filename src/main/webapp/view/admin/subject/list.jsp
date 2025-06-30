@@ -226,7 +226,7 @@
               <!-- Add Subject Button -->
               <div class="dashboard__actions">
                 <h5>Total Subjects: <span class="text-primary">${subjects.size()}</span></h5>
-                <a href="${pageContext.request.contextPath}/subject/new" class="add-subject-btn">
+                <a href="${pageContext.request.contextPath}/admin/subject/new" class="add-subject-btn">
                   <i class="fas fa-plus"></i> Add New Subject
                 </a>
               </div>
@@ -286,8 +286,8 @@
                       </td>
                       <td>
                         <div class="dashboard__review-action">
-                          <a href="${pageContext.request.contextPath}/subject/details?id=${subject.id}" class="subject-action-link edit-link" title="Edit"><i class="skillgro-edit"></i> Edit</a>
-                          <a href="${pageContext.request.contextPath}/subject/view?id=${subject.id}" class="subject-action-link view-link" title="View"><i class="skillgro-book-2"></i> View</a>
+                          <a href="${pageContext.request.contextPath}/admin/subject/details?id=${subject.id}" class="subject-action-link edit-link" title="Edit"><i class="skillgro-edit"></i> Edit</a>
+                          <a href="${pageContext.request.contextPath}/admin/subject/view?id=${subject.id}" class="subject-action-link view-link" title="View"><i class="skillgro-book-2"></i> View</a>
                         </div>
                       </td>
                     </tr>

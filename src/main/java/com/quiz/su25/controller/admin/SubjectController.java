@@ -3,28 +3,36 @@ package com.quiz.su25.controller.admin;
 import com.quiz.su25.dal.impl.SubjectCategoriesDAO;
 import com.quiz.su25.dal.impl.SubjectDAO;
 import com.quiz.su25.dal.impl.UserDAO;
+import com.quiz.su25.dal.impl.PricePackageDAO;
 import com.quiz.su25.entity.PricePackage;
 import com.quiz.su25.entity.Subject;
 import com.quiz.su25.entity.SubjectCategories;
 
 import com.quiz.su25.entity.User;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @WebServlet(name = "SubjectController", urlPatterns = {"/admin/subjects", "/admin/subject/*"})
+@MultipartConfig(
+    fileSizeThreshold = 1024 * 1024,    // 1 MB
+    maxFileSize = 1024 * 1024 * 100,    // 100 MB
+    maxRequestSize = 1024 * 1024 * 200  // 200 MB total
+)
 public class SubjectController extends HttpServlet {
 
     private static final int DEFAULT_PAGE_SIZE = 8;
     private final SubjectDAO subjectDAO = new SubjectDAO();
     private final SubjectCategoriesDAO categoryDAO = new SubjectCategoriesDAO();
-//    private final PricePackageDAO packageDAO = new PricePackageDAO();
+    private final PricePackageDAO packageDAO = new PricePackageDAO();
     private final UserDAO userDAO = new UserDAO();
 
     @Override
@@ -39,6 +47,10 @@ public class SubjectController extends HttpServlet {
                 viewSubject(request, response);
             } else if (pathInfo != null && pathInfo.equals("/register")) {
                 showRegistrationForm(request, response);
+            } else if (pathInfo != null && pathInfo.equals("/new")) {
+                showNewSubjectForm(request, response);
+            } else if (pathInfo != null && pathInfo.equals("/view")) {
+                viewSubject(request, response);
             }
         }
     }
@@ -50,6 +62,8 @@ public class SubjectController extends HttpServlet {
 
         if (path.equals("/admin/subject") && pathInfo != null && pathInfo.equals("/register")) {
             registerForSubject(request, response);
+        } else if (path.equals("/admin/subject") && pathInfo != null && pathInfo.equals("/create")) {
+            createSubject(request, response);
         }
     }
 
@@ -97,7 +111,7 @@ public class SubjectController extends HttpServlet {
         List<Subject> featuredSubjects = getFeaturedSubjects();
 
         // Get lowest price package for each subject
-//        Map<Integer, PricePackage> lowestPricePackages = getLowestPricePackages(subjects);
+        Map<Integer, PricePackage> lowestPricePackages = getLowestPricePackages(subjects);
 
         // Set attributes for the view
         request.setAttribute("subjects", subjects);
@@ -110,7 +124,7 @@ public class SubjectController extends HttpServlet {
         request.setAttribute("searchTerm", searchTerm);
         request.setAttribute("categories", categories);
         request.setAttribute("featuredSubjects", featuredSubjects);
-//        request.setAttribute("lowestPricePackages", lowestPricePackages);
+        request.setAttribute("lowestPricePackages", lowestPricePackages);
 
         // Forward to the view
         request.getRequestDispatcher("/view/admin/subject/list.jsp").forward(request, response);
@@ -123,15 +137,27 @@ public class SubjectController extends HttpServlet {
             Subject subject = subjectDAO.findById(subjectId);
 
             if (subject != null) {
-                // Get all packages for this subject
-//                List<PricePackage> packages = packageDAO.findBySubjectId(subjectId);
+                // Get the lowest price package from all available packages
+                PricePackage lowestPricePackage = packageDAO.findLowestPricePackage();
 
                 // Get the subject's category
-                SubjectCategories category = categoryDAO.findById(subject.getId());
+                SubjectCategories category = categoryDAO.findById(subject.getCategory_id());
+
+                // Get all categories for sidebar
+                List<SubjectCategories> categories = categoryDAO.findAll();
+
+                // Get featured subjects for sidebar
+                List<Subject> featuredSubjects = getFeaturedSubjects();
+
+                // Get search term if any
+                String searchTerm = request.getParameter("search");
 
                 request.setAttribute("subject", subject);
-//                request.setAttribute("packages", packages);
+                request.setAttribute("lowestPricePackage", lowestPricePackage);
                 request.setAttribute("category", category);
+                request.setAttribute("categories", categories);
+                request.setAttribute("featuredSubjects", featuredSubjects);
+                request.setAttribute("searchTerm", searchTerm);
 
                 request.getRequestDispatcher("/view/admin/subject/details.jsp").forward(request, response);
             } else {
@@ -150,21 +176,21 @@ public class SubjectController extends HttpServlet {
             Subject subject = subjectDAO.findById(subjectId);
 
             if (subject != null) {
-//                List<PricePackage> packages = packageDAO.findBySubjectId(subjectId);
+                List<PricePackage> packages = packageDAO.findBySubjectId(subjectId);
 
                 // If packageId is provided, pre-select that package
                 PricePackage selectedPackage = null;
-//                if (packageId > 0) {
-//                    for (PricePackage pkg : packages) {
-//                        if (pkg.getId() == packageId) {
-//                            selectedPackage = pkg;
-//                            break;
-//                        }
-//                    }
-//                }
+                if (packageId > 0) {
+                    for (PricePackage pkg : packages) {
+                        if (pkg.getId() == packageId) {
+                            selectedPackage = pkg;
+                            break;
+                        }
+                    }
+                }
 
                 request.setAttribute("subject", subject);
-//                request.setAttribute("packages", packages);
+                request.setAttribute("packages", packages);
                 request.setAttribute("selectedPackage", selectedPackage);
 
                 request.getRequestDispatcher("/view/admin/subject/registration.jsp").forward(request, response);
@@ -197,23 +223,166 @@ public class SubjectController extends HttpServlet {
         }
     }
 
+    private void showNewSubjectForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Get all categories for the form
+        List<SubjectCategories> categories = categoryDAO.findAll();
+        request.setAttribute("categories", categories);
+
+        // Forward to the new subject form
+        request.getRequestDispatcher("/view/admin/subject/new.jsp").forward(request, response);
+    }
+
+    private void createSubject(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            // Get form parameters
+            String title = request.getParameter("title");
+            String tagLine = request.getParameter("tag_line");
+            String briefInfo = request.getParameter("brief_info");
+            String description = request.getParameter("description");
+            String status = request.getParameter("status");
+            String featuredFlag = request.getParameter("featured_flag");
+            int categoryId = getIntParameter(request, "category_id", 0);
+            String owner = request.getParameter("owner");
+
+            // Validate required fields
+            if (title == null || title.trim().isEmpty() || categoryId == 0) {
+                request.getSession().setAttribute("errorMessage", "Course name and category are required!");
+                response.sendRedirect(request.getContextPath() + "/admin/subject/new");
+                return;
+            }
+
+            if (owner == null || owner.trim().isEmpty()) {
+                request.getSession().setAttribute("errorMessage", "Course owner is required!");
+                response.sendRedirect(request.getContextPath() + "/admin/subject/new");
+                return;
+            }
+
+            // Get main thumbnail and video URLs
+            String thumbnailUrl = request.getParameter("thumbnail_url");
+            String videoUrl = request.getParameter("video_url");
+            
+            // Handle file uploads for main thumbnail and video
+            String uploadedThumbnail = handleFileUpload(request, "thumbnail_file");
+            String uploadedVideo = handleFileUpload(request, "video_file");
+            
+            // Use uploaded files if no URL provided
+            if ((thumbnailUrl == null || thumbnailUrl.trim().isEmpty()) && uploadedThumbnail != null) {
+                thumbnailUrl = uploadedThumbnail;
+            }
+            if ((videoUrl == null || videoUrl.trim().isEmpty()) && uploadedVideo != null) {
+                videoUrl = uploadedVideo;
+            }
+
+            // Create new subject
+            Subject newSubject = Subject.builder()
+                    .title(title.trim())
+                    .tag_line(tagLine != null ? tagLine.trim() : null)
+                    .brief_info(briefInfo != null ? briefInfo.trim() : null)
+                    .description(description != null ? description.trim() : null)
+                    .thumbnail_url(thumbnailUrl != null && !thumbnailUrl.trim().isEmpty() ? thumbnailUrl.trim() : null)
+                    .video_url(videoUrl != null && !videoUrl.trim().isEmpty() ? videoUrl.trim() : null)
+                    .status(status != null ? status : "draft")
+                    .featured_flag("on".equals(featuredFlag))
+                    .category_id(categoryId)
+                    .owner_id(1) // TODO: Get actual user ID from session
+                    .created_at(new java.util.Date())
+                    .updated_at(new java.util.Date())
+                    .created_by(1) // TODO: Get from session
+                    .updated_by(1) // TODO: Get from session
+                    .build();
+
+            // Insert the subject
+            int newSubjectId = subjectDAO.insert(newSubject);
+
+            if (newSubjectId > 0) {
+                request.getSession().setAttribute("successMessage", 
+                    "Course '" + title + "' created successfully! You can add more media content using the rich text editor.");
+                response.sendRedirect(request.getContextPath() + "/admin/subjects?success=created&id=" + newSubjectId);
+            } else {
+                request.getSession().setAttribute("errorMessage", "Failed to create course. Please try again.");
+                response.sendRedirect(request.getContextPath() + "/admin/subject/new");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.getSession().setAttribute("errorMessage", "System error: " + e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/admin/subject/new");
+        }
+    }
+
+    /**
+     * Handle file upload for main thumbnail or video
+     */
+    private String handleFileUpload(HttpServletRequest request, String fieldName) {
+        try {
+            Part filePart = request.getPart(fieldName);
+            if (filePart != null && filePart.getSize() > 0) {
+                String fileName = getFileName(filePart);
+                if (fileName != null && !fileName.isEmpty()) {
+                    // Create a unique filename
+                    String timestamp = String.valueOf(System.currentTimeMillis());
+                    String extension = "";
+                    if (fileName.contains(".")) {
+                        extension = fileName.substring(fileName.lastIndexOf("."));
+                    }
+                    String uniqueFileName = timestamp + "_" + fileName.replaceAll("[^a-zA-Z0-9.]", "_");
+                    
+                    // Create upload directory if it doesn't exist
+                    String uploadPath = request.getServletContext().getRealPath("/media");
+                    java.io.File uploadDir = new java.io.File(uploadPath);
+                    if (!uploadDir.exists()) {
+                        uploadDir.mkdirs();
+                    }
+                    
+                    // Save the file
+                    String filePath = uploadPath + java.io.File.separator + uniqueFileName;
+                    filePart.write(filePath);
+                    
+                    // Return the web-accessible URL
+                    return "/media/" + uniqueFileName;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error handling file upload for " + fieldName + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Extract filename from Part header
+     */
+    private String getFileName(Part part) {
+        String contentDisposition = part.getHeader("content-disposition");
+        String[] elements = contentDisposition.split(";");
+        for (String element : elements) {
+            if (element.trim().startsWith("filename")) {
+                return element.substring(element.indexOf('=') + 1).trim().replace("\"", "");
+            }
+        }
+        return null;
+    }
+
     // In SubjectController
     private List<Subject> getFeaturedSubjects() {
         return subjectDAO.getFeaturedSubjects();
     }
 
-//    private Map<Integer, PricePackage> getLowestPricePackages(List<Subject> subjects) {
-//        Map<Integer, PricePackage> lowestPricePackages = new HashMap<>();
-//
-//        for (Subject subject : subjects) {
-//            PricePackage lowestPricePackage = packageDAO.findLowestPricePackageBySubjectId(subject.getId());
-//            if (lowestPricePackage != null) {
-//                lowestPricePackages.put(subject.getId(), lowestPricePackage);
-//            }
-//        }
-//
-//        return lowestPricePackages;
-//    }
+    private Map<Integer, PricePackage> getLowestPricePackages(List<Subject> subjects) {
+        Map<Integer, PricePackage> lowestPricePackages = new HashMap<>();
+        
+        // Get the lowest price package from all packages
+        PricePackage lowestPricePackage = packageDAO.findLowestPricePackage();
+        
+        // Assign the same lowest price package to all subjects
+        if (lowestPricePackage != null) {
+            for (Subject subject : subjects) {
+                lowestPricePackages.put(subject.getId(), lowestPricePackage);
+            }
+        }
+
+        return lowestPricePackages;
+    }
 
     private int getIntParameter(HttpServletRequest request, String paramName, int defaultValue) {
         String paramValue = request.getParameter(paramName);
@@ -268,7 +437,5 @@ public class SubjectController extends HttpServlet {
         // Print how many unique owners were found
         System.out.println("\nTotal unique owners: " + ownerNames.size());
     }
-
-
 
 }

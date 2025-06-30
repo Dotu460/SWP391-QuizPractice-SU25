@@ -72,8 +72,8 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
             statement.setInt(8, subject.getOwner_id());
             statement.setString(9, subject.getStatus());
             statement.setBoolean(10, subject.getFeatured_flag());
-            statement.setDate(11, (Date) subject.getCreated_at());
-            statement.setDate(12, (Date) subject.getUpdated_at());
+            statement.setDate(11, subject.getCreated_at() != null ? new java.sql.Date(subject.getCreated_at().getTime()) : null);
+            statement.setDate(12, subject.getUpdated_at() != null ? new java.sql.Date(subject.getUpdated_at().getTime()) : null);
             statement.setInt(13, subject.getCreated_by());
             statement.setInt(14, subject.getUpdated_by());
 
@@ -111,7 +111,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
             statement.setInt(8, subject.getOwner_id());
             statement.setString(9, subject.getStatus());
             statement.setBoolean(10, subject.getFeatured_flag());
-            statement.setObject(11, subject.getUpdated_at());
+            statement.setDate(11, subject.getUpdated_at() != null ? new java.sql.Date(subject.getUpdated_at().getTime()) : null);
             statement.setInt(12, subject.getUpdated_by());
             statement.setInt(13, subject.getId());
 
@@ -165,8 +165,8 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
                 .owner_id(resultSet.getInt("owner_id"))
                 .status(resultSet.getString("status"))
                 .featured_flag(resultSet.getBoolean("featured_flag"))
-                .created_at(resultSet.getDate("created_at"))
-                .updated_at(resultSet.getDate("updated_at"))
+                .created_at(resultSet.getDate("created_at") != null ? new java.util.Date(resultSet.getDate("created_at").getTime()) : null)
+                .updated_at(resultSet.getDate("updated_at") != null ? new java.util.Date(resultSet.getDate("updated_at").getTime()) : null)
                 .created_by(resultSet.getInt("created_by"))
                 .updated_by(resultSet.getInt("updated_by"))
                 .build();
