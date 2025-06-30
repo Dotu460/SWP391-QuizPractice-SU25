@@ -11,7 +11,7 @@ import com.quiz.su25.entity.PricePackage;
 import java.util.List;
 
 
-@WebServlet(name = "ManagePricePackage", urlPatterns = {"/admin/pricepackage"})
+@WebServlet(name = "ManagePricePackage", urlPatterns = {"/admin/list-pricepackage"})
 public class ManagePricePackage extends HttpServlet {
     private PricePackageDAO pricePackageDAO;
 
@@ -52,7 +52,7 @@ public class ManagePricePackage extends HttpServlet {
         }
         
         // If package not found or invalid ID, redirect to list
-        response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+        response.sendRedirect(request.getContextPath() + "/admin/list-pricepackage");
     }
     
     private void handleDetails(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -72,7 +72,7 @@ public class ManagePricePackage extends HttpServlet {
         }
         
         // If package not found or invalid ID, redirect to list
-        response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+        response.sendRedirect(request.getContextPath() + "/admin/list-pricepackage");
     }
     
     private void handleListWithFilters(HttpServletRequest request, HttpServletResponse response) 
@@ -146,7 +146,7 @@ public class ManagePricePackage extends HttpServlet {
         } else if ("deactivate".equals(action)) {
             deactivatePricePackage(request, response);
         } else {
-            response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+            response.sendRedirect(request.getContextPath() + "/admin/list-pricepackage");
         }
     }
     
@@ -212,7 +212,7 @@ public class ManagePricePackage extends HttpServlet {
             if (success) {
                 request.getSession().setAttribute("toastMessage", "Price package created successfully");
                 request.getSession().setAttribute("toastType", "success");
-                response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+                response.sendRedirect(request.getContextPath() + "/admin/list-pricepackage");
             } else {
                 request.setAttribute("error", "Failed to create price package");
                 request.getRequestDispatcher("/view/admin/price_package/addPricePackage.jsp").forward(request, response);
@@ -233,7 +233,7 @@ public class ManagePricePackage extends HttpServlet {
             String idStr = request.getParameter("id");
             if (idStr == null || idStr.trim().isEmpty()) {
                 request.setAttribute("error", "Package ID is required for update");
-                response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+                response.sendRedirect(request.getContextPath() + "/admin/list-pricepackage");
                 return;
             }
             
@@ -309,7 +309,7 @@ public class ManagePricePackage extends HttpServlet {
             if (success) {
                 request.getSession().setAttribute("toastMessage", "Price package updated successfully");
                 request.getSession().setAttribute("toastType", "success");
-                response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+                response.sendRedirect(request.getContextPath() + "/admin/list-pricepackage");
             } else {
                 request.setAttribute("pricePackage", pricePackage);
                 request.setAttribute("error", "Failed to update price package");
@@ -326,7 +326,7 @@ public class ManagePricePackage extends HttpServlet {
                     request.setAttribute("pricePackage", pricePackage);
                 } catch (NumberFormatException ex) {
                     // If we can't get the package, redirect to list
-                    response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+                    response.sendRedirect(request.getContextPath() + "/admin/list-pricepackage");
                     return;
                 }
             }
@@ -342,7 +342,7 @@ public class ManagePricePackage extends HttpServlet {
                     request.setAttribute("pricePackage", pricePackage);
                 } catch (NumberFormatException ex) {
                     // If we can't get the package, redirect to list
-                    response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+                    response.sendRedirect(request.getContextPath() + "/admin/list-pricepackage");
                     return;
                 }
             }
@@ -357,7 +357,7 @@ public class ManagePricePackage extends HttpServlet {
             if (idStr == null || idStr.trim().isEmpty()) {
                 request.getSession().setAttribute("toastMessage", "Package ID is required for deletion");
                 request.getSession().setAttribute("toastType", "error");
-                response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+                response.sendRedirect(request.getContextPath() + "/admin/list-pricepackage");
                 return;
             }
             
@@ -368,7 +368,7 @@ public class ManagePricePackage extends HttpServlet {
             if (pricePackage == null) {
                 request.getSession().setAttribute("toastMessage", "Price package not found");
                 request.getSession().setAttribute("toastType", "error");
-                response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+                response.sendRedirect(request.getContextPath() + "/admin/list-pricepackage");
                 return;
             }
             
@@ -392,7 +392,7 @@ public class ManagePricePackage extends HttpServlet {
         }
         
         // Redirect to avoid form resubmission
-        response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+        response.sendRedirect(request.getContextPath() + "/admin/list-pricepackage");
     }
 
     private void activatePricePackage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -401,7 +401,7 @@ public class ManagePricePackage extends HttpServlet {
             if (idStr == null || idStr.trim().isEmpty()) {
                 request.getSession().setAttribute("toastMessage", "Package ID is required");
                 request.getSession().setAttribute("toastType", "error");
-                response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+                response.sendRedirect(request.getContextPath() + "/admin/list-pricepackage");
                 return;
             }
             
@@ -410,7 +410,7 @@ public class ManagePricePackage extends HttpServlet {
             if (pricePackage == null) {
                 request.getSession().setAttribute("toastMessage", "Price package not found");
                 request.getSession().setAttribute("toastType", "error");
-                response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+                response.sendRedirect(request.getContextPath() + "/admin/list-pricepackage");
                 return;
             }
             
@@ -434,7 +434,7 @@ public class ManagePricePackage extends HttpServlet {
             request.getSession().setAttribute("toastType", "error");
         }
         
-        response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+        response.sendRedirect(request.getContextPath() + "/admin/list-pricepackage");
     }
 
     private void deactivatePricePackage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -443,7 +443,7 @@ public class ManagePricePackage extends HttpServlet {
             if (idStr == null || idStr.trim().isEmpty()) {
                 request.getSession().setAttribute("toastMessage", "Package ID is required");
                 request.getSession().setAttribute("toastType", "error");
-                response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+                response.sendRedirect(request.getContextPath() + "/admin/list-pricepackage");
                 return;
             }
             
@@ -452,7 +452,7 @@ public class ManagePricePackage extends HttpServlet {
             if (pricePackage == null) {
                 request.getSession().setAttribute("toastMessage", "Price package not found");
                 request.getSession().setAttribute("toastType", "error");
-                response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+                response.sendRedirect(request.getContextPath() + "/admin/list-pricepackage");
                 return;
             }
             
@@ -476,7 +476,7 @@ public class ManagePricePackage extends HttpServlet {
             request.getSession().setAttribute("toastType", "error");
         }
         
-        response.sendRedirect(request.getContextPath() + "/admin/pricepackage");
+        response.sendRedirect(request.getContextPath() + "/admin/list-pricepackage");
     }
 
     private void handleAdd(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

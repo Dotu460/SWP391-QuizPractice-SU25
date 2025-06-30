@@ -136,14 +136,12 @@
                                 <!-- Title and Buttons Row -->
                                 <div class="row mb-4">
                                     <div class="col">
-                                        <div class="dashboard__content-title">
+                                        <div class="dashboard__content-title d-flex justify-content-between">
                                             <h4 class="title">Price Package Details</h4>
+                                            <a href="${pageContext.request.contextPath}/admin/list-pricepackage?${param.returnQueryString}" class="btn btn-secondary rounded-pill">
+                                                <i class="fa fa-arrow-left me-2"></i> Back to Price Packages
+                                            </a>
                                         </div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <a href="${pageContext.request.contextPath}/admin/pricepackage?${param.returnQueryString}" class="btn btn-secondary rounded-pill">
-                                            <i class="fa fa-arrow-left me-2"></i> Back to Price Packages
-                                        </a>
                                     </div>
                                 </div>
 
@@ -326,20 +324,22 @@
                                                 </div>
                                                 
                                                 <!-- Action Buttons Section -->
-                                                <div class="mt-4 text-end">
-                                                    <a href="${pageContext.request.contextPath}/admin/pricepackage?action=edit&id=${pricePackage.id}" class="btn btn-warning action-button">
-                                                        <i class="fa fa-edit"></i> Edit Package
-                                                    </a>
-                                                    <c:if test="${pricePackage.status eq 'active'}">
-                                                        <button type="button" class="btn btn-danger action-button" onclick="confirmDeactivate('${pricePackage.id}')">
-                                                            <i class="fa fa-ban"></i> Deactivate Package
-                                                        </button>
-                                                    </c:if>
-                                                    <c:if test="${pricePackage.status eq 'inactive'}">
-                                                        <button type="button" class="btn btn-success action-button" onclick="confirmActivate('${pricePackage.id}')">
-                                                            <i class="fa fa-check"></i> Activate Package
-                                                        </button>
-                                                    </c:if>
+                                                <div class="mt-4 d-flex justify-content-between">
+                                                    <div>
+                                                        <a href="${pageContext.request.contextPath}/admin/list-pricepackage?action=edit&id=${pricePackage.id}" class="btn btn-warning action-button">
+                                                            <i class="fa fa-edit"></i> Edit Package
+                                                        </a>
+                                                        <c:if test="${pricePackage.status eq 'active'}">
+                                                            <button type="button" class="btn btn-danger action-button" onclick="confirmDeactivate('${pricePackage.id}')">
+                                                                <i class="fa fa-ban"></i> Deactivate Package
+                                                            </button>
+                                                        </c:if>
+                                                        <c:if test="${pricePackage.status eq 'inactive'}">
+                                                            <button type="button" class="btn btn-success action-button" onclick="confirmActivate('${pricePackage.id}')">
+                                                                <i class="fa fa-check"></i> Activate Package
+                                                            </button>
+                                                        </c:if>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -400,7 +400,7 @@
                 // Create form and submit
                 var form = document.createElement('form');
                 form.method = 'POST';
-                form.action = '${pageContext.request.contextPath}/admin/pricepackage';
+                form.action = '${pageContext.request.contextPath}/admin/list-pricepackage';
                 
                 var actionInput = document.createElement('input');
                 actionInput.type = 'hidden';
@@ -425,7 +425,7 @@
                 // Create form and submit
                 var form = document.createElement('form');
                 form.method = 'POST';
-                form.action = '${pageContext.request.contextPath}/admin/pricepackage';
+                form.action = '${pageContext.request.contextPath}/admin/list-pricepackage';
                 
                 var actionInput = document.createElement('input');
                 actionInput.type = 'hidden';

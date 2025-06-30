@@ -108,14 +108,16 @@
                                 <!-- Title and Buttons Row -->
                                 <div class="row mb-4">
                                     <div class="col">
-                                        <div class="dashboard__content-title">
-                                            <h4 class="title">Add New Price Package</h4>
+                                        <div class="dashboard__content-title d-flex justify-content-between mb-4">
+                                            <div class="d-flex align-items-center">
+                                                <h4 class="title">Add New Package</h4>
+                                            </div>
+                                            <div>
+                                                <a href="${pageContext.request.contextPath}/admin/list-pricepackage" class="btn btn-secondary rounded-pill">
+                                                    <i class="fas fa-arrow-left me-2"></i> Back to List
+                                                </a>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <a href="${pageContext.request.contextPath}/admin/pricepackage" class="btn btn-secondary rounded-pill">
-                                            <i class="fa fa-arrow-left me-2"></i> Back to Price Packages
-                                        </a>
                                     </div>
                                 </div>
 
@@ -141,7 +143,7 @@
                                                 <h5 class="mb-0">Create New Price Package</h5>
                                             </div>
                                             <div class="card-body">
-                                                <form method="post" action="${pageContext.request.contextPath}/admin/pricepackage">
+                                                <form method="post" action="${pageContext.request.contextPath}/admin/list-pricepackage">
                                                     <input type="hidden" name="action" value="create">
                                                     
                                                     <!-- Basic Information Section -->
@@ -216,8 +218,8 @@
                                                     
                                                     <!-- Action Buttons -->
                                                     <div class="text-end btn-group">
-                                                        <a href="${pageContext.request.contextPath}/admin/pricepackage" class="btn btn-secondary">
-                                                            <i class="fa fa-times"></i> Cancel
+                                                        <a href="${pageContext.request.contextPath}/admin/list-pricepackage" class="btn btn-secondary">
+                                                            <i class="fas fa-times me-1"></i> Cancel
                                                         </a>
                                                         <button type="submit" class="btn btn-success">
                                                             <i class="fa fa-plus"></i> Create Package
