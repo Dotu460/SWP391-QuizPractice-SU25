@@ -113,7 +113,7 @@
                                                 <h4 class="title">Add New Package</h4>
                                             </div>
                                             <div>
-                                                <a href="${pageContext.request.contextPath}/admin/list-pricepackage" class="btn btn-secondary rounded-pill">
+                                                <a href="${pageContext.request.contextPath}/admin/price-package-list" class="btn btn-secondary rounded-pill">
                                                     <i class="fas fa-arrow-left me-2"></i> Back to List
                                                 </a>
                                             </div>
@@ -143,7 +143,7 @@
                                                 <h5 class="mb-0">Create New Price Package</h5>
                                             </div>
                                             <div class="card-body">
-                                                <form method="post" action="${pageContext.request.contextPath}/admin/list-pricepackage">
+                                                <form method="post" action="${pageContext.request.contextPath}/admin/price-package-list">
                                                     <input type="hidden" name="action" value="create">
                                                     
                                                     <!-- Basic Information Section -->
@@ -218,7 +218,7 @@
                                                     
                                                     <!-- Action Buttons -->
                                                     <div class="text-end btn-group">
-                                                        <a href="${pageContext.request.contextPath}/admin/list-pricepackage" class="btn btn-secondary">
+                                                        <a href="${pageContext.request.contextPath}/admin/price-package-list" class="btn btn-secondary">
                                                             <i class="fas fa-times me-1"></i> Cancel
                                                         </a>
                                                         <button type="submit" class="btn btn-success">

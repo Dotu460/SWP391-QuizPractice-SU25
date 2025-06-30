@@ -144,7 +144,7 @@
                         <div class="row">
                             <jsp:include page="../../common/user/sidebarCustomer.jsp"></jsp:include>
 
-                            <c:url value="/admin/list-pricepackage" var="paginationUrl">
+                            <c:url value="/admin/price-package-list" var="paginationUrl">
                                 <c:if test="${not empty param.status}">
                                     <c:param name="status" value="${param.status}" />
                                 </c:if>
@@ -167,7 +167,7 @@
                                     <div class="dashboard__content-title d-flex justify-content-between align-items-center mb-4">
                                         <h4 class="title">Price Package Management</h4>
                                         <div>
-                                            <a href="${pageContext.request.contextPath}/admin/list-pricepackage?action=add" class="add-btn">
+                                            <a href="${pageContext.request.contextPath}/admin/price-package-list?action=add" class="add-btn">
                                                 <i class="fas fa-plus"></i> Add New Package
                                             </a>
                                             <button type="button" class="settings-btn ml-2" id="columnSettingsBtn">
@@ -192,7 +192,7 @@
 
                                     <!-- Filter Form -->
                                     <div class="filter-form">
-                                        <form action="${pageContext.request.contextPath}/admin/list-pricepackage" method="get">
+                                        <form action="${pageContext.request.contextPath}/admin/price-package-list" method="get">
                                             <div class="row">
                                                 <div class="col-md-3">
                                                     <div class="form-group">
@@ -230,7 +230,7 @@
                                             <div class="row mt-2">
                                                 <div class="col-md-12 d-flex justify-content-end">
                                                     <button type="submit" class="btn btn-primary" style="padding: 6px 15px; font-size: 15px;">Filter</button>
-                                                    <a href="${pageContext.request.contextPath}/admin/list-pricepackage" class="btn btn-secondary ml-2" style="padding: 6px 15px; font-size: 15px; margin-left: 8px;">Reset</a>
+                                                    <a href="${pageContext.request.contextPath}/admin/price-package-list" class="btn btn-secondary ml-2" style="padding: 6px 15px; font-size: 15px; margin-left: 8px;">Reset</a>
                                                 </div>
                                             </div>
                                         </form>
@@ -291,10 +291,10 @@
                                                         </td>
                                                         <td class="column-actions">
                                                             <div class="table-actions">
-                                                                <a href="${pageContext.request.contextPath}/admin/list-pricepackage?action=details&id=${pkg.id}" class="action-details">
+                                                                <a href="${pageContext.request.contextPath}/admin/price-package-list?action=details&id=${pkg.id}" class="action-details">
                                                                     <i class="fas fa-eye"></i> Details
                                                                 </a>
-                                                                <a href="${pageContext.request.contextPath}/admin/list-pricepackage?action=edit&id=${pkg.id}" class="action-edit">
+                                                                <a href="${pageContext.request.contextPath}/admin/price-package-list?action=edit&id=${pkg.id}" class="action-edit">
                                                                     <i class="fas fa-edit"></i> Edit
                                                                 </a>
                                                                 <form method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this package?');">

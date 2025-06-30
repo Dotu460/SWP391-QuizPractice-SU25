@@ -113,7 +113,7 @@
                                         </div>
                                     </div>
                                     <div class="col-auto">
-                                        <a href="${pageContext.request.contextPath}/admin/list-pricepackage" class="btn btn-secondary rounded-pill">
+                                        <a href="${pageContext.request.contextPath}/admin/price-package-list" class="btn btn-secondary rounded-pill">
                                             <i class="fa fa-arrow-left me-2"></i> Back to Price Packages
                                         </a>
                                     </div>
@@ -141,7 +141,7 @@
                                                 <h5 class="mb-0">Edit Package #${pricePackage.id} - ${pricePackage.name}</h5>
                                             </div>
                                             <div class="card-body">
-                                                <form method="post" action="${pageContext.request.contextPath}/admin/list-pricepackage">
+                                                <form method="post" action="${pageContext.request.contextPath}/admin/price-package-list">
                                                     <input type="hidden" name="action" value="update">
                                                     <input type="hidden" name="id" value="${pricePackage.id}">
                                                     
@@ -213,7 +213,7 @@
                                                     
                                                     <!-- Action Buttons -->
                                                     <div class="text-end btn-group">
-                                                        <a href="${pageContext.request.contextPath}/admin/list-pricepackage" class="btn btn-secondary">
+                                                        <a href="${pageContext.request.contextPath}/admin/price-package-list" class="btn btn-secondary">
                                                             <i class="fa fa-times"></i> Cancel
                                                         </a>
                                                         <button type="submit" class="btn btn-primary">

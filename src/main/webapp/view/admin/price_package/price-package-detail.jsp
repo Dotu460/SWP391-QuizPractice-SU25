@@ -138,7 +138,7 @@
                                     <div class="col">
                                         <div class="dashboard__content-title d-flex justify-content-between">
                                             <h4 class="title">Price Package Details</h4>
-                                            <a href="${pageContext.request.contextPath}/admin/list-pricepackage?${param.returnQueryString}" class="btn btn-secondary rounded-pill">
+                                            <a href="${pageContext.request.contextPath}/admin/price-package-list?${param.returnQueryString}" class="btn btn-secondary rounded-pill">
                                                 <i class="fa fa-arrow-left me-2"></i> Back to Price Packages
                                             </a>
                                         </div>
@@ -326,7 +326,7 @@
                                                 <!-- Action Buttons Section -->
                                                 <div class="mt-4 d-flex justify-content-between">
                                                     <div>
-                                                        <a href="${pageContext.request.contextPath}/admin/list-pricepackage?action=edit&id=${pricePackage.id}" class="btn btn-warning action-button">
+                                                        <a href="${pageContext.request.contextPath}/admin/price-package-list?action=edit&id=${pricePackage.id}" class="btn btn-warning action-button">
                                                             <i class="fa fa-edit"></i> Edit Package
                                                         </a>
                                                         <c:if test="${pricePackage.status eq 'active'}">
@@ -400,7 +400,7 @@
                 // Create form and submit
                 var form = document.createElement('form');
                 form.method = 'POST';
-                form.action = '${pageContext.request.contextPath}/admin/list-pricepackage';
+                form.action = '${pageContext.request.contextPath}/admin/price-package-list';
                 
                 var actionInput = document.createElement('input');
                 actionInput.type = 'hidden';
@@ -425,7 +425,7 @@
                 // Create form and submit
                 var form = document.createElement('form');
                 form.method = 'POST';
-                form.action = '${pageContext.request.contextPath}/admin/list-pricepackage';
+                form.action = '${pageContext.request.contextPath}/admin/price-package-list';
                 
                 var actionInput = document.createElement('input');
                 actionInput.type = 'hidden';
