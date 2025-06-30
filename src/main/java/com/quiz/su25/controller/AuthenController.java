@@ -302,7 +302,7 @@ public class AuthenController extends HttpServlet {
                     session.setAttribute("OTPCreationTime", System.currentTimeMillis());
                     
                     System.out.println("ResendOTP - Password reset flow - New OTP sent to: " + email);
-//                    response.getWriter().write("success");
+                    response.getWriter().write("success");
                     return;
                 }
                 
