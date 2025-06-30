@@ -55,7 +55,7 @@
                 <div class="swiper-wrapper">
                     <c:forEach items="${sliders}" var="slider">
                         <div class="swiper-slide">
-                            <a href="${pageContext.request.contextPath}${slider.backlink_url}" class="slide-link">
+                            <a href="${slider.backlink_url}" class="slide-link" target="_blank">
                                 <div class="container">
                                     <div class="row align-items-center">
                                         <div class="col-lg-6 hero-content">

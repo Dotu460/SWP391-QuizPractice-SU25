@@ -116,7 +116,14 @@ public class PostDetailsController extends HttpServlet {
                 if (status == null || status.trim().isEmpty()) {
                     status = "draft";
                 }
-                
+
+                // Set published_at if status is published
+                if ("published".equals(status)) {
+                    post.setPublished_at(new Date(System.currentTimeMillis()));
+                } else {
+                    post.setPublished_at(null); // Keep null for draft/archived posts
+                }
+                post.setCategory_id(1); 
                 // TODO: Set author from session when authentication is implemented
                 // For now, set a default author (you should change this)
                 post.setAuthor("Admin");
@@ -130,6 +137,13 @@ public class PostDetailsController extends HttpServlet {
                     return;
                 }
                 post.setUpdated_at(new Date(System.currentTimeMillis()));
+                if ("published".equals(status) && post.getPublished_at() == null) {
+                    post.setPublished_at(new Date(System.currentTimeMillis()));
+                }
+
+                // Update category_id if category changed
+                // Option 1: Set default category_id
+                post.setCategory_id(1);
             }
 
             // Handle thumbnail upload

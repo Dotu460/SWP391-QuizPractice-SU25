@@ -59,7 +59,7 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
 
     @Override
     public int insert(Post post) {
-        String sql = "INSERT INTO post (category, title, thumbnail_url,category, brief_info, content, category_id, author_id, published_at, updated_at, created_at, status, featured_flag) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO post (category, title, thumbnail_url, brief_info, content, category_id, author, published_at, updated_at, created_at, status, featured_flag) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         int generatedId = -1;
         try {
             connection = getConnection();
