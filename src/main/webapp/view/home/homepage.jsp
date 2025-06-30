@@ -129,7 +129,7 @@
                             <div class="blog__post-item mb-30">
                                 <!-- Hình ảnh đại diện -->
                                 <div class="blog__post-thumb">
-                                    <a href="${pageContext.request.contextPath}/subject?id=${subject.id}">
+                                    <a href="${subject.description}" target="_blank">
                                         <img src="${pageContext.request.contextPath}${subject.thumbnail_url}" 
                                              alt="${subject.title}" style="border-radius: 15px; height: 300px; object-fit: cover;">
                                     </a>
