@@ -330,7 +330,7 @@
                                                                     </c:otherwise>
                                                                 </c:choose>
                                                                 <input type="hidden" name="optionId_${status.index + 1}" value="${option.id}">
-                                                                <button type="button" class="btn-remove-option" onclick="removeOption(${status.index + 1})">
+                                                                <button type="button" class="btn-remove-option" onclick="removeOption('${status.index + 1}')">
                                                                     <i class="fas fa-times"></i>
                                                                 </button>
                                                             </div>
@@ -342,7 +342,7 @@
                                                                 <input type="checkbox" name="correctAnswers" value="${i}" ${i == 1 ? 'checked' : ''}>
                                                                 <input type="text" class="form-control" name="optionText_${i}" placeholder="Answer ${i}" required>
                                                                 <input type="hidden" name="optionId_${i}" value="0">
-                                                                <button type="button" class="btn-remove-option" onclick="removeOption(${i})">
+                                                                <button type="button" class="btn-remove-option" onclick="removeOption('${i}')">
                                                                     <i class="fas fa-times"></i>
                                                                 </button>
                                                             </div>
@@ -389,6 +389,26 @@
 
             <script>
                                                 $(document).ready(function () {
+                                                    function normalizeUploadUrl(url) {
+                                                        if (!url) return url;
+                                                        
+                                                        // Remove any leading relative paths and normalize
+                                                        url = url.replace(/^\.\.\//, '').replace(/^\.\//, '');
+                                                        
+                                                        // Handle different URL formats
+                                                        if (url.startsWith('uploads/media/')) {
+                                                            return '/SWP391_QUIZ_PRACTICE_SU25/' + url;
+                                                        } else if (url.startsWith('/uploads/media/')) {
+                                                            return '/SWP391_QUIZ_PRACTICE_SU25' + url;
+                                                        } else if (url.startsWith('/SWP391_QUIZ_PRACTICE_SU25/')) {
+                                                            return url; // Already has correct prefix
+                                                        } else {
+                                                            // Default case: add prefix and clean up any leading slashes
+                                                            return '/SWP391_QUIZ_PRACTICE_SU25/' + url.replace(/^\/+/, '');
+                                                        }
+                                                    }
+                                                    
+                                                    
                                                     function initTinyMCE(selector = '#media_url') {
                                                         tinymce.init({
                                                             selector: selector,
@@ -396,7 +416,7 @@
                                                             toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright | image media | preview code | removeformat',
                                                             height: 400,
 
-                                                            images_upload_url: '${pageContext.request.contextPath}/upload-media',
+                                                            images_upload_url: '/SWP391_QUIZ_PRACTICE_SU25/upload-media',
                                                             automatic_uploads: true,
                                                             file_picker_types: 'image media',
 
@@ -416,14 +436,15 @@
                                                                         const formData = new FormData();
                                                                         formData.append('file', blobInfo.blob(), blobInfo.filename());
 
-                                                                        fetch('${pageContext.request.contextPath}/upload-media', {
+                                                                        fetch('/SWP391_QUIZ_PRACTICE_SU25/upload-media', {
                                                                             method: 'POST',
                                                                             body: formData
                                                                         })
                                                                                 .then(response => response.json())
                                                                                 .then(result => {
                                                                                     if (result.location) {
-                                                                                        resolve(result.location);
+                                                                                        var url = normalizeUploadUrl(result.location);
+                                                                                        resolve(url);
                                                                                     } else {
                                                                                         reject({message: result.message || 'Upload failed'});
                                                                                     }
@@ -453,11 +474,37 @@
                                                                 // Xử lý sau khi paste
                                                                 args.node.querySelectorAll('img').forEach(function (img) {
                                                                     if (img.src.startsWith('data:')) {
-                                                                        // Xử lý base64 images
-                                                                        var blobInfo = plugin.editor.editorUpload.blobCache.create({
-                                                                            base64: img.src.split(',')[1]
+                                                                        // Upload directly instead of using blobCache
+                                                                        var base64Data = img.src.split(',')[1];
+                                                                        var filename = 'pasted-image-' + (new Date()).getTime() + '.png';
+                                                                        
+                                                                        // Convert base64 to blob
+                                                                        var byteCharacters = atob(base64Data);
+                                                                        var byteNumbers = new Array(byteCharacters.length);
+                                                                        for (var i = 0; i < byteCharacters.length; i++) {
+                                                                            byteNumbers[i] = byteCharacters.charCodeAt(i);
+                                                                        }
+                                                                        var byteArray = new Uint8Array(byteNumbers);
+                                                                        var blob = new Blob([byteArray], {type: 'image/png'});
+                                                                        
+                                                                        // Upload blob directly
+                                                                        var formData = new FormData();
+                                                                        formData.append('file', blob, filename);
+                                                                        
+                                                                        fetch('/SWP391_QUIZ_PRACTICE_SU25/upload-media', {
+                                                                            method: 'POST',
+                                                                            body: formData
+                                                                        })
+                                                                        .then(response => response.json())
+                                                                        .then(result => {
+                                                                            if (result.location) {
+                                                                                var url = normalizeUploadUrl(result.location);
+                                                                                img.src = url;
+                                                                            }
+                                                                        })
+                                                                        .catch(error => {
+                                                                            console.error('Error uploading pasted image:', error);
                                                                         });
-                                                                        plugin.editor.editorUpload.uploadImages([blobInfo]);
                                                                     }
                                                                     // Thêm class và style cho ảnh
                                                                     img.className = 'img-fluid';
@@ -480,17 +527,19 @@
                                                                     var formData = new FormData();
                                                                     formData.append('file', file);
 
-                                                                    fetch('${pageContext.request.contextPath}/upload-media', {
+                                                                    fetch('/SWP391_QUIZ_PRACTICE_SU25/upload-media', {
                                                                         method: 'POST',
                                                                         body: formData
                                                                     })
                                                                             .then(response => response.json())
                                                                             .then(result => {
                                                                                 if (result.location) {
+                                                                                    var url = normalizeUploadUrl(result.location);
+                                                                                    
                                                                                     if (meta.filetype === 'image') {
-                                                                                        cb(result.location, {title: file.name});
+                                                                                        cb(url, {title: file.name});
                                                                                     } else {
-                                                                                        var videoHtml = '<video controls width="100%"><source src="' + result.location + '" type="' + file.type + '"></video>';
+                                                                                        var videoHtml = '<video controls width="100%"><source src="' + url + '" type="' + file.type + '"></video>';
                                                                                         tinymce.activeEditor.insertContent(videoHtml);
                                                                                     }
                                                                                 } else {
@@ -552,33 +601,14 @@
                                                                     editor.save();
                                                                 });
 
-                                                                // Xử lý paste trực tiếp
-                                                                editor.on('paste', function (e) {
-                                                                    var clipboardData = e.clipboardData || window.clipboardData;
-                                                                    if (!clipboardData)
-                                                                        return;
 
-                                                                    var items = clipboardData.items;
-                                                                    if (!items)
-                                                                        return;
-
-                                                                    for (var i = 0; i < items.length; i++) {
-                                                                        if (items[i].type.indexOf('image') !== -1) {
-                                                                            var blob = items[i].getAsFile();
-                                                                            var blobInfo = editor.editorUpload.blobCache.create({
-                                                                                blob: blob,
-                                                                                name: 'mceclip-' + (new Date()).getTime()
-                                                                            });
-                                                                            editor.editorUpload.uploadImages([blobInfo]);
-                                                                        }
-                                                                    }
-                                                                });
                                                             }
                                                         });
                                                     }
 
                                                     // Initialize TinyMCE for media_url
                                                     initTinyMCE();
+                                                    //fixOldMediaUrls('#media_url');
 
                                                     // Form validation
                                                     $('#questionForm').submit(function (e) {
@@ -675,7 +705,7 @@
                                                             // Option exists in database, ask for confirmation and delete via AJAX
                                                             if (confirm('Are you sure you want to delete this answer option?')) {
                                                                 $.ajax({
-                                                                    url: '${pageContext.request.contextPath}/questions-list',
+                                                                    url: '/SWP391_QUIZ_PRACTICE_SU25/questions-list',
                                                                     type: 'POST',
                                                                     data: {
                                                                         action: 'deleteOption',
