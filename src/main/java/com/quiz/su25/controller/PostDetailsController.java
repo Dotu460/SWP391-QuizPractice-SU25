@@ -77,7 +77,7 @@ public class PostDetailsController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+                
         try {
             // Get form parameters
             String postIdParam = request.getParameter("postId");
@@ -88,8 +88,11 @@ public class PostDetailsController extends HttpServlet {
             String status = request.getParameter("status");
             boolean featuredFlag = request.getParameter("featuredFlag") != null;
 
+            
+
             // Validate required fields
             if (title == null || title.trim().isEmpty()) {
+                System.out.println("ERROR: Title is required!");
                 response.sendRedirect(request.getContextPath() + "/post-details" + 
                     (postIdParam != null && !postIdParam.isEmpty() ? "?id=" + postIdParam : "") + 
                     "&error=title_required");
@@ -97,6 +100,7 @@ public class PostDetailsController extends HttpServlet {
             }
 
             if (category == null || category.trim().isEmpty()) {
+                System.out.println("ERROR: Category is required!");
                 response.sendRedirect(request.getContextPath() + "/post-details" + 
                     (postIdParam != null && !postIdParam.isEmpty() ? "?id=" + postIdParam : "") + 
                     "&error=category_required");
@@ -105,8 +109,10 @@ public class PostDetailsController extends HttpServlet {
 
             Post post;
             boolean isNewPost = (postIdParam == null || postIdParam.isEmpty());
+            System.out.println("Is new post: " + isNewPost);
             
             if (isNewPost) {
+                System.out.println("Creating new post...");
                 // Create new post
                 post = new Post();
                 post.setCreated_at(new Date(System.currentTimeMillis()));
@@ -115,24 +121,30 @@ public class PostDetailsController extends HttpServlet {
                 // Set default values for new post
                 if (status == null || status.trim().isEmpty()) {
                     status = "draft";
+                    System.out.println("Status set to default: draft");
                 }
 
                 // Set published_at if status is published
                 if ("published".equals(status)) {
                     post.setPublished_at(new Date(System.currentTimeMillis()));
+                    System.out.println("Post status is published, setting published_at");
                 } else {
                     post.setPublished_at(null); // Keep null for draft/archived posts
+                    System.out.println("Post status is not published, published_at = null");
                 }
                 post.setCategory_id(1); 
                 // TODO: Set author from session when authentication is implemented
                 // For now, set a default author (you should change this)
                 post.setAuthor("Admin");
+                System.out.println("Default values set: category_id=1, author=Admin");
                 
             } else {
+                System.out.println("Updating existing post...");
                 // Update existing post
                 int postId = Integer.parseInt(postIdParam);
                 post = postDAO.findById(postId);
                 if (post == null) {
+                    System.out.println("ERROR: Post not found with ID: " + postId);
                     response.sendRedirect(request.getContextPath() + "/blog?error=post_not_found");
                     return;
                 }
@@ -149,10 +161,14 @@ public class PostDetailsController extends HttpServlet {
             // Handle thumbnail upload
             Part thumbnailPart = request.getPart("thumbnail");
             if (thumbnailPart != null && thumbnailPart.getSize() > 0) {
+                System.out.println("Processing thumbnail upload...");
                 String thumbnailPath = handleFileUpload(thumbnailPart, "thumbnails", request);
                 if (thumbnailPath != null) {
                     post.setThumbnail_url(thumbnailPath);
+                    System.out.println("Thumbnail uploaded: " + thumbnailPath);
                 }
+            } else {
+                System.out.println("No thumbnail uploaded");
             }
 
             // Content is handled directly by TinyMCE
@@ -166,20 +182,41 @@ public class PostDetailsController extends HttpServlet {
             post.setStatus(status);
             post.setFeatured_flag(Boolean.valueOf(featuredFlag));
 
+            // DEBUGGING: Print final post object
+            System.out.println("Final post object before save:");
+            System.out.println("  ID: " + post.getId());
+            System.out.println("  Title: " + post.getTitle());
+            System.out.println("  Category: " + post.getCategory());
+            System.out.println("  Category_id: " + post.getCategory_id());
+            System.out.println("  Author: " + post.getAuthor());
+            System.out.println("  Status: " + post.getStatus());
+            System.out.println("  Featured_flag: " + post.getFeatured_flag());
+            System.out.println("  Created_at: " + post.getCreated_at());
+            System.out.println("  Updated_at: " + post.getUpdated_at());
+            System.out.println("  Published_at: " + post.getPublished_at());
+
             // Save to database
             boolean success;
             if (isNewPost) {
+                System.out.println("Calling postDAO.insert()...");
                 int result = postDAO.insert(post);
                 success = (result > 0);
+                System.out.println("Insert result: " + result + ", success: " + success);
+                
                 if (success) {
+                    System.out.println("Post created successfully! Redirecting to blog...");
                     // Get the ID of the newly created post for redirect
                     response.sendRedirect(request.getContextPath() + "/blog?success=post_created");
                 } else {
+                    System.out.println("ERROR: Post creation failed!");
                     response.sendRedirect(request.getContextPath() + "/post-details?error=create_failed");
                 }
             } else {
+                System.out.println("Calling postDAO.update()...");
                 boolean result = postDAO.update(post);
                 success = (result);
+                System.out.println("Update result: " + result + ", success: " + success);
+                
                 if (success) {
                     response.sendRedirect(request.getContextPath() + "/post-details?id=" + post.getId() + "&success=updated");
                 } else {
@@ -188,9 +225,12 @@ public class PostDetailsController extends HttpServlet {
             }
 
         } catch (Exception e) {
+            System.out.println("EXCEPTION in PostDetailsController: " + e.getMessage());
             e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/blog?error=system_error");
         }
+        
+        System.out.println("=== POST DETAILS CONTROLLER DEBUG END ===");
         }
 
     private String handleFileUpload(Part filePart, String subfolder, HttpServletRequest request) {

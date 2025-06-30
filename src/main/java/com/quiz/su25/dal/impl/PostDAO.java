@@ -61,9 +61,32 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
     public int insert(Post post) {
         String sql = "INSERT INTO post (category, title, thumbnail_url, brief_info, content, category_id, author, published_at, updated_at, created_at, status, featured_flag) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         int generatedId = -1;
+        
+        // DEBUGGING: Print all post data before insert
+        System.out.println("=== POST INSERT DEBUG ===");
+        System.out.println("SQL: " + sql);
+        System.out.println("Post data:");
+        System.out.println("  Category: " + post.getCategory());
+        System.out.println("  Title: " + post.getTitle());
+        System.out.println("  Thumbnail_url: " + post.getThumbnail_url());
+        System.out.println("  Brief_info: " + post.getBrief_info());
+        System.out.println("  Content: " + (post.getContent() != null ? post.getContent().substring(0, Math.min(50, post.getContent().length())) + "..." : "null"));
+        System.out.println("  Category_id: " + post.getCategory_id());
+        System.out.println("  Author: " + post.getAuthor());
+        System.out.println("  Published_at: " + post.getPublished_at());
+        System.out.println("  Updated_at: " + post.getUpdated_at());
+        System.out.println("  Created_at: " + post.getCreated_at());
+        System.out.println("  Status: " + post.getStatus());
+        System.out.println("  Featured_flag: " + post.getFeatured_flag());
+        
         try {
             connection = getConnection();
+            System.out.println("Connection obtained: " + (connection != null ? "SUCCESS" : "NULL"));
+            System.out.println("Connection closed: " + (connection != null ? connection.isClosed() : "connection is null"));
+            
             statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            System.out.println("PreparedStatement created: " + (statement != null ? "SUCCESS" : "NULL"));
+            
             statement.setString(1, post.getCategory());           // category (chuỗi)
             statement.setString(2, post.getTitle());              // title
             statement.setString(3, post.getThumbnail_url());      // thumbnail_url
@@ -75,18 +98,33 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
             statement.setDate(9, post.getUpdated_at());           // updated_at
             statement.setDate(10, post.getCreated_at());          // created_at
             statement.setString(11, post.getStatus());            // status
-            statement.setBoolean(12, post.getFeatured_flag());
-
-            statement.executeUpdate();
+            statement.setInt(12, (post.getFeatured_flag() != null && post.getFeatured_flag()) ? 1 : 0);
+            
+            System.out.println("All parameters set. Executing insert...");
+            int rowsAffected = statement.executeUpdate();
+            System.out.println("Rows affected: " + rowsAffected);
+            
             resultSet = statement.getGeneratedKeys();
             if (resultSet.next()) {
                 generatedId = resultSet.getInt(1);
+                System.out.println("Generated ID: " + generatedId);
+            } else {
+                System.out.println("ERROR: No generated keys returned!");
             }
+            
+            System.out.println("INSERT COMPLETED SUCCESSFULLY!");
+            
         } catch (SQLException e) {
-            System.out.println("Error insert at class PostDAO: " + e.getMessage());
+            System.out.println("ERROR insert at class PostDAO: " + e.getMessage());
+            System.out.println("SQL State: " + e.getSQLState());
+            System.out.println("Error Code: " + e.getErrorCode());
+            e.printStackTrace(); // ✅ ADD FULL STACK TRACE
         } finally {
             closeResources();
         }
+        
+        System.out.println("Returning generated ID: " + generatedId);
+        System.out.println("=== POST INSERT DEBUG END ===");
         return generatedId;
     }
 
@@ -108,7 +146,7 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
             statement.setDate(9, post.getUpdated_at());           // updated_at
             statement.setDate(10, post.getCreated_at());          // created_at
             statement.setString(11, post.getStatus());            // status
-            statement.setBoolean(12, post.getFeatured_flag());    // featured_flag
+            statement.setInt(12, (post.getFeatured_flag() != null && post.getFeatured_flag()) ? 1 : 0);
             statement.setInt(13, post.getId());
 
             int rowsAffected = statement.executeUpdate();
