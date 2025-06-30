@@ -407,6 +407,25 @@
                                                             return '/SWP391_QUIZ_PRACTICE_SU25/' + url.replace(/^\/+/, '');
                                                         }
                                                     }
+
+                                                    function fixOldMediaUrls(selector) {
+                                                        setTimeout(function() {
+                                                            if (selector) {
+                                                                var editor = tinymce.get(selector.replace('#', ''));
+                                                                if (editor) {
+                                                                    var content = editor.getContent();
+                                                                    // Fix image URLs that start with uploads/media but don't have the prefix
+                                                                    content = content.replace(/src="uploads\/media\//g, 'src="/SWP391_QUIZ_PRACTICE_SU25/uploads/media/');
+                                                                    // Fix video source URLs
+                                                                    content = content.replace(/<source[^>]+src="uploads\/media\/([^"]+)"/g, '<source src="/SWP391_QUIZ_PRACTICE_SU25/uploads/media/$1"');
+                                                                    // Fix relative path URLs like ../uploads/media/
+                                                                    content = content.replace(/src="\.\.\/uploads\/media\//g, 'src="/SWP391_QUIZ_PRACTICE_SU25/uploads/media/');
+                                                                    content = content.replace(/<source[^>]+src="\.\.\/uploads\/media\/([^"]+)"/g, '<source src="/SWP391_QUIZ_PRACTICE_SU25/uploads/media/$1"');
+                                                                    editor.setContent(content);
+                                                                }
+                                                            }
+                                                        }, 1000);
+                                                    }
                                                     
                                                     
                                                     function initTinyMCE(selector = '#media_url') {
