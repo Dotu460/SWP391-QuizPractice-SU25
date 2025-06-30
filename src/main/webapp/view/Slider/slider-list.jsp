@@ -229,7 +229,7 @@
                                                 </div>
                                                 <div class="col-md-3 d-flex align-items-end">
                                                     <button type="submit" class="btn btn-primary">Filter</button>
-                                                    <a href="${pageContext.request.contextPath}/slider-list" class="btn btn-secondary ml-2">Reset</a>
+                                                    <a href="${pageContext.request.contextPath}/slider-list" class="btn btn-secondary" style="margin-left: 12px;">Reset</a>
                                                 </div>
                                             </div>
                                         </form>
@@ -240,13 +240,18 @@
                                         <div>
                                             Showing <span class="fw-bold">${fn:length(sliders)}</span> of <span class="fw-bold">${totalSliders}</span> sliders
                                         </div>
-                                        <div>
-                                            <select class="form-control" style="width: auto;" onchange="changePageSize(this.value)">
-                                                <option value="5" ${pageSize == 5 ? 'selected' : ''}>5 per page</option>
-                                                <option value="10" ${pageSize == 10 ? 'selected' : ''}>10 per page</option>
-                                                <option value="20" ${pageSize == 20 ? 'selected' : ''}>20 per page</option>
-                                                <option value="50" ${pageSize == 50 ? 'selected' : ''}>50 per page</option>
-                                            </select>
+                                        <div class="d-flex align-items-center">
+                                            <div class="input-group" style="width: auto;">
+                                                <input type="number" id="customPageSize" class="form-control form-control-sm" min="1" max="100" value="${pageSize}" style="width: 80px; height: 38px;" ${param.showAll eq 'true' ? 'disabled' : ''}>
+                                                <button class="btn btn-primary" onclick="applyCustomPageSize()" id="applySizeBtn" style="padding: 6px 12px; font-size: 15px;">Apply</button>
+                                            </div>
+                                            <span class="ms-2">items per page</span>
+                                            <div class="form-check ms-3">
+                                                <input class="form-check-input" type="checkbox" id="showAllCheckbox" ${param.showAll eq 'true' ? 'checked' : ''}>
+                                                <label class="form-check-label" for="showAllCheckbox">
+                                                    Show all
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -422,18 +427,71 @@
             }
 
             // Function to change page size
-            function changePageSize(newSize) {
+            function changePageSize(newSize, showAll) {
                 // Set a flag to indicate navigation is due to pagination
                 sessionStorage.setItem('isSliderPaginating', 'true');
                 const url = new URL(window.location);
-                url.searchParams.set('pageSize', newSize);
+                
+                if (showAll) {
+                    url.searchParams.set('showAll', 'true');
+                    url.searchParams.delete('pageSize');
+                } else {
+                    url.searchParams.delete('showAll');
+                    url.searchParams.set('pageSize', newSize);
+                }
+                
                 url.searchParams.set('page', '1'); // Reset to first page
                 window.location.href = url.toString();
+            }
+            
+            // Function to apply custom page size from input
+            function applyCustomPageSize() {
+                const showAllCheckbox = document.getElementById('showAllCheckbox');
+                
+                if (showAllCheckbox.checked) {
+                    // Show all items
+                    changePageSize(null, true);
+                } else {
+                    // Apply custom page size
+                    const customSizeInput = document.getElementById('customPageSize');
+                    let newSize = parseInt(customSizeInput.value);
+                    
+                    // Validate input
+                    if (isNaN(newSize) || newSize < 1) {
+                        newSize = 10; // Default value if invalid
+                        customSizeInput.value = newSize;
+                    } else if (newSize > 100) {
+                        newSize = 100; // Max limit
+                        customSizeInput.value = newSize;
+                    }
+                    
+                    // Apply the new page size
+                    changePageSize(newSize, false);
+                }
             }
 
             $(document).ready(function() {
                 const storageKey = 'sliderColumnPrefs';
                 const navigationFlag = 'isSliderPaginating';
+                
+                // Add event listener for Enter key on the input
+                document.getElementById('customPageSize').addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        applyCustomPageSize();
+                    }
+                });
+                
+                // Add event listener for checkbox
+                document.getElementById('showAllCheckbox').addEventListener('change', function() {
+                    const customSizeInput = document.getElementById('customPageSize');
+                    
+                    if (this.checked) {
+                        customSizeInput.disabled = true;
+                    } else {
+                        customSizeInput.disabled = false;
+                    }
+                });
 
                 // --- Main Event Handlers ---
                 $('#columnSettingsBtn').click(function() {
