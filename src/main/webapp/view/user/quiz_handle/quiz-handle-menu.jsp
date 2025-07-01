@@ -88,6 +88,21 @@
             font-style: italic;
         }
         .header-top-wrap{background:#1A1B3D;padding:8px 0;color:#fff;position:relative}.header-logo{position:relative;z-index:2;display:flex;align-items:center}.header-logo a{display:block;width:auto;height:100%}.header-logo img{max-height:50px;width:auto;height:auto;display:block;object-fit:contain;filter:brightness(0) invert(1)}.header-top{display:flex;align-items:center;justify-content:space-between;min-height:60px}.header-right{display:flex;align-items:center;gap:15px}.user-menu,.settings-menu{position:relative}.user-icon,.settings-icon{width:40px;height:40px;border-radius:50%;background:#5751E1;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s ease}.user-icon i,.settings-icon i{color:#fff;font-size:18px}.user-icon:hover,.settings-icon:hover{background:#7A6DC0;transform:translateY(-1px)}.dropdown-menu,.settings-dropdown{position:absolute;top:120%;right:0;width:280px;background:#fff;border-radius:8px;box-shadow:0 5px 15px rgba(0,0,0,.15);opacity:0;visibility:hidden;transform:translateY(10px);transition:all .3s ease;z-index:1000}.settings-dropdown{width:200px}.dropdown-menu.show,.settings-dropdown.show{opacity:1;visibility:visible;transform:translateY(0)}.dropdown-header{padding:16px;border-bottom:1px solid #eee}.user-info{display:flex;align-items:center;gap:12px}.user-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden}.user-avatar img{width:100%;height:100%;object-fit:cover}.user-details{display:flex;flex-direction:column}.user-name{font-weight:600;color:#1A1B3D;font-size:14px}.user-email{color:#666;font-size:12px}.dropdown-body{padding:8px 0}.dropdown-item{display:flex;align-items:center;padding:10px 16px;color:#1A1B3D;text-decoration:none;transition:background-color .3s ease}.dropdown-item:hover{background-color:#f8f9fa}.dropdown-item i{width:20px;margin-right:12px;font-size:16px}.dropdown-item span{font-size:14px}.text-danger{color:#dc3545!important}.dropdown-divider{height:1px;background-color:#eee;margin:8px 0}
+        
+        /* Simple quiz status styles */
+        .quiz-status {
+            display: inline-block;
+            margin-top: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .status-graded {
+            color: #28a745;
+        }
+        
+        .status-in-process {
+            color: #ffc107;
+        }
     </style>
 </head>
 
@@ -199,11 +214,24 @@
                                             <div class="card h-100 quiz-card">
                                                 <div class="card-body">
                                                     <span class="quiz-level level-${quiz.level.toLowerCase()}">${quiz.level}</span>
+                                                    
                                                     <h5 class="quiz-title">${quiz.name}</h5>
                                                     <div class="quiz-info">
                                                         <!--<p><i class="fas fa-clock"></i> Duration: ${quiz.duration_minutes} minutes</p>-->
                                                         <p><i class="fas fa-question-circle"></i> Questions: ${quiz.number_of_questions_target}</p>
                                                         <p><i class="fas fa-book"></i> Lesson: ${quiz.lesson_id}</p>
+                                                        
+                                                        <!-- Simple Status Indicator -->
+                                                        <c:if test="${not empty quizScores[quiz.id] && quizHasEssay[quiz.id]}">
+                                                            <c:choose>
+                                                                <c:when test="${quizAttemptStatus[quiz.id] eq 'completed'}">
+                                                                    <p><i class="fas fa-check-circle"></i> Status: <span class="status-graded">Graded</span></p>
+                                                                </c:when>
+                                                                <c:when test="${quizAttemptStatus[quiz.id] eq 'partially_graded'}">
+                                                                    <p><i class="fas fa-hourglass-half"></i> Status: <span class="status-in-process">In process</span></p>
+                                                                </c:when>
+                                                            </c:choose>
+                                                        </c:if>
                                                     </div>
                                                     <div class="quiz-score">
                                                         <div class="score-label">Your Score</div>
