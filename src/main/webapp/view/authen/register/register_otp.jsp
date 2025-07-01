@@ -20,7 +20,7 @@
         
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -147,7 +147,7 @@
         
         .verify-button {
             width: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
             color: white;
             border: none;
             padding: 16px 24px;

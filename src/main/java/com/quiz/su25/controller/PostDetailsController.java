@@ -129,7 +129,7 @@ public class PostDetailsController extends HttpServlet {
                     post.setPublished_at(new Date(System.currentTimeMillis()));
                     System.out.println("Post status is published, setting published_at");
                 } else {
-                    post.setPublished_at(null); // Keep null for draft/archived posts
+                    post.setPublished_at(null); // Keep null for draft posts
                     System.out.println("Post status is not published, published_at = null");
                 }
                 post.setCategory_id(1); 

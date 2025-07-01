@@ -295,7 +295,6 @@
                                 <select class="form-select" id="status" name="status">
                                     <option value="draft" ${post.status == 'draft' ? 'selected' : ''}>Draft</option>
                                     <option value="published" ${post.status == 'published' ? 'selected' : ''}>Published</option>
-                                    <option value="archived" ${post.status == 'archived' ? 'selected' : ''}>Archived</option>
                                 </select>
                             </div>
                         </div>
