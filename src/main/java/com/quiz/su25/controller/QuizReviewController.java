@@ -119,6 +119,9 @@ public class QuizReviewController extends HttpServlet {
             request.setAttribute("userAnswerMap", userAnswerMap);
             request.setAttribute("essayAnswerMap", essayAnswerMap);
             request.setAttribute("attempt", latestAttempt);
+            
+            // Pass all userAnswers for complete data access in JSP
+            request.setAttribute("allUserAnswers", userAnswers);
 
             request.getRequestDispatcher("view/user/quiz_handle/quiz-handle-review.jsp").forward(request, response);
 

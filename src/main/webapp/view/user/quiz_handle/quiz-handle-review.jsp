@@ -88,6 +88,53 @@
             .essay-answer-review { background-color: #f8f9fa; border: 1px solid #dee2e6; color: #495057; padding: 1rem; border-radius: 0.5rem;}
             .explanation { margin-top: 20px; padding: 20px; background-color: #f1f7fe; border-left: 5px solid #007bff; border-radius: 0 8px 8px 0; }
             
+            /* Expert feedback styles */
+            .expert-feedback {
+                margin-top: 25px;
+                padding: 20px;
+                background-color: #f8f1fe;
+                border-left: 5px solid #8B7FD2;
+                border-radius: 0 8px 8px 0;
+                position: relative;
+            }
+
+            .expert-feedback-header {
+                display: flex;
+                align-items: center;
+                margin-bottom: 12px;
+                font-weight: 600;
+                color: #5751E1;
+            }
+
+            .expert-feedback-header i {
+                margin-right: 10px;
+                font-size: 1.2em;
+            }
+
+            .expert-feedback-content {
+                color: #333;
+                line-height: 1.6;
+                font-size: 16px;
+            }
+
+            .expert-feedback-score {
+                position: absolute;
+                top: 15px;
+                right: 20px;
+                background: #5751E1;
+                color: white;
+                padding: 5px 15px;
+                border-radius: 20px;
+                font-weight: bold;
+                font-size: 16px;
+                box-shadow: 0 2px 10px rgba(87, 81, 225, 0.2);
+            }
+
+            .no-feedback {
+                color: #6c757d;
+                font-style: italic;
+            }
+            
             /* Review Popup Styles */
             .review-popup {
                 display: none;
@@ -481,6 +528,46 @@
                                                   rows="6" 
                                                   readonly>${essayAnswerMap[question.id]}</textarea>
                                     </div>
+                                    
+                                    <!-- Expert feedback section for essay questions -->
+                                    <c:if test="${question.type eq 'essay'}">
+                                        <c:set var="hasExpertFeedback" value="false" />
+                                        <c:forEach items="${allUserAnswers}" var="answer">
+                                            <c:if test="${answer.quiz_question_id eq question.id && (not empty answer.essay_score || not empty answer.essay_feedback)}">
+                                                <c:set var="hasExpertFeedback" value="true" />
+                                                <div class="expert-feedback">
+                                                    <div class="expert-feedback-header">
+                                                        <i class="fas fa-comment-dots"></i> Expert Feedback
+                                                    </div>
+                                                    <div class="expert-feedback-content">
+                                                        <c:choose>
+                                                            <c:when test="${not empty answer.essay_feedback}">
+                                                                ${answer.essay_feedback}
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <span class="no-feedback">No feedback provided</span>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </div>
+                                                    <c:if test="${not empty answer.essay_score}">
+                                                        <div class="expert-feedback-score">${answer.essay_score}/10</div>
+                                                    </c:if>
+                                                </div>
+                                            </c:if>
+                                        </c:forEach>
+                                        
+                                        <c:if test="${!hasExpertFeedback && attempt.status eq 'partially_graded'}">
+                                            <div class="expert-feedback">
+                                                <div class="expert-feedback-header">
+                                                    <i class="fas fa-hourglass-half"></i> Grading in Progress
+                                                </div>
+                                                <div class="expert-feedback-content">
+                                                    <span class="no-feedback">Your essay is still being graded by our experts. Please check back later.</span>
+                                                </div>
+                                            </div>
+                                        </c:if>
+                                    </c:if>
+                                    
                                     <c:if test="${not empty question.explanation}">
                                        <div class="explanation mt-3"><strong>Explanation: </strong> ${question.explanation}</div>
                                     </c:if>
