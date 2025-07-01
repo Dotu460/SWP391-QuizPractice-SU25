@@ -257,8 +257,10 @@
                 sessionStorage.removeItem('answeredQuestions');
                 sessionStorage.removeItem('markedQuestions');
                 sessionStorage.removeItem('selectedAnswers');
+                sessionStorage.removeItem('quizScore');
                 
-                window.location.href = '${pageContext.request.contextPath}/quiz-handle?id=' + quizId + '&retake=true';
+                // Make sure to include a timestamp to prevent caching
+                window.location.href = '${pageContext.request.contextPath}/quiz-handle?id=' + quizId + '&retake=true&t=' + new Date().getTime();
             } else {
                 window.location.href = '${pageContext.request.contextPath}/quiz-handle?id=' + quizId;
             }

@@ -34,4 +34,6 @@ public class UserQuizAttemptAnswers {
    private Boolean correct;  //1 - correct 0 - incorrect
    private Date answer_at;
    private String essay_answer;
+   private Double essay_score;
+   private String essay_feedback;
 }

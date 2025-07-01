@@ -53,12 +53,17 @@ public class QuizHandleMenuController extends HttpServlet {
                 Map<Integer, Double> quizScores = new HashMap<>();
                 for (Quizzes quiz : quizzesList) {
                     UserQuizAttempts latestAttempt = userQuizAttemptsDAO.findLatestAttempt(userId, quiz.getId());
-                    if (latestAttempt != null && GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED.equals(latestAttempt.getStatus())) {
-                        // Lấy điểm trực tiếp từ attempt đã hoàn thành
+                    if (latestAttempt != null && 
+                        (GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED.equals(latestAttempt.getStatus()) || 
+                         GlobalConfig.QUIZ_ATTEMPT_STATUS_PARTIALLY_GRADED.equals(latestAttempt.getStatus()))) {
+                        // Lấy điểm từ attempt đã hoàn thành hoặc partially_graded
                         quizScores.put(quiz.getId(), latestAttempt.getScore());
+                        System.out.println("Quiz " + quiz.getId() + " has score: " + latestAttempt.getScore() + 
+                                          " with status: " + latestAttempt.getStatus());
                     } else {
                         // Nếu chưa có attempt nào hoàn thành, đặt điểm là null hoặc giá trị mặc định
                         quizScores.put(quiz.getId(), null);
+                        System.out.println("Quiz " + quiz.getId() + " has no completed/partially_graded attempt");
                     }
                 }
                 
@@ -68,7 +73,7 @@ public class QuizHandleMenuController extends HttpServlet {
                 System.out.println("Set quizzesList and quizScores attributes");
                 
                 // Forward to the quiz menu page
-                String forwardPath = "/view/user/quizHandle/quiz-handle-menu.jsp";
+                String forwardPath = "view/user/quiz_handle/quiz-handle-menu.jsp";
                 System.out.println("Attempting to forward to: " + forwardPath);
                 
                 try {

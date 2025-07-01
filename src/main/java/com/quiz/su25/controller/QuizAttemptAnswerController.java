@@ -86,9 +86,8 @@ public class QuizAttemptAnswerController extends HttpServlet {
                 return;
             }
 
-            // Forward to the quiz attempt page
-            request.setAttribute("attempt", attempt);
-            request.getRequestDispatcher("quiz-attempt.jsp").forward(request, response);
+            // Redirect to the quiz handle page instead of forwarding to a non-existent JSP
+            response.sendRedirect(request.getContextPath() + "/quiz-handle?id=" + attempt.getQuiz_id());
 
         } catch (NumberFormatException e) {
             response.sendRedirect("home");
@@ -281,8 +280,8 @@ public class QuizAttemptAnswerController extends HttpServlet {
             attemptsDAO.update(attempt);
         }
 
-        // Redirect to results page
-        response.sendRedirect("quiz-results?attemptId=" + attempt.getId());
+        // Redirect to the quiz handle page instead of forwarding to a non-existent JSP
+        response.sendRedirect(request.getContextPath() + "/quiz-handle?id=" + attempt.getQuiz_id());
     }
 
     /**

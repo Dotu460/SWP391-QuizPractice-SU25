@@ -127,7 +127,7 @@ public class QuizAttemptController extends HttpServlet {
             UserQuizAttempts existingAttempt = attemptsDAO.findLatestAttempt(userId, quizId);
             if (existingAttempt != null && GlobalConfig.QUIZ_ATTEMPT_STATUS_IN_PROGRESS.equals(existingAttempt.getStatus())) {
                 // Redirect to the existing attempt
-                response.sendRedirect("quiz-attempt-answer?attemptId=" + existingAttempt.getId());
+                response.sendRedirect(request.getContextPath() + "/quiz-handle?id=" + quizId);
                 return;
             }
 
@@ -143,12 +143,12 @@ public class QuizAttemptController extends HttpServlet {
 
             int attemptId = attemptsDAO.insert(newAttempt);
             if (attemptId > 0) {
-                // Redirect to the quiz attempt page with the new attempt ID
-                response.sendRedirect("quiz-attempt-answer?attemptId=" + attemptId);
+                // Redirect to the quiz handle page with the new attempt ID
+                response.sendRedirect(request.getContextPath() + "/quiz-handle?id=" + quizId);
             } else {
                 // Handle error - could not create attempt
                 request.setAttribute("error", "Could not start quiz attempt. Please try again.");
-                request.getRequestDispatcher("error.jsp").forward(request, response);
+                response.sendRedirect(request.getContextPath() + "/home");
             }
             
         } catch (NumberFormatException e) {
@@ -182,7 +182,7 @@ public class QuizAttemptController extends HttpServlet {
                     } else {
                         // Handle error - could not update attempt
                         request.setAttribute("error", "Could not end quiz attempt. Please try again.");
-                        request.getRequestDispatcher("error.jsp").forward(request, response);
+                        response.sendRedirect(request.getContextPath() + "/home");
                     }
                 } else {
                     // Attempt is already completed

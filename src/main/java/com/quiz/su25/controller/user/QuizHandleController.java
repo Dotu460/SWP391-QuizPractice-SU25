@@ -205,7 +205,7 @@ public class QuizHandleController extends HttpServlet {
             }
 
             // Forward to the quiz handle page
-            String forwardPath = "/view/user/quizHandle/quiz-handle.jsp";
+            String forwardPath = "view/user/quiz_handle/quiz-handle.jsp";
             System.out.println("Forwarding to: " + forwardPath);
             request.getRequestDispatcher(forwardPath).forward(request, response);
 
@@ -451,17 +451,41 @@ public class QuizHandleController extends HttpServlet {
             System.out.println("Final Score (after rounding): " + score);
             System.out.println("===============================\n");
             
-            // 7. Cập nhật trạng thái attempt thành COMPLETED, lưu điểm
-            attempt.setScore(score);
-            attempt.setStatus(GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED);
+            // 7. Kiểm tra xem quiz có câu hỏi tự luận không
+            boolean hasEssayQuestions = false;
+            List<Question> allQuestions = new QuestionDAO().findByQuizId(quizId);
+            for (Question question : allQuestions) {
+                if ("essay".equals(question.getType())) {
+                    hasEssayQuestions = true;
+                    break;
+                }
+            }
+
+            // Cập nhật trạng thái attempt
             attempt.setEnd_time(Date.valueOf(LocalDate.now()));
             attempt.setUpdate_at(Date.valueOf(LocalDate.now()));
-            
+
+            if (hasEssayQuestions) {
+                // Nếu có câu hỏi tự luận, đánh dấu là partially_graded
+                attempt.setStatus(GlobalConfig.QUIZ_ATTEMPT_STATUS_PARTIALLY_GRADED);
+                attempt.setScore(score); // Lưu điểm tạm thời (chỉ tính phần trắc nghiệm)
+                System.out.println("Quiz has essay questions, marking as PARTIALLY_GRADED");
+            } else {
+                // Nếu chỉ có câu hỏi trắc nghiệm, đánh dấu là completed
+                attempt.setStatus(GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED);
+                attempt.setScore(score);
+                System.out.println("Quiz has only multiple choice questions, marking as COMPLETED");
+            }
+
             // Sử dụng phương thức updateScore để đảm bảo cập nhật thành công
             boolean updateScoreResult = attemptsDAO.updateScore(attempt.getId(), score, score >= 5.0);
             
             if (updateScoreResult) {
-                System.out.println("Successfully updated attempt status to COMPLETED with score: " + score);
+                System.out.println("Successfully updated score: " + score);
+                
+                // Cập nhật trạng thái attempt
+                boolean updateStatusResult = attemptsDAO.updateStatus(attempt.getId(), attempt.getStatus());
+                System.out.println("Updated attempt status to " + attempt.getStatus() + ": " + updateStatusResult);
             } else {
                 // Thử dùng update() nếu updateScore() không thành công
                 boolean updateResult = attemptsDAO.update(attempt);

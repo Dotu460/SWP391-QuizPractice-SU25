@@ -120,7 +120,7 @@ public class QuizReviewController extends HttpServlet {
             request.setAttribute("essayAnswerMap", essayAnswerMap);
             request.setAttribute("attempt", latestAttempt);
 
-            request.getRequestDispatcher("view/user/quizHandle/quiz-handle-review.jsp").forward(request, response);
+            request.getRequestDispatcher("view/user/quiz_handle/quiz-handle-review.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
             System.out.println("Error parsing quiz ID: " + e.getMessage());

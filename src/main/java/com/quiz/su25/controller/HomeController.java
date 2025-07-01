@@ -70,7 +70,15 @@ public class HomeController extends HttpServlet {
         } catch (Exception e) {
             System.out.println("Error in HomeController: " + e.getMessage());
             e.printStackTrace(); // Add stack trace for better debugging
-            response.sendRedirect("error.jsp");
+            
+            // Set error attribute and forward to homepage instead of redirecting to error.jsp
+            request.setAttribute("errorMessage", "An error occurred: " + e.getMessage());
+            try {
+                request.getRequestDispatcher("view/home/homepage.jsp").forward(request, response);
+            } catch (Exception ex) {
+                // If forwarding fails, simply redirect to the context root
+                response.sendRedirect(request.getContextPath());
+            }
         }
     } 
 

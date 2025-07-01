@@ -4,6 +4,7 @@
  */
 package com.quiz.su25.dal.impl;
 
+import com.quiz.su25.config.GlobalConfig;
 import com.quiz.su25.dal.DBContext;
 import com.quiz.su25.dal.I_DAO;
 import com.quiz.su25.entity.UserQuizAttempts;
@@ -210,8 +211,7 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
      * Update the score and status of an attempt
      */
     public boolean updateScore(Integer attemptId, Double score, Boolean passed) {
-        String sql = "UPDATE UserQuizAttempts SET score = ?, passed = ?, "
-                + "status = 'completed', update_at = CURRENT_TIMESTAMP WHERE id = ?";
+        String sql = "UPDATE UserQuizAttempts SET score = ?, passed = ?, update_at = CURRENT_TIMESTAMP WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -331,10 +331,10 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
     }
 
     /**
-     * Find all completed attempts for a specific user and quiz, ordered by newest first
+     * Find all completed or partially graded attempts for a specific user and quiz, ordered by newest first
      */
     public List<UserQuizAttempts> findCompletedAttemptsByQuizId(Integer userId, Integer quizId) {
-        String sql = "SELECT * FROM UserQuizAttempts WHERE user_id = ? AND quiz_id = ? AND status = 'completed' ORDER BY end_time DESC, created_at DESC";
+        String sql = "SELECT * FROM UserQuizAttempts WHERE user_id = ? AND quiz_id = ? AND (status = 'completed' OR status = 'partially_graded') ORDER BY end_time DESC, created_at DESC";
         List<UserQuizAttempts> completedAttempts = new ArrayList<>();
         
         try {
@@ -349,7 +349,7 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
                 completedAttempts.add(attempt);
             }
             
-            System.out.println("Found " + completedAttempts.size() + " completed attempts for user " + userId + " and quiz " + quizId);
+            System.out.println("Found " + completedAttempts.size() + " completed/partially graded attempts for user " + userId + " and quiz " + quizId);
             
         } catch (Exception e) {
             System.out.println("Error findCompletedAttemptsByQuizId at class UserQuizAttemptsDAO: " + e.getMessage());
@@ -359,6 +359,111 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
         }
         
         return completedAttempts;
+    }
+
+    /**
+     * Tìm kiếm attempts theo các điều kiện lọc và phân trang
+     */
+    public List<UserQuizAttempts> findAttemptsByFilters(Integer quizId, Integer userId, String status, int page, int pageSize) {
+        StringBuilder sql = new StringBuilder("SELECT * FROM UserQuizAttempts WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+        
+        // Thêm điều kiện lọc
+        if (quizId != null) {
+            sql.append(" AND quiz_id = ?");
+            params.add(quizId);
+        }
+        
+        if (userId != null) {
+            sql.append(" AND user_id = ?");
+            params.add(userId);
+        }
+        
+        if (status != null) {
+            sql.append(" AND status = ?");
+            params.add(status);
+        } else {
+            // Mặc định chỉ lấy các attempts có câu hỏi tự luận cần chấm điểm
+            sql.append(" AND (status = ? OR status = ?)");
+            params.add(GlobalConfig.QUIZ_ATTEMPT_STATUS_PARTIALLY_GRADED);
+            params.add(GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED);
+        }
+        
+        // Thêm sắp xếp và phân trang
+        sql.append(" ORDER BY update_at DESC LIMIT ? OFFSET ?");
+        params.add(pageSize);
+        params.add((page - 1) * pageSize);
+        
+        List<UserQuizAttempts> listAttempts = new ArrayList<>();
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+            
+            // Đặt các tham số
+            for (int i = 0; i < params.size(); i++) {
+                statement.setObject(i + 1, params.get(i));
+            }
+            
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                UserQuizAttempts attempt = getFromResultSet(resultSet);
+                listAttempts.add(attempt);
+            }
+        } catch (Exception e) {
+            System.out.println("Error findAttemptsByFilters at class UserQuizAttemptsDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return listAttempts;
+    }
+
+    /**
+     * Đếm tổng số attempts theo các điều kiện lọc
+     */
+    public int countAttemptsByFilters(Integer quizId, Integer userId, String status) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM UserQuizAttempts WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+        
+        // Thêm điều kiện lọc
+        if (quizId != null) {
+            sql.append(" AND quiz_id = ?");
+            params.add(quizId);
+        }
+        
+        if (userId != null) {
+            sql.append(" AND user_id = ?");
+            params.add(userId);
+        }
+        
+        if (status != null) {
+            sql.append(" AND status = ?");
+            params.add(status);
+        } else {
+            // Mặc định chỉ đếm các attempts có câu hỏi tự luận cần chấm điểm
+            sql.append(" AND (status = ? OR status = ?)");
+            params.add(GlobalConfig.QUIZ_ATTEMPT_STATUS_PARTIALLY_GRADED);
+            params.add(GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED);
+        }
+        
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+            
+            // Đặt các tham số
+            for (int i = 0; i < params.size(); i++) {
+                statement.setObject(i + 1, params.get(i));
+            }
+            
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+        } catch (Exception e) {
+            System.out.println("Error countAttemptsByFilters at class UserQuizAttemptsDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return 0;
     }
 
     public static void main(String[] args) {
