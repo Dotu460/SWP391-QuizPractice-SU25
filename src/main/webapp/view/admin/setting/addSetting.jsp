@@ -226,50 +226,12 @@
                             </div>
                         </div>
 
-                        <!-- Common Setting Examples -->
-                        <div class="form-section">
-                            <label class="form-label">Common Setting Examples</label>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="card bg-light">
-                                        <div class="card-body py-2">
-                                            <h6 class="card-title mb-1">Boolean Settings</h6>
-                                            <small class="text-muted">
-                                                <code>true</code> or <code>false</code><br>
-                                                Example: email_notification
-                                            </small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="card bg-light">
-                                        <div class="card-body py-2">
-                                            <h6 class="card-title mb-1">Numeric Settings</h6>
-                                            <small class="text-muted">
-                                                Numbers only<br>
-                                                Example: max_login_attempts
-                                            </small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="card bg-light">
-                                        <div class="card-body py-2">
-                                            <h6 class="card-title mb-1">Text Settings</h6>
-                                            <small class="text-muted">
-                                                Any text value<br>
-                                                Example: system_name
-                                            </small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        
 
                         <!-- Form Actions -->
                         <div class="form-section">
                             <div class="d-flex gap-3 btn-group-mobile">
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn btn-secondary">
                                     <i class="fas fa-save"></i> Create Setting
                                 </button>
                                 <button type="reset" class="btn btn-outline-secondary">

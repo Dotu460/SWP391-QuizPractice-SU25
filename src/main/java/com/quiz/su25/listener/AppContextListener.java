@@ -27,16 +27,7 @@ public class AppContextListener implements ServletContextListener {
     private static final String SETTINGS = "SETTINGS";
     
     // Common setting keys (add your own here)
-    public static final String EMAIL_NOTIFICATION = "email_notification";
-    public static final String MAX_LOGIN_ATTEMPTS = "max_login_attempts";
-    public static final String SESSION_TIMEOUT = "session_timeout";
-    public static final String HOMEPAGE_POSTS_LIMIT = "homepage_posts_limit";
-    public static final String MAINTENANCE_MODE = "maintenance_mode";
-    public static final String DEFAULT_QUIZ_TIME = "default_quiz_time";
-    public static final String MAX_QUESTIONS_PER_QUIZ = "max_questions_per_quiz";
-    public static final String ADMIN_EMAIL = "admin_email";
-    public static final String SYSTEM_NAME = "system_name";
-    public static final String MIN_PASS_SCORE = "min_pass_score";
+    public static final String otp_time = "otp_time";
     
     @Override
     public void contextInitialized(ServletContextEvent sce) {
@@ -273,90 +264,90 @@ public class AppContextListener implements ServletContextListener {
      * @param request HttpServletRequest
      * @return true if maintenance mode is enabled
      */
-    public static boolean isMaintenanceMode(HttpServletRequest request) {
-        return getBooleanSetting(request, MAINTENANCE_MODE, false);
-    }
+//    public static boolean isMaintenanceMode(HttpServletRequest request) {
+//        return getBooleanSetting(request, MAINTENANCE_MODE, false);
+//    }
     
     /**
      * Check if email notifications are enabled
      * @param request HttpServletRequest
      * @return true if email notifications are enabled
      */
-    public static boolean isEmailNotificationEnabled(HttpServletRequest request) {
-        return getBooleanSetting(request, EMAIL_NOTIFICATION, true);
-    }
+//    public static boolean isEmailNotificationEnabled(HttpServletRequest request) {
+//        return getBooleanSetting(request, EMAIL_NOTIFICATION, true);
+//    }
     
     /**
      * Get maximum login attempts allowed
      * @param request HttpServletRequest
      * @return Maximum login attempts (default: 5)
      */
-    public static int getMaxLoginAttempts(HttpServletRequest request) {
-        return getIntSetting(request, MAX_LOGIN_ATTEMPTS, 5);
-    }
+//    public static int getMaxLoginAttempts(HttpServletRequest request) {
+//        return getIntSetting(request, MAX_LOGIN_ATTEMPTS, 5);
+//    }
     
     /**
      * Get session timeout in minutes
      * @param request HttpServletRequest
      * @return Session timeout in minutes (default: 30)
      */
-    public static int getSessionTimeout(HttpServletRequest request) {
-        return getIntSetting(request, SESSION_TIMEOUT, 30);
-    }
+//    public static int getSessionTimeout(HttpServletRequest request) {
+//        return getIntSetting(request, SESSION_TIMEOUT, 30);
+//    }
     
     /**
      * Get homepage posts limit
      * @param request HttpServletRequest
      * @return Number of posts to show on homepage (default: 6)
      */
-    public static int getHomepagePostsLimit(HttpServletRequest request) {
-        return getIntSetting(request, HOMEPAGE_POSTS_LIMIT, 6);
-    }
+//    public static int getHomepagePostsLimit(HttpServletRequest request) {
+//        return getIntSetting(request, HOMEPAGE_POSTS_LIMIT, 6);
+//    }
     
     /**
      * Get default quiz time in minutes
      * @param request HttpServletRequest
      * @return Default quiz time in minutes (default: 60)
      */
-    public static int getDefaultQuizTime(HttpServletRequest request) {
-        return getIntSetting(request, DEFAULT_QUIZ_TIME, 60);
-    }
+//    public static int getDefaultQuizTime(HttpServletRequest request) {
+//        return getIntSetting(request, DEFAULT_QUIZ_TIME, 60);
+//    }
     
     /**
      * Get maximum questions per quiz
      * @param request HttpServletRequest
      * @return Maximum questions per quiz (default: 50)
      */
-    public static int getMaxQuestionsPerQuiz(HttpServletRequest request) {
-        return getIntSetting(request, MAX_QUESTIONS_PER_QUIZ, 50);
-    }
+//    public static int getMaxQuestionsPerQuiz(HttpServletRequest request) {
+//        return getIntSetting(request, MAX_QUESTIONS_PER_QUIZ, 50);
+//    }
     
     /**
      * Get admin email address
      * @param request HttpServletRequest
      * @return Admin email address
      */
-    public static String getAdminEmail(HttpServletRequest request) {
-        return getSetting(request, ADMIN_EMAIL, "admin@quizpractice.com");
-    }
+//    public static String getAdminEmail(HttpServletRequest request) {
+//        return getSetting(request, ADMIN_EMAIL, "admin@quizpractice.com");
+//    }
     
     /**
      * Get system name
      * @param request HttpServletRequest
      * @return System name
      */
-    public static String getSystemName(HttpServletRequest request) {
-        return getSetting(request, SYSTEM_NAME, "Quiz Practice System");
-    }
+//    public static String getSystemName(HttpServletRequest request) {
+//        return getSetting(request, SYSTEM_NAME, "Quiz Practice System");
+//    }
     
     /**
      * Get minimum passing score
      * @param request HttpServletRequest
      * @return Minimum passing score (default: 70)
      */
-    public static int getMinPassScore(HttpServletRequest request) {
-        return getIntSetting(request, MIN_PASS_SCORE, 70);
-    }
+//    public static int getMinPassScore(HttpServletRequest request) {
+//        return getIntSetting(request, MIN_PASS_SCORE, 70);
+//    }
     
     /**
      * Refresh settings cache (useful after manual database changes)
