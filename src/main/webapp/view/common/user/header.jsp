@@ -135,7 +135,7 @@
                                                 <a>Blog</a>
                                                 <ul class="sub-menu">
                                                     <li><a href="${pageContext.request.contextPath}/blog">Blog List</a></li>
-                                                    <li><a href="blog-details.html">Blog Details</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/post-details">Post Details</a></li>
                                                 </ul>
                                             </li>
                                             <li><a href="login.html">Student Login</a></li>
@@ -200,12 +200,20 @@
                                 <ul class="list-wrap">                                   
                                     <c:choose>
                                         <c:when test="${not empty sessionScope.account}">
-                                        <!-- Nút Log out -->
-                                            <a href="logout" class="button-style">Log out</a>
+                                            <!-- Nút Change Password -->
+                                            <li style="display: inline;">
+                                                <a href="change-password" class="button-style">Change Password</a>
+                                            </li>
+                                            <!-- Nút Log out -->
+                                            <li style="display: inline;">
+                                                <a href="logout" class="button-style">Log out</a>
+                                            </li>
                                         </c:when>
                                         <c:otherwise>
-                                        <!-- Nút Log in -->
-                                            <a href="login" class="button-style">Log in</a>
+                                            <!-- Nút Log in -->
+                                            <li style="display: inline;">
+                                                <a href="login" class="button-style">Log in</a>
+                                            </li>
                                         </c:otherwise>
                                     </c:choose>
                                 </ul>
@@ -335,6 +343,9 @@
         .button-style:hover {
             background-color: #6559F5;
             box-shadow: 0 6px 15px rgba(128, 0, 128, 0.3);
+        }
+        .tgmenu__action .button-style {
+            margin-right: 10px; /* Khoảng cách giữa các nút */
         }
         .navbar {
             padding: 0;

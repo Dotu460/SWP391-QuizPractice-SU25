@@ -37,7 +37,7 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
         return list;
     }
 
-    @Override
+   @Override
     public Post findById(Integer id) {
         String sql = "SELECT * FROM post WHERE id = ?";
         Post post = null;
@@ -59,56 +59,95 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
 
     @Override
     public int insert(Post post) {
-        String sql = "INSERT INTO post (title,category, thumbnail_url,category, brief_info, content, category_id, author_id, published_at, updated_at, created_at, status, featured_flag) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO post (category, title, thumbnail_url, brief_info, content, category_id, author, published_at, updated_at, created_at, status, featured_flag) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         int generatedId = -1;
+        
+        // DEBUGGING: Print all post data before insert
+        System.out.println("=== POST INSERT DEBUG ===");
+        System.out.println("SQL: " + sql);
+        System.out.println("Post data:");
+        System.out.println("  Category: " + post.getCategory());
+        System.out.println("  Title: " + post.getTitle());
+        System.out.println("  Thumbnail_url: " + post.getThumbnail_url());
+        System.out.println("  Brief_info: " + post.getBrief_info());
+        System.out.println("  Content: " + (post.getContent() != null ? post.getContent().substring(0, Math.min(50, post.getContent().length())) + "..." : "null"));
+        System.out.println("  Category_id: " + post.getCategory_id());
+        System.out.println("  Author: " + post.getAuthor());
+        System.out.println("  Published_at: " + post.getPublished_at());
+        System.out.println("  Updated_at: " + post.getUpdated_at());
+        System.out.println("  Created_at: " + post.getCreated_at());
+        System.out.println("  Status: " + post.getStatus());
+        System.out.println("  Featured_flag: " + post.getFeatured_flag());
+        
         try {
             connection = getConnection();
+            System.out.println("Connection obtained: " + (connection != null ? "SUCCESS" : "NULL"));
+            System.out.println("Connection closed: " + (connection != null ? connection.isClosed() : "connection is null"));
+            
             statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            statement.setString(1, post.getTitle());
-            statement.setString(2, post.getCategory());
-            statement.setString(3, post.getThumbnail_url());
-            statement.setString(4, post.getBrief_info());
-            statement.setString(5, post.getContent());
-            statement.setInt(6, post.getCategory_id());
-            statement.setInt(7, post.getAuthor_id());
-            statement.setDate(8, post.getPublished_at());
-            statement.setDate(9, post.getUpdated_at());
-            statement.setDate(10, post.getCreated_at());
-            statement.setString(11, post.getStatus());
-            statement.setBoolean(12, post.getFeatured_flag());
-
-            statement.executeUpdate();
+            System.out.println("PreparedStatement created: " + (statement != null ? "SUCCESS" : "NULL"));
+            
+            statement.setString(1, post.getCategory());           // category (chuỗi)
+            statement.setString(2, post.getTitle());              // title
+            statement.setString(3, post.getThumbnail_url());      // thumbnail_url
+            statement.setString(4, post.getBrief_info());         // brief_info
+            statement.setString(5, post.getContent());            // content
+            statement.setInt(6, post.getCategory_id());           // category_id
+            statement.setString(7, post.getAuthor());             // author (chuỗi)
+            statement.setDate(8, post.getPublished_at());         // published_at
+            statement.setDate(9, post.getUpdated_at());           // updated_at
+            statement.setDate(10, post.getCreated_at());          // created_at
+            statement.setString(11, post.getStatus());            // status
+            statement.setInt(12, (post.getFeatured_flag() != null && post.getFeatured_flag()) ? 1 : 0);
+            
+            System.out.println("All parameters set. Executing insert...");
+            int rowsAffected = statement.executeUpdate();
+            System.out.println("Rows affected: " + rowsAffected);
+            
             resultSet = statement.getGeneratedKeys();
             if (resultSet.next()) {
                 generatedId = resultSet.getInt(1);
+                System.out.println("Generated ID: " + generatedId);
+            } else {
+                System.out.println("ERROR: No generated keys returned!");
             }
+            
+            System.out.println("INSERT COMPLETED SUCCESSFULLY!");
+            
         } catch (SQLException e) {
-            System.out.println("Error insert at class PostDAO: " + e.getMessage());
+            System.out.println("ERROR insert at class PostDAO: " + e.getMessage());
+            System.out.println("SQL State: " + e.getSQLState());
+            System.out.println("Error Code: " + e.getErrorCode());
+            e.printStackTrace(); // ✅ ADD FULL STACK TRACE
         } finally {
             closeResources();
         }
+        
+        System.out.println("Returning generated ID: " + generatedId);
+        System.out.println("=== POST INSERT DEBUG END ===");
         return generatedId;
     }
 
     @Override
     public boolean update(Post post) {
-        String sql = "UPDATE post SET title = ?, thumbnail_url = ?, brief_info = ?, content = ?, category_id = ?, author_id = ?, published_at = ?, updated_at = ?, created_at = ?, status = ?, featured_flag = ? WHERE id = ?";
+        String sql = "UPDATE post SET category = ?, title = ?, thumbnail_url = ?, brief_info = ?, content = ?, category_id = ?, author = ?, published_at = ?, updated_at = ?, created_at = ?, status = ?, featured_flag = ? WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setString(1, post.getTitle());
-            statement.setString(2, post.getThumbnail_url());
-            statement.setString(3, post.getBrief_info());
-            statement.setString(4, post.getContent());
-            statement.setInt(5, post.getCategory_id());
-            statement.setInt(6, post.getAuthor_id());
-            statement.setDate(7, post.getPublished_at());
-            statement.setDate(8, post.getUpdated_at());
-            statement.setDate(9, post.getCreated_at());
-            statement.setString(10, post.getStatus());
-            statement.setBoolean(11, post.getFeatured_flag());
-            statement.setInt(12, post.getId());
+            statement.setString(1, post.getCategory());           // category (chuỗi)
+            statement.setString(2, post.getTitle());              // title
+            statement.setString(3, post.getThumbnail_url());      // thumbnail_url
+            statement.setString(4, post.getBrief_info());         // brief_info
+            statement.setString(5, post.getContent());            // content
+            statement.setInt(6, post.getCategory_id());           // category_id
+            statement.setString(7, post.getAuthor());             // author (chuỗi)
+            statement.setDate(8, post.getPublished_at());         // published_at
+            statement.setDate(9, post.getUpdated_at());           // updated_at
+            statement.setDate(10, post.getCreated_at());          // created_at
+            statement.setString(11, post.getStatus());            // status
+            statement.setInt(12, (post.getFeatured_flag() != null && post.getFeatured_flag()) ? 1 : 0);
+            statement.setInt(13, post.getId());
 
             int rowsAffected = statement.executeUpdate();
             success = rowsAffected > 0;
@@ -156,7 +195,7 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
                 .brief_info(resultSet.getString("brief_info"))
                 .content(resultSet.getString("content"))
                 .category_id(resultSet.getInt("category_id"))
-                .author_id(resultSet.getInt("author_id"))
+                .author(resultSet.getString("author"))
                 .published_at(resultSet.getDate("published_at"))
                 .updated_at(resultSet.getDate("updated_at"))
                 .created_at(resultSet.getDate("created_at"))
@@ -185,11 +224,11 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
 
     public List<Post> getLatestPosts(int limit) {
         List<Post> list = new ArrayList<>();
-        String sql = "SELECT * FROM post WHERE featured_flag = 2 ORDER BY published_at DESC LIMIT ?";
+        String sql = "SELECT * FROM post WHERE status = 'published' ORDER BY published_at DESC LIMIT 2";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setInt(1, limit);
+//            statement.setInt(1, limit);
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 list.add(getFromResultSet(resultSet));
@@ -286,18 +325,18 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
      * @param categoryId The category ID
      * @return Total number of posts in the category
      */
-    public int countPostsByCategory(int categoryId) {
-        String sql = "SELECT COUNT(*) FROM post WHERE category_id = ?";
+    public int countPostsByCategoryName(String category) {
+        String sql = "SELECT COUNT(*) FROM post WHERE category = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setInt(1, categoryId);
+            statement.setString(1, category);
             resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return resultSet.getInt(1);
             }
         } catch (SQLException e) {
-            System.out.println("Error countPostsByCategory at class PostDAO: " + e.getMessage());
+            System.out.println("Error countPostsByCategoryName at class PostDAO: " + e.getMessage());
         } finally {
             closeResources();
         }
@@ -572,21 +611,21 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
      * @param limit Number of related posts to retrieve
      * @return List of related posts
      */
-    public List<Post> getRelatedPostsByCategory(int categoryId, int currentPostId, int limit) {
+    public List<Post> getPostsByCategoryName(String category, int pageNumber, int pageSize) {
         List<Post> list = new ArrayList<>();
-        String sql = "SELECT * FROM post WHERE category_id = ? AND id != ? ORDER BY updated_at DESC LIMIT ?";
+        String sql = "SELECT * FROM post WHERE category = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setInt(1, categoryId);
-            statement.setInt(2, currentPostId);
-            statement.setInt(3, limit);
+            statement.setString(1, category);
+            statement.setInt(2, pageSize);
+            statement.setInt(3, (pageNumber - 1) * pageSize);
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 list.add(getFromResultSet(resultSet));
             }
         } catch (SQLException e) {
-            System.out.println("Error getRelatedPostsByCategory at class PostDAO: " + e.getMessage());
+            System.out.println("Error getPostsByCategoryName at class PostDAO: " + e.getMessage());
         } finally {
             closeResources();
         }
@@ -622,26 +661,26 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
      * @param categoryId The category ID
      * @return Category name or "Uncategorized" if not found
      */
-    public String findCategory(Integer categoryId) {
-        if (categoryId == null) {
+    public String findCategory(String categoryName) {
+        if (categoryName == null || categoryName.trim().isEmpty()) {
             return "Uncategorized";
         }
 
-        String sql = "SELECT p.category FROM quiz_practice_su25.post p WHERE p.category_id = ?";
+        String sql = "SELECT p.category FROM post p WHERE p.category = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setInt(1, categoryId);
+            statement.setString(1, categoryName.trim());
 
             System.out.println("Executing SQL: " + sql); // Debug log
-            System.out.println("With category ID: " + categoryId); // Debug log
+            System.out.println("With category name: " + categoryName); // Debug log
 
             resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                String categoryName = resultSet.getString("category");
-                System.out.println("Found category: " + categoryName); // Debug log
-                return categoryName != null ? categoryName : "Uncategorized";
+                String foundCategory = resultSet.getString("category");
+                System.out.println("Found category: " + foundCategory); // Debug log
+                return foundCategory != null ? foundCategory : "Uncategorized";
             }
         } catch (SQLException e) {
             System.out.println("Error findCategory at class PostDAO: " + e.getMessage());
