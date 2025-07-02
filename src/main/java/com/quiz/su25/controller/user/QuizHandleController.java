@@ -526,8 +526,26 @@ public class QuizHandleController extends HttpServlet {
             int questionId = Integer.parseInt(request.getParameter("questionId"));
             String nextAction = request.getParameter("nextAction");
             int currentNumber = Integer.parseInt(request.getParameter("questionNumber"));
+            
+            // Lấy quizId từ request
+            String quizIdParam = request.getParameter("quizId");
+            Integer quizId = null;
+            
+            if (quizIdParam != null && !quizIdParam.isEmpty()) {
+                quizId = Integer.parseInt(quizIdParam);
+                // Cập nhật quizId trong session
+                request.getSession().setAttribute("quizId", quizId);
+                System.out.println("Updated quizId in session: " + quizId);
+            } else {
+                // Lấy quizId từ session nếu không có trong request
+                quizId = (Integer) request.getSession().getAttribute("quizId");
+            }
+            
+            if (quizId == null) {
+                throw new IllegalStateException("Không tìm thấy quizId trong request hoặc session");
+            }
 
-            System.out.println("Saving answer for question ID: " + questionId);
+            System.out.println("Saving answer for question ID: " + questionId + ", nextAction: " + nextAction + ", quizId: " + quizId);
 
             // Lấy câu hỏi để kiểm tra type
             QuestionDAO questionDAO = new QuestionDAO();
@@ -565,6 +583,14 @@ public class QuizHandleController extends HttpServlet {
             session.setAttribute("userAnswers", userAnswers);
             System.out.println("Updated session with answers: " + userAnswers);
 
+            // Nếu là autosave, trả về phản hồi thành công mà không chuyển hướng
+            if ("autosave".equals(nextAction)) {
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"success\": true, \"message\": \"Đã lưu thành công\"}");
+                return;
+            }
+
             // Xác định số câu hỏi tiếp theo
             int nextNumber = currentNumber;
             switch (nextAction) {
@@ -576,8 +602,8 @@ public class QuizHandleController extends HttpServlet {
                     break;
             }
 
-            // Chuyển hướng đến câu hỏi tiếp theo
-            response.sendRedirect(request.getContextPath() + "/quiz-handle?questionNumber=" + nextNumber);
+            // Chuyển hướng đến câu hỏi tiếp theo, đảm bảo có quizId trong URL
+            response.sendRedirect(request.getContextPath() + "/quiz-handle?id=" + quizId + "&questionNumber=" + nextNumber);
 
         } catch (Exception e) {
             handleSaveAnswerError(request, response, e);

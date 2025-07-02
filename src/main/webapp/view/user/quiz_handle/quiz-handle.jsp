@@ -2360,7 +2360,13 @@
             // Hàm điều hướng đến câu hỏi
             function navigateToQuestion(questionNumber) {
                 saveCurrentState();
-                window.location.href = 'quiz-handle?action=navigate&questionNumber=' + questionNumber;
+                
+                // Lấy quizId từ URL hiện tại
+                const urlParams = new URLSearchParams(window.location.search);
+                const quizId = urlParams.get('id');
+                
+                // Thêm quizId vào URL điều hướng
+                window.location.href = '${pageContext.request.contextPath}/quiz-handle?id=' + quizId + '&questionNumber=' + questionNumber;
             }
 
             // Hàm xử lý điều hướng
@@ -2383,9 +2389,23 @@
                 form.querySelector('input[name="action"]').value = 'saveAnswer';
                 document.getElementById('nextAction').value = action;
                 
+                // Lấy quizId từ URL và thêm vào form nếu chưa có
+                const urlParams = new URLSearchParams(window.location.search);
+                const quizId = urlParams.get('id');
+                
+                let quizIdInput = form.querySelector('input[name="quizId"]');
+                if (!quizIdInput) {
+                    quizIdInput = document.createElement('input');
+                    quizIdInput.type = 'hidden';
+                    quizIdInput.name = 'quizId';
+                    form.appendChild(quizIdInput);
+                }
+                quizIdInput.value = quizId;
+                
                 console.log('Updated form data:', {
                     action: form.querySelector('input[name="action"]').value,
-                    nextAction: document.getElementById('nextAction').value
+                    nextAction: document.getElementById('nextAction').value,
+                    quizId: quizIdInput.value
                 });
                 
                 form.submit();
@@ -2563,10 +2583,58 @@
 
         <!-- Thêm script để xử lý tự động lưu câu trả lời -->
         <script>
-            function autoSaveEssayAnswer(answer) {
+            // Thêm debounce để tránh gửi quá nhiều request
+            let timeoutId;
+            let saveStatusTimeout;
+            
+            document.addEventListener('DOMContentLoaded', function() {
+                const essayInput = document.querySelector('.essay-answer');
+                const essayControls = document.querySelector('.essay-controls');
+                
+                if (essayInput && essayControls) {
+                    // Add save status indicator to essay controls
+                    const saveStatus = document.createElement('span');
+                    saveStatus.className = 'save-status';
+                    saveStatus.style.marginLeft = '10px';
+                    saveStatus.style.fontSize = '12px';
+                    saveStatus.style.opacity = '0';
+                    saveStatus.style.transition = 'opacity 0.3s ease';
+                    essayControls.appendChild(saveStatus);
+                    
+                    essayInput.addEventListener('input', function(e) {
+                        clearTimeout(timeoutId);
+                        clearTimeout(saveStatusTimeout);
+                        
+                        // Show "Saving..." message
+                        saveStatus.textContent = 'Saving...';
+                        saveStatus.style.color = '#ffc107';
+                        saveStatus.style.opacity = '1';
+                        
+                        timeoutId = setTimeout(() => {
+                            autoSaveEssayAnswer(e.target.value, saveStatus);
+                        }, 500); // Reduced to 500ms for quicker saving
+                    });
+                }
+            });
+
+            function autoSaveEssayAnswer(answer, saveStatus) {
                 const form = document.getElementById('answerForm');
                 const formData = new FormData(form);
-                formData.append('action', 'saveAnswer');
+                
+                // Đặt action là saveAnswer
+                formData.set('action', 'saveAnswer');
+                
+                // Đảm bảo essay_answer được đưa vào formData
+                formData.set('essay_answer', answer);
+                
+                // Thêm nextAction với giá trị mặc định là 'autosave'
+                formData.set('nextAction', 'autosave');
+                
+                // Debug: Log tất cả dữ liệu form trước khi gửi
+                console.log('Form data being sent:');
+                for (let pair of formData.entries()) {
+                    console.log(pair[0] + ': ' + pair[1]);
+                }
                 
                 // Lấy ID câu hỏi hiện tại
                 const currentQuestionId = parseInt(document.querySelector('input[name="questionId"]').value);
@@ -2578,6 +2646,17 @@
                 }).then(response => {
                     if (response.ok) {
                         console.log('Essay answer saved successfully');
+                        
+                        if (saveStatus) {
+                            saveStatus.textContent = 'Đã lưu';
+                            saveStatus.style.color = '#28a745';
+                            
+                            // Ẩn thông báo sau 2 giây
+                            clearTimeout(saveStatusTimeout);
+                            saveStatusTimeout = setTimeout(() => {
+                                saveStatus.style.opacity = '0';
+                            }, 2000);
+                        }
                         
                         // Cập nhật trạng thái answered
                         if (answer.trim() !== '') {
@@ -2592,21 +2671,25 @@
                         
                         // Cập nhật hiển thị của các ô câu hỏi
                         updateQuestionBoxStates();
+                    } else {
+                        console.error('Error response from server:', response.status);
+                        
+                        // Thêm code để hiển thị chi tiết lỗi
+                        response.text().then(text => {
+                            console.error('Error details:', text);
+                        });
+                        
+                        if (saveStatus) {
+                            saveStatus.textContent = 'Lưu thất bại';
+                            saveStatus.style.color = '#dc3545';
+                        }
                     }
                 }).catch(error => {
                     console.error('Error saving essay answer:', error);
-                });
-            }
-
-            // Thêm debounce để tránh gửi quá nhiều request
-            let timeoutId;
-            const essayInput = document.querySelector('.essay-answer');
-            if (essayInput) {
-                essayInput.addEventListener('input', function(e) {
-                    clearTimeout(timeoutId);
-                    timeoutId = setTimeout(() => {
-                        autoSaveEssayAnswer(e.target.value);
-                    }, 1000); // Đợi 1 giây sau khi người dùng ngừng gõ
+                    if (saveStatus) {
+                        saveStatus.textContent = 'Lưu thất bại';
+                        saveStatus.style.color = '#dc3545';
+                    }
                 });
             }
         </script>

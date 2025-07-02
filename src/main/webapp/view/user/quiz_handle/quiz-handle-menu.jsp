@@ -103,6 +103,41 @@
         .status-in-process {
             color: #ffc107;
         }
+        
+        /* Styles for waiting for grading message */
+        .waiting-for-grading-note {
+            font-size: 0.85rem;
+            padding: 5px 0;            
+        }
+        
+        .waiting-for-grading-note small {
+            display: block;
+            text-align: center;
+        }
+        
+        /* Style for disabled waiting button */
+        .btn-warning:disabled {
+            background-color: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+        
+        .btn-warning:disabled:hover {
+            background-color: #fff3cd;
+        }
+        
+        /* Add a subtle pulsing effect to the waiting icon */
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .btn-warning:disabled i {
+            animation: pulse 2s infinite;
+        }
     </style>
 </head>
 
@@ -238,17 +273,34 @@
                                                         <c:choose>
                                                             <c:when test="${not empty quizScores[quiz.id]}">
                                                                 <div class="score-value">${quizScores[quiz.id]}%</div>
+                                                                
+                                                                <!-- Thêm thông báo khi quiz đang chờ chấm điểm tự luận -->
+                                                                <c:if test="${quizAttemptStatus[quiz.id] eq 'partially_graded'}">
+                                                                    <div class="waiting-for-grading-note mt-2">
+                                                                        <small class="text-warning">
+                                                                            <i class="fas fa-info-circle"></i> 
+                                                                            This is a temporary score. Waiting for the essay score...
+                                                                        </small>
+                                                                    </div>
+                                                                </c:if>
                                                             </c:when>
                                                             <c:otherwise>
                                                                 <div class="no-score">Not attempted yet</div>
                                                             </c:otherwise>
                                                         </c:choose>
                                                     </div>
-                                                                                                                    <div class="mt-3">
+                                                    <div class="mt-3">
                                                         <c:choose>
                                                             <c:when test="${not empty quizScores[quiz.id]}">
                                                                 <div class="d-flex gap-2">
-                                                                    <button class="btn btn-primary flex-grow-1" onclick="startQuiz('${quiz.id}', true)">Retake Quiz</button>
+                                                                    <c:if test="${quizAttemptStatus[quiz.id] eq 'completed'}">
+                                                                        <button class="btn btn-primary flex-grow-1" onclick="startQuiz('${quiz.id}', true)">Retake Quiz</button>
+                                                                    </c:if>
+                                                                    <c:if test="${quizAttemptStatus[quiz.id] eq 'partially_graded'}">
+                                                                        <button class="btn btn-warning flex-grow-1" disabled title="Waiting for essay grading">
+                                                                            <i class="fas fa-clock"></i> Waiting for Grading
+                                                                        </button>
+                                                                    </c:if>
                                                                     <button class="btn btn-secondary flex-grow-1" onclick="reviewQuiz('${quiz.id}')">Review Quiz</button>
                                                                 </div>
                                                             </c:when>

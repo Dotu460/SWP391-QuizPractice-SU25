@@ -134,6 +134,9 @@ public class EssayScoreController extends HttpServlet {
         String feedback = request.getParameter("feedback");
         String action = request.getParameter("action");
         
+        System.out.println("Essay Score POST - attemptId: " + attemptIdStr + ", questionId: " + questionIdStr + 
+                          ", score: " + scoreStr + ", action: " + action);
+        
         if (attemptIdStr == null || questionIdStr == null || scoreStr == null) {
             response.sendRedirect(request.getContextPath() + "/home");
             return;
@@ -165,6 +168,8 @@ public class EssayScoreController extends HttpServlet {
                 return;
             }
             
+            System.out.println("Essay score saved successfully: " + score);
+            
             // Kiểm tra xem đã chấm điểm tất cả câu hỏi tự luận chưa
             boolean allEssayQuestionsGraded = true;
             List<Question> essayQuestions = questionDAO.findEssayQuestionsByQuizId(attempt.getQuiz_id());
@@ -177,6 +182,8 @@ public class EssayScoreController extends HttpServlet {
                 }
             }
             
+            System.out.println("All essay questions graded: " + allEssayQuestionsGraded);
+            
             // Nếu đã chấm điểm tất cả câu hỏi tự luận, cập nhật trạng thái attempt thành COMPLETED
             if (allEssayQuestionsGraded) {
                 // Tính toán lại điểm tổng kết (kết hợp điểm trắc nghiệm và tự luận)
@@ -187,25 +194,31 @@ public class EssayScoreController extends HttpServlet {
                 attempt.setScore(totalScore);
                 attempt.setPassed(totalScore >= 5.0); // Giả sử điểm đạt là 5.0
                 
-                attemptsDAO.update(attempt);
+                boolean updated = attemptsDAO.update(attempt);
+                System.out.println("Attempt updated with final score " + totalScore + ": " + updated);
             }
             
-            // Redirect về trang chấm điểm với câu hỏi tiếp theo hoặc câu hỏi hiện tại
+            // Nếu action là "save", luôn chuyển về trang danh sách chấm điểm
+            if ("save".equals(action)) {
+                System.out.println("Redirecting to essay grading list page");
+                response.sendRedirect(request.getContextPath() + "/admin/essay-grading?success=true");
+                return;
+            }
+            
+            // Nếu không, tiếp tục chấm điểm câu hỏi hiện tại hoặc chuyển đến câu hỏi tiếp theo
             String questionNumberStr = request.getParameter("questionNumber");
             int currentNumber = questionNumberStr != null ? Integer.parseInt(questionNumberStr) : 1;
             
-            // Nếu đã chấm xong tất cả và action là "save", chuyển về trang danh sách chấm điểm
-            if (allEssayQuestionsGraded && "save".equals(action)) {
-                response.sendRedirect(request.getContextPath() + "/admin/essay-grading?success=true");
-            } else {
-                // Nếu không, tiếp tục chấm điểm câu hỏi hiện tại
-                response.sendRedirect(request.getContextPath() + "/essay-score?attemptId=" + attemptId + "&questionNumber=" + currentNumber);
-            }
+            response.sendRedirect(request.getContextPath() + "/essay-score?attemptId=" + attemptId + "&questionNumber=" + currentNumber);
             
         } catch (NumberFormatException e) {
+            System.out.println("NumberFormatException in EssayScoreController: " + e.getMessage());
+            e.printStackTrace();
             request.setAttribute("errorMessage", "Tham số không hợp lệ");
             response.sendRedirect(request.getContextPath() + "/home");
         } catch (Exception e) {
+            System.out.println("Exception in EssayScoreController: " + e.getMessage());
+            e.printStackTrace();
             request.setAttribute("errorMessage", "Lỗi: " + e.getMessage());
             response.sendRedirect(request.getContextPath() + "/home");
         }
