@@ -262,7 +262,7 @@
                                     <span class="setting-id-badge">#${setting.id}</span>
                             </p>
                         </div>
-                        <a href="${pageContext.request.contextPath}/admin/setting" class="btn btn-secondary">
+                        <a href="${pageContext.request.contextPath}setting" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Back to List
                         </a>
                     </div>
@@ -364,7 +364,7 @@
                     </h5>
 
                     <div class="action-buttons d-flex gap-3">
-                        <a href="${pageContext.request.contextPath}/admin/setting?action=edit&id=${setting.id}" 
+                        <a href="${pageContext.request.contextPath}/setting?action=edit&id=${setting.id}" 
                            class="btn btn-primary">
                             <i class="fas fa-edit"></i> Edit Setting
                         </a>
@@ -377,7 +377,7 @@
                             <i class="fas fa-trash"></i> Delete Setting
                         </button>
 
-                        <a href="${pageContext.request.contextPath}/admin/setting" class="btn btn-secondary">
+                        <a href="${pageContext.request.contextPath}/setting" class="btn btn-secondary">
                             <i class="fas fa-list"></i> Back to List
                         </a>
                     </div>
@@ -404,7 +404,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <form method="POST" action="${pageContext.request.contextPath}/admin/setting" style="display: inline;">
+                        <form method="POST" action="${pageContext.request.contextPath}setting" style="display: inline;">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="id" value="${setting.id}">
                             <button type="submit" class="btn btn-danger">Delete Setting</button>

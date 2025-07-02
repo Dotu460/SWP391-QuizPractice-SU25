@@ -11,7 +11,7 @@ import com.quiz.su25.entity.Setting;
 import com.quiz.su25.listener.AppContextListener;
 import java.util.List;
 
-@WebServlet(name = "ManageSettingController", urlPatterns = {"/admin/setting"})
+@WebServlet(name = "ManageSettingController", urlPatterns = {"/setting"})
 public class ManageSettingController extends HttpServlet {
     private SettingDAO settingDAO;
 
@@ -52,7 +52,7 @@ public class ManageSettingController extends HttpServlet {
         }
         
         // If setting not found or invalid ID, redirect to list
-        response.sendRedirect(request.getContextPath() + "/admin/setting");
+        response.sendRedirect(request.getContextPath() + "/setting");
     }
     
     private void handleDetails(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -72,7 +72,7 @@ public class ManageSettingController extends HttpServlet {
         }
         
         // If setting not found or invalid ID, redirect to list
-        response.sendRedirect(request.getContextPath() + "/admin/setting");
+        response.sendRedirect(request.getContextPath() + "/setting");
     }
     
     private void handleListWithFilters(HttpServletRequest request, HttpServletResponse response) 
@@ -157,7 +157,7 @@ public class ManageSettingController extends HttpServlet {
         } else if ("delete".equals(action)) {
             deleteSetting(request, response);
         } else {
-            response.sendRedirect(request.getContextPath() + "/admin/setting");
+            response.sendRedirect(request.getContextPath() + "/setting");
         }
     }
     
@@ -200,7 +200,7 @@ public class ManageSettingController extends HttpServlet {
                 
                 request.getSession().setAttribute("toastMessage", "Setting created successfully");
                 request.getSession().setAttribute("toastType", "success");
-                response.sendRedirect(request.getContextPath() + "/admin/setting");
+                response.sendRedirect(request.getContextPath() + "/setting");
             } else {
                 request.setAttribute("error", "Failed to create setting");
                 request.setAttribute("key", key);
@@ -220,7 +220,7 @@ public class ManageSettingController extends HttpServlet {
             String idStr = request.getParameter("id");
             if (idStr == null || idStr.trim().isEmpty()) {
                 request.setAttribute("error", "Setting ID is required for update");
-                response.sendRedirect(request.getContextPath() + "/admin/setting");
+                response.sendRedirect(request.getContextPath() + "/setting");
                 return;
             }
             
@@ -268,7 +268,7 @@ public class ManageSettingController extends HttpServlet {
                 
                 request.getSession().setAttribute("toastMessage", "Setting updated successfully");
                 request.getSession().setAttribute("toastType", "success");
-                response.sendRedirect(request.getContextPath() + "/admin/setting");
+                response.sendRedirect(request.getContextPath() + "/setting");
             } else {
                 request.setAttribute("setting", setting);
                 request.setAttribute("error", "Failed to update setting");
@@ -285,7 +285,7 @@ public class ManageSettingController extends HttpServlet {
                     request.setAttribute("setting", setting);
                 } catch (NumberFormatException ex) {
                     // If we can't get the setting, redirect to list
-                    response.sendRedirect(request.getContextPath() + "/admin/setting");
+                    response.sendRedirect(request.getContextPath() + "/setting");
                     return;
                 }
             }
@@ -301,7 +301,7 @@ public class ManageSettingController extends HttpServlet {
                     request.setAttribute("setting", setting);
                 } catch (NumberFormatException ex) {
                     // If we can't get the setting, redirect to list
-                    response.sendRedirect(request.getContextPath() + "/admin/setting");
+                    response.sendRedirect(request.getContextPath() + "/setting");
                     return;
                 }
             }
@@ -316,7 +316,7 @@ public class ManageSettingController extends HttpServlet {
             if (idStr == null || idStr.trim().isEmpty()) {
                 request.getSession().setAttribute("toastMessage", "Setting ID is required for deletion");
                 request.getSession().setAttribute("toastType", "error");
-                response.sendRedirect(request.getContextPath() + "/admin/setting");
+                response.sendRedirect(request.getContextPath() + "/setting");
                 return;
             }
             
@@ -327,7 +327,7 @@ public class ManageSettingController extends HttpServlet {
             if (setting == null) {
                 request.getSession().setAttribute("toastMessage", "Setting not found");
                 request.getSession().setAttribute("toastType", "error");
-                response.sendRedirect(request.getContextPath() + "/admin/setting");
+                response.sendRedirect(request.getContextPath() + "/setting");
                 return;
             }
             
@@ -354,7 +354,7 @@ public class ManageSettingController extends HttpServlet {
         }
         
         // Redirect to avoid form resubmission
-        response.sendRedirect(request.getContextPath() + "/admin/setting");
+        response.sendRedirect(request.getContextPath() + "/setting");
     }
 
     private void handleAdd(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

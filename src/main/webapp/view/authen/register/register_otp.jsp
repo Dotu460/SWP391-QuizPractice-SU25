@@ -299,7 +299,7 @@
             <div class="timer-section">
                 <i class="fas fa-clock timer-icon"></i>
                 <span>Time remaining:</span>
-                <span class="countdown" id="countdown">01:00</span>
+                <span class="countdown" id="countdown">--:--</span>
             </div>
             
             <div class="resend-section">
@@ -336,7 +336,9 @@
             const countdownEl = document.getElementById('countdown');
             const messageContainer = document.getElementById('messageContainer');
             
-            let timeLeft = 60; // 1 minute
+            // Get timeout from server (passed via request attribute)
+            let otpTimeoutSeconds = ${not empty otpTimeoutSeconds ? otpTimeoutSeconds : 60};
+            let timeLeft = otpTimeoutSeconds;
             let timerInterval;
             
             // Auto focus first input
@@ -422,7 +424,8 @@
             // Timer functionality
             function startTimer() {
                 resendButton.disabled = true;
-                timeLeft = 60;
+                timeLeft = otpTimeoutSeconds;
+                
                 
                 timerInterval = setInterval(() => {
                     timeLeft--;

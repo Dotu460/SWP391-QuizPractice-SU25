@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;    
 
 import com.quiz.su25.config.GlobalConfig;
+import com.quiz.su25.listener.AppContextListener;
 import com.quiz.su25.utils.EmailUtils;
 @WebServlet(name="AuthenController", urlPatterns={"/login","/logout","/register","/verifyOTP","/forgot-password","/reset-password","/resendOTP","/newpassword","/registerverifyOTP","/change-password"})
 public class AuthenController extends HttpServlet {
@@ -142,7 +143,9 @@ public class AuthenController extends HttpServlet {
 
         // Check OTP
         long currentTime = System.currentTimeMillis();
-        if(otpCreationTime == null || currentTime - otpCreationTime >60000){
+        int otpTimeoutSeconds = AppContextListener.getIntSetting(request, "otp_timeout", 60);        
+        long otpTimeoutMillis = otpTimeoutSeconds * 1000L;
+        if(otpCreationTime == null || currentTime - otpCreationTime > otpTimeoutMillis){
             request.setAttribute("error", "Mã OTP đã hết hạn. vui lòng yêu cầu mã mới");
             request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
             return;
@@ -166,8 +169,11 @@ public class AuthenController extends HttpServlet {
 
         // Check OTP
         long currentTime = System.currentTimeMillis();
-        if(otpCreationTime == null || currentTime - otpCreationTime >60000){
+        int otpTimeoutSeconds = AppContextListener.getIntSetting(request, "otp_timeout", 60);        
+        long otpTimeoutMillis = otpTimeoutSeconds * 1000L;
+        if(otpCreationTime == null || currentTime - otpCreationTime > otpTimeoutMillis){
             request.setAttribute("error", "Mã OTP đã hết hạn. vui lòng yêu cầu mã mới");
+            request.setAttribute("otpTimeoutSeconds", otpTimeoutSeconds);
             request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
             return;
         }
@@ -218,6 +224,9 @@ public class AuthenController extends HttpServlet {
             // Set OTP creation time
             session.setAttribute("OTPCreationTime", System.currentTimeMillis());
             
+            // Pass OTP timeout to JSP
+            int otpTimeoutSeconds = AppContextListener.getIntSetting(request, "otp_timeout", 60);            
+            request.setAttribute("otpTimeoutSeconds", otpTimeoutSeconds);
             // Forward to OTP verification page
             request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
             
@@ -249,6 +258,8 @@ public class AuthenController extends HttpServlet {
                 session.setAttribute("isPasswordReset", true); // Đánh dấu đây là quá trình reset password
                 
                 // Chuyển đến trang nhập OTP
+                int otpTimeoutSeconds = AppContextListener.getIntSetting(request, "otp_timeout", 60);                
+                request.setAttribute("otpTimeoutSeconds", otpTimeoutSeconds);
                 request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
             } else {
                 // Email không tồn tại

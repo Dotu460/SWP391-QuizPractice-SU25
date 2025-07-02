@@ -156,7 +156,7 @@
                                                                 <h2 class="page-title">Settings Management</h2>
                                 <p class="page-description">Manage system configuration settings</p>
                             </div>
-                            <a href="${pageContext.request.contextPath}/admin/setting?action=add" class="btn btn-secondary">
+                            <a href="${pageContext.request.contextPath}/setting?action=add" class="btn btn-secondary">
                             <i class="fas fa-plus"></i> Add New Setting
                         </a>
                     </div>
@@ -199,12 +199,12 @@
                                                 </td>
                                                 <td>
                                                     <div class="action-buttons">
-                                                        <a href="${pageContext.request.contextPath}/admin/setting?action=details&id=${setting.id}" 
+                                                        <a href="${pageContext.request.contextPath}/setting?action=details&id=${setting.id}" 
                                                            class="btn btn-info btn-sm" title="View Details">
                                                             <i class="fas fa-eye"></i>
                                                         </a>
 
-                                                        <a href="${pageContext.request.contextPath}/admin/setting?action=edit&id=${setting.id}" 
+                                                        <a href="${pageContext.request.contextPath}/setting?action=edit&id=${setting.id}" 
                                                            class="btn btn-warning btn-sm" title="Edit">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
@@ -300,7 +300,7 @@
             function confirmDelete(id, key) {
                 document.getElementById('deleteSettingId').value = id;
                 document.getElementById('deleteSettingKey').textContent = key;
-                document.getElementById('deleteForm').action = '${pageContext.request.contextPath}/admin/setting';
+                document.getElementById('deleteForm').action = '${pageContext.request.contextPath}/setting';
                 new bootstrap.Modal(document.getElementById('deleteModal')).show();
             }
 

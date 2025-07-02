@@ -157,7 +157,7 @@
                                 <h2 class="page-title">Add New Setting</h2>
                                 <p class="page-description">Create a new system configuration setting</p>
                             </div>
-                            <a href="${pageContext.request.contextPath}/admin/setting" class="btn btn-secondary">
+                            <a href="${pageContext.request.contextPath}/setting" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Back to List
                         </a>
                     </div>
@@ -173,7 +173,7 @@
                         </div>
                     </c:if>
 
-                    <form method="POST" action="${pageContext.request.contextPath}/admin/setting" id="addSettingForm">
+                    <form method="POST" action="${pageContext.request.contextPath}/setting" id="addSettingForm">
                         <input type="hidden" name="action" value="create">
 
                         <!-- Setting Key Section -->
@@ -237,7 +237,7 @@
                                 <button type="reset" class="btn btn-outline-secondary">
                                     <i class="fas fa-undo"></i> Reset Form
                                 </button>
-                                <a href="${pageContext.request.contextPath}/admin/setting" class="btn btn-outline-dark">
+                                <a href="${pageContext.request.contextPath}/setting" class="btn btn-outline-dark">
                                     <i class="fas fa-times"></i> Cancel
                                 </a>
                             </div>
