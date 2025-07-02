@@ -569,7 +569,7 @@ public class QuestionListController extends HttpServlet {
             String filePath = uploadPath + File.separator + uniqueFileName;
             filePart.write(filePath);
 
-            String fileUrl = request.getContextPath() + "/" + UPLOAD_DIRECTORY + "/" + uniqueFileName;
+            String fileUrl = "/SWP391_QUIZ_PRACTICE_SU25/" + UPLOAD_DIRECTORY + "/" + uniqueFileName;
 
             // Return response based on TinyMCE requirements
             if (fileType.startsWith("image/")) {
