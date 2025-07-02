@@ -281,8 +281,8 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
      * @param status Trạng thái mới
      * @return true nếu cập nhật thành công, false nếu thất bại
      */
-    public boolean updateStatus(Integer id, String status) {
-        String sql = "UPDATE Question SET status = ? WHERE id = ?";
+    public boolean updateStatus(int id, String status) {
+        String sql = "UPDATE Question SET status=? WHERE id=?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -322,40 +322,58 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
     /**
      * Tìm kiếm và lọc câu hỏi với nhiều tiêu chí kèm phân trang
      * 
+     * @param contentFilter Tìm kiếm trong nội dung câu hỏi
+     * @param subjectId Lọc theo subject
+     * @param lessonId Lọc theo lesson
+     * @param quizId Lọc theo quiz
      * @param statusFilter Lọc theo trạng thái câu hỏi (active/inactive)
-     * @param searchFilter Tìm kiếm trong nội dung và phần giải thích
-     * @param levelFilter Lọc theo độ khó (easy/medium/hard)
      * @param page Số trang hiện tại (bắt đầu từ 1)
      * @param pageSize Số lượng câu hỏi mỗi trang
      * @return Danh sách câu hỏi thỏa mãn điều kiện cho trang hiện tại
      */
-    public List<Question> findQuestionsWithFilters(String statusFilter, String searchFilter, 
-            String levelFilter, int page, int pageSize) {
-        StringBuilder sql = new StringBuilder("SELECT * FROM Question WHERE 1=1");
+    public List<Question> findQuestionsWithFilters(String contentFilter, Integer subjectId, 
+            Integer lessonId, Integer quizId, String statusFilter, int page, int pageSize) {
+        StringBuilder sql = new StringBuilder(
+            "SELECT q.* FROM Question q "
+            + "INNER JOIN Quizzes quiz ON q.quiz_id = quiz.id "
+            + "INNER JOIN Lessons l ON quiz.lesson_id = l.id "
+            + "INNER JOIN subject s ON l.subject_id = s.id "
+            + "WHERE 1=1"
+        );
         List<Object> parameters = new ArrayList<>();
         
-        // Thêm điều kiện lọc theo trạng thái
+        // Add content filter
+        if (contentFilter != null && !contentFilter.trim().isEmpty()) {
+            sql.append(" AND q.content LIKE ?");
+            parameters.add("%" + contentFilter.trim() + "%");
+        }
+        
+        // Add subject id filter
+        if (subjectId != null) {
+            sql.append(" AND s.id = ?");
+            parameters.add(subjectId);
+        }
+        
+        // Add lesson id filter
+        if (lessonId != null) {
+            sql.append(" AND l.id = ?");
+            parameters.add(lessonId);
+        }
+        
+        // Add quiz id filter
+        if (quizId != null) {
+            sql.append(" AND q.quiz_id = ?");
+            parameters.add(quizId);
+        }
+        
+        // Add status filter
         if (statusFilter != null && !statusFilter.trim().isEmpty()) {
-            sql.append(" AND status = ?");
+            sql.append(" AND q.status = ?");
             parameters.add(statusFilter.trim());
         }
         
-        // Thêm điều kiện tìm kiếm trong nội dung và phần giải thích
-        if (searchFilter != null && !searchFilter.trim().isEmpty()) {
-            sql.append(" AND (content LIKE ? OR explanation LIKE ?)");
-            String searchPattern = "%" + searchFilter.trim() + "%";
-            parameters.add(searchPattern);
-            parameters.add(searchPattern);
-        }
-        
-        // Thêm điều kiện lọc theo độ khó
-        if (levelFilter != null && !levelFilter.trim().isEmpty()) {
-            sql.append(" AND level = ?");
-            parameters.add(levelFilter.trim());
-        }
-        
-        // Thêm sắp xếp và phân trang
-        sql.append(" ORDER BY id DESC LIMIT ? OFFSET ?");
+        // Add order by and pagination
+        sql.append(" ORDER BY q.id ASC LIMIT ? OFFSET ?");
         parameters.add(pageSize);
         parameters.add((page - 1) * pageSize);
         
@@ -364,7 +382,7 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
             connection = getConnection();
             statement = connection.prepareStatement(sql.toString());
             
-            // Thiết lập các tham số
+            // Set parameters
             for (int i = 0; i < parameters.size(); i++) {
                 statement.setObject(i + 1, parameters.get(i));
             }
@@ -374,6 +392,8 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
                 Question question = getFromResultSet(resultSet);
                 listQuestions.add(question);
             }
+            // Load options cho tất cả questions
+            loadOptionsForQuestions(listQuestions);
         } catch (Exception e) {
             System.out.println("Error findQuestionsWithFilters at class QuestionDAO: " + e.getMessage());
         } finally {
@@ -384,43 +404,60 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
     
     /**
      * Đếm tổng số câu hỏi thỏa mãn điều kiện lọc
-     * Phương thức này được sử dụng để tính toán phân trang và hiển thị tổng số kết quả
      * 
+     * @param contentFilter Tìm kiếm trong nội dung câu hỏi
+     * @param subjectId Lọc theo subject
+     * @param lessonId Lọc theo lesson
+     * @param quizId Lọc theo quiz
      * @param statusFilter Lọc theo trạng thái câu hỏi
-     * @param searchFilter Tìm kiếm trong nội dung và phần giải thích
-     * @param levelFilter Lọc theo độ khó
      * @return Tổng số câu hỏi thỏa mãn điều kiện
      */
-    public int getTotalFilteredQuestions(String statusFilter, String searchFilter, 
-            String levelFilter) {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Question WHERE 1=1");
+    public int getTotalFilteredQuestions(String contentFilter, Integer subjectId, 
+            Integer lessonId, Integer quizId, String statusFilter) {
+        StringBuilder sql = new StringBuilder(
+            "SELECT COUNT(*) FROM Question q "
+            + "INNER JOIN Quizzes quiz ON q.quiz_id = quiz.id "
+            + "INNER JOIN Lessons l ON quiz.lesson_id = l.id "
+            + "INNER JOIN subject s ON l.subject_id = s.id "
+            + "WHERE 1=1"
+        );
         List<Object> parameters = new ArrayList<>();
         
-        // Thêm điều kiện lọc theo trạng thái
+        // Add content filter
+        if (contentFilter != null && !contentFilter.trim().isEmpty()) {
+            sql.append(" AND q.content LIKE ?");
+            parameters.add("%" + contentFilter.trim() + "%");
+        }
+        
+        // Add subject id filter
+        if (subjectId != null) {
+            sql.append(" AND s.id = ?");
+            parameters.add(subjectId);
+        }
+        
+        // Add lesson id filter
+        if (lessonId != null) {
+            sql.append(" AND l.id = ?");
+            parameters.add(lessonId);
+        }
+        
+        // Add quiz id filter
+        if (quizId != null) {
+            sql.append(" AND q.quiz_id = ?");
+            parameters.add(quizId);
+        }
+        
+        // Add status filter
         if (statusFilter != null && !statusFilter.trim().isEmpty()) {
-            sql.append(" AND status = ?");
+            sql.append(" AND q.status = ?");
             parameters.add(statusFilter.trim());
-        }
-        
-        // Thêm điều kiện tìm kiếm trong nội dung và phần giải thích
-        if (searchFilter != null && !searchFilter.trim().isEmpty()) {
-            sql.append(" AND (content LIKE ? OR explanation LIKE ?)");
-            String searchPattern = "%" + searchFilter.trim() + "%";
-            parameters.add(searchPattern);
-            parameters.add(searchPattern);
-        }
-        
-        // Thêm điều kiện lọc theo độ khó
-        if (levelFilter != null && !levelFilter.trim().isEmpty()) {
-            sql.append(" AND level = ?");
-            parameters.add(levelFilter.trim());
         }
         
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql.toString());
             
-            // Thiết lập các tham số
+            // Set parameters
             for (int i = 0; i < parameters.size(); i++) {
                 statement.setObject(i + 1, parameters.get(i));
             }
@@ -460,6 +497,33 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
         return 0;
     }
     
+    /**
+     * Tìm câu hỏi theo nội dung
+     * @param content Nội dung câu hỏi
+     * @return Danh sách câu hỏi thỏa mãn điều kiện
+     */
+    public List<Question> findByContent(String content) {
+        String sql = "SELECT * FROM Question WHERE content = ?";
+        List<Question> list = new ArrayList<>();
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, content);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Question question = getFromResultSet(resultSet);
+                list.add(question);
+            }
+            // Load options cho tất cả questions
+            loadOptionsForQuestions(list);
+        } catch (Exception e) {
+            System.out.println("Error findByContent at class QuestionDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return list;
+    }
+
     public static void main(String[] args) {
         QuestionDAO questionDAO = new QuestionDAO();
         questionDAO.findAll().forEach(item -> {

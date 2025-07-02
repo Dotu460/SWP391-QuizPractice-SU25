@@ -10,6 +10,8 @@ import com.quiz.su25.dal.impl.LessonDAO;
 import com.quiz.su25.entity.Quizzes;
 import com.quiz.su25.entity.Subject;
 import com.quiz.su25.entity.Lesson;
+import com.quiz.su25.entity.User;
+import com.quiz.su25.config.GlobalConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -77,6 +79,10 @@ public class QuizzesListController extends HttpServlet {
     private void listQuizzes(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
+            // Lấy thông tin user từ session
+            User currentUser = (User) request.getSession().getAttribute(GlobalConfig.SESSION_ACCOUNT);
+            request.setAttribute("currentUser", currentUser);
+            
             // Get and validate filter parameters
             String quizName = request.getParameter("quizName");
             if (quizName != null && quizName.trim().isEmpty()) {
