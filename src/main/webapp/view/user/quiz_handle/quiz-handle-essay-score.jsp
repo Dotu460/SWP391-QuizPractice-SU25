@@ -314,6 +314,7 @@
                     <input type="hidden" name="attemptId" value="${attempt.id}">
                     <input type="hidden" name="questionId" value="${question.id}">
                     <input type="hidden" name="answerId" value="${answer.id}">
+                    <input type="hidden" name="questionNumber" value="${currentNumber}">
                     
                     <div class="grading-section">
                         <div class="section-title">
@@ -369,6 +370,14 @@
                     e.target.value = 0;
                 } else if (value > 10) {
                     e.target.value = 10;
+                }
+            });
+            
+            // Khắc phục lỗi select2
+            $(document).ready(function() {
+                // Kiểm tra xem select2 có tồn tại không trước khi gọi
+                if ($.fn.select2 !== undefined) {
+                    $('.select2').select2();
                 }
             });
         </script>

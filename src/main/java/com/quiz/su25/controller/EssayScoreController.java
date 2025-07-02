@@ -135,9 +135,10 @@ public class EssayScoreController extends HttpServlet {
         String action = request.getParameter("action");
         
         System.out.println("Essay Score POST - attemptId: " + attemptIdStr + ", questionId: " + questionIdStr + 
-                          ", score: " + scoreStr + ", action: " + action);
+                          ", score: " + scoreStr + ", action: " + action + ", feedback length: " + (feedback != null ? feedback.length() : 0));
         
         if (attemptIdStr == null || questionIdStr == null || scoreStr == null) {
+            System.out.println("Missing required parameters, redirecting to home");
             response.sendRedirect(request.getContextPath() + "/home");
             return;
         }
@@ -154,15 +155,18 @@ public class EssayScoreController extends HttpServlet {
             // Lấy thông tin về attempt
             UserQuizAttempts attempt = attemptsDAO.findById(attemptId);
             if (attempt == null) {
+                System.out.println("Attempt not found: " + attemptId);
                 request.setAttribute("errorMessage", "Attempt không tồn tại");
                 response.sendRedirect(request.getContextPath() + "/home");
                 return;
             }
             
             // Lưu điểm và feedback
+            System.out.println("Saving essay score: " + score + " for question: " + questionId + " in attempt: " + attemptId);
             boolean success = answersDAO.updateEssayScore(attemptId, questionId, score, feedback);
             
             if (!success) {
+                System.out.println("Failed to save essay score");
                 request.setAttribute("errorMessage", "Không thể lưu điểm");
                 response.sendRedirect(request.getContextPath() + "/home");
                 return;
@@ -178,6 +182,7 @@ public class EssayScoreController extends HttpServlet {
                 UserQuizAttemptAnswers ans = answersDAO.findEssayAnswerByAttemptAndQuestionId(attemptId, q.getId());
                 if (ans == null || ans.getEssay_score() == null) {
                     allEssayQuestionsGraded = false;
+                    System.out.println("Question " + q.getId() + " not graded yet");
                     break;
                 }
             }
@@ -201,26 +206,27 @@ public class EssayScoreController extends HttpServlet {
             // Nếu action là "save", luôn chuyển về trang danh sách chấm điểm
             if ("save".equals(action)) {
                 System.out.println("Redirecting to essay grading list page");
-                response.sendRedirect(request.getContextPath() + "/admin/essay-grading?success=true");
+                response.sendRedirect(request.getContextPath() + "/admin/essay-grading");
                 return;
             }
             
-            // Nếu không, tiếp tục chấm điểm câu hỏi hiện tại hoặc chuyển đến câu hỏi tiếp theo
+            // Nếu không, tiếp tục chấm điểm câu hỏi tiếp theo
             String questionNumberStr = request.getParameter("questionNumber");
             int currentNumber = questionNumberStr != null ? Integer.parseInt(questionNumberStr) : 1;
             
+            // Luôn redirect về essay-score với attempt ID
             response.sendRedirect(request.getContextPath() + "/essay-score?attemptId=" + attemptId + "&questionNumber=" + currentNumber);
             
         } catch (NumberFormatException e) {
             System.out.println("NumberFormatException in EssayScoreController: " + e.getMessage());
             e.printStackTrace();
             request.setAttribute("errorMessage", "Tham số không hợp lệ");
-            response.sendRedirect(request.getContextPath() + "/home");
+            response.sendRedirect(request.getContextPath() + "/admin/essay-grading");
         } catch (Exception e) {
             System.out.println("Exception in EssayScoreController: " + e.getMessage());
             e.printStackTrace();
             request.setAttribute("errorMessage", "Lỗi: " + e.getMessage());
-            response.sendRedirect(request.getContextPath() + "/home");
+            response.sendRedirect(request.getContextPath() + "/admin/essay-grading");
         }
     }
     

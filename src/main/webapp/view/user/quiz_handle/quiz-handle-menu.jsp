@@ -107,7 +107,7 @@
         /* Styles for waiting for grading message */
         .waiting-for-grading-note {
             font-size: 0.85rem;
-            padding: 5px 0;            
+            padding: 5px 0;
         }
         
         .waiting-for-grading-note small {
@@ -115,28 +115,55 @@
             text-align: center;
         }
         
-        /* Style for disabled waiting button */
-        .btn-warning:disabled {
-            background-color: #fff3cd;
-            border-color: #ffc107;
-            color: #856404;
+        /* Style for disabled review button */
+        .disabled-review-btn {
+            background-color: #e9ecef;
+            border-color: #ced4da;
+            color: #6c757d;
             cursor: not-allowed;
-            opacity: 0.8;
+            opacity: 0.65;
+            position: relative;
         }
         
-        .btn-warning:disabled:hover {
-            background-color: #fff3cd;
+        /* Style for disabled retake button */
+        .disabled-retake-btn {
+            background-color: #e9ecef;
+            border-color: #ced4da;
+            color: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.65;
+            position: relative;
         }
         
-        /* Add a subtle pulsing effect to the waiting icon */
-        @keyframes pulse {
-            0% { opacity: 0.6; }
-            50% { opacity: 1; }
-            100% { opacity: 0.6; }
+        /* Add custom tooltip styling */
+        .disabled-retake-btn:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 10;
+            margin-bottom: 5px;
         }
         
-        .btn-warning:disabled i {
-            animation: pulse 2s infinite;
+        /* Add arrow to tooltip */
+        .disabled-retake-btn:hover::before {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px;
+            border-style: solid;
+            border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+            margin-bottom: -5px;
+            transform: translateX(-50%) rotate(180deg);
         }
     </style>
 </head>
@@ -293,14 +320,21 @@
                                                         <c:choose>
                                                             <c:when test="${not empty quizScores[quiz.id]}">
                                                                 <div class="d-flex gap-2">
-                                                                    <c:if test="${quizAttemptStatus[quiz.id] eq 'completed'}">
-                                                                        <button class="btn btn-primary flex-grow-1" onclick="startQuiz('${quiz.id}', true)">Retake Quiz</button>
-                                                                    </c:if>
-                                                                    <c:if test="${quizAttemptStatus[quiz.id] eq 'partially_graded'}">
-                                                                        <button class="btn btn-warning flex-grow-1" disabled title="Waiting for essay grading">
-                                                                            <i class="fas fa-clock"></i> Waiting for Grading
-                                                                        </button>
-                                                                    </c:if>
+                                                                    <!-- Nút Retake Quiz: bị vô hiệu hóa khi đang chờ chấm điểm, có thể bấm khi đã chấm xong -->
+                                                                    <c:choose>
+                                                                        <c:when test="${quizAttemptStatus[quiz.id] eq 'partially_graded'}">
+                                                                            <button class="btn btn-primary flex-grow-1 disabled-retake-btn" 
+                                                                                    disabled 
+                                                                                    title="Available when expert graded the essay quiz">
+                                                                                Retake Quiz
+                                                                            </button>
+                                                                        </c:when>
+                                                                        <c:otherwise>
+                                                                            <button class="btn btn-primary flex-grow-1" onclick="startQuiz('${quiz.id}', true)">Retake Quiz</button>
+                                                                        </c:otherwise>
+                                                                    </c:choose>
+                                                                    
+                                                                    <!-- Nút Review Quiz luôn có thể bấm được -->
                                                                     <button class="btn btn-secondary flex-grow-1" onclick="reviewQuiz('${quiz.id}')">Review Quiz</button>
                                                                 </div>
                                                             </c:when>

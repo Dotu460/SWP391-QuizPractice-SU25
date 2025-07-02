@@ -423,16 +423,34 @@ public class UserQuizAttemptAnswersDAO extends DBContext implements I_DAO<UserQu
                 addEssayColumns();
             }
             
-            // Tiếp tục cập nhật điểm và feedback
-            String sql = "UPDATE UserQuizAttemptAnswers SET essay_score = ?, essay_feedback = ? WHERE attempt_id = ? AND quiz_question_id = ?";
-            connection = getConnection();
-            statement = connection.prepareStatement(sql);
-            statement.setDouble(1, score);
-            statement.setString(2, feedback);
-            statement.setInt(3, attemptId);
-            statement.setInt(4, questionId);
+            // Kiểm tra xem câu trả lời đã tồn tại chưa
+            UserQuizAttemptAnswers existingAnswer = findEssayAnswerByAttemptAndQuestionId(attemptId, questionId);
             
-            return statement.executeUpdate() > 0;
+            if (existingAnswer == null) {
+                // Nếu chưa có câu trả lời, tạo mới với điểm và feedback
+                System.out.println("No existing answer found, creating new one");
+                String insertSql = "INSERT INTO UserQuizAttemptAnswers (attempt_id, quiz_question_id, essay_score, essay_feedback, answer_at) VALUES (?, ?, ?, ?, NOW())";
+                connection = getConnection();
+                statement = connection.prepareStatement(insertSql);
+                statement.setInt(1, attemptId);
+                statement.setInt(2, questionId);
+                statement.setDouble(3, score);
+                statement.setString(4, feedback);
+                
+                return statement.executeUpdate() > 0;
+            } else {
+                // Nếu đã có câu trả lời, cập nhật điểm và feedback
+                System.out.println("Updating existing answer with ID: " + existingAnswer.getId());
+                String updateSql = "UPDATE UserQuizAttemptAnswers SET essay_score = ?, essay_feedback = ? WHERE attempt_id = ? AND quiz_question_id = ?";
+                connection = getConnection();
+                statement = connection.prepareStatement(updateSql);
+                statement.setDouble(1, score);
+                statement.setString(2, feedback);
+                statement.setInt(3, attemptId);
+                statement.setInt(4, questionId);
+                
+                return statement.executeUpdate() > 0;
+            }
         } catch (Exception e) {
             System.out.println("Error updateEssayScore at class UserQuizAttemptAnswersDAO: " + e.getMessage());
             e.printStackTrace();
