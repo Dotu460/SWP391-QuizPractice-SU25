@@ -147,6 +147,7 @@ public class AuthenController extends HttpServlet {
         long otpTimeoutMillis = otpTimeoutSeconds * 1000L;
         if(otpCreationTime == null || currentTime - otpCreationTime > otpTimeoutMillis){
             request.setAttribute("error", "Mã OTP đã hết hạn. vui lòng yêu cầu mã mới");
+            request.setAttribute("otpTimeoutSeconds", otpTimeoutSeconds);            
             request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
             return;
         }
@@ -157,6 +158,7 @@ public class AuthenController extends HttpServlet {
             request.getRequestDispatcher("view/authen/register/newpassword.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "Mã OTP không đúng. Vui lòng thử lại.");
+            request.setAttribute("otpTimeoutSeconds", otpTimeoutSeconds);
             request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
         }
     }

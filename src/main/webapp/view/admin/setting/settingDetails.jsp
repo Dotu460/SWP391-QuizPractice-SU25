@@ -199,32 +199,7 @@
                 position: relative;
             }
 
-            .stats-row {
-                display: flex;
-                justify-content: space-between;
-                flex-wrap: wrap;
-                gap: 15px;
-                margin-top: 15px;
-                padding-top: 15px;
-                border-top: 1px solid #dee2e6;
-            }
-
-            .stat-item {
-                text-align: center;
-                flex: 1;
-                min-width: 120px;
-            }
-
-            .stat-number {
-                font-size: 1.5em;
-                font-weight: 600;
-                color: #667eea;
-            }
-
-            .stat-label {
-                font-size: 0.875em;
-                color: #6c757d;
-            }
+            
 
             @media (max-width: 768px) {
                 .details-container {
@@ -311,50 +286,10 @@
                             </button>
                         </div>
 
-                        <!-- Value Statistics -->
-                        <div class="stats-row">
-                            <div class="stat-item">
-                                <div class="stat-number" id="charCount">-</div>
-                                <div class="stat-label">Characters</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number" id="lineCount">-</div>
-                                <div class="stat-label">Lines</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number" id="wordCount">-</div>
-                                <div class="stat-label">Words</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number" id="dataType">-</div>
-                                <div class="stat-label">Data Type</div>
-                            </div>
-                        </div>
+                        
                     </div>
 
-                    <!-- Usage Information Section -->
-                    <div class="detail-section">
-                        <h4 class="mb-4">
-                            <i class="fas fa-chart-line text-info"></i>
-                            Usage Information
-                        </h4>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <span class="detail-label">Recommended Usage</span>
-                                <div class="detail-value" id="usageRecommendation">
-                                    System configuration parameter
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <span class="detail-label">Access Method</span>
-                                <div class="detail-value">
-                                    <code>settingDAO.getValueByKey("${setting.key}")</code>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                    
 
                 <!-- Action Section -->
                 <div class="action-section">
@@ -369,13 +304,7 @@
                             <i class="fas fa-edit"></i> Edit Setting
                         </a>
 
-                        <button type="button" class="btn btn-outline-warning" onclick="testSetting()">
-                            <i class="fas fa-flask"></i> Test Value
-                        </button>
-
-                        <button type="button" class="btn btn-outline-danger" onclick="confirmDelete()">
-                            <i class="fas fa-trash"></i> Delete Setting
-                        </button>
+                        
 
                         <a href="${pageContext.request.contextPath}/setting" class="btn btn-secondary">
                             <i class="fas fa-list"></i> Back to List
@@ -385,52 +314,9 @@
             </div>
         </main>
 
-        <!-- Delete Confirmation Modal -->
-        <div class="modal fade" id="deleteModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Confirm Delete</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Are you sure you want to delete this setting?</p>
-                        <p><strong>Key:</strong> <code>${setting.key}</code></p>
-                        <p><strong>Value:</strong> <code class="text-break">${setting.value}</code></p>
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <strong>Warning:</strong> This action cannot be undone and may affect system functionality.
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <form method="POST" action="${pageContext.request.contextPath}setting" style="display: inline;">
-                            <input type="hidden" name="action" value="delete">
-                            <input type="hidden" name="id" value="${setting.id}">
-                            <button type="submit" class="btn btn-danger">Delete Setting</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+        
 
-        <!-- Test Result Modal -->
-        <div class="modal fade" id="testModal" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Value Test Results</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div id="testResults"></div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        
 
         <!-- Scripts -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -438,77 +324,13 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
 
         <script>
-                            document.addEventListener('DOMContentLoaded', function () {
-                                const settingValue = '${setting.value}';
-                                analyzeValue(settingValue);
-                            });
+                            
 
-                            function analyzeValue(value) {
-                                // Character count
-                                document.getElementById('charCount').textContent = value.length;
+                            
 
-                                // Line count
-                                const lines = value.split('\n').length;
-                                document.getElementById('lineCount').textContent = lines;
+                            
 
-                                // Word count
-                                const words = value.trim() ? value.trim().split(/\s+/).length : 0;
-                                document.getElementById('wordCount').textContent = words;
-
-                                // Determine data type and set badge
-                                let dataType = 'TEXT';
-                                let typeClass = 'type-text';
-
-                                if (value.toLowerCase() === 'true' || value.toLowerCase() === 'false') {
-                                    dataType = 'BOOLEAN';
-                                    typeClass = 'type-boolean';
-                                } else if (!isNaN(value) && !isNaN(parseFloat(value))) {
-                                    dataType = 'NUMBER';
-                                    typeClass = 'type-number';
-                                } else if (isValidJSON(value)) {
-                                    dataType = 'JSON';
-                                    typeClass = 'type-json';
-                                }
-
-                                document.getElementById('dataType').textContent = dataType;
-
-                                const typeBadge = document.getElementById('valueType');
-                                typeClass.textContent = dataType;
-                                typeClass.className = 'value-type-badge ' + typeClass;
-
-                                // Set usage recommendation
-                                setUsageRecommendation(dataType, value);
-                            }
-
-                            function isValidJSON(str) {
-                                try {
-                                    JSON.parse(str);
-                                    return true;
-                                } catch (e) {
-                                    return false;
-                                }
-                            }
-
-                            function setUsageRecommendation(type, value) {
-                                const element = document.getElementById('usageRecommendation');
-                                let recommendation = '';
-
-                                switch (type) {
-                                    case 'BOOLEAN':
-                                        recommendation = 'Use for feature flags, toggles, or yes/no configurations';
-                                        break;
-                                    case 'NUMBER':
-                                        recommendation = 'Use for limits, thresholds, timeouts, or numeric configurations';
-                                        break;
-                                    case 'JSON':
-                                        recommendation = 'Use for complex configurations, arrays, or structured data';
-                                        break;
-                                    default:
-                                        recommendation = 'Use for text values, URLs, paths, or simple string configurations';
-                                }
-
-                                element.textContent = recommendation;
-                            }
+                            
 
                             function copyToClipboard(text) {
                                 navigator.clipboard.writeText(text).then(function () {
@@ -533,49 +355,9 @@
                                 return toast;
                             }
 
-                            function confirmDelete() {
-                                new bootstrap.Modal(document.getElementById('deleteModal')).show();
-                            }
+                            
 
-                            function testSetting() {
-                                const value = '${setting.value}';
-                                const key = '${setting.key}';
-
-                                let results = '';
-
-                                // Test if it's a boolean
-                                if (value.toLowerCase() === 'true' || value.toLowerCase() === 'false') {
-                                    results += '<h6>Boolean Test</h6>';
-                                    results += '<p class="text-success"><i class="fas fa-check"></i> Valid boolean value: ' + value + '</p>';
-                                }
-
-                                // Test if it's a number
-                                if (!isNaN(value) && !isNaN(parseFloat(value))) {
-                                    results += '<h6>Number Test</h6>';
-                                    results += '<p class="text-success"><i class="fas fa-check"></i> Valid number: ' + parseFloat(value) + '</p>';
-                                }
-
-                                // Test if it's JSON
-                                if (isValidJSON(value)) {
-                                    results += '<h6>JSON Test</h6>';
-                                    results += '<p class="text-success"><i class="fas fa-check"></i> Valid JSON structure</p>';
-                                    try {
-                                        const parsed = JSON.parse(value);
-                                        results += '<pre class="bg-light p-3 border rounded">' + JSON.stringify(parsed, null, 2) + '</pre>';
-                                    } catch (e) {
-                                        results += '<p class="text-danger">Error parsing JSON: ' + e.message + '</p>';
-                                    }
-                                }
-
-                                // General validation
-                                results += '<h6>General Validation</h6>';
-                                results += '<p><strong>Length:</strong> ' + value.length + ' characters</p>';
-                                results += '<p><strong>Empty:</strong> ' + (value.trim() === '' ? 'Yes' : 'No') + '</p>';
-                                results += '<p><strong>Contains HTML:</strong> ' + (/<[^>]*>/.test(value) ? 'Yes' : 'No') + '</p>';
-
-                                document.getElementById('testResults').innerHTML = results;
-                                new bootstrap.Modal(document.getElementById('testModal')).show();
-                            }
+                            
         </script>
 
         <!-- Footer -->

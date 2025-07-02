@@ -156,8 +156,7 @@
                                                                 <h2 class="page-title">Settings Management</h2>
                                 <p class="page-description">Manage system configuration settings</p>
                             </div>
-                            <a href="${pageContext.request.contextPath}/setting?action=add" class="btn btn-secondary">
-                            <i class="fas fa-plus"></i> Add New Setting
+                            
                         </a>
                     </div>
                 </div>
@@ -264,30 +263,7 @@
             </div>
         </main>
 
-        <!-- Delete Confirmation Modal -->
-        <div class="modal fade" id="deleteModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Confirm Delete</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Are you sure you want to delete this setting?</p>
-                        <p><strong>Key:</strong> <span id="deleteSettingKey"></span></p>
-                        <p class="text-danger"><small>This action cannot be undone.</small></p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <form id="deleteForm" method="POST" style="display: inline;">
-                            <input type="hidden" name="action" value="delete">
-                            <input type="hidden" name="id" id="deleteSettingId">
-                            <button type="submit" class="btn btn-danger">Delete</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+        
 
         <!-- Toast Container -->
         <div class="toast-container"></div>
@@ -296,24 +272,12 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
         <script>
-            // Delete confirmation
-            function confirmDelete(id, key) {
-                document.getElementById('deleteSettingId').value = id;
-                document.getElementById('deleteSettingKey').textContent = key;
-                document.getElementById('deleteForm').action = '${pageContext.request.contextPath}/setting';
-                new bootstrap.Modal(document.getElementById('deleteModal')).show();
-            }
+            
 
             // Show toast messages
             document.addEventListener('DOMContentLoaded', function () {
                 // Handle delete button clicks
-                document.querySelectorAll('.delete-btn').forEach(function (button) {
-                    button.addEventListener('click', function () {
-                        const id = this.getAttribute('data-id');
-                        const key = this.getAttribute('data-key');
-                        confirmDelete(id, key);
-                    });
-                });
+                
 
             <c:if test="${not empty sessionScope.toastMessage}">
                 showToast('${sessionScope.toastMessage}', '${sessionScope.toastType}');

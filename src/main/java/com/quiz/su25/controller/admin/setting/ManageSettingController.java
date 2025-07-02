@@ -28,8 +28,6 @@ public class ManageSettingController extends HttpServlet {
             handleEdit(request, response);
         } else if ("details".equals(action)) {
             handleDetails(request, response);
-        } else if ("add".equals(action)) {
-            handleAdd(request, response);
         } else {
             handleListWithFilters(request, response);
         }
@@ -150,69 +148,13 @@ public class ManageSettingController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
         
-        if ("create".equals(action)) {
-            createSetting(request, response);
-        } else if ("update".equals(action)) {
+        if ("update".equals(action)) {
             updateSetting(request, response);
-        } else if ("delete".equals(action)) {
-            deleteSetting(request, response);
         } else {
             response.sendRedirect(request.getContextPath() + "/setting");
         }
     }
     
-    private void createSetting(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        try {
-            // Get parameters from request
-            String key = request.getParameter("key");
-            String value = request.getParameter("value");
-            
-            // Validate required fields
-            if (key == null || key.trim().isEmpty() ||
-                value == null || value.trim().isEmpty()) {
-                
-                request.setAttribute("error", "All required fields must be filled");
-                request.getRequestDispatcher("/view/admin/setting/addSetting.jsp").forward(request, response);
-                return;
-            }
-            
-            // Check if key already exists
-            if (settingDAO.isKeyExist(key.trim())) {
-                request.setAttribute("error", "Setting key already exists");
-                request.setAttribute("key", key);
-                request.setAttribute("value", value);
-                request.getRequestDispatcher("/view/admin/setting/addSetting.jsp").forward(request, response);
-                return;
-            }
-            
-            // Create Setting object
-            Setting setting = Setting.builder()
-                    .key(key.trim())
-                    .value(value.trim())
-                    .build();
-            
-            // Save to database
-            int generatedId = settingDAO.insert(setting);
-            
-            if (generatedId > 0) {
-                // Refresh cached settings after successful creation
-                AppContextListener.refreshSettings(getServletContext());
-                
-                request.getSession().setAttribute("toastMessage", "Setting created successfully");
-                request.getSession().setAttribute("toastType", "success");
-                response.sendRedirect(request.getContextPath() + "/setting");
-            } else {
-                request.setAttribute("error", "Failed to create setting");
-                request.setAttribute("key", key);
-                request.setAttribute("value", value);
-                request.getRequestDispatcher("/view/admin/setting/addSetting.jsp").forward(request, response);
-            }
-            
-        } catch (Exception e) {
-            request.setAttribute("error", "An error occurred: " + e.getMessage());
-            request.getRequestDispatcher("/view/admin/setting/addSetting.jsp").forward(request, response);
-        }
-    }
     
     private void updateSetting(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
@@ -310,54 +252,4 @@ public class ManageSettingController extends HttpServlet {
         }
     }
     
-    private void deleteSetting(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        try {
-            String idStr = request.getParameter("id");
-            if (idStr == null || idStr.trim().isEmpty()) {
-                request.getSession().setAttribute("toastMessage", "Setting ID is required for deletion");
-                request.getSession().setAttribute("toastType", "error");
-                response.sendRedirect(request.getContextPath() + "/setting");
-                return;
-            }
-            
-            int id = Integer.parseInt(idStr);
-            
-            // Find the setting first to ensure it exists
-            Setting setting = settingDAO.findById(id);
-            if (setting == null) {
-                request.getSession().setAttribute("toastMessage", "Setting not found");
-                request.getSession().setAttribute("toastType", "error");
-                response.sendRedirect(request.getContextPath() + "/setting");
-                return;
-            }
-            
-            // Perform hard delete
-            boolean success = settingDAO.delete(setting);
-            
-            if (success) {
-                // Refresh cached settings after successful deletion
-                AppContextListener.refreshSettings(getServletContext());
-                
-                request.getSession().setAttribute("toastMessage", "Setting deleted successfully");
-                request.getSession().setAttribute("toastType", "success");
-            } else {
-                request.getSession().setAttribute("toastMessage", "Failed to delete setting");
-                request.getSession().setAttribute("toastType", "error");
-            }
-            
-        } catch (NumberFormatException e) {
-            request.getSession().setAttribute("toastMessage", "Invalid setting ID");
-            request.getSession().setAttribute("toastType", "error");
-        } catch (Exception e) {
-            request.getSession().setAttribute("toastMessage", "An error occurred: " + e.getMessage());
-            request.getSession().setAttribute("toastType", "error");
-        }
-        
-        // Redirect to avoid form resubmission
-        response.sendRedirect(request.getContextPath() + "/setting");
-    }
-
-    private void handleAdd(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/view/admin/setting/addSetting.jsp").forward(request, response);
-    }
-} 
+}
