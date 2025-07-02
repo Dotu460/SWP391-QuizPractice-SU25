@@ -627,7 +627,7 @@
 
                                                     // Initialize TinyMCE for media_url
                                                     initTinyMCE();
-                                                    //fixOldMediaUrls('#media_url');
+                                                    fixOldMediaUrls('#media_url');
 
                                                     // Form validation
                                                     $('#questionForm').submit(function (e) {
