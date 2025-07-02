@@ -9,7 +9,7 @@ package com.quiz.su25.entity;
  * @author quangmingdoc
  */
 
-import java.sql.Date;
+import java.sql.Timestamp;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,7 +32,7 @@ public class UserQuizAttemptAnswers {
    private Integer quiz_question_id;
    private Integer selected_option_id;
    private Boolean correct;  //1 - correct 0 - incorrect
-   private Date answer_at;
+   private Timestamp answer_at;
    private String essay_answer;
    private Double essay_score;
    private String essay_feedback;

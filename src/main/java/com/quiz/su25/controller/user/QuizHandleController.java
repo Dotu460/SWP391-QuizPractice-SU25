@@ -28,8 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.sql.Date;
-import java.time.LocalDate;
+import java.sql.Timestamp;
 import com.quiz.su25.config.GlobalConfig;
 import com.quiz.su25.dal.impl.UserDAO;
 
@@ -135,13 +134,13 @@ public class QuizHandleController extends HttpServlet {
                 UserQuizAttempts newAttempt = UserQuizAttempts.builder()
                         .user_id(userId)
                         .quiz_id(quizId)
-                        .start_time(Date.valueOf(LocalDate.now()))
+                        .start_time(new Timestamp(System.currentTimeMillis()))
                         .end_time(null)
                         .score(0.0)
                         .passed(false)
                         .status(GlobalConfig.QUIZ_ATTEMPT_STATUS_IN_PROGRESS)
-                        .created_at(Date.valueOf(LocalDate.now()))
-                        .update_at(Date.valueOf(LocalDate.now()))
+                        .created_at(new Timestamp(System.currentTimeMillis()))
+                        .update_at(new Timestamp(System.currentTimeMillis()))
                         .build();
 
                 int attemptId = attemptsDAO.insert(newAttempt);
@@ -462,8 +461,8 @@ public class QuizHandleController extends HttpServlet {
             }
 
             // Cập nhật trạng thái attempt
-            attempt.setEnd_time(Date.valueOf(LocalDate.now()));
-            attempt.setUpdate_at(Date.valueOf(LocalDate.now()));
+            attempt.setEnd_time(new Timestamp(System.currentTimeMillis()));
+            attempt.setUpdate_at(new Timestamp(System.currentTimeMillis()));
 
             if (hasEssayQuestions) {
                 // Nếu có câu hỏi tự luận, đánh dấu là partially_graded

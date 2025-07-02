@@ -65,7 +65,7 @@ public class UserQuizAttemptAnswersDAO extends DBContext implements I_DAO<UserQu
             statement.setInt(2, t.getQuiz_question_id());
             statement.setInt(3, t.getSelected_option_id() != null ? t.getSelected_option_id() : 0);
             statement.setBoolean(4, t.getCorrect());
-            statement.setDate(5, t.getAnswer_at());
+            statement.setTimestamp(5, t.getAnswer_at());
             statement.setString(6, t.getEssay_answer());
             
             if (t.getEssay_score() != null) {
@@ -95,7 +95,7 @@ public class UserQuizAttemptAnswersDAO extends DBContext implements I_DAO<UserQu
             statement.setInt(2, t.getQuiz_question_id());
             statement.setInt(3, t.getSelected_option_id() != null ? t.getSelected_option_id() : 0);
             statement.setBoolean(4, t.getCorrect());
-            statement.setDate(5, t.getAnswer_at());
+            statement.setTimestamp(5, t.getAnswer_at());
             statement.setString(6, t.getEssay_answer());
             
             if (t.getEssay_score() != null) {
@@ -148,7 +148,7 @@ public class UserQuizAttemptAnswersDAO extends DBContext implements I_DAO<UserQu
         answer.setSelected_option_id(selectedOptionId);
         
         answer.setCorrect(resultSet.getBoolean("correct"));
-        answer.setAnswer_at(resultSet.getDate("answer_at"));
+        answer.setAnswer_at(resultSet.getTimestamp("answer_at"));
         
         // Đọc các trường cho câu hỏi tự luận
         answer.setEssay_answer(resultSet.getString("essay_answer"));
@@ -302,7 +302,7 @@ public class UserQuizAttemptAnswersDAO extends DBContext implements I_DAO<UserQu
                 statement.setInt(2, answer.getQuiz_question_id());
                 statement.setInt(3, answer.getSelected_option_id() != null ? answer.getSelected_option_id() : 0);
                 statement.setBoolean(4, answer.getCorrect());
-                statement.setDate(5, answer.getAnswer_at());
+                statement.setTimestamp(5, answer.getAnswer_at());
                 statement.setString(6, answer.getEssay_answer());
                 statement.addBatch();
             }

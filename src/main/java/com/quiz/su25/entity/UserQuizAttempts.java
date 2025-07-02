@@ -8,7 +8,7 @@ package com.quiz.su25.entity;
  * @author quangmingdoc
  */
 
-import java.sql.Date;
+import java.sql.Timestamp;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,12 +29,12 @@ public class UserQuizAttempts {
     private Integer id;
     private Integer user_id;
     private Integer quiz_id;
-    private Date start_time;
-    private Date end_time;
+    private Timestamp start_time;
+    private Timestamp end_time;
     private Double score;
     private Boolean passed;   //1 - passed n 0 - not passed
     private String status;    //in_progress - completed
-    private Date created_at;  
-    private Date update_at;
+    private Timestamp created_at;  
+    private Timestamp update_at;
     
 }

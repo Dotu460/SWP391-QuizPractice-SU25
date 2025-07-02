@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 
 /**
@@ -135,10 +136,10 @@ public class QuizAttemptController extends HttpServlet {
             UserQuizAttempts newAttempt = UserQuizAttempts.builder()
                     .user_id(userId)
                     .quiz_id(quizId)
-                    .start_time(Date.valueOf(LocalDate.now()))
+                    .start_time(new Timestamp(System.currentTimeMillis()))
                     .status(GlobalConfig.QUIZ_ATTEMPT_STATUS_IN_PROGRESS)
-                    .created_at(Date.valueOf(LocalDate.now()))
-                    .update_at(Date.valueOf(LocalDate.now()))
+                    .created_at(new Timestamp(System.currentTimeMillis()))
+                    .update_at(new Timestamp(System.currentTimeMillis()))
                     .build();
 
             int attemptId = attemptsDAO.insert(newAttempt);
@@ -172,9 +173,9 @@ public class QuizAttemptController extends HttpServlet {
             if (attempt != null) {
                 // Only update if the attempt is still in progress
                 if (GlobalConfig.QUIZ_ATTEMPT_STATUS_IN_PROGRESS.equals(attempt.getStatus())) {
-                    attempt.setEnd_time(Date.valueOf(LocalDate.now()));
+                    attempt.setEnd_time(new Timestamp(System.currentTimeMillis()));
                     attempt.setStatus(GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED);
-                    attempt.setUpdate_at(Date.valueOf(LocalDate.now()));
+                    attempt.setUpdate_at(new Timestamp(System.currentTimeMillis()));
                     
                     if (attemptsDAO.update(attempt)) {
                         // Redirect to results page

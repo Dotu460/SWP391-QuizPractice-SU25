@@ -62,13 +62,13 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
             statement = connection.prepareStatement(sql);
             statement.setInt(1, t.getUser_id());
             statement.setInt(2, t.getQuiz_id());
-            statement.setDate(3, t.getStart_time());
-            statement.setDate(4, t.getEnd_time());
+            statement.setTimestamp(3, t.getStart_time());
+            statement.setTimestamp(4, t.getEnd_time());
             statement.setDouble(5, t.getScore());
             statement.setBoolean(6, t.getPassed());
             statement.setString(7, t.getStatus());
-            statement.setDate(8, t.getCreated_at());
-            statement.setDate(9, t.getUpdate_at());
+            statement.setTimestamp(8, t.getCreated_at());
+            statement.setTimestamp(9, t.getUpdate_at());
 
             return statement.executeUpdate();
         } catch (Exception e) {
@@ -87,13 +87,13 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
             statement = connection.prepareStatement(sql);
             statement.setInt(1, t.getUser_id());
             statement.setInt(2, t.getQuiz_id());
-            statement.setDate(3, t.getStart_time());
-            statement.setDate(4, t.getEnd_time());
+            statement.setTimestamp(3, t.getStart_time());
+            statement.setTimestamp(4, t.getEnd_time());
             statement.setDouble(5, t.getScore());
             statement.setBoolean(6, t.getPassed());
             statement.setString(7, t.getStatus());
-            statement.setDate(8, t.getCreated_at());
-            statement.setDate(9, t.getUpdate_at());
+            statement.setTimestamp(8, t.getCreated_at());
+            statement.setTimestamp(9, t.getUpdate_at());
             statement.setInt(10, t.getId());
 
             return statement.executeUpdate() > 0;
@@ -128,13 +128,13 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
                 .id(resultSet.getInt("id"))
                 .user_id(resultSet.getInt("user_id"))
                 .quiz_id(resultSet.getInt("quiz_id"))
-                .start_time(resultSet.getDate("start_time"))
-                .end_time(resultSet.getDate("end_time"))
+                .start_time(resultSet.getTimestamp("start_time"))
+                .end_time(resultSet.getTimestamp("end_time"))
                 .score(resultSet.getDouble("score"))
                 .passed(resultSet.getBoolean("passed"))
                 .status(resultSet.getString("status"))
-                .created_at(resultSet.getDate("created_at"))
-                .update_at(resultSet.getDate("update_at"))
+                .created_at(resultSet.getTimestamp("created_at"))
+                .update_at(resultSet.getTimestamp("update_at"))
                 .build();
     }
 
@@ -187,9 +187,10 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
 
     /**
      * Find the latest attempt by a user for a specific quiz
+     * Ordered by update_at DESC, end_time DESC, created_at DESC to ensure we get the most recently updated attempt
      */
     public UserQuizAttempts findLatestAttempt(Integer userId, Integer quizId) {
-        String sql = "SELECT * FROM UserQuizAttempts WHERE user_id = ? AND quiz_id = ? ORDER BY created_at DESC LIMIT 1";
+        String sql = "SELECT * FROM UserQuizAttempts WHERE user_id = ? AND quiz_id = ? ORDER BY update_at DESC, end_time DESC, created_at DESC LIMIT 1";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);

@@ -17,8 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Date;
-import java.time.LocalDate;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -168,7 +167,7 @@ public class QuizAttemptAnswerController extends HttpServlet {
                         .quiz_question_id(questionId)
                         .selected_option_id(selectedOptionId)
                         .correct(isCorrect)
-                        .answer_at(Date.valueOf(LocalDate.now()))
+                        .answer_at(new Timestamp(System.currentTimeMillis()))
                         .build();
                 answersDAO.insert(newAnswer);
             }
@@ -273,9 +272,9 @@ public class QuizAttemptAnswerController extends HttpServlet {
             // Update attempt with final score
             attempt.setScore(score);
             attempt.setPassed(passed);
-            attempt.setEnd_time(Date.valueOf(LocalDate.now()));
+            attempt.setEnd_time(new Timestamp(System.currentTimeMillis()));
             attempt.setStatus(GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED);
-            attempt.setUpdate_at(Date.valueOf(LocalDate.now()));
+            attempt.setUpdate_at(new Timestamp(System.currentTimeMillis()));
 
             attemptsDAO.update(attempt);
         }
