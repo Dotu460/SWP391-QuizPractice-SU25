@@ -416,6 +416,18 @@
                        <!-- Media display logic here -->
                        <div class="media-content mt-3">
                             <c:choose>
+                                <c:when test="${fn:contains(question.media_url, 'youtube.com') || fn:contains(question.media_url, 'youtu.be')}">
+                                    <!-- YouTube Video Embed -->
+                                    <div class="youtube-embed-container" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; border-radius: 8px;">
+                                        <iframe 
+                                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px;"
+                                            src="${fn:replace(fn:replace(question.media_url, 'watch?v=', 'embed/'), 'youtu.be/', 'youtube.com/embed/')}" 
+                                            frameborder="0" 
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                            allowfullscreen>
+                                        </iframe>
+                                    </div>
+                                </c:when>
                                 <c:when test="${fn:endsWith(question.media_url, '.mp4') 
                                             || fn:endsWith(question.media_url, '.webm') 
                                             || fn:endsWith(question.media_url, '.ogg')

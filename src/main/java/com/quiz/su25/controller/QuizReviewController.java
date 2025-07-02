@@ -140,4 +140,40 @@ public class QuizReviewController extends HttpServlet {
             throws ServletException, IOException {
         doGet(request, response);
     }
+    
+    /**
+     * Utility method to convert YouTube URLs to their embed format
+     * For use in JSP pages via EL function or in controller logic
+     * @param url YouTube URL (either youtube.com/watch?v= or youtu.be/ format)
+     * @return Properly formatted YouTube embed URL
+     */
+    private String getYoutubeEmbedUrl(String url) {
+        if (url == null || url.isEmpty()) {
+            return "";
+        }
+        
+        // Handle youtu.be short links
+        if (url.contains("youtu.be/")) {
+            String videoId = url.substring(url.lastIndexOf("/") + 1);
+            return "https://www.youtube.com/embed/" + videoId;
+        }
+        
+        // Handle standard youtube.com watch links
+        if (url.contains("youtube.com/watch")) {
+            // Extract the v parameter
+            int vIndex = url.indexOf("v=");
+            if (vIndex != -1) {
+                String videoId = url.substring(vIndex + 2);
+                // Remove any additional parameters
+                int ampIndex = videoId.indexOf("&");
+                if (ampIndex != -1) {
+                    videoId = videoId.substring(0, ampIndex);
+                }
+                return "https://www.youtube.com/embed/" + videoId;
+            }
+        }
+        
+        // Return original URL if it doesn't match expected patterns
+        return url;
+    }
 } 
