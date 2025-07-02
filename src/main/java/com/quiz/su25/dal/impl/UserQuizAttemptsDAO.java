@@ -333,9 +333,10 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
 
     /**
      * Find all completed or partially graded attempts for a specific user and quiz, ordered by newest first
+     * Uses the same ordering as findLatestAttempt: update_at DESC, end_time DESC, created_at DESC
      */
     public List<UserQuizAttempts> findCompletedAttemptsByQuizId(Integer userId, Integer quizId) {
-        String sql = "SELECT * FROM UserQuizAttempts WHERE user_id = ? AND quiz_id = ? AND (status = 'completed' OR status = 'partially_graded') ORDER BY end_time DESC, created_at DESC";
+        String sql = "SELECT * FROM UserQuizAttempts WHERE user_id = ? AND quiz_id = ? AND (status = 'completed' OR status = 'partially_graded') ORDER BY update_at DESC, end_time DESC, created_at DESC";
         List<UserQuizAttempts> completedAttempts = new ArrayList<>();
         
         try {
