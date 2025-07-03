@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-package com.quiz.su25.controller;
+package com.quiz.su25.controller.user;
 
 import com.quiz.su25.config.GlobalConfig;
 import com.quiz.su25.dal.impl.QuestionDAO;

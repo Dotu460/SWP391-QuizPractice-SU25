@@ -82,6 +82,8 @@ public class PricePackageController extends HttpServlet {
         String searchFilter = request.getParameter("search");
         String minPriceFilter = request.getParameter("minPrice");
         String maxPriceFilter = request.getParameter("maxPrice");
+        String showAllParam = request.getParameter("showAll");
+        boolean showAll = "true".equals(showAllParam);
         
         // Get pagination parameters
         int page = 1;
@@ -98,7 +100,10 @@ public class PricePackageController extends HttpServlet {
             }
         }
         
-        if (pageSizeStr != null && !pageSizeStr.isEmpty()) {
+        if (showAll) {
+            // If showAll is true, set pageSize to a very large number to get all records
+            pageSize = Integer.MAX_VALUE;
+        } else if (pageSizeStr != null && !pageSizeStr.isEmpty()) {
             try {
                 pageSize = Integer.parseInt(pageSizeStr);
                 if (pageSize < 1) pageSize = 10;
@@ -113,14 +118,16 @@ public class PricePackageController extends HttpServlet {
         
         int totalPackages = pricePackageDAO.getTotalFilteredPricePackages(
                 statusFilter, searchFilter, minPriceFilter, maxPriceFilter);
-        int totalPages = (int) Math.ceil((double) totalPackages / pageSize);
+        int totalPages = showAll ? 1 : (int) Math.ceil((double) totalPackages / pageSize);
         
         // Set attributes for JSP
         request.setAttribute("pricePackages", pricePackages);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("totalPackages", totalPackages);
-        request.setAttribute("pageSize", pageSize);
+        // Don't pass Integer.MAX_VALUE to the view when showAll is true
+        request.setAttribute("pageSize", showAll ? 10 : pageSize);
+        request.setAttribute("showAll", showAll);
         
         // Set filter values for maintaining state
         request.setAttribute("statusFilter", statusFilter);

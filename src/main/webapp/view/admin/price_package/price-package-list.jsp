@@ -192,7 +192,7 @@
 
                                     <!-- Filter Form -->
                                     <div class="filter-form">
-                                        <form action="${pageContext.request.contextPath}/admin/price-package-list" method="get">
+                                        <form action="${pageContext.request.contextPath}/admin/price-package-list" method="get" id="filterForm">
                                             <div class="row">
                                                 <div class="col-md-3">
                                                     <div class="form-group">
@@ -227,6 +227,9 @@
                                                 </div>
                                             </div>
                                             
+                                            <!-- Hidden field to preserve showAll parameter -->
+                                            <input type="hidden" id="showAllField" name="showAll" value="${param.showAll}" />
+                                            
                                             <div class="row mt-2">
                                                 <div class="col-md-12 d-flex justify-content-end">
                                                     <button type="submit" class="btn btn-primary" style="padding: 6px 15px; font-size: 15px;">Filter</button>
@@ -243,7 +246,7 @@
                                         </div>
                                         <div class="d-flex align-items-center">
                                             <div class="input-group" style="width: auto;">
-                                                <input type="number" id="customPageSize" class="form-control form-control-sm" min="1" max="100" value="${pageSize}" style="width: 80px; height: 38px;" ${param.showAll eq 'true' ? 'disabled' : ''}>
+                                                <input type="number" id="customPageSize" class="form-control form-control-sm" min="1" max="100" value="${showAll ? '' : pageSize}" style="width: 80px; height: 38px;" ${showAll ? 'disabled placeholder="-"' : ''} />
                                                 <button class="btn btn-primary" onclick="applyCustomPageSize()" id="applySizeBtn" style="padding: 6px 12px; font-size: 15px;">Apply</button>
                                             </div>
                                             <span class="ms-2">items per page</span>
@@ -508,11 +511,18 @@
                 // Add event listener for checkbox
                 document.getElementById('showAllCheckbox').addEventListener('change', function() {
                     const customSizeInput = document.getElementById('customPageSize');
+                    const showAllField = document.getElementById('showAllField');
                     
                     if (this.checked) {
                         customSizeInput.disabled = true;
+                        customSizeInput.value = '';
+                        customSizeInput.placeholder = '-';
+                        showAllField.value = 'true';
                     } else {
                         customSizeInput.disabled = false;
+                        customSizeInput.value = '${pageSize == 2147483647 ? 10 : pageSize}';
+                        customSizeInput.placeholder = '';
+                        showAllField.value = '';
                     }
                 });
             });
