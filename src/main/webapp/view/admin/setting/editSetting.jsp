@@ -278,11 +278,11 @@
                                               id="value" 
                                               name="value" 
                                               rows="6" 
-                                              placeholder="Enter the setting value..."
+                                              placeholder="Enter timeout in seconds (numbers only)..."
+                                              pattern="^[0-9]+$"
+                                              title="Only numbers are allowed"
                                               required>${setting.value}</textarea>
-                                    <div class="help-text">
-                                        Modify the value for this setting. Can be text, numbers, JSON, etc.
-                                    </div>
+                                    
                                 </div>
                             </div>
                         </div>
@@ -318,6 +318,13 @@
             document.addEventListener('DOMContentLoaded', function () {
                 const keyInput = document.getElementById('key');
                 const originalKey = '${setting.key}';
+
+                // Only allow numbers in value field
+                const valueInput = document.getElementById('value');
+                valueInput.addEventListener('input', function(e) {
+                    // Remove any non-digit characters
+                    e.target.value = e.target.value.replace(/\D/g, '');
+                });
 
                 // Validate key format
                 keyInput.addEventListener('blur', function () {
