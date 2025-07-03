@@ -23,6 +23,7 @@ public class QuizHandleMenuController extends HttpServlet {
     private final QuizzesDAO quizzesDAO = new QuizzesDAO();
     private final UserQuizAttemptsDAO userQuizAttemptsDAO = new UserQuizAttemptsDAO();
     
+    //all
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -52,22 +53,66 @@ public class QuizHandleMenuController extends HttpServlet {
                 Map<Integer, Double> quizScores = new HashMap<>();
                 for (Quizzes quiz : quizzesList) {
                     UserQuizAttempts latestAttempt = userQuizAttemptsDAO.findLatestAttempt(userId, quiz.getId());
-                    if (latestAttempt != null && GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED.equals(latestAttempt.getStatus())) {
-                        // Lấy điểm trực tiếp từ attempt đã hoàn thành
+                    if (latestAttempt != null && 
+                        (GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED.equals(latestAttempt.getStatus()) || 
+                         GlobalConfig.QUIZ_ATTEMPT_STATUS_PARTIALLY_GRADED.equals(latestAttempt.getStatus()))) {
+                        // Lấy điểm từ attempt đã hoàn thành hoặc partially_graded
                         quizScores.put(quiz.getId(), latestAttempt.getScore());
+                        System.out.println("Quiz " + quiz.getId() + " has score: " + latestAttempt.getScore() + 
+                                          " with status: " + latestAttempt.getStatus());
                     } else {
                         // Nếu chưa có attempt nào hoàn thành, đặt điểm là null hoặc giá trị mặc định
                         quizScores.put(quiz.getId(), null);
+                        System.out.println("Quiz " + quiz.getId() + " has no completed/partially_graded attempt");
+                    }
+                }
+                
+                // Create maps for essay grading information
+                Map<Integer, Boolean> quizHasEssay = new HashMap<>();
+                Map<Integer, Boolean> quizEssayGraded = new HashMap<>();
+                Map<Integer, String> quizAttemptStatus = new HashMap<>();
+                
+                // Check which quizzes have essay questions and their grading status
+                for (Quizzes quiz : quizzesList) {
+                    // Check if quiz has essay questions - this would normally use the QuestionDAO to check question types
+                    // For now, we'll assume quizzes with certain IDs have essays (mock implementation)
+                    boolean hasEssay = quizzesDAO.hasEssayQuestions(quiz.getId());
+                    quizHasEssay.put(quiz.getId(), hasEssay);
+                    
+                    // Check if essays have been graded
+                    UserQuizAttempts latestAttempt = userQuizAttemptsDAO.findLatestAttempt(userId, quiz.getId());
+                    
+                    if (latestAttempt != null) {
+                        // Store attempt status for JSP
+                        quizAttemptStatus.put(quiz.getId(), latestAttempt.getStatus());
+                        
+                        // Essay is fully graded if status is COMPLETED and has essay questions
+                        boolean isEssayGraded = hasEssay && 
+                                             latestAttempt != null && 
+                                             GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED.equals(latestAttempt.getStatus());
+                        
+                        quizEssayGraded.put(quiz.getId(), isEssayGraded);
+                        
+                        System.out.println("Quiz " + quiz.getId() + 
+                                         " has essays: " + hasEssay + 
+                                         ", essay graded: " + isEssayGraded +
+                                         ", status: " + latestAttempt.getStatus());
+                    } else {
+                        quizEssayGraded.put(quiz.getId(), false);
+                        quizAttemptStatus.put(quiz.getId(), null);
                     }
                 }
                 
                 // Set the quizzes list and scores as attributes
                 request.setAttribute("quizzesList", quizzesList);
                 request.setAttribute("quizScores", quizScores);
-                System.out.println("Set quizzesList and quizScores attributes");
+                request.setAttribute("quizHasEssay", quizHasEssay);
+                request.setAttribute("quizEssayGraded", quizEssayGraded);
+                request.setAttribute("quizAttemptStatus", quizAttemptStatus);
+                System.out.println("Set quiz attributes for JSP");
                 
                 // Forward to the quiz menu page
-                String forwardPath = "/view/user/quizHandle/quiz-handle-menu.jsp";
+                String forwardPath = "view/user/quiz_handle/quiz-handle-menu.jsp";
                 System.out.println("Attempting to forward to: " + forwardPath);
                 
                 try {

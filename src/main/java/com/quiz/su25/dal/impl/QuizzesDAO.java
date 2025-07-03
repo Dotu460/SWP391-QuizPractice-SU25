@@ -292,5 +292,29 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
         System.out.println(total);
     }
 
+    public boolean hasEssayQuestions(Quizzes quiz) {
+        // Implementation of hasEssayQuestions method
+        return false; // Placeholder return, actual implementation needed
+    }
+
+    public boolean hasEssayQuestions(Integer quizId) {
+        String sql = "SELECT COUNT(*) AS essay_count FROM Question q WHERE q.quiz_id = ? AND q.type = 'essay'";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, quizId);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt("essay_count") > 0;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in hasEssayQuestions: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        // Default to false if there's an error
+        return false;
+    }
+
 }
 

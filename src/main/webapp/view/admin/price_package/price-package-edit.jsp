@@ -7,8 +7,8 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>SkillGro - Add Price Package</title>
-    <meta name="description" content="SkillGro - Add Price Package">
+    <title>SkillGro - Edit Price Package</title>
+    <meta name="description" content="SkillGro - Edit Price Package">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="shortcut icon" type="image/x-icon"
@@ -20,19 +20,19 @@
 
     <!-- Custom CSS for form styling -->
     <style>
-        .add-form-card {
+        .edit-form-card {
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             border-radius: 8px;
             overflow: hidden;
         }
         
-        .add-form-card .card-header {
+        .edit-form-card .card-header {
             background-color: #f8f9fa;
             padding: 15px 20px;
             border-bottom: 2px solid #e9ecef;
         }
         
-        .add-form-card .card-body {
+        .edit-form-card .card-body {
             padding: 25px;
         }
         
@@ -109,11 +109,11 @@
                                 <div class="row mb-4">
                                     <div class="col">
                                         <div class="dashboard__content-title">
-                                            <h4 class="title">Add New Price Package</h4>
+                                            <h4 class="title">Edit Price Package</h4>
                                         </div>
                                     </div>
                                     <div class="col-auto">
-                                        <a href="${pageContext.request.contextPath}/admin/pricepackage" class="btn btn-secondary rounded-pill">
+                                        <a href="${pageContext.request.contextPath}/admin/price-package-list" class="btn btn-secondary rounded-pill">
                                             <i class="fa fa-arrow-left me-2"></i> Back to Price Packages
                                         </a>
                                     </div>
@@ -133,16 +133,17 @@
                                     </div>
                                 </c:if>
 
-                                <!-- Add Form Card -->
+                                <!-- Edit Form Card -->
                                 <div class="row">
                                     <div class="col-12">
-                                        <div class="card add-form-card">
+                                        <div class="card edit-form-card">
                                             <div class="card-header">
-                                                <h5 class="mb-0">Create New Price Package</h5>
+                                                <h5 class="mb-0">Edit Package #${pricePackage.id} - ${pricePackage.name}</h5>
                                             </div>
                                             <div class="card-body">
-                                                <form method="post" action="${pageContext.request.contextPath}/admin/pricepackage">
-                                                    <input type="hidden" name="action" value="create">
+                                                <form method="post" action="${pageContext.request.contextPath}/admin/price-package-list">
+                                                    <input type="hidden" name="action" value="update">
+                                                    <input type="hidden" name="id" value="${pricePackage.id}">
                                                     
                                                     <!-- Basic Information Section -->
                                                     <div class="form-section">
@@ -151,15 +152,13 @@
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
                                                                     <label for="name" class="form-label">Package Name <span class="required">*</span></label>
-                                                                    <input type="text" class="form-control" id="name" name="name" 
-                                                                           value="${param.name != null ? param.name : ''}" required>
+                                                                    <input type="text" class="form-control" id="name" name="name" value="${pricePackage.name}" required>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
                                                                     <label for="access_duration_months" class="form-label">Access Duration (Months) <span class="required">*</span></label>
-                                                                    <input type="number" class="form-control" id="access_duration_months" name="access_duration_months" 
-                                                                           value="${param.access_duration_months != null ? param.access_duration_months : ''}" min="1" required>
+                                                                    <input type="number" class="form-control" id="access_duration_months" name="access_duration_months" value="${pricePackage.access_duration_months}" min="1" required>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -169,8 +168,8 @@
                                                                     <label for="status" class="form-label">Status <span class="required">*</span></label>
                                                                     <select class="form-control" id="status" name="status" required>
                                                                         <option value="">Select Status</option>
-                                                                        <option value="active" ${param.status == 'active' ? 'selected' : ''}>Active</option>
-                                                                        <option value="inactive" ${param.status == 'inactive' ? 'selected' : ''}>Inactive</option>
+                                                                        <option value="active" ${pricePackage.status == 'active' ? 'selected' : ''}>Active</option>
+                                                                        <option value="inactive" ${pricePackage.status == 'inactive' ? 'selected' : ''}>Inactive</option>
                                                                     </select>
                                                                 </div>
                                                             </div>
@@ -179,7 +178,7 @@
                                                             <div class="col-12">
                                                                 <div class="form-group">
                                                                     <label for="description" class="form-label">Description</label>
-                                                                    <textarea class="form-control" id="description" name="description" rows="3">${param.description != null ? param.description : ''}</textarea>
+                                                                    <textarea class="form-control" id="description" name="description" rows="3">${pricePackage.description}</textarea>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -192,15 +191,13 @@
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
                                                                     <label for="list_price" class="form-label">List Price <span class="required">*</span></label>
-                                                                    <input type="number" class="form-control" id="list_price" name="list_price" 
-                                                                           value="${param.list_price != null ? param.list_price : ''}" min="1" required>
+                                                                    <input type="number" class="form-control" id="list_price" name="list_price" value="${pricePackage.list_price}" min="1" required>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
                                                                     <label for="sale_price" class="form-label">Sale Price <span class="required">*</span></label>
-                                                                    <input type="number" class="form-control" id="sale_price" name="sale_price" 
-                                                                           value="${param.sale_price != null ? param.sale_price : ''}" min="1" required>
+                                                                    <input type="number" class="form-control" id="sale_price" name="sale_price" value="${pricePackage.sale_price}" min="1" required>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -216,11 +213,11 @@
                                                     
                                                     <!-- Action Buttons -->
                                                     <div class="text-end btn-group">
-                                                        <a href="${pageContext.request.contextPath}/admin/pricepackage" class="btn btn-secondary">
+                                                        <a href="${pageContext.request.contextPath}/admin/price-package-list" class="btn btn-secondary">
                                                             <i class="fa fa-times"></i> Cancel
                                                         </a>
-                                                        <button type="submit" class="btn btn-success">
-                                                            <i class="fa fa-plus"></i> Create Package
+                                                        <button type="submit" class="btn btn-primary">
+                                                            <i class="fa fa-save"></i> Update Package
                                                         </button>
                                                     </div>
                                                 </form>
@@ -273,14 +270,7 @@
                 if (!salePrice.checkValidity()) {
                     e.preventDefault();
                     salePrice.reportValidity();
-                    return;
                 }
-                
-                // Show loading state
-                const submitBtn = this.querySelector('button[type="submit"]');
-                const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Creating...';
-                submitBtn.disabled = true;
             });
         });
 

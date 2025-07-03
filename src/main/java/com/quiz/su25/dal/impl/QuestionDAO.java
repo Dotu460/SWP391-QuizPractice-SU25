@@ -523,6 +523,33 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
         }
         return list;
     }
+    /**
+     * Tìm tất cả các câu hỏi tự luận trong một quiz
+     * 
+     * @param quizId ID của quiz
+     * @return Danh sách các câu hỏi tự luận
+     */
+    public List<Question> findEssayQuestionsByQuizId(Integer quizId) {
+        String sql = "SELECT * FROM Question WHERE quiz_id = ? AND type = 'essay' ORDER BY id";
+        List<Question> questions = new ArrayList<>();
+        
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, quizId);
+            resultSet = statement.executeQuery();
+            
+            while (resultSet.next()) {
+                questions.add(getFromResultSet(resultSet));
+            }
+        } catch (Exception e) {
+            System.out.println("Error findEssayQuestionsByQuizId at class QuestionDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        
+        return questions;
+    }
 
     public static void main(String[] args) {
         QuestionDAO questionDAO = new QuestionDAO();

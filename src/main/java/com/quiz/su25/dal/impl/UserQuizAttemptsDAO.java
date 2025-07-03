@@ -4,6 +4,7 @@
  */
 package com.quiz.su25.dal.impl;
 
+import com.quiz.su25.config.GlobalConfig;
 import com.quiz.su25.dal.DBContext;
 import com.quiz.su25.dal.I_DAO;
 import com.quiz.su25.entity.UserQuizAttempts;
@@ -61,13 +62,13 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
             statement = connection.prepareStatement(sql);
             statement.setInt(1, t.getUser_id());
             statement.setInt(2, t.getQuiz_id());
-            statement.setDate(3, t.getStart_time());
-            statement.setDate(4, t.getEnd_time());
+            statement.setTimestamp(3, t.getStart_time());
+            statement.setTimestamp(4, t.getEnd_time());
             statement.setDouble(5, t.getScore());
             statement.setBoolean(6, t.getPassed());
             statement.setString(7, t.getStatus());
-            statement.setDate(8, t.getCreated_at());
-            statement.setDate(9, t.getUpdate_at());
+            statement.setTimestamp(8, t.getCreated_at());
+            statement.setTimestamp(9, t.getUpdate_at());
 
             return statement.executeUpdate();
         } catch (Exception e) {
@@ -86,13 +87,13 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
             statement = connection.prepareStatement(sql);
             statement.setInt(1, t.getUser_id());
             statement.setInt(2, t.getQuiz_id());
-            statement.setDate(3, t.getStart_time());
-            statement.setDate(4, t.getEnd_time());
+            statement.setTimestamp(3, t.getStart_time());
+            statement.setTimestamp(4, t.getEnd_time());
             statement.setDouble(5, t.getScore());
             statement.setBoolean(6, t.getPassed());
             statement.setString(7, t.getStatus());
-            statement.setDate(8, t.getCreated_at());
-            statement.setDate(9, t.getUpdate_at());
+            statement.setTimestamp(8, t.getCreated_at());
+            statement.setTimestamp(9, t.getUpdate_at());
             statement.setInt(10, t.getId());
 
             return statement.executeUpdate() > 0;
@@ -127,13 +128,13 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
                 .id(resultSet.getInt("id"))
                 .user_id(resultSet.getInt("user_id"))
                 .quiz_id(resultSet.getInt("quiz_id"))
-                .start_time(resultSet.getDate("start_time"))
-                .end_time(resultSet.getDate("end_time"))
+                .start_time(resultSet.getTimestamp("start_time"))
+                .end_time(resultSet.getTimestamp("end_time"))
                 .score(resultSet.getDouble("score"))
                 .passed(resultSet.getBoolean("passed"))
                 .status(resultSet.getString("status"))
-                .created_at(resultSet.getDate("created_at"))
-                .update_at(resultSet.getDate("update_at"))
+                .created_at(resultSet.getTimestamp("created_at"))
+                .update_at(resultSet.getTimestamp("update_at"))
                 .build();
     }
 
@@ -186,9 +187,10 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
 
     /**
      * Find the latest attempt by a user for a specific quiz
+     * Ordered by update_at DESC, end_time DESC, created_at DESC to ensure we get the most recently updated attempt
      */
     public UserQuizAttempts findLatestAttempt(Integer userId, Integer quizId) {
-        String sql = "SELECT * FROM UserQuizAttempts WHERE user_id = ? AND quiz_id = ? ORDER BY created_at DESC LIMIT 1";
+        String sql = "SELECT * FROM UserQuizAttempts WHERE user_id = ? AND quiz_id = ? ORDER BY update_at DESC, end_time DESC, created_at DESC LIMIT 1";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -210,8 +212,7 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
      * Update the score and status of an attempt
      */
     public boolean updateScore(Integer attemptId, Double score, Boolean passed) {
-        String sql = "UPDATE UserQuizAttempts SET score = ?, passed = ?, "
-                + "status = 'completed', update_at = CURRENT_TIMESTAMP WHERE id = ?";
+        String sql = "UPDATE UserQuizAttempts SET score = ?, passed = ?, update_at = CURRENT_TIMESTAMP WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -226,6 +227,245 @@ public class UserQuizAttemptsDAO extends DBContext implements I_DAO<UserQuizAtte
         } finally {
             closeResources();
         }
+    }
+
+    /**
+     * Check if an attempt exists in the database
+     */
+    public boolean checkAttemptExists(Integer attemptId) {
+        String sql = "SELECT COUNT(*) FROM UserQuizAttempts WHERE id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, attemptId);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                int count = resultSet.getInt(1);
+                System.out.println("Checking if attempt ID " + attemptId + " exists: " + (count > 0));
+                return count > 0;
+            }
+        } catch (Exception e) {
+            System.out.println("Error checkAttemptExists at class UserQuizAttemptsDAO: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+        return false;
+    }
+
+    /**
+     * Update only status of an attempt
+     */
+    public boolean updateStatus(Integer attemptId, String status) {
+        String sql = "UPDATE UserQuizAttempts SET status = ?, update_at = CURRENT_TIMESTAMP WHERE id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, status);
+            statement.setInt(2, attemptId);
+
+            int result = statement.executeUpdate();
+            System.out.println("Updating status of attempt ID " + attemptId + " to " + status + ": " + (result > 0 ? "SUCCESS" : "FAILED"));
+            return result > 0;
+        } catch (Exception e) {
+            System.out.println("Error updateStatus at class UserQuizAttemptsDAO: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        } finally {
+            closeResources();
+        }
+    }
+
+    /**
+     * Mark all in-progress attempts for a user and quiz as abandoned
+     * This is useful when starting a new attempt to ensure only one is in-progress
+     */
+    public int markAllInProgressAsAbandoned(Integer userId, Integer quizId) {
+        String sql = "UPDATE UserQuizAttempts SET status = ?, update_at = CURRENT_TIMESTAMP " +
+                     "WHERE user_id = ? AND quiz_id = ? AND status = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, "abandoned");
+            statement.setInt(2, userId);
+            statement.setInt(3, quizId);
+            statement.setString(4, "in_progress");
+
+            int updatedCount = statement.executeUpdate();
+            System.out.println("Marked " + updatedCount + " in-progress attempts as abandoned for user " + 
+                              userId + " and quiz " + quizId);
+            return updatedCount;
+        } catch (Exception e) {
+            System.out.println("Error markAllInProgressAsAbandoned at class UserQuizAttemptsDAO: " + e.getMessage());
+            e.printStackTrace();
+            return 0;
+        } finally {
+            closeResources();
+        }
+    }
+
+    /**
+     * Find the latest in-progress attempt by a user for a specific quiz
+     */
+    public UserQuizAttempts findLatestInProgressAttempt(Integer userId, Integer quizId) {
+        String sql = "SELECT * FROM UserQuizAttempts WHERE user_id = ? AND quiz_id = ? AND status = ? ORDER BY created_at DESC LIMIT 1";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, userId);
+            statement.setInt(2, quizId);
+            statement.setString(3, "in_progress");
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                UserQuizAttempts attempt = getFromResultSet(resultSet);
+                System.out.println("Found latest in-progress attempt: ID=" + attempt.getId());
+                return attempt;
+            }
+            System.out.println("No in-progress attempt found for user " + userId + " and quiz " + quizId);
+        } catch (Exception e) {
+            System.out.println("Error findLatestInProgressAttempt at class UserQuizAttemptsDAO: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+        return null;
+    }
+
+    /**
+     * Find all completed or partially graded attempts for a specific user and quiz, ordered by newest first
+     * Uses the same ordering as findLatestAttempt: update_at DESC, end_time DESC, created_at DESC
+     */
+    public List<UserQuizAttempts> findCompletedAttemptsByQuizId(Integer userId, Integer quizId) {
+        String sql = "SELECT * FROM UserQuizAttempts WHERE user_id = ? AND quiz_id = ? AND (status = 'completed' OR status = 'partially_graded') ORDER BY update_at DESC, end_time DESC, created_at DESC";
+        List<UserQuizAttempts> completedAttempts = new ArrayList<>();
+        
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, userId);
+            statement.setInt(2, quizId);
+            resultSet = statement.executeQuery();
+            
+            while (resultSet.next()) {
+                UserQuizAttempts attempt = getFromResultSet(resultSet);
+                completedAttempts.add(attempt);
+            }
+            
+            System.out.println("Found " + completedAttempts.size() + " completed/partially graded attempts for user " + userId + " and quiz " + quizId);
+            
+        } catch (Exception e) {
+            System.out.println("Error findCompletedAttemptsByQuizId at class UserQuizAttemptsDAO: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+        
+        return completedAttempts;
+    }
+
+    /**
+     * Tìm kiếm attempts theo các điều kiện lọc và phân trang
+     */
+    public List<UserQuizAttempts> findAttemptsByFilters(Integer quizId, Integer userId, String status, int page, int pageSize) {
+        StringBuilder sql = new StringBuilder("SELECT * FROM UserQuizAttempts WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+        
+        // Thêm điều kiện lọc
+        if (quizId != null) {
+            sql.append(" AND quiz_id = ?");
+            params.add(quizId);
+        }
+        
+        if (userId != null) {
+            sql.append(" AND user_id = ?");
+            params.add(userId);
+        }
+        
+        if (status != null) {
+            sql.append(" AND status = ?");
+            params.add(status);
+        } else {
+            // Mặc định chỉ lấy các attempts có câu hỏi tự luận cần chấm điểm
+            sql.append(" AND (status = ? OR status = ?)");
+            params.add(GlobalConfig.QUIZ_ATTEMPT_STATUS_PARTIALLY_GRADED);
+            params.add(GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED);
+        }
+        
+        // Thêm sắp xếp và phân trang
+        sql.append(" ORDER BY update_at DESC LIMIT ? OFFSET ?");
+        params.add(pageSize);
+        params.add((page - 1) * pageSize);
+        
+        List<UserQuizAttempts> listAttempts = new ArrayList<>();
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+            
+            // Đặt các tham số
+            for (int i = 0; i < params.size(); i++) {
+                statement.setObject(i + 1, params.get(i));
+            }
+            
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                UserQuizAttempts attempt = getFromResultSet(resultSet);
+                listAttempts.add(attempt);
+            }
+        } catch (Exception e) {
+            System.out.println("Error findAttemptsByFilters at class UserQuizAttemptsDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return listAttempts;
+    }
+
+    /**
+     * Đếm tổng số attempts theo các điều kiện lọc
+     */
+    public int countAttemptsByFilters(Integer quizId, Integer userId, String status) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM UserQuizAttempts WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+        
+        // Thêm điều kiện lọc
+        if (quizId != null) {
+            sql.append(" AND quiz_id = ?");
+            params.add(quizId);
+        }
+        
+        if (userId != null) {
+            sql.append(" AND user_id = ?");
+            params.add(userId);
+        }
+        
+        if (status != null) {
+            sql.append(" AND status = ?");
+            params.add(status);
+        } else {
+            // Mặc định chỉ đếm các attempts có câu hỏi tự luận cần chấm điểm
+            sql.append(" AND (status = ? OR status = ?)");
+            params.add(GlobalConfig.QUIZ_ATTEMPT_STATUS_PARTIALLY_GRADED);
+            params.add(GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED);
+        }
+        
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+            
+            // Đặt các tham số
+            for (int i = 0; i < params.size(); i++) {
+                statement.setObject(i + 1, params.get(i));
+            }
+            
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+        } catch (Exception e) {
+            System.out.println("Error countAttemptsByFilters at class UserQuizAttemptsDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return 0;
     }
 
     public static void main(String[] args) {
