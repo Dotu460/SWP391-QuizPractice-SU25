@@ -12,7 +12,7 @@ import java.util.List;
 
 
 @WebServlet(name = "ManagePricePackage", urlPatterns = {"/admin/price-package-list"})
-public class ManagePricePackage extends HttpServlet {
+public class PricePackageController extends HttpServlet {
     private PricePackageDAO pricePackageDAO;
 
     @Override

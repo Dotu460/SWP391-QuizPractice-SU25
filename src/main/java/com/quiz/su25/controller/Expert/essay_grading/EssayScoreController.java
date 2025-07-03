@@ -1,4 +1,4 @@
-package com.quiz.su25.controller;
+package com.quiz.su25.controller.Expert.essay_grading;
 
 import com.quiz.su25.config.GlobalConfig;
 import com.quiz.su25.dal.impl.QuestionDAO;
@@ -110,7 +110,7 @@ public class EssayScoreController extends HttpServlet {
             request.setAttribute("totalEssayQuestions", essayQuestions.size());
             
             // Forward đến trang chấm điểm với đường dẫn tuyệt đối
-            request.getRequestDispatcher("/view/user/quiz_handle/quiz-handle-essay-score.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/Expert/essay-grading/quiz-handle-essay-score.jsp").forward(request, response);
             
         } catch (NumberFormatException e) {
             request.setAttribute("errorMessage", "Tham số không hợp lệ");

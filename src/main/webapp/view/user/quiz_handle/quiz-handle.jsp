@@ -1569,8 +1569,7 @@
                                         <textarea class="form-control essay-answer" 
                                                   name="essay_answer" 
                                                   rows="6" 
-                                                  placeholder="Type your answer here..."
-                                                  onchange="autoSaveEssayAnswer(this.value)">${selectedAnswers}</textarea>
+                                                  placeholder="Type your answer here...">${selectedAnswers}</textarea>
                                         <div class="essay-controls mt-2">
                                             <span class="word-count">0 words</span>
                                         </div>
@@ -2585,39 +2584,23 @@
         <script>
             // Thêm debounce để tránh gửi quá nhiều request
             let timeoutId;
-            let saveStatusTimeout;
             
             document.addEventListener('DOMContentLoaded', function() {
                 const essayInput = document.querySelector('.essay-answer');
-                const essayControls = document.querySelector('.essay-controls');
                 
-                if (essayInput && essayControls) {
-                    // Add save status indicator to essay controls
-                    const saveStatus = document.createElement('span');
-                    saveStatus.className = 'save-status';
-                    saveStatus.style.marginLeft = '10px';
-                    saveStatus.style.fontSize = '12px';
-                    saveStatus.style.opacity = '0';
-                    saveStatus.style.transition = 'opacity 0.3s ease';
-                    essayControls.appendChild(saveStatus);
-                    
+                if (essayInput) {
                     essayInput.addEventListener('input', function(e) {
                         clearTimeout(timeoutId);
-                        clearTimeout(saveStatusTimeout);
                         
-                        // Show "Saving..." message
-                        saveStatus.textContent = 'Saving...';
-                        saveStatus.style.color = '#ffc107';
-                        saveStatus.style.opacity = '1';
-                        
+                        // Tự động lưu sau 500ms khi người dùng ngừng nhập
                         timeoutId = setTimeout(() => {
-                            autoSaveEssayAnswer(e.target.value, saveStatus);
-                        }, 500); // Reduced to 500ms for quicker saving
+                            autoSaveEssayAnswer(e.target.value);
+                        }, 500);
                     });
                 }
             });
 
-            function autoSaveEssayAnswer(answer, saveStatus) {
+            function autoSaveEssayAnswer(answer) {
                 const form = document.getElementById('answerForm');
                 const formData = new FormData(form);
                 
@@ -2630,12 +2613,6 @@
                 // Thêm nextAction với giá trị mặc định là 'autosave'
                 formData.set('nextAction', 'autosave');
                 
-                // Debug: Log tất cả dữ liệu form trước khi gửi
-                console.log('Form data being sent:');
-                for (let pair of formData.entries()) {
-                    console.log(pair[0] + ': ' + pair[1]);
-                }
-                
                 // Lấy ID câu hỏi hiện tại
                 const currentQuestionId = parseInt(document.querySelector('input[name="questionId"]').value);
                 
@@ -2646,17 +2623,6 @@
                 }).then(response => {
                     if (response.ok) {
                         console.log('Essay answer saved successfully');
-                        
-                        if (saveStatus) {
-                            saveStatus.textContent = 'Đã lưu';
-                            saveStatus.style.color = '#28a745';
-                            
-                            // Ẩn thông báo sau 2 giây
-                            clearTimeout(saveStatusTimeout);
-                            saveStatusTimeout = setTimeout(() => {
-                                saveStatus.style.opacity = '0';
-                            }, 2000);
-                        }
                         
                         // Cập nhật trạng thái answered
                         if (answer.trim() !== '') {
@@ -2678,18 +2644,9 @@
                         response.text().then(text => {
                             console.error('Error details:', text);
                         });
-                        
-                        if (saveStatus) {
-                            saveStatus.textContent = 'Lưu thất bại';
-                            saveStatus.style.color = '#dc3545';
-                        }
                     }
                 }).catch(error => {
                     console.error('Error saving essay answer:', error);
-                    if (saveStatus) {
-                        saveStatus.textContent = 'Lưu thất bại';
-                        saveStatus.style.color = '#dc3545';
-                    }
                 });
             }
         </script>

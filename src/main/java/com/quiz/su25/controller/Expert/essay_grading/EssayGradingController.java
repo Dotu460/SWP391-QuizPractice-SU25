@@ -1,4 +1,4 @@
-package com.quiz.su25.controller.Expert;
+package com.quiz.su25.controller.Expert.essay_grading;
 
 import com.quiz.su25.config.GlobalConfig;
 import com.quiz.su25.dal.impl.QuestionDAO;
