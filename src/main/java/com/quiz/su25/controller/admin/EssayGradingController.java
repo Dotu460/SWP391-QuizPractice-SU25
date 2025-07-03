@@ -177,7 +177,7 @@ public class EssayGradingController extends HttpServlet {
             System.out.println("Forwarding to JSP...");
             
             // Forward đến trang danh sách chấm điểm
-            request.getRequestDispatcher("/view/admin/essay-grading/essay-grading-list.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/Expert/essay-grading/essay-grading-list.jsp").forward(request, response);
             
         } catch (NumberFormatException e) {
             System.out.println("ERROR: " + e.getMessage());
