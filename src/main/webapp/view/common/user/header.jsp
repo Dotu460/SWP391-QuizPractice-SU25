@@ -163,7 +163,7 @@
                                     </li>
                                     <li class="menu-item-has-children"><a href="#">Dashboard</a>
                                         <ul class="sub-menu">
-                                            <li class="active menu-item-has-children">
+                                            <li class="menu-item-has-children">
                                                 <a href="instructor-dashboard.html">Admin Dashboard</a>
                                                 <ul class="sub-menu">
                                                     <li><a href="instructor-dashboard.html">Dashboard</a></li>
