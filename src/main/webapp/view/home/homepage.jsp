@@ -28,12 +28,87 @@
                 left: 0;
                 width: 100%;
             }
+            
 
             .swiper-slide.swiper-slide-active {
                 opacity: 1;
                 visibility: visible;
                 position: relative;
                 z-index: 1;
+            }
+
+            /* Đồng bộ chiều cao các card */
+            .blog__post-item {
+                display: flex;
+                flex-direction: column;
+                height: auto;
+                border: 3px solid #e5e5e5;
+                border-radius: 14px;
+                overflow: hidden;
+                transition: all 0.3s ease;
+            }
+
+            .blog__post-item:hover {
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                transform: translateY(-2px);
+            }
+
+            /* Đảm bảo ảnh có kích thước cố định */
+            .blog__post-thumb {
+                flex-shrink: 0;
+            }
+
+            /* Content area co giãn để fill không gian còn lại */
+            .blog__post-content {
+                /*flex-grow: 1;*/
+                display: flex;
+                flex-direction: column;
+                padding: 20px;
+            }
+
+            /* Giới hạn title 2 dòng */
+            .blog__post-content .title {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                line-height: 1.4;
+                height: 2.8em; /* 2 dòng * 1.4 line-height */
+                margin-bottom: 8px;
+            }
+
+            /* Giới hạn description 3 dòng */
+            .blog__post-content p {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                line-height: 1.5;
+                height: 3em; /* 3 dòng * 1 line-height */
+                margin-bottom: 8px;
+/*                flex-grow: 1;*/
+            }
+
+            /* Date luôn ở bottom */
+            .blog__post-content .date {
+                margin-top: auto;
+                color: #888;
+                font-size: 0.9em;
+            }
+
+            /* Responsive cho mobile */
+            @media (max-width: 768px) {
+                .blog__post-content .title {
+                    -webkit-line-clamp: 1;
+                    height: 1.4em;
+                }
+
+                .blog__post-content p {
+                    -webkit-line-clamp: 2;
+                    height: 3em;
+                }
             }
 
             /* Quan trọng: đặt chiều cao cố định cho slider container */
@@ -79,7 +154,7 @@
 
         <!-- Hot Posts Section -->
         <section class="blog-area section-padding-120">
-            <div style="max-width: 960px;padding-left: 24px; padding-right: 0;">
+            <div style="max-width: 1400px;padding-left: 24px; padding-right: 0;">
                 <div class="row">
                     <div class="col-12">
                         <div class="section-title mb-70">
@@ -88,14 +163,14 @@
                     </div>
                 </div>
 
-                <div class="row">
+                <div class="row gx-4">
                     <c:forEach items="${hotPosts}" var="post">
-                        <div class="col-xl-6 col-lg-6">
+                        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
                             <div class="blog__post-item mb-30">
                                 <div class="blog__post-thumb">
                                     <a href="${pageContext.request.contextPath}/post?id=${post.id}">
                                         <img src="${pageContext.request.contextPath}${post.thumbnail_url}" 
-                                             alt="${post.title}" style="border-radius: 15px; height: 300px; object-fit: cover;">
+                                             alt="${post.title}" style="border-radius: 15px; height: 200px; object-fit: cover; width: 100%;">
                                     </a>
                                 </div>
                                 <div class="blog__post-content">
@@ -114,7 +189,7 @@
 
         <!-- Featured Subjects Section -->
         <section class="features-area section-padding-120">
-            <div style="max-width: 960px;padding-left: 24px; padding-right: 0;">
+            <div style="max-width: 1400px;padding-left: 24px; padding-right: 0;">
                 <div class="row">
                     <div class="col-12">
                         <div class="section-title mb-40">
@@ -123,15 +198,15 @@
                     </div>
                 </div>
 
-                <div class="row">
+                <div class="row gx-4">
                     <c:forEach items="${featuredSubjects}" var="subject">
-                        <div class="col-xl-6 col-lg-6">
+                        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
                             <div class="blog__post-item mb-30">
                                 <!-- Hình ảnh đại diện -->
                                 <div class="blog__post-thumb">
                                     <a href="${subject.description}" target="_blank">
                                         <img src="${pageContext.request.contextPath}${subject.thumbnail_url}" 
-                                             alt="${subject.title}" style="border-radius: 15px; height: 300px; object-fit: cover;">
+                                             alt="${subject.title}" style="border-radius: 15px; height: 200px; object-fit: cover; width: 100%;">
                                     </a>
                                 </div>
 
@@ -153,7 +228,7 @@
 
         <!-- Latest Posts Sidebar -->
         <section class="latest-posts section-padding-120">
-            <div style="max-width: 960px;padding-left: 24px; padding-right: 0;">
+            <div style="max-width: 1400px;padding-left: 24px; padding-right: 0;">
                 <div class="row">
                     <div class="col-12">
                         <div class="section-title mb-70">
@@ -163,11 +238,11 @@
                 </div>    
                 <div class="row gx-4">
                     <c:forEach items="${latestPosts}" var="post">
-                        <div class="col-xl-6 col-lg-6">
+                        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
                             <div class="blog__post-item mb-30">
                                 <div class="blog__post-thumb">
                                     <a href="${pageContext.request.contextPath}/post?id=${post.id}" class="latest-post">
-                                        <img src="${pageContext.request.contextPath}${post.thumbnail_url}" alt="${post.title}"style="border-radius: 15px; height: 300px; object-fit: cover;width: 100%">
+                                        <img src="${pageContext.request.contextPath}${post.thumbnail_url}" alt="${post.title}"style="border-radius: 15px; height: 200px; object-fit: cover; width: 100%;">
                                     </a>
                                 </div>
                                 <div class="blog__post-content">
