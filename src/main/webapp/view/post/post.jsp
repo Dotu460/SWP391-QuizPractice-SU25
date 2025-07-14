@@ -14,7 +14,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${post.title} - SkillGro</title>
+        <title>SkillGro - Blog Details</title>
 
         <!-- Include common CSS -->
         <jsp:include page="../common/user/link_css_common.jsp"></jsp:include>
