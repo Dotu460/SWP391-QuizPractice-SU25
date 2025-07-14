@@ -41,7 +41,7 @@
             .blog__post-item {
                 display: flex;
                 flex-direction: column;
-                height: auto;
+                height: 400px;
                 border: 3px solid #e5e5e5;
                 border-radius: 14px;
                 overflow: hidden;
@@ -61,10 +61,31 @@
             /* Content area co giãn để fill không gian còn lại */
             .blog__post-content {
                 /*flex-grow: 1;*/
-                display: flex;
-                flex-direction: column;
+                display: grid;
+                /*flex-direction: column;*/
+                grid-template-rows: 1fr auto;
                 padding: 20px;
+                /*justify-content: space-between;*/
+                gap: 0;
             }
+            .content-group {            
+                display: grid;
+                /*flex-direction: column;*/
+                grid-template-rows: auto auto;
+                gap: 4px;
+            }
+            .content-group p {
+                margin: 3px !important;
+                padding: 2px !important;
+                height: auto !important;
+                line-height: 1.2 !important;
+            }
+            .content-group .title {
+                margin: 3px !important;
+                padding: 2px !important;
+                height: auto !important;
+                line-height: 1.2 !important;
+}
 
             /* Giới hạn title 2 dòng */
             .blog__post-content .title {
@@ -74,8 +95,11 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
                 line-height: 1.4;
+                margin-left: 0 !important;
+                tadding-left: 0 !important;ext-indent: 0 !important;
+                padding-left: 0 !important;
                 height: 2.8em; /* 2 dòng * 1.4 line-height */
-                margin-bottom: 8px;
+                /*margin-bottom: 5px;*/
             }
 
             /* Giới hạn description 3 dòng */
@@ -86,14 +110,17 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
                 line-height: 1.5;
+                margin-left: 0 !important;
+                text-indent: 0 !important;
+                padding-left: 0 !important;
                 height: 3em; /* 3 dòng * 1 line-height */
-                margin-bottom: 8px;
+/*                margin-bottom: 5px;*/
 /*                flex-grow: 1;*/
             }
 
             /* Date luôn ở bottom */
             .blog__post-content .date {
-                margin-top: auto;
+                /*margin-top: auto;*/
                 color: #888;
                 font-size: 0.9em;
             }
@@ -102,12 +129,12 @@
             @media (max-width: 768px) {
                 .blog__post-content .title {
                     -webkit-line-clamp: 1;
-                    height: 1.4em;
+                    height: 1em;
                 }
 
                 .blog__post-content p {
                     -webkit-line-clamp: 2;
-                    height: 3em;
+                    height: 2em;
                 }
             }
 
@@ -174,10 +201,12 @@
                                     </a>
                                 </div>
                                 <div class="blog__post-content">
-                                    <h3 class="title">
-                                        <a href="${pageContext.request.contextPath}/post?id=${post.id}">${post.title}</a>
-                                    </h3>
-                                    <p>${post.brief_info}</p>
+                                    <div class="content-group">
+                                        <h3 class="title">
+                                            <a href="${pageContext.request.contextPath}/post?id=${post.id}">${post.title}</a>
+                                        </h3>
+                                        <p>${post.brief_info}</p>
+                                    </div>
                                     <span class="date">${post.created_at}</span>
                                 </div>
                             </div>
@@ -212,12 +241,14 @@
 
                                 <!-- Nội dung -->
                                 <div class="blog__post-content">
-                                    <h3 class="title">
-                                        <a href="${pageContext.request.contextPath}/subject?id=${subject.id}">
-                                            ${subject.title}
-                                        </a>
-                                    </h3>
-                                    <p>${subject.tag_line}</p>
+                                    <div class="content-group">
+                                        <h3 class="title">
+                                            <a href="${pageContext.request.contextPath}/subject?id=${subject.id}">
+                                                ${subject.title}
+                                            </a>
+                                        </h3>
+                                        <p>${subject.tag_line}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -246,10 +277,12 @@
                                     </a>
                                 </div>
                                 <div class="blog__post-content">
-                                    <h3 class="title">
-                                        <a href="${pageContext.request.contextPath}/post?id=${post.id}">${post.title}</a>
-                                    </h3>
-                                    <p>${post.brief_info}</p>
+                                    <div class="content-group">
+                                        <h3 class="title">
+                                            <a href="${pageContext.request.contextPath}/post?id=${post.id}">${post.title}</a>
+                                        </h3>
+                                        <p>${post.brief_info}</p>
+                                    </div>
                                     <span class="date">${post.created_at}</span>
                                 </div>
                             </div>
