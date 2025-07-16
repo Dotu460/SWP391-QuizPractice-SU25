@@ -208,26 +208,47 @@
       box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
     }
 
-    .subject-media {
+    /* Media Gallery Styles */
+    .media-gallery {
       margin-top: 30px;
     }
 
     .media-section {
-      margin-bottom: 30px;
+      margin-bottom: 40px;
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 25px;
+      border: 2px solid #e9ecef;
     }
 
     .media-section h4 {
       color: #333;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
       font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    .thumbnail-container {
+    .media-section h4 i {
+      color: #3f78e0;
+    }
+
+    .media-viewer {
+      position: relative;
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .media-display {
+      position: relative;
       text-align: center;
       margin-bottom: 20px;
     }
 
-    .subject-thumbnail {
+    .media-image {
       max-width: 100%;
       height: auto;
       border-radius: 10px;
@@ -235,7 +256,7 @@
       transition: all 0.3s ease;
     }
 
-    .subject-thumbnail:hover {
+    .media-image:hover {
       transform: scale(1.02);
       box-shadow: 0 8px 25px rgba(0,0,0,0.15);
     }
@@ -247,71 +268,132 @@
       padding-bottom: 56.25%; /* 16:9 aspect ratio */
       border-radius: 10px;
       overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
 
-    .video-container iframe {
+    .video-container iframe,
+    .video-container video {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
       border: none;
-    }
-
-    .no-video-message {
-      text-align: center;
-      padding: 40px 20px;
-      background: #f8f9fa;
       border-radius: 10px;
-      border: 2px dashed #dee2e6;
     }
 
-    .no-video-message i {
-      font-size: 3rem;
-      color: #6c757d;
-      margin-bottom: 15px;
+    .media-notes {
+      background: #e7f3ff;
+      border: 1px solid #b3d9ff;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      border-left: 4px solid #3f78e0;
     }
 
-    .no-video-message p {
+    .media-notes h6 {
+      color: #0066cc;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .media-notes p {
       margin: 0;
-      color: #6c757d;
-      font-size: 1.1rem;
+      color: #004080;
+      font-size: 0.9rem;
+      line-height: 1.5;
     }
 
-    .no-image-message {
+    .media-navigation {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .nav-btn {
+      background: #3f78e0;
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1.2rem;
+    }
+
+    .nav-btn:hover {
+      background: #2c5ec1;
+      transform: scale(1.1);
+    }
+
+    .nav-btn:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .media-counter {
+      background: #fff;
+      border: 2px solid #3f78e0;
+      border-radius: 20px;
+      padding: 8px 15px;
+      font-weight: 600;
+      color: #3f78e0;
+      min-width: 80px;
       text-align: center;
-      padding: 40px 20px;
-      background: #f8f9fa;
-      border-radius: 10px;
-      border: 2px dashed #dee2e6;
     }
 
-    .no-image-message i {
-      font-size: 3rem;
-      color: #6c757d;
-      margin-bottom: 15px;
+    .media-thumbnails {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      overflow-x: auto;
+      padding: 10px 0;
     }
 
-    .no-image-message p {
-      margin: 0;
-      color: #6c757d;
-      font-size: 1.1rem;
-    }
-
-    .image-debug-info,
-    .video-debug-info {
-      background: #f8f9fa;
-      padding: 10px;
+    .media-thumbnail {
+      width: 80px;
+      height: 60px;
       border-radius: 5px;
-      margin-top: 10px;
-      border-left: 3px solid #007bff;
+      object-fit: cover;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
     }
 
-    .image-debug-info small,
-    .video-debug-info small {
+    .media-thumbnail:hover {
+      border-color: #3f78e0;
+      transform: scale(1.05);
+    }
+
+    .media-thumbnail.active {
+      border-color: #28a745;
+      box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
+    }
+
+    .no-media-message {
+      text-align: center;
+      padding: 40px 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      border: 2px dashed #dee2e6;
       color: #6c757d;
-      font-family: monospace;
-      word-break: break-all;
+    }
+
+    .no-media-message i {
+      font-size: 3rem;
+      margin-bottom: 15px;
+    }
+
+    .no-media-message p {
+      margin: 0;
+      font-size: 1.1rem;
     }
 
     /* Sidebar Styles */
@@ -570,6 +652,15 @@
       .subject-content {
         padding: 20px;
       }
+
+      .media-navigation {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .media-thumbnails {
+        justify-content: center;
+      }
     }
   </style>
 </head>
@@ -691,22 +782,6 @@
                 <div class="subject-brief">${subject.brief_info != null ? subject.brief_info : 'No brief information available'}</div>
               </div>
 
-              <!-- Debug Section (remove in production) -->
-              <div class="debug-section" style="background: #f8f9fa; padding: 20px; margin: 20px; border-radius: 10px; border: 2px dashed #007bff;">
-                <h5><i class="fas fa-bug"></i> Debug Information</h5>
-                <div style="font-family: monospace; font-size: 0.9rem;">
-                  <p><strong>Subject ID:</strong> ${subject.id}</p>
-                  <p><strong>Title:</strong> ${subject.title}</p>
-                  <p><strong>Thumbnail URL:</strong> ${subject.thumbnail_url != null ? subject.thumbnail_url : 'NULL'}</p>
-                  <p><strong>Video URL:</strong> ${subject.video_url != null ? subject.video_url : 'NULL'}</p>
-                  <p><strong>Tag Line:</strong> ${subject.tag_line != null ? subject.tag_line : 'NULL'}</p>
-                  <p><strong>Brief Info:</strong> ${subject.brief_info != null ? subject.brief_info : 'NULL'}</p>
-                  <p><strong>Description:</strong> ${subject.description != null ? subject.description : 'NULL'}</p>
-                  <p><strong>Status:</strong> ${subject.status}</p>
-                  <p><strong>Category ID:</strong> ${subject.category_id}</p>
-                </div>
-              </div>
-
               <!-- Content Section -->
               <div class="subject-content">
                 <div class="subject-info-grid">
@@ -764,147 +839,87 @@
                   </div>
                 </div>
 
-                <!-- Media Section -->
-                <div class="subject-media">
-                  <!-- Thumbnail -->
+                <!-- Media Gallery -->
+                <div class="media-gallery">
+                  <!-- Images Section -->
                   <div class="media-section">
-                    <h4><i class="fas fa-image"></i> Subject Thumbnail</h4>
+                    <h4><i class="fas fa-images"></i> Course Images</h4>
                     <c:choose>
-                      <c:when test="${subject.thumbnail_url != null && not empty subject.thumbnail_url}">
-                        <div class="thumbnail-container">
-                          <c:choose>
-                            <c:when test="${fn:startsWith(subject.thumbnail_url, '/')}">
-                              <img src="${pageContext.request.contextPath}${subject.thumbnail_url}" alt="${subject.title}" class="subject-thumbnail" 
-                                   onerror="this.onerror=null; this.src='${pageContext.request.contextPath}/view/common/img/courses/course_thumb01.jpg'; this.style.border='2px dashed #dc3545';">
-                            </c:when>
-                            <c:when test="${fn:startsWith(subject.thumbnail_url, 'http')}">
-                              <img src="${subject.thumbnail_url}" alt="${subject.title}" class="subject-thumbnail" 
-                                   onerror="this.onerror=null; this.src='${pageContext.request.contextPath}/view/common/img/courses/course_thumb01.jpg'; this.style.border='2px dashed #dc3545';">
-                            </c:when>
-                            <c:otherwise>
-                              <img src="${pageContext.request.contextPath}/${subject.thumbnail_url}" alt="${subject.title}" class="subject-thumbnail" 
-                                   onerror="this.onerror=null; this.src='${pageContext.request.contextPath}/view/common/img/courses/course_thumb01.jpg'; this.style.border='2px dashed #dc3545';">
-                            </c:otherwise>
-                          </c:choose>
-                          <div class="image-debug-info">
-                            <small>Image URL: ${subject.thumbnail_url}</small>
-                            <br><small>Common patterns to try:</small>
-                            <br><small>- /media/demoImages.png</small>
-                            <br><small>- ${pageContext.request.contextPath}/media/demoImages.png</small>
-                            <br><small>- /view/common/img/courses/course_thumb01.jpg</small>
-                            <br><small>- ${pageContext.request.contextPath}/view/common/img/courses/course_thumb01.jpg</small>
+                      <c:when test="${not empty subjectImages}">
+                        <div class="media-viewer" id="imageViewer">
+                          <div class="media-display">
+                            <img id="currentImage" src="${subjectImages[0].link}" alt="Course Image" class="media-image">
+                          </div>
+                          
+                          <div class="media-notes" id="currentImageNotes">
+                            <h6>Image Notes:</h6>
+                            <p id="imageNotesText">${subjectImages[0].notes != null ? subjectImages[0].notes : 'No notes available'}</p>
+                          </div>
+                          
+                          <div class="media-navigation">
+                            <button class="nav-btn" id="prevImageBtn" onclick="changeImage(-1)">
+                              <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="media-counter">
+                              <span id="currentImageIndex">1</span> / <span id="totalImages">${fn:length(subjectImages)}</span>
+                            </div>
+                            <button class="nav-btn" id="nextImageBtn" onclick="changeImage(1)">
+                              <i class="fas fa-chevron-right"></i>
+                            </button>
+                          </div>
+                          
+                          <div class="media-thumbnails">
+                            <c:forEach var="image" items="${subjectImages}" varStatus="status">
+                              <img src="${image.link}" alt="Thumbnail ${status.index + 1}" 
+                                   class="media-thumbnail ${status.index == 0 ? 'active' : ''}" 
+                                   onclick="showImage(${status.index})">
+                            </c:forEach>
                           </div>
                         </div>
                       </c:when>
                       <c:otherwise>
-                        <div class="no-image-message">
+                        <div class="no-media-message">
                           <i class="fas fa-image"></i>
-                          <p>No thumbnail available for this subject</p>
-                          <small>Thumbnail URL: ${subject.thumbnail_url}</small>
+                          <p>No images available for this course</p>
                         </div>
                       </c:otherwise>
                     </c:choose>
                   </div>
 
-                  <!-- Video -->
+                  <!-- Videos Section -->
                   <div class="media-section">
-                    <h4><i class="fas fa-video"></i> Subject Video</h4>
+                    <h4><i class="fas fa-video"></i> Course Videos</h4>
                     <c:choose>
-                      <c:when test="${subject.video_url != null && not empty subject.video_url}">
-                        <div class="video-container">
-                          <c:choose>
-                            <c:when test="${fn:contains(subject.video_url, 'youtube.com') || fn:contains(subject.video_url, 'youtu.be')}">
-                              <!-- YouTube Video -->
-                              <c:set var="videoId" value="" />
-                              <c:choose>
-                                <c:when test="${fn:contains(subject.video_url, 'youtube.com/watch?v=')}">
-                                  <c:set var="videoId" value="${fn:substringAfter(subject.video_url, 'v=')}" />
-                                  <c:if test="${fn:contains(videoId, '&')}">
-                                    <c:set var="videoId" value="${fn:substringBefore(videoId, '&')}" />
-                                  </c:if>
-                                </c:when>
-                                <c:when test="${fn:contains(subject.video_url, 'youtu.be/')}">
-                                  <c:set var="videoId" value="${fn:substringAfter(subject.video_url, 'youtu.be/')}" />
-                                </c:when>
-                              </c:choose>
-                              <iframe src="https://www.youtube.com/embed/${videoId}" 
-                                      title="${subject.title}" 
-                                      allowfullscreen>
-                              </iframe>
-                              <div class="video-debug-info">
-                                <small>YouTube Video ID: ${videoId}</small><br>
-                                <small>Original URL: ${subject.video_url}</small>
-                              </div>
-                            </c:when>
-                            <c:when test="${fn:contains(subject.video_url, 'vimeo.com')}">
-                              <!-- Vimeo Video -->
-                              <c:set var="videoId" value="${fn:substringAfter(subject.video_url, 'vimeo.com/')}" />
-                              <iframe src="https://player.vimeo.com/video/${videoId}" 
-                                      title="${subject.title}" 
-                                      allowfullscreen>
-                              </iframe>
-                              <div class="video-debug-info">
-                                <small>Vimeo Video ID: ${videoId}</small><br>
-                                <small>Original URL: ${subject.video_url}</small>
-                              </div>
-                            </c:when>
-                            <c:otherwise>
-                              <!-- Direct Video File -->
-                              <c:choose>
-                                <c:when test="${fn:startsWith(subject.video_url, '/')}">
-                                  <video controls width="100%" height="100%" 
-                                         onerror="console.log('Video failed to load:', this.src); this.style.border='2px dashed #dc3545';"
-                                         onloadstart="console.log('Video loading started:', this.src);"
-                                         onloadeddata="console.log('Video loaded successfully:', this.src);">
-                                    <source src="${pageContext.request.contextPath}${subject.video_url}" type="video/mp4">
-                                    <source src="${pageContext.request.contextPath}${subject.video_url}" type="video/webm">
-                                    <source src="${pageContext.request.contextPath}${subject.video_url}" type="video/ogg">
-                                    Your browser does not support the video tag.
-                                  </video>
-                                </c:when>
-                                <c:when test="${fn:startsWith(subject.video_url, 'http')}">
-                                  <video controls width="100%" height="100%" 
-                                         onerror="console.log('Video failed to load:', this.src); this.style.border='2px dashed #dc3545';"
-                                         onloadstart="console.log('Video loading started:', this.src);"
-                                         onloadeddata="console.log('Video loaded successfully:', this.src);">
-                                    <source src="${subject.video_url}" type="video/mp4">
-                                    <source src="${subject.video_url}" type="video/webm">
-                                    <source src="${subject.video_url}" type="video/ogg">
-                                    Your browser does not support the video tag.
-                                  </video>
-                                </c:when>
-                                <c:otherwise>
-                                  <video controls width="100%" height="100%" 
-                                         onerror="console.log('Video failed to load:', this.src); this.style.border='2px dashed #dc3545';"
-                                         onloadstart="console.log('Video loading started:', this.src);"
-                                         onloadeddata="console.log('Video loaded successfully:', this.src);">
-                                    <source src="${pageContext.request.contextPath}/${subject.video_url}" type="video/mp4">
-                                    <source src="${pageContext.request.contextPath}/${subject.video_url}" type="video/webm">
-                                    <source src="${pageContext.request.contextPath}/${subject.video_url}" type="video/ogg">
-                                    Your browser does not support the video tag.
-                                  </video>
-                                </c:otherwise>
-                              </c:choose>
-                              <div class="video-debug-info">
-                                <small>Direct Video URL: ${subject.video_url}</small>
-                                <br><small>Constructed URL: ${pageContext.request.contextPath}${subject.video_url}</small>
-                                <br><small>Context Path: ${pageContext.request.contextPath}</small>
-                                <br><small>Common patterns to try:</small>
-                                <br><small>- /media/demoVideo.mp4</small>
-                                <br><small>- ${pageContext.request.contextPath}/media/demoVideo.mp4</small>
-                                <br><small>- /media/skdaljw.mp4</small>
-                                <br><small>- ${pageContext.request.contextPath}/media/skdaljw.mp4</small>
-                                <br><small>Test direct link: <a href="${pageContext.request.contextPath}${subject.video_url}" target="_blank">Click here to test video URL</a></small>
-                              </div>
-                            </c:otherwise>
-                          </c:choose>
+                      <c:when test="${not empty subjectVideos}">
+                        <div class="media-viewer" id="videoViewer">
+                          <div class="media-display">
+                            <div id="currentVideoContainer" class="video-container">
+                              <!-- Video will be loaded here -->
+                            </div>
+                          </div>
+                          
+                          <div class="media-notes" id="currentVideoNotes">
+                            <h6>Video Notes:</h6>
+                            <p id="videoNotesText">${subjectVideos[0].notes != null ? subjectVideos[0].notes : 'No notes available'}</p>
+                          </div>
+                          
+                          <div class="media-navigation">
+                            <button class="nav-btn" id="prevVideoBtn" onclick="changeVideo(-1)">
+                              <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="media-counter">
+                              <span id="currentVideoIndex">1</span> / <span id="totalVideos">${fn:length(subjectVideos)}</span>
+                            </div>
+                            <button class="nav-btn" id="nextVideoBtn" onclick="changeVideo(1)">
+                              <i class="fas fa-chevron-right"></i>
+                            </button>
+                          </div>
                         </div>
                       </c:when>
                       <c:otherwise>
-                        <div class="no-video-message">
+                        <div class="no-media-message">
                           <i class="fas fa-video-slash"></i>
-                          <p>No video available for this subject</p>
-                          <small>Video URL: ${subject.video_url}</small>
+                          <p>No videos available for this course</p>
                         </div>
                       </c:otherwise>
                     </c:choose>
@@ -925,15 +940,165 @@
 <jsp:include page="../../common/user/footer.jsp"></jsp:include>
 <!-- footer-area-end -->
 
+<!-- Hidden data containers for JavaScript -->
+<div id="imageData" style="display: none;">
+  <c:forEach var="image" items="${subjectImages}" varStatus="status">
+    <div class="image-data" data-link="${image.link}" data-notes="${image.notes != null ? image.notes : 'No notes available'}"></div>
+  </c:forEach>
+</div>
+<div id="videoData" style="display: none;">
+  <c:forEach var="video" items="${subjectVideos}" varStatus="status">
+    <div class="video-data" data-link="${video.link}" data-notes="${video.notes != null ? video.notes : 'No notes available'}"></div>
+  </c:forEach>
+</div>
+
+<!-- JavaScript for Media Navigation -->
+<script>
+  // Image data from server
+  const images = [];
+  document.querySelectorAll('.image-data').forEach(function(element) {
+    images.push({
+      link: element.getAttribute('data-link'),
+      notes: element.getAttribute('data-notes')
+    });
+  });
+  
+  // Video data from server
+  const videos = [];
+  document.querySelectorAll('.video-data').forEach(function(element) {
+    videos.push({
+      link: element.getAttribute('data-link'),
+      notes: element.getAttribute('data-notes')
+    });
+  });
+  
+  let currentImageIndex = 0;
+  let currentVideoIndex = 0;
+  
+  // Image navigation functions
+  function changeImage(direction) {
+    currentImageIndex += direction;
+    
+    if (currentImageIndex < 0) {
+      currentImageIndex = images.length - 1;
+    } else if (currentImageIndex >= images.length) {
+      currentImageIndex = 0;
+    }
+    
+    showImage(currentImageIndex);
+  }
+  
+  function showImage(index) {
+    if (index >= 0 && index < images.length) {
+      currentImageIndex = index;
+      
+      // Update image
+      document.getElementById('currentImage').src = images[index].link;
+      document.getElementById('imageNotesText').textContent = images[index].notes;
+      
+      // Update counter
+      document.getElementById('currentImageIndex').textContent = index + 1;
+      
+      // Update thumbnails
+      const thumbnails = document.querySelectorAll('.media-thumbnail');
+      thumbnails.forEach((thumb, i) => {
+        thumb.classList.toggle('active', i === index);
+      });
+      
+      // Update navigation buttons
+      document.getElementById('prevImageBtn').disabled = images.length <= 1;
+      document.getElementById('nextImageBtn').disabled = images.length <= 1;
+    }
+  }
+  
+  // Video navigation functions
+  function changeVideo(direction) {
+    currentVideoIndex += direction;
+    
+    if (currentVideoIndex < 0) {
+      currentVideoIndex = videos.length - 1;
+    } else if (currentVideoIndex >= videos.length) {
+      currentVideoIndex = 0;
+    }
+    
+    showVideo(currentVideoIndex);
+  }
+  
+  function showVideo(index) {
+    if (index >= 0 && index < videos.length) {
+      currentVideoIndex = index;
+      const video = videos[index];
+      
+      // Update video container
+      const container = document.getElementById('currentVideoContainer');
+      let videoHtml = '';
+      
+      if (video.link.includes('youtube.com') || video.link.includes('youtu.be')) {
+        // YouTube video
+        let videoId = '';
+        if (video.link.includes('youtube.com/watch?v=')) {
+          videoId = video.link.split('v=')[1].split('&')[0];
+        } else if (video.link.includes('youtu.be/')) {
+          videoId = video.link.split('youtu.be/')[1];
+        }
+        videoHtml = '<iframe src="https://www.youtube.com/embed/' + videoId + '" title="Course Video" allowfullscreen></iframe>';
+      } else if (video.link.includes('vimeo.com')) {
+        // Vimeo video
+        const videoId = video.link.split('vimeo.com/')[1];
+        videoHtml = '<iframe src="https://player.vimeo.com/video/' + videoId + '" title="Course Video" allowfullscreen></iframe>';
+      } else {
+        // Direct video file
+        videoHtml = '<video controls><source src="' + video.link + '" type="video/mp4"><source src="' + video.link + '" type="video/webm">Your browser does not support the video tag.</video>';
+      }
+      
+      container.innerHTML = videoHtml;
+      
+      // Update notes
+      document.getElementById('videoNotesText').textContent = video.notes;
+      
+      // Update counter
+      document.getElementById('currentVideoIndex').textContent = index + 1;
+      
+      // Update navigation buttons
+      document.getElementById('prevVideoBtn').disabled = videos.length <= 1;
+      document.getElementById('nextVideoBtn').disabled = videos.length <= 1;
+    }
+  }
+  
+  // Initialize when page loads
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize image viewer
+    if (images.length > 0) {
+      showImage(0);
+    }
+    
+    // Initialize video viewer
+    if (videos.length > 0) {
+      showVideo(0);
+    }
+    
+    // Initialize tooltips
+    if (typeof $ !== 'undefined') {
+      $('[data-toggle="tooltip"]').tooltip();
+    }
+  });
+  
+  // Keyboard navigation
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft') {
+      changeImage(-1);
+    } else if (e.key === 'ArrowRight') {
+      changeImage(1);
+    }
+  });
+</script>
+
 <!-- JS here -->
 <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
 <script>
-  SVGInject(document.querySelectorAll("img.injectable"));
-
-  // Initialize tooltips
-  $(document).ready(function() {
-    $('[data-toggle="tooltip"]').tooltip();
-  });
+  if (typeof SVGInject !== 'undefined') {
+    SVGInject(document.querySelectorAll("img.injectable"));
+  }
 </script>
 </body>
 </html>

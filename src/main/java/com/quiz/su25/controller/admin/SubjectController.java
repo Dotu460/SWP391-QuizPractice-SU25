@@ -20,8 +20,10 @@ import jakarta.servlet.http.Part;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @WebServlet(name = "SubjectController", urlPatterns = {"/admin/subjects", "/admin/subject/*"})
 @MultipartConfig(
@@ -330,6 +332,10 @@ public class SubjectController extends HttpServlet {
      */
     private void handleMediaUploads(HttpServletRequest request, int subjectId) {
         try {
+            // Keep track of which indices have file uploads to avoid URL conflicts
+            Set<String> processedImageIndices = new HashSet<>();
+            Set<String> processedVideoIndices = new HashSet<>();
+            
             // Handle multiple image uploads with notes
             Collection<Part> parts = request.getParts();
             
@@ -342,6 +348,8 @@ public class SubjectController extends HttpServlet {
                     String imageFile = handleFileUpload(request, partName);
                     
                     if (imageFile != null) {
+                        processedImageIndices.add(imageIndex);
+                        
                         // Get corresponding notes for this image
                         String notes = request.getParameter("image_notes_" + imageIndex);
                         if (notes == null) notes = "";
@@ -353,6 +361,8 @@ public class SubjectController extends HttpServlet {
                                 .notes(notes.trim())
                                 .build();
                         mediaDAO.insert(imageMedia);
+                        
+                        System.out.println("Successfully uploaded image file: " + imageFile + " for subject " + subjectId);
                     }
                 }
                 
@@ -362,6 +372,8 @@ public class SubjectController extends HttpServlet {
                     String videoFile = handleFileUpload(request, partName);
                     
                     if (videoFile != null) {
+                        processedVideoIndices.add(videoIndex);
+                        
                         // Get corresponding notes for this video
                         String notes = request.getParameter("video_notes_" + videoIndex);
                         if (notes == null) notes = "";
@@ -373,12 +385,14 @@ public class SubjectController extends HttpServlet {
                                 .notes(notes.trim())
                                 .build();
                         mediaDAO.insert(videoMedia);
+                        
+                        System.out.println("Successfully uploaded video file: " + videoFile + " for subject " + subjectId);
                     }
                 }
             }
             
-            // Also handle any media URLs with notes from the rich text editor
-            handleMediaUrls(request, subjectId);
+            // Handle media URLs (only for indices that don't have file uploads)
+            handleMediaUrls(request, subjectId, processedImageIndices, processedVideoIndices);
             
         } catch (Exception e) {
             System.out.println("Error handling media uploads: " + e.getMessage());
@@ -387,49 +401,35 @@ public class SubjectController extends HttpServlet {
     }
     
     /**
-     * Handle media URLs submitted from the form (from TinyMCE or direct URLs)
+     * Handle media URLs submitted from the form (only for indices without file uploads)
      */
-    private void handleMediaUrls(HttpServletRequest request, int subjectId) {
+    private void handleMediaUrls(HttpServletRequest request, int subjectId, Set<String> processedImageIndices, Set<String> processedVideoIndices) {
         try {
-            // Handle image URLs with notes
-            int imageUrlIndex = 0;
-            while (true) {
-                String imageUrl = request.getParameter("image_url_" + imageUrlIndex);
-                if (imageUrl == null || imageUrl.trim().isEmpty()) {
-                    break;
-                }
-                
-                String notes = request.getParameter("image_url_notes_" + imageUrlIndex);
-                if (notes == null) notes = "";
-                
-                Media imageMedia = Media.builder()
-                        .subjectId(subjectId)
-                        .link(imageUrl.trim())
-                        .type(0) // Image
-                        .notes(notes.trim())
-                        .build();
-                mediaDAO.insert(imageMedia);
-                imageUrlIndex++;
-            }
-            
-            // Handle video URLs with notes
+            // Handle video URLs with notes (only for indices that don't have file uploads)
             int videoUrlIndex = 0;
             while (true) {
                 String videoUrl = request.getParameter("video_url_" + videoUrlIndex);
-                if (videoUrl == null || videoUrl.trim().isEmpty()) {
+                String indexStr = String.valueOf(videoUrlIndex);
+                
+                // Only process URL if no file was uploaded for this index
+                if (videoUrl != null && !videoUrl.trim().isEmpty() && !processedVideoIndices.contains(indexStr)) {
+                    String notes = request.getParameter("video_notes_" + videoUrlIndex);
+                    if (notes == null) notes = "";
+                    
+                    Media videoMedia = Media.builder()
+                            .subjectId(subjectId)
+                            .link(videoUrl.trim())
+                            .type(1) // Video
+                            .notes(notes.trim())
+                            .build();
+                    mediaDAO.insert(videoMedia);
+                    
+                    System.out.println("Successfully added video URL: " + videoUrl + " for subject " + subjectId);
+                } else if (videoUrl == null || videoUrl.trim().isEmpty()) {
+                    // Stop when we reach the first empty URL parameter
                     break;
                 }
                 
-                String notes = request.getParameter("video_notes_" + videoUrlIndex);
-                if (notes == null) notes = "";
-                
-                Media videoMedia = Media.builder()
-                        .subjectId(subjectId)
-                        .link(videoUrl.trim())
-                        .type(1) // Video
-                        .notes(notes.trim())
-                        .build();
-                mediaDAO.insert(videoMedia);
                 videoUrlIndex++;
             }
             
@@ -440,7 +440,7 @@ public class SubjectController extends HttpServlet {
     }
 
     /**
-     * Handle file upload for main thumbnail or video
+     * Handle file upload for images and videos
      */
     private String handleFileUpload(HttpServletRequest request, String fieldName) {
         try {
@@ -448,31 +448,52 @@ public class SubjectController extends HttpServlet {
             if (filePart != null && filePart.getSize() > 0) {
                 String fileName = getFileName(filePart);
                 if (fileName != null && !fileName.isEmpty()) {
+                    System.out.println("Processing file upload: " + fileName + " (size: " + filePart.getSize() + " bytes)");
+                    
                     // Create a unique filename
                     String timestamp = String.valueOf(System.currentTimeMillis());
                     String extension = "";
                     if (fileName.contains(".")) {
                         extension = fileName.substring(fileName.lastIndexOf("."));
                     }
-                    String uniqueFileName = timestamp + "_" + fileName.replaceAll("[^a-zA-Z0-9.]", "_");
+                    String uniqueFileName = timestamp + "_" + fileName.replaceAll("[^a-zA-Z0-9.-]", "_");
                     
                     // Create upload directory if it doesn't exist
                     String uploadPath = request.getServletContext().getRealPath("/media");
                     java.io.File uploadDir = new java.io.File(uploadPath);
+                    
+                    System.out.println("Upload directory path: " + uploadPath);
+                    
                     if (!uploadDir.exists()) {
-                        uploadDir.mkdirs();
+                        boolean created = uploadDir.mkdirs();
+                        System.out.println("Created upload directory: " + created);
+                    } else {
+                        System.out.println("Upload directory already exists");
                     }
                     
                     // Save the file
                     String filePath = uploadPath + java.io.File.separator + uniqueFileName;
                     filePart.write(filePath);
                     
-                    // Return the web-accessible URL
-                    return "/media/" + uniqueFileName;
+                    // Verify file was written
+                    java.io.File savedFile = new java.io.File(filePath);
+                    if (savedFile.exists()) {
+                        System.out.println("File saved successfully: " + filePath + " (size: " + savedFile.length() + " bytes)");
+                        
+                        // Return the web-accessible URL
+                        String webUrl = request.getContextPath() + "/media/" + uniqueFileName;
+                        System.out.println("Returning web URL: " + webUrl);
+                        return webUrl;
+                    } else {
+                        System.err.println("Failed to save file: " + filePath);
+                        return null;
+                    }
                 }
+            } else {
+                System.out.println("No file part found for field: " + fieldName + " or file is empty");
             }
         } catch (Exception e) {
-            System.out.println("Error handling file upload for " + fieldName + ": " + e.getMessage());
+            System.err.println("Error handling file upload for " + fieldName + ": " + e.getMessage());
             e.printStackTrace();
         }
         return null;
