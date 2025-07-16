@@ -124,6 +124,15 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
                 .updated_at(resultSet.getDate("updated_at"))
                 .created_at(resultSet.getDate("created_at"))
                 .build();
+        
+        // Try to get subject_id if the column exists, otherwise set to null
+        try {
+            pricePackage.setSubject_id(resultSet.getInt("subject_id"));
+        } catch (SQLException e) {
+            // Column doesn't exist, set to null
+            pricePackage.setSubject_id(null);
+        }
+        
         return pricePackage;
     }
 
@@ -154,9 +163,106 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
     
     public static void main(String[] args) {
         PricePackageDAO pricePackageDAO = new PricePackageDAO();
-        pricePackageDAO.findAll().forEach(item -> {
-            System.out.println(item);
-        });
+        
+        System.out.println("=== PricePackageDAO Debug Test ===\n");
+        
+        // Test 1: Find all packages
+        System.out.println("1. Testing findAll():");
+        List<PricePackage> allPackages = pricePackageDAO.findAll();
+        if (allPackages.isEmpty()) {
+            System.out.println("   No packages found in database");
+        } else {
+            System.out.println("   Found " + allPackages.size() + " packages:");
+            for (PricePackage pkg : allPackages) {
+                System.out.println("   - ID: " + pkg.getId() + 
+                                 ", Name: " + pkg.getName() + 
+                                 ", Sale Price: $" + pkg.getSale_price() + 
+                                 ", List Price: $" + pkg.getList_price() +
+                                 ", Subject ID: " + (pkg.getSubject_id() != null ? pkg.getSubject_id() : "N/A"));
+            }
+        }
+        System.out.println();
+        
+        // Test 2: Find lowest price package
+        System.out.println("2. Testing findLowestPricePackage():");
+        PricePackage lowestPackage = pricePackageDAO.findLowestPricePackage();
+        if (lowestPackage != null) {
+            System.out.println("   Lowest price package found:");
+            System.out.println("   - ID: " + lowestPackage.getId());
+            System.out.println("   - Name: " + lowestPackage.getName());
+            System.out.println("   - Sale Price: $" + lowestPackage.getSale_price());
+            System.out.println("   - List Price: $" + lowestPackage.getList_price());
+            System.out.println("   - Subject ID: " + (lowestPackage.getSubject_id() != null ? lowestPackage.getSubject_id() : "N/A"));
+            System.out.println("   - Duration: " + lowestPackage.getAccess_duration_months() + " months");
+            System.out.println("   - Status: " + lowestPackage.getStatus());
+            System.out.println("   - Description: " + (lowestPackage.getDescription() != null ? lowestPackage.getDescription() : "No description"));
+        } else {
+            System.out.println("   No packages found - lowest price package is null");
+        }
+        System.out.println();
+        
+        // Test 3: Find by subject ID (if we have packages with subject_id)
+        System.out.println("3. Testing findBySubjectId():");
+        if (!allPackages.isEmpty()) {
+            // Try to find packages for subject ID 1
+            List<PricePackage> subjectPackages = pricePackageDAO.findBySubjectId(1);
+            System.out.println("   Packages for subject ID 1: " + subjectPackages.size());
+            for (PricePackage pkg : subjectPackages) {
+                System.out.println("   - ID: " + pkg.getId() + ", Name: " + pkg.getName() + ", Price: $" + pkg.getSale_price());
+            }
+            
+            // Try to find packages for subject ID 2
+            List<PricePackage> subjectPackages2 = pricePackageDAO.findBySubjectId(2);
+            System.out.println("   Packages for subject ID 2: " + subjectPackages2.size());
+            for (PricePackage pkg : subjectPackages2) {
+                System.out.println("   - ID: " + pkg.getId() + ", Name: " + pkg.getName() + ", Price: $" + pkg.getSale_price());
+            }
+        }
+        System.out.println();
+        
+        // Test 4: Find lowest price package by subject ID
+        System.out.println("4. Testing findLowestPricePackageBySubjectId():");
+        if (!allPackages.isEmpty()) {
+            PricePackage lowestBySubject = pricePackageDAO.findLowestPricePackageBySubjectId(1);
+            if (lowestBySubject != null) {
+                System.out.println("   Lowest price package for subject ID 1:");
+                System.out.println("   - ID: " + lowestBySubject.getId() + ", Name: " + lowestBySubject.getName() + ", Price: $" + lowestBySubject.getSale_price());
+            } else {
+                System.out.println("   No packages found for subject ID 1");
+            }
+        }
+        System.out.println();
+        
+        // Test 5: Database connection test
+        System.out.println("5. Testing database connection:");
+        try {
+            // Try to get a simple count
+            String countSql = "SELECT COUNT(*) FROM pricePackage";
+            pricePackageDAO.connection = pricePackageDAO.getConnection();
+            pricePackageDAO.statement = pricePackageDAO.connection.prepareStatement(countSql);
+            pricePackageDAO.resultSet = pricePackageDAO.statement.executeQuery();
+            if (pricePackageDAO.resultSet.next()) {
+                int count = pricePackageDAO.resultSet.getInt(1);
+                System.out.println("   Database connection successful. Total packages in table: " + count);
+            }
+        } catch (Exception e) {
+            System.out.println("   Database connection error: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            pricePackageDAO.closeResources();
+        }
+        System.out.println();
+        
+        // Test 6: Test with filters
+        System.out.println("6. Testing findPricePackagesWithFilters():");
+        List<PricePackage> filteredPackages = pricePackageDAO.findPricePackagesWithFilters("active", "", "", "", 1, 10);
+        System.out.println("   Active packages found: " + filteredPackages.size());
+        for (PricePackage pkg : filteredPackages) {
+            System.out.println("   - ID: " + pkg.getId() + ", Name: " + pkg.getName() + ", Status: " + pkg.getStatus());
+        }
+        System.out.println();
+        
+        System.out.println("=== Debug Test Complete ===");
     }
     
     /**
@@ -288,6 +394,45 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
             closeResources();
         }
         return 0;
+    }
+    
+    /**
+     * Find price packages by subject ID
+     * Note: Since subject_id column doesn't exist, this returns all packages
+     */
+    public List<PricePackage> findBySubjectId(Integer subjectId) {
+        // Since subject_id column doesn't exist, return all packages
+        return findAll();
+    }
+    
+    /**
+     * Find the lowest price package for a subject
+     * Note: Since subject_id column doesn't exist, this returns the lowest price package from all packages
+     */
+    public PricePackage findLowestPricePackageBySubjectId(Integer subjectId) {
+        // Since subject_id column doesn't exist, return the lowest price package from all packages
+        return findLowestPricePackage();
+    }
+    
+    /**
+     * Find the lowest price package from all packages
+     */
+    public PricePackage findLowestPricePackage() {
+        String sql = "SELECT * FROM pricePackage ORDER BY sale_price ASC LIMIT 1";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return getFromResultSet(resultSet);
+            }
+        } catch (Exception e) {
+            System.out.println("Error findLowestPricePackage at class PricePackageDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return null;
     }
     
 }

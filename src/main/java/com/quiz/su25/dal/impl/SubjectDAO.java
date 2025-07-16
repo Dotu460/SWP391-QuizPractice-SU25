@@ -71,8 +71,8 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
             statement.setInt(7, subject.getOwner_id());
             statement.setString(8, subject.getStatus());
             statement.setBoolean(9, subject.getFeatured_flag());
-            statement.setDate(10, (Date) subject.getCreated_at());
-            statement.setDate(11, (Date) subject.getUpdated_at());
+            statement.setDate(10, subject.getCreated_at() != null ? new java.sql.Date(subject.getCreated_at().getTime()) : null);
+            statement.setDate(11, subject.getUpdated_at() != null ? new java.sql.Date(subject.getUpdated_at().getTime()) : null);
             statement.setInt(12, subject.getCreated_by());
             statement.setInt(13, subject.getUpdated_by());
 
@@ -95,16 +95,21 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
                 + "title = ?, thumbnail_url = ?, tag_line = ?, brief_info = ?, description = ?, "
                 + "category_id = ?, owner_id = ?, status = ?, featured_flag = ?, "
                 + "updated_at = ?, updated_by = ? "
-                + "WHERE subject_id = ?";
+                + "WHERE id = ?";
         boolean success = false;
         try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, subject.getTitle());
+            statement.setString(2, subject.getThumbnail_url());
+            statement.setString(3, subject.getTag_line());
             statement.setString(4, subject.getBrief_info());
             statement.setString(5, subject.getDescription());
             statement.setInt(6, subject.getCategory_id());
             statement.setInt(7, subject.getOwner_id());
             statement.setString(8, subject.getStatus());
             statement.setBoolean(9, subject.getFeatured_flag());
-            statement.setObject(10, subject.getUpdated_at());
+            statement.setDate(10, subject.getUpdated_at() != null ? new java.sql.Date(subject.getUpdated_at().getTime()) : null);
             statement.setInt(11, subject.getUpdated_by());
             statement.setInt(12, subject.getId());
 
@@ -127,7 +132,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
     }
 
     public boolean deleteById(Integer id) {
-        String sql = "DELETE FROM subject WHERE subject_id = ?";
+        String sql = "DELETE FROM subject WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -157,8 +162,8 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
                 .owner_id(resultSet.getInt("owner_id"))
                 .status(resultSet.getString("status"))
                 .featured_flag(resultSet.getBoolean("featured_flag"))
-                .created_at(resultSet.getDate("created_at"))
-                .updated_at(resultSet.getDate("updated_at"))
+                .created_at(resultSet.getDate("created_at") != null ? new java.util.Date(resultSet.getDate("created_at").getTime()) : null)
+                .updated_at(resultSet.getDate("updated_at") != null ? new java.util.Date(resultSet.getDate("updated_at").getTime()) : null)
                 .created_by(resultSet.getInt("created_by"))
                 .updated_by(resultSet.getInt("updated_by"))
                 .build();
