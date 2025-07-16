@@ -55,27 +55,26 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
     @Override
     public int insert(Subject subject) {
         String sql = "INSERT INTO subject "
-                + "(title, thumbnail_url, video_url, tag_line, brief_info, description, category_id, "
+                + "(title, thumbnail_url, tag_line, brief_info, description, category_id, "
                 + "owner_id, status, featured_flag, created_at, updated_at, created_by, updated_by) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         int generatedId = -1;
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, subject.getTitle());
             statement.setString(2, subject.getThumbnail_url());
-            statement.setString(3, subject.getVideo_url());
-            statement.setString(4, subject.getTag_line());
-            statement.setString(5, subject.getBrief_info());
-            statement.setString(6, subject.getDescription());
-            statement.setInt(7, subject.getCategory_id());
-            statement.setInt(8, subject.getOwner_id());
-            statement.setString(9, subject.getStatus());
-            statement.setBoolean(10, subject.getFeatured_flag());
-            statement.setDate(11, subject.getCreated_at() != null ? new java.sql.Date(subject.getCreated_at().getTime()) : null);
-            statement.setDate(12, subject.getUpdated_at() != null ? new java.sql.Date(subject.getUpdated_at().getTime()) : null);
-            statement.setInt(13, subject.getCreated_by());
-            statement.setInt(14, subject.getUpdated_by());
+            statement.setString(3, subject.getTag_line());
+            statement.setString(4, subject.getBrief_info());
+            statement.setString(5, subject.getDescription());
+            statement.setInt(6, subject.getCategory_id());
+            statement.setInt(7, subject.getOwner_id());
+            statement.setString(8, subject.getStatus());
+            statement.setBoolean(9, subject.getFeatured_flag());
+            statement.setDate(10, subject.getCreated_at() != null ? new java.sql.Date(subject.getCreated_at().getTime()) : null);
+            statement.setDate(11, subject.getUpdated_at() != null ? new java.sql.Date(subject.getUpdated_at().getTime()) : null);
+            statement.setInt(12, subject.getCreated_by());
+            statement.setInt(13, subject.getUpdated_by());
 
             statement.executeUpdate();
             resultSet = statement.getGeneratedKeys();
@@ -93,27 +92,26 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
     @Override
     public boolean update(Subject subject) {
         String sql = "UPDATE subject SET "
-                + "title = ?, thumbnail_url = ?, video_url = ?, tag_line = ?, brief_info = ?, description = ?, "
+                + "title = ?, thumbnail_url = ?, tag_line = ?, brief_info = ?, description = ?, "
                 + "category_id = ?, owner_id = ?, status = ?, featured_flag = ?, "
                 + "updated_at = ?, updated_by = ? "
-                + "WHERE subject_id = ?";
+                + "WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setString(1, subject.getTitle());
             statement.setString(2, subject.getThumbnail_url());
-            statement.setString(3, subject.getVideo_url());
-            statement.setString(4, subject.getTag_line());
-            statement.setString(5, subject.getBrief_info());
-            statement.setString(6, subject.getDescription());
-            statement.setInt(7, subject.getCategory_id());
-            statement.setInt(8, subject.getOwner_id());
-            statement.setString(9, subject.getStatus());
-            statement.setBoolean(10, subject.getFeatured_flag());
-            statement.setDate(11, subject.getUpdated_at() != null ? new java.sql.Date(subject.getUpdated_at().getTime()) : null);
-            statement.setInt(12, subject.getUpdated_by());
-            statement.setInt(13, subject.getId());
+            statement.setString(3, subject.getTag_line());
+            statement.setString(4, subject.getBrief_info());
+            statement.setString(5, subject.getDescription());
+            statement.setInt(6, subject.getCategory_id());
+            statement.setInt(7, subject.getOwner_id());
+            statement.setString(8, subject.getStatus());
+            statement.setBoolean(9, subject.getFeatured_flag());
+            statement.setDate(10, subject.getUpdated_at() != null ? new java.sql.Date(subject.getUpdated_at().getTime()) : null);
+            statement.setInt(11, subject.getUpdated_by());
+            statement.setInt(12, subject.getId());
 
             int rowsAffected = statement.executeUpdate();
             success = rowsAffected > 0;
@@ -134,7 +132,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
     }
 
     public boolean deleteById(Integer id) {
-        String sql = "DELETE FROM subject WHERE subject_id = ?";
+        String sql = "DELETE FROM subject WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -157,7 +155,6 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
                 .id(resultSet.getInt("id"))
                 .title(resultSet.getString("title"))
                 .thumbnail_url(resultSet.getString("thumbnail_url"))
-                .video_url(resultSet.getString("video_url"))
                 .tag_line(resultSet.getString("tag_line"))
                 .brief_info(resultSet.getString("brief_info"))
                 .description(resultSet.getString("description"))
@@ -325,7 +322,6 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
         Subject newSubject = Subject.builder()
                 .title("Test Subject")
                 .thumbnail_url("https://example.com/test.jpg")
-                .video_url("https://example.com/test-video.mp4")
                 .tag_line("This is a test subject")
                 .description("Detailed description for testing")
                 .featured_flag(true)
@@ -376,7 +372,6 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
         Subject anotherSubject = Subject.builder()
                 .title("Another Test Subject")
                 .thumbnail_url("https://example.com/another.jpg")
-                .video_url("https://example.com/another-video.mp4")
                 .tag_line("Another test subject")
                 .description("Another description")
                 .featured_flag(false)
@@ -397,7 +392,6 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
         System.out.println("ID: " + subject.getId());
         System.out.println("Title: " + subject.getTitle());
         System.out.println("Thumbnail: " + subject.getThumbnail_url());
-        System.out.println("Video URL: " + subject.getVideo_url());
         System.out.println("Tag Line: " + subject.getTag_line());
         System.out.println("Description: " + subject.getDescription());
         System.out.println("Featured: " + subject.getFeatured_flag());

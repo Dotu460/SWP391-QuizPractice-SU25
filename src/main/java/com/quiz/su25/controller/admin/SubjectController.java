@@ -4,10 +4,11 @@ import com.quiz.su25.dal.impl.SubjectCategoriesDAO;
 import com.quiz.su25.dal.impl.SubjectDAO;
 import com.quiz.su25.dal.impl.UserDAO;
 import com.quiz.su25.dal.impl.PricePackageDAO;
+import com.quiz.su25.dal.impl.MediaDAO;
 import com.quiz.su25.entity.PricePackage;
 import com.quiz.su25.entity.Subject;
 import com.quiz.su25.entity.SubjectCategories;
-
+import com.quiz.su25.entity.Media;
 import com.quiz.su25.entity.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -17,6 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,7 @@ public class SubjectController extends HttpServlet {
     private final SubjectCategoriesDAO categoryDAO = new SubjectCategoriesDAO();
     private final PricePackageDAO packageDAO = new PricePackageDAO();
     private final UserDAO userDAO = new UserDAO();
+    private final MediaDAO mediaDAO = new MediaDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -113,6 +116,15 @@ public class SubjectController extends HttpServlet {
         // Get lowest price package for each subject
         Map<Integer, PricePackage> lowestPricePackages = getLowestPricePackages(subjects);
 
+        // Get main thumbnails for each subject
+        Map<Integer, Media> subjectThumbnails = new HashMap<>();
+        for (Subject subject : subjects) {
+            Media thumbnail = mediaDAO.findFirstImageBySubjectId(subject.getId());
+            if (thumbnail != null) {
+                subjectThumbnails.put(subject.getId(), thumbnail);
+            }
+        }
+
         // Set attributes for the view
         request.setAttribute("subjects", subjects);
         request.setAttribute("page", page);
@@ -125,6 +137,7 @@ public class SubjectController extends HttpServlet {
         request.setAttribute("categories", categories);
         request.setAttribute("featuredSubjects", featuredSubjects);
         request.setAttribute("lowestPricePackages", lowestPricePackages);
+        request.setAttribute("subjectThumbnails", subjectThumbnails);
 
         // Forward to the view
         request.getRequestDispatcher("/view/admin/subject/list.jsp").forward(request, response);
@@ -149,6 +162,15 @@ public class SubjectController extends HttpServlet {
                 // Get featured subjects for sidebar
                 List<Subject> featuredSubjects = getFeaturedSubjects();
 
+                // Get media content for the subject
+                List<Media> subjectMedia = mediaDAO.findBySubjectId(subjectId);
+                List<Media> subjectImages = mediaDAO.findImagesBySubjectId(subjectId);
+                List<Media> subjectVideos = mediaDAO.findVideosBySubjectId(subjectId);
+                
+                // Get main thumbnail and video for backward compatibility
+                Media mainThumbnail = mediaDAO.findFirstImageBySubjectId(subjectId);
+                Media mainVideo = mediaDAO.findFirstVideoBySubjectId(subjectId);
+
                 // Get search term if any
                 String searchTerm = request.getParameter("search");
 
@@ -157,6 +179,11 @@ public class SubjectController extends HttpServlet {
                 request.setAttribute("category", category);
                 request.setAttribute("categories", categories);
                 request.setAttribute("featuredSubjects", featuredSubjects);
+                request.setAttribute("subjectMedia", subjectMedia);
+                request.setAttribute("subjectImages", subjectImages);
+                request.setAttribute("subjectVideos", subjectVideos);
+                request.setAttribute("mainThumbnail", mainThumbnail);
+                request.setAttribute("mainVideo", mainVideo);
                 request.setAttribute("searchTerm", searchTerm);
 
                 request.getRequestDispatcher("/view/admin/subject/details.jsp").forward(request, response);
@@ -257,21 +284,7 @@ public class SubjectController extends HttpServlet {
                 return;
             }
 
-            // Get main thumbnail and video URLs
-            String thumbnailUrl = request.getParameter("thumbnail_url");
-            String videoUrl = request.getParameter("video_url");
-            
-            // Handle file uploads for main thumbnail and video
-            String uploadedThumbnail = handleFileUpload(request, "thumbnail_file");
-            String uploadedVideo = handleFileUpload(request, "video_file");
-            
-            // Use uploaded files if no URL provided
-            if ((thumbnailUrl == null || thumbnailUrl.trim().isEmpty()) && uploadedThumbnail != null) {
-                thumbnailUrl = uploadedThumbnail;
-            }
-            if ((videoUrl == null || videoUrl.trim().isEmpty()) && uploadedVideo != null) {
-                videoUrl = uploadedVideo;
-            }
+            // No need for thumbnail_url - using Media table for images
 
             // Create new subject
             Subject newSubject = Subject.builder()
@@ -279,8 +292,7 @@ public class SubjectController extends HttpServlet {
                     .tag_line(tagLine != null ? tagLine.trim() : null)
                     .brief_info(briefInfo != null ? briefInfo.trim() : null)
                     .description(description != null ? description.trim() : null)
-                    .thumbnail_url(thumbnailUrl != null && !thumbnailUrl.trim().isEmpty() ? thumbnailUrl.trim() : null)
-                    .video_url(videoUrl != null && !videoUrl.trim().isEmpty() ? videoUrl.trim() : null)
+                    .thumbnail_url(null) // No longer using thumbnail_url - using Media table
                     .status(status != null ? status : "draft")
                     .featured_flag("on".equals(featuredFlag))
                     .category_id(categoryId)
@@ -295,6 +307,9 @@ public class SubjectController extends HttpServlet {
             int newSubjectId = subjectDAO.insert(newSubject);
 
             if (newSubjectId > 0) {
+                // Handle media uploads if files were provided
+                handleMediaUploads(request, newSubjectId);
+                
                 request.getSession().setAttribute("successMessage", 
                     "Course '" + title + "' created successfully! You can add more media content using the rich text editor.");
                 response.sendRedirect(request.getContextPath() + "/admin/subjects?success=created&id=" + newSubjectId);
@@ -307,6 +322,120 @@ public class SubjectController extends HttpServlet {
             e.printStackTrace();
             request.getSession().setAttribute("errorMessage", "System error: " + e.getMessage());
             response.sendRedirect(request.getContextPath() + "/admin/subject/new");
+        }
+    }
+
+    /**
+     * Handle multiple media uploads for a subject with notes
+     */
+    private void handleMediaUploads(HttpServletRequest request, int subjectId) {
+        try {
+            // Handle multiple image uploads with notes
+            Collection<Part> parts = request.getParts();
+            
+            for (Part part : parts) {
+                String partName = part.getName();
+                
+                // Handle image uploads (image_0, image_1, etc.)
+                if (partName != null && partName.startsWith("image_") && part.getSize() > 0) {
+                    String imageIndex = partName.substring(6); // Extract index after "image_"
+                    String imageFile = handleFileUpload(request, partName);
+                    
+                    if (imageFile != null) {
+                        // Get corresponding notes for this image
+                        String notes = request.getParameter("image_notes_" + imageIndex);
+                        if (notes == null) notes = "";
+                        
+                        Media imageMedia = Media.builder()
+                                .subjectId(subjectId)
+                                .link(imageFile)
+                                .type(0) // Image
+                                .notes(notes.trim())
+                                .build();
+                        mediaDAO.insert(imageMedia);
+                    }
+                }
+                
+                // Handle video uploads with notes (video_0, video_1, etc.)
+                else if (partName != null && partName.startsWith("video_") && part.getSize() > 0) {
+                    String videoIndex = partName.substring(6); // Extract index after "video_"
+                    String videoFile = handleFileUpload(request, partName);
+                    
+                    if (videoFile != null) {
+                        // Get corresponding notes for this video
+                        String notes = request.getParameter("video_notes_" + videoIndex);
+                        if (notes == null) notes = "";
+                        
+                        Media videoMedia = Media.builder()
+                                .subjectId(subjectId)
+                                .link(videoFile)
+                                .type(1) // Video
+                                .notes(notes.trim())
+                                .build();
+                        mediaDAO.insert(videoMedia);
+                    }
+                }
+            }
+            
+            // Also handle any media URLs with notes from the rich text editor
+            handleMediaUrls(request, subjectId);
+            
+        } catch (Exception e) {
+            System.out.println("Error handling media uploads: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Handle media URLs submitted from the form (from TinyMCE or direct URLs)
+     */
+    private void handleMediaUrls(HttpServletRequest request, int subjectId) {
+        try {
+            // Handle image URLs with notes
+            int imageUrlIndex = 0;
+            while (true) {
+                String imageUrl = request.getParameter("image_url_" + imageUrlIndex);
+                if (imageUrl == null || imageUrl.trim().isEmpty()) {
+                    break;
+                }
+                
+                String notes = request.getParameter("image_url_notes_" + imageUrlIndex);
+                if (notes == null) notes = "";
+                
+                Media imageMedia = Media.builder()
+                        .subjectId(subjectId)
+                        .link(imageUrl.trim())
+                        .type(0) // Image
+                        .notes(notes.trim())
+                        .build();
+                mediaDAO.insert(imageMedia);
+                imageUrlIndex++;
+            }
+            
+            // Handle video URLs with notes
+            int videoUrlIndex = 0;
+            while (true) {
+                String videoUrl = request.getParameter("video_url_" + videoUrlIndex);
+                if (videoUrl == null || videoUrl.trim().isEmpty()) {
+                    break;
+                }
+                
+                String notes = request.getParameter("video_notes_" + videoUrlIndex);
+                if (notes == null) notes = "";
+                
+                Media videoMedia = Media.builder()
+                        .subjectId(subjectId)
+                        .link(videoUrl.trim())
+                        .type(1) // Video
+                        .notes(notes.trim())
+                        .build();
+                mediaDAO.insert(videoMedia);
+                videoUrlIndex++;
+            }
+            
+        } catch (Exception e) {
+            System.out.println("Error handling media URLs: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

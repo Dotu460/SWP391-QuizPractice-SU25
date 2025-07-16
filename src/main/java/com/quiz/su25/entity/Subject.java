@@ -21,7 +21,7 @@ public class Subject {
     private Integer id;
     private String title;
     private String thumbnail_url;
-    private String video_url;
+//    private String video_url;
     private String tag_line;
     private String brief_info;
     private String description;
