@@ -17,8 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Date;
-import java.time.LocalDate;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -86,9 +85,8 @@ public class QuizAttemptAnswerController extends HttpServlet {
                 return;
             }
 
-            // Forward to the quiz attempt page
-            request.setAttribute("attempt", attempt);
-            request.getRequestDispatcher("quiz-attempt.jsp").forward(request, response);
+            // Redirect to the quiz handle page instead of forwarding to a non-existent JSP
+            response.sendRedirect(request.getContextPath() + "/quiz-handle?id=" + attempt.getQuiz_id());
 
         } catch (NumberFormatException e) {
             response.sendRedirect("home");
@@ -169,13 +167,34 @@ public class QuizAttemptAnswerController extends HttpServlet {
                         .quiz_question_id(questionId)
                         .selected_option_id(selectedOptionId)
                         .correct(isCorrect)
-                        .answer_at(Date.valueOf(LocalDate.now()))
+                        .answer_at(new Timestamp(System.currentTimeMillis()))
                         .build();
                 answersDAO.insert(newAnswer);
             }
         } catch (Exception e) {
             System.err.println("Error in saveAnswer (insert-only): " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Lưu câu trả lời tự luận cho câu hỏi.
+     * @param attemptId ID của lần thi
+     * @param questionId ID của câu hỏi
+     * @param essayAnswer Nội dung câu trả lời tự luận
+     * @return true nếu lưu thành công, false nếu thất bại
+     */
+    public boolean saveEssayAnswer(Integer attemptId, Integer questionId, String essayAnswer) {
+        try {
+            // Xóa các câu trả lời cũ
+            clearAnswersForQuestion(attemptId, questionId);
+            
+            // Lưu câu trả lời tự luận mới
+            return answersDAO.saveEssayAnswer(attemptId, questionId, essayAnswer);
+        } catch (Exception e) {
+            System.err.println("Error in saveEssayAnswer: " + e.getMessage());
+            e.printStackTrace();
+            return false;
         }
     }
 
@@ -253,15 +272,15 @@ public class QuizAttemptAnswerController extends HttpServlet {
             // Update attempt with final score
             attempt.setScore(score);
             attempt.setPassed(passed);
-            attempt.setEnd_time(Date.valueOf(LocalDate.now()));
+            attempt.setEnd_time(new Timestamp(System.currentTimeMillis()));
             attempt.setStatus(GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED);
-            attempt.setUpdate_at(Date.valueOf(LocalDate.now()));
+            attempt.setUpdate_at(new Timestamp(System.currentTimeMillis()));
 
             attemptsDAO.update(attempt);
         }
 
-        // Redirect to results page
-        response.sendRedirect("quiz-results?attemptId=" + attempt.getId());
+        // Redirect to the quiz handle page instead of forwarding to a non-existent JSP
+        response.sendRedirect(request.getContextPath() + "/quiz-handle?id=" + attempt.getQuiz_id());
     }
 
     /**

@@ -64,6 +64,12 @@
                     Quiz Attempts
                 </a>
             </li>
+            <li class="sidebar-item">
+                <a href="${pageContext.request.contextPath}/admin/essay-grading" class="sidebar-link">
+                    <i class="fas fa-pen-alt"></i>
+                    <span>Essay Grading</span>
+                </a>
+            </li>
         </ul>
     </nav>
     <div class="dashboard__sidebar-title mt-40 mb-20">

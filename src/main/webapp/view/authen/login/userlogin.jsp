@@ -253,6 +253,7 @@
                     </c:if>
 
                     <div class="form-group">
+                        <label for="password">Email</label>
                         <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" >
                         <span id="email-error" style="color:red;"></span>
 

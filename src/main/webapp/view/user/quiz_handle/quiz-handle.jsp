@@ -947,6 +947,50 @@
                         justify-content: center;
                     }
                 }
+
+                /* --- New Answer Option Styles --- */
+                .form-check-input { display: none; }
+                .form-check-label {
+                    display: flex;
+                    align-items: center;
+                    padding: 1rem 1.25rem;
+                    border: 1px solid #dee2e6;
+                    border-radius: 0.5rem;
+                    margin-bottom: 0.75rem;
+                    transition: all 0.2s ease-in-out;
+                    cursor: pointer;
+                    position: relative;
+                    background-color: #f8f9fa;
+                }
+                .form-check-label::before {
+                    font-family: "Font Awesome 5 Free";
+                    font-weight: 900;
+                    font-size: 1.2em;
+                    width: 24px;
+                    margin-right: 1rem;
+                    content: '\f111'; /* circle */
+                    color: #adb5bd;
+                    transition: all 0.2s ease-in-out;
+                }
+                .form-check-label:hover {
+                    border-color: #8B7FD2;
+                    background-color: #f8f7ff;
+                }
+                .form-check-input:checked + .form-check-label {
+                    background-color: #f8f7ff;
+                    border-color: #5751E1;
+                    color: #5751E1;
+                    font-weight: 500;
+                }
+                .form-check-input:checked + .form-check-label::before {
+                    content: '\f058'; /* check-circle */
+                    color: #5751E1;
+                }
+
+                /* Style cho nút Peek */
+                .btn-peek:hover {
+                    background: #f0f0f0;
+                }
             </style>
     </head>
 
@@ -996,13 +1040,8 @@
                                                         </div>
                                                     </div>
                                                 </c:when>
-                                                <c:otherwise>
-                                                    <div class="guest-info">
-                                                        <span>Welcome, Quang Minh!</span>
-                                                    </div>
-                                                </c:otherwise>
                                             </c:choose>
-                                    </div>
+                                        </div>
                                         <div class="dropdown-body">
                                             <c:choose>
                                                 <c:when test="${not empty sessionScope.account}">
@@ -1020,24 +1059,8 @@
                                                         <span>Log out</span>
                                                     </a>
                                                 </c:when>
-                                                <c:otherwise>
-                                                    <!---------------HIỆN TẠM, XONG XOÁ--------------------------------->
-                                                    <a href="my-profile" class="dropdown-item">
-                                                        <i class="fas fa-user-circle"></i>
-                                                        <span>My Profile</span>
-                                                    </a>
-                                                    <!------------------------------------------------>
-                                                    <a href="login" class="dropdown-item">
-                                                        <i class="fas fa-sign-in-alt"></i>
-                                                        <span>Log in</span>
-                                                    </a>
-                                                    <a href="register" class="dropdown-item">
-                                                        <i class="fas fa-user-plus"></i>
-                                                        <span>Register</span>
-                                                    </a>
-                                                </c:otherwise>
                                             </c:choose>
-                                    </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1046,10 +1069,8 @@
                 </div>
             </div>
             <div id="header-fixed-height"></div>
-            <!-- header-top-end -->
-
-            <!-- header-area -->
-
+                <!-- header-top-end -->
+                
             <!-- header-area-end -->
 
             <style>
@@ -1416,6 +1437,18 @@
                     <c:if test="${not empty question.media_url}">
                         <div class="media-content mt-3">
                             <c:choose>
+                                <c:when test="${fn:contains(question.media_url, 'youtube.com') || fn:contains(question.media_url, 'youtu.be')}">
+                                    <!-- YouTube Video Embed -->
+                                    <div class="youtube-embed-container" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; border-radius: 8px;">
+                                        <iframe 
+                                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px;"
+                                            src="${fn:replace(fn:replace(question.media_url, 'watch?v=', 'embed/'), 'youtu.be/', 'youtube.com/embed/')}" 
+                                            frameborder="0" 
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                            allowfullscreen>
+                                        </iframe>
+                                    </div>
+                                </c:when>
                                 <c:when test="${fn:endsWith(question.media_url, '.mp4') 
                                             || fn:endsWith(question.media_url, '.webm') 
                                             || fn:endsWith(question.media_url, '.ogg')
@@ -1505,12 +1538,20 @@
                                     </div>
                                 </c:when>
                                 <c:when test="${question.type eq 'multiple'}">
+                                    <%-- Count correct options to determine input type (radio/checkbox) --%>
+                                    <c:set var="correctOptionsCount" value="0" />
+                                    <c:forEach items="${question.questionOptions}" var="opt">
+                                        <c:if test="${opt.correct_key}">
+                                            <c:set var="correctOptionsCount" value="${correctOptionsCount + 1}" />
+                                        </c:if>
+                                    </c:forEach>
+                                    
                                     <!-- Multiple Choice Question -->
                                     <c:forEach items="${question.questionOptions}" var="option">
                                         <div class="answer-option mb-3">
                                             <div class="form-check">
                                                 <input class="form-check-input" 
-                                                       type="${question.questionOptions.size() > 1 ? 'checkbox' : 'radio'}"
+                                                       type="${correctOptionsCount > 1 ? 'checkbox' : 'radio'}"
                                                        name="answer" 
                                                        id="option${option.id}" 
                                                        value="${option.id}"
@@ -1528,8 +1569,7 @@
                                         <textarea class="form-control essay-answer" 
                                                   name="essay_answer" 
                                                   rows="6" 
-                                                  placeholder="Type your answer here..."
-                                                  onchange="autoSaveEssayAnswer(this.value)">${selectedAnswers}</textarea>
+                                                  placeholder="Type your answer here...">${selectedAnswers}</textarea>
                                         <div class="essay-controls mt-2">
                                             <span class="word-count">0 words</span>
                                         </div>
@@ -2319,7 +2359,13 @@
             // Hàm điều hướng đến câu hỏi
             function navigateToQuestion(questionNumber) {
                 saveCurrentState();
-                window.location.href = 'quiz-handle?action=navigate&questionNumber=' + questionNumber;
+                
+                // Lấy quizId từ URL hiện tại
+                const urlParams = new URLSearchParams(window.location.search);
+                const quizId = urlParams.get('id');
+                
+                // Thêm quizId vào URL điều hướng
+                window.location.href = '${pageContext.request.contextPath}/quiz-handle?id=' + quizId + '&questionNumber=' + questionNumber;
             }
 
             // Hàm xử lý điều hướng
@@ -2342,9 +2388,23 @@
                 form.querySelector('input[name="action"]').value = 'saveAnswer';
                 document.getElementById('nextAction').value = action;
                 
+                // Lấy quizId từ URL và thêm vào form nếu chưa có
+                const urlParams = new URLSearchParams(window.location.search);
+                const quizId = urlParams.get('id');
+                
+                let quizIdInput = form.querySelector('input[name="quizId"]');
+                if (!quizIdInput) {
+                    quizIdInput = document.createElement('input');
+                    quizIdInput.type = 'hidden';
+                    quizIdInput.name = 'quizId';
+                    form.appendChild(quizIdInput);
+                }
+                quizIdInput.value = quizId;
+                
                 console.log('Updated form data:', {
                     action: form.querySelector('input[name="action"]').value,
-                    nextAction: document.getElementById('nextAction').value
+                    nextAction: document.getElementById('nextAction').value,
+                    quizId: quizIdInput.value
                 });
                 
                 form.submit();
@@ -2379,7 +2439,7 @@
         </script>
 
         <script>
-            // Hàm mở popup xác nhận score exam
+            // Hàm xử lý popup xác nhận score exam
             function openScoreExamConfirmation() {
                 const popup = document.getElementById('scoreExamPopup');
                 const title = document.getElementById('popupTitle');
@@ -2443,12 +2503,27 @@
                     }
                     userAnswersInput.value = JSON.stringify(savedAnswers);
                     
+                    // Thêm quizId từ URL nếu có
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const quizId = urlParams.get('id');
+                    if (quizId) {
+                        let quizIdInput = form.querySelector('input[name="quizId"]');
+                        if (!quizIdInput) {
+                            quizIdInput = document.createElement('input');
+                            quizIdInput.type = 'hidden';
+                            quizIdInput.name = 'quizId';
+                            quizIdInput.value = quizId;
+                            form.appendChild(quizIdInput);
+                        }
+                    }
+                    
                     form.querySelector('input[name="action"]').value = 'score';
                     
                     // Log form data sau khi thay đổi
                     const updatedFormData = new FormData(form);
                     console.log('Updated form data:', {
                         action: updatedFormData.get('action'),
+                        quizId: updatedFormData.get('quizId'),
                         userAnswers: updatedFormData.get('userAnswers')
                     });
                     
@@ -2507,10 +2582,36 @@
 
         <!-- Thêm script để xử lý tự động lưu câu trả lời -->
         <script>
+            // Thêm debounce để tránh gửi quá nhiều request
+            let timeoutId;
+            
+            document.addEventListener('DOMContentLoaded', function() {
+                const essayInput = document.querySelector('.essay-answer');
+                
+                if (essayInput) {
+                    essayInput.addEventListener('input', function(e) {
+                        clearTimeout(timeoutId);
+                        
+                        // Tự động lưu sau 500ms khi người dùng ngừng nhập
+                        timeoutId = setTimeout(() => {
+                            autoSaveEssayAnswer(e.target.value);
+                        }, 500);
+                    });
+                }
+            });
+
             function autoSaveEssayAnswer(answer) {
                 const form = document.getElementById('answerForm');
                 const formData = new FormData(form);
-                formData.append('action', 'saveAnswer');
+                
+                // Đặt action là saveAnswer
+                formData.set('action', 'saveAnswer');
+                
+                // Đảm bảo essay_answer được đưa vào formData
+                formData.set('essay_answer', answer);
+                
+                // Thêm nextAction với giá trị mặc định là 'autosave'
+                formData.set('nextAction', 'autosave');
                 
                 // Lấy ID câu hỏi hiện tại
                 const currentQuestionId = parseInt(document.querySelector('input[name="questionId"]').value);
@@ -2536,21 +2637,16 @@
                         
                         // Cập nhật hiển thị của các ô câu hỏi
                         updateQuestionBoxStates();
+                    } else {
+                        console.error('Error response from server:', response.status);
+                        
+                        // Thêm code để hiển thị chi tiết lỗi
+                        response.text().then(text => {
+                            console.error('Error details:', text);
+                        });
                     }
                 }).catch(error => {
                     console.error('Error saving essay answer:', error);
-                });
-            }
-
-            // Thêm debounce để tránh gửi quá nhiều request
-            let timeoutId;
-            const essayInput = document.querySelector('.essay-answer');
-            if (essayInput) {
-                essayInput.addEventListener('input', function(e) {
-                    clearTimeout(timeoutId);
-                    timeoutId = setTimeout(() => {
-                        autoSaveEssayAnswer(e.target.value);
-                    }, 1000); // Đợi 1 giây sau khi người dùng ngừng gõ
                 });
             }
         </script>
@@ -2624,6 +2720,13 @@
                 // Tạo FormData object
                 const formData = new FormData();
                 formData.append('action', 'scoreExam');
+                
+                // Thêm quizId từ URL nếu có
+                const urlParams = new URLSearchParams(window.location.search);
+                const quizId = urlParams.get('id');
+                if (quizId) {
+                    formData.append('quizId', quizId);
+                }
                 
                 // Chuyển đổi object thành mảng các câu trả lời
                 const answersArray = Object.entries(savedAnswers).map(([questionId, answers]) => ({

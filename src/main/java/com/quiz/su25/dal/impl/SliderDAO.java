@@ -43,7 +43,7 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
 
     @Override
     public Slider findById(Integer id) {
-        String sql = "SELECT id, title, image_url, backlink_url, status FROM slider WHERE id = ?";
+        String sql = "SELECT id, title, image_url, backlink_url, status, notes FROM slider WHERE id = ?";
         Slider slider = null;
         try {
             connection = getConnection();
@@ -63,7 +63,7 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
 
     @Override
     public int insert(Slider slider) {
-        String sql = "INSERT INTO slider (title, image_url, backlink_url, status) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO slider (title, image_url, backlink_url, status, notes) VALUES (?, ?, ?, ?, ?)";
         int generatedId = -1;
         try {
             connection = getConnection();
@@ -72,6 +72,7 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
             statement.setString(2, slider.getImage_url());
             statement.setString(3, slider.getBacklink_url());
             statement.setBoolean(4, slider.getStatus());
+            statement.setString(5, slider.getNotes());
 
             statement.executeUpdate();
             resultSet = statement.getGeneratedKeys();
@@ -88,7 +89,7 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
 
     @Override
     public boolean update(Slider slider) {
-        String sql = "UPDATE slider SET title = ?, image_url = ?, backlink_url = ?, status = ? WHERE id = ?";
+        String sql = "UPDATE slider SET title = ?, image_url = ?, backlink_url = ?, status = ?, notes = ? WHERE id = ?";
         boolean success = false;
         try {
             connection = getConnection();
@@ -97,7 +98,8 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
             statement.setString(2, slider.getImage_url());
             statement.setString(3, slider.getBacklink_url());
             statement.setBoolean(4, slider.getStatus());
-            statement.setInt(5, slider.getId());
+            statement.setString(5, slider.getNotes());
+            statement.setInt(6, slider.getId());
 
             int rowsAffected = statement.executeUpdate();
             success = rowsAffected > 0;
@@ -143,6 +145,7 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
                 .image_url(resultSet.getString("image_url"))
                 .backlink_url(resultSet.getString("backlink_url"))
                 .status(resultSet.getBoolean("status"))
+                .notes(resultSet.getString("notes"))
                 .build();
     }
 
@@ -162,5 +165,82 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
             closeResources();
         }
         return list;
+    }
+
+    public List<Slider> findSlidersWithFilters(String status, String search, int page, int pageSize) {
+        List<Slider> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM slider WHERE 1=1");
+        
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND status = ?");
+        }
+        if (search != null && !search.isEmpty()) {
+            sql.append(" AND (title LIKE ? OR backlink_url LIKE ?)");
+        }
+        
+        sql.append(" ORDER BY id LIMIT ? OFFSET ?");
+        
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+            
+            int paramIndex = 1;
+            if (status != null && !status.isEmpty()) {
+                statement.setBoolean(paramIndex++, "active".equalsIgnoreCase(status));
+            }
+            if (search != null && !search.isEmpty()) {
+                statement.setString(paramIndex++, "%" + search + "%");
+                statement.setString(paramIndex++, "%" + search + "%");
+            }
+            
+            statement.setInt(paramIndex++, pageSize);
+            statement.setInt(paramIndex++, (page - 1) * pageSize);
+            
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                list.add(getFromResultSet(resultSet));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error findSlidersWithFilters at class SliderDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return list;
+    }
+
+    public int getTotalFilteredSliders(String status, String search) {
+        int total = 0;
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM slider WHERE 1=1");
+
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND status = ?");
+        }
+        if (search != null && !search.isEmpty()) {
+            sql.append(" AND (title LIKE ? OR backlink_url LIKE ?)");
+        }
+
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql.toString());
+
+            int paramIndex = 1;
+            if (status != null && !status.isEmpty()) {
+                statement.setBoolean(paramIndex++, "active".equalsIgnoreCase(status));
+            }
+            if (search != null && !search.isEmpty()) {
+                statement.setString(paramIndex++, "%" + search + "%");
+                statement.setString(paramIndex++, "%" + search + "%");
+            }
+
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                total = resultSet.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getTotalFilteredSliders at class SliderDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return total;
     }
 }

@@ -43,7 +43,7 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
 
     @Override
     public boolean update(Question t) {
-        String sql = "UPDATE Question SET quiz_id=?, type=?, content=?, media_url=?, level=?, status=?, explanation=? WHERE id=?";
+        String sql = "UPDATE Question SET quiz_id=?, type=?, content=?, media_url=?, level=?, status=?, explanation=?, created_by=? WHERE id=?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -54,7 +54,9 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
             statement.setString(5, t.getLevel());
             statement.setString(6, t.getStatus());
             statement.setString(7, t.getExplanation());
-            statement.setInt(8, t.getId());
+            statement.setInt(8, t.getCreated_by());
+            statement.setInt(9, t.getId());
+            
             return statement.executeUpdate() > 0;
         } catch (Exception e) {
             System.out.println("Error update at class QuestionDAO - update: " + e.getMessage());
@@ -83,8 +85,7 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
 
     @Override
     public int insert(Question t) {
-        String sql = "INSERT INTO Question (quiz_id, type, content, media_url, level, status, explanation) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Question (quiz_id, type, content, media_url, level, status, explanation, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -95,6 +96,7 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
             statement.setString(5, t.getLevel());
             statement.setString(6, t.getStatus());
             statement.setString(7, t.getExplanation());
+            statement.setInt(8, t.getCreated_by());
             
             return statement.executeUpdate();
         } catch (Exception e) {
@@ -471,6 +473,30 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
         }
         return 0;
     }
+    
+    /**
+     * Đếm tổng số câu hỏi thuộc một quiz cụ thể.
+     * @param quizId ID của quiz.
+     * @return Tổng số câu hỏi trong quiz.
+     */
+    public int countQuestionsByQuizId(Integer quizId) {
+        String sql = "SELECT COUNT(*) as total FROM Question WHERE quiz_id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, quizId);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt("total");
+            }
+        } catch (Exception e) {
+            System.out.println("Error countQuestionsByQuizId at class QuestionDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return 0;
+    }
+    
     /**
      * Tìm câu hỏi theo nội dung
      * @param content Nội dung câu hỏi
@@ -497,28 +523,32 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
         }
         return list;
     }
-
     /**
-     * Đếm tổng số câu hỏi thuộc một quiz cụ thể.
-     * @param quizId ID của quiz.
-     * @return Tổng số câu hỏi trong quiz.
+     * Tìm tất cả các câu hỏi tự luận trong một quiz
+     * 
+     * @param quizId ID của quiz
+     * @return Danh sách các câu hỏi tự luận
      */
-    public int countQuestionsByQuizId(Integer quizId) {
-        String sql = "SELECT COUNT(*) as total FROM Question WHERE quiz_id = ?";
+    public List<Question> findEssayQuestionsByQuizId(Integer quizId) {
+        String sql = "SELECT * FROM Question WHERE quiz_id = ? AND type = 'essay' ORDER BY id";
+        List<Question> questions = new ArrayList<>();
+        
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setInt(1, quizId);
             resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                return resultSet.getInt("total");
+            
+            while (resultSet.next()) {
+                questions.add(getFromResultSet(resultSet));
             }
         } catch (Exception e) {
-            System.out.println("Error countQuestionsByQuizId at class QuestionDAO: " + e.getMessage());
+            System.out.println("Error findEssayQuestionsByQuizId at class QuestionDAO: " + e.getMessage());
         } finally {
             closeResources();
         }
-        return 0;
+        
+        return questions;
     }
 
     public static void main(String[] args) {

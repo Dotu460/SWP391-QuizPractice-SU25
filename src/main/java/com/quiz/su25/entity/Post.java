@@ -27,7 +27,7 @@ public class Post {
     private String brief_info;
     private String content;
     private Integer category_id;
-    private Integer author_id;
+    private String author;
     private Date published_at;
     private Date updated_at;
     private Date created_at;

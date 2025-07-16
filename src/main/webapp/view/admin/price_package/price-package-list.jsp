@@ -54,6 +54,10 @@
                 background-color: #17a2b8;
             }
             
+            .action-details {
+                background-color: #5751e1;
+            }
+            
             .action-delete {
                 background-color: #dc3545;
             }
@@ -98,6 +102,26 @@
                 border-radius: 8px;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             }
+            
+            .column-hidden {
+                display: none;
+            }
+            
+            .column-checkbox {
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+            }
+            
+            .column-checkbox input[type="checkbox"] {
+                margin-right: 8px;
+            }
+            
+            .column-checkbox label {
+                margin-bottom: 0;
+                user-select: none;
+                cursor: pointer;
+            }
         </style>
     </head>
 
@@ -120,7 +144,7 @@
                         <div class="row">
                             <jsp:include page="../../common/user/sidebarCustomer.jsp"></jsp:include>
 
-                            <c:url value="/admin/pricepackage" var="paginationUrl">
+                            <c:url value="/admin/price-package-list" var="paginationUrl">
                                 <c:if test="${not empty param.status}">
                                     <c:param name="status" value="${param.status}" />
                                 </c:if>
@@ -143,10 +167,10 @@
                                     <div class="dashboard__content-title d-flex justify-content-between align-items-center mb-4">
                                         <h4 class="title">Price Package Management</h4>
                                         <div>
-                                            <a href="${pageContext.request.contextPath}/admin/pricepackage?action=add" class="add-btn">
+                                            <a href="${pageContext.request.contextPath}/admin/price-package-list?action=add" class="add-btn">
                                                 <i class="fas fa-plus"></i> Add New Package
                                             </a>
-                                            <button type="button" class="settings-btn ml-2" data-bs-toggle="modal" data-bs-target="#settingModal">
+                                            <button type="button" class="settings-btn ml-2" id="columnSettingsBtn">
                                                 <i class="fa fa-cog"></i> Display Settings
                                             </button>
                                         </div>
@@ -168,7 +192,7 @@
 
                                     <!-- Filter Form -->
                                     <div class="filter-form">
-                                        <form action="${pageContext.request.contextPath}/admin/pricepackage" method="get">
+                                        <form action="${pageContext.request.contextPath}/admin/price-package-list" method="get" id="filterForm">
                                             <div class="row">
                                                 <div class="col-md-3">
                                                     <div class="form-group">
@@ -203,10 +227,13 @@
                                                 </div>
                                             </div>
                                             
+                                            <!-- Hidden field to preserve showAll parameter -->
+                                            <input type="hidden" id="showAllField" name="showAll" value="${param.showAll}" />
+                                            
                                             <div class="row mt-2">
                                                 <div class="col-md-12 d-flex justify-content-end">
-                                                    <button type="submit" class="btn btn-primary">Filter</button>
-                                                    <a href="${pageContext.request.contextPath}/admin/pricepackage" class="btn btn-secondary ml-2">Reset</a>
+                                                    <button type="submit" class="btn btn-primary" style="padding: 6px 15px; font-size: 15px;">Filter</button>
+                                                    <a href="${pageContext.request.contextPath}/admin/price-package-list" class="btn btn-secondary ml-2" style="padding: 6px 15px; font-size: 15px; margin-left: 8px;">Reset</a>
                                                 </div>
                                             </div>
                                         </form>
@@ -217,57 +244,60 @@
                                         <div>
                                             Showing <span class="fw-bold">${fn:length(pricePackages)}</span> of <span class="fw-bold">${totalPackages}</span> price packages
                                         </div>
-                                        <div>
-                                            <select class="form-control" style="width: auto;" onchange="changePageSize(this.value)">
-                                                <option value="10" ${pageSize == 10 ? 'selected' : ''}>10 per page</option>
-                                                <option value="25" ${pageSize == 25 ? 'selected' : ''}>25 per page</option>
-                                                <option value="50" ${pageSize == 50 ? 'selected' : ''}>50 per page</option>
-                                                <option value="100" ${pageSize == 100 ? 'selected' : ''}>100 per page</option>
-                                            </select>
+                                        <div class="d-flex align-items-center">
+                                            <div class="input-group" style="width: auto;">
+                                                <input type="number" id="customPageSize" class="form-control form-control-sm" min="1" max="100" value="${showAll ? '' : pageSize}" style="width: 80px; height: 38px;" ${showAll ? 'disabled placeholder="-"' : ''} />
+                                                <button class="btn btn-primary" onclick="applyCustomPageSize()" id="applySizeBtn" style="padding: 6px 12px; font-size: 15px;">Apply</button>
+                                            </div>
+                                            <span class="ms-2">items per page</span>
+                                            <div class="form-check ms-3">
+                                                <input class="form-check-input" type="checkbox" id="showAllCheckbox" ${param.showAll eq 'true' ? 'checked' : ''}>
+                                                <label class="form-check-label" for="showAllCheckbox">
+                                                    Show all
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
 
                                     <!-- Package Table -->
                                     <div class="table-responsive">
-                                        <table class="table table-striped table-hover">
+                                        <table class="table table-striped table-hover" id="pricePackageTable">
                                             <thead>
                                                 <tr>
-                                                    <th>ID</th>
-                                                    <th>Name</th>
-                                                    <th>Duration (Months)</th>
-                                                    <th>List Price</th>
-                                                    <th>Sale Price</th>
-                                                    <th>Status</th>
-                                                    <th>Description</th>
-                                                    <th>Actions</th>
+                                                    <th class="column-id">ID</th>
+                                                    <th class="column-name">Name</th>
+                                                    <th class="column-duration">Duration (Months)</th>
+                                                    <th class="column-list-price">List Price</th>
+                                                    <th class="column-sale-price">Sale Price</th>
+                                                    <th class="column-status">Status</th>
+                                                    <th class="column-description">Description</th>
+                                                    <th class="column-actions">Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <c:forEach items="${pricePackages}" var="pkg" varStatus="loop">
                                                     <tr>
-                                                        <td>${pkg.id}</td>
-                                                        <td><strong>${pkg.name}</strong></td>
-                                                        <td>${pkg.access_duration_months}</td>
-                                                        <td><fmt:formatNumber value="${pkg.list_price}" type="currency" currencySymbol="$" /></td>
-                                                        <td><fmt:formatNumber value="${pkg.sale_price}" type="currency" currencySymbol="$" /></td>
-                                                        <td>
+                                                        <td class="column-id">${pkg.id}</td>
+                                                        <td class="column-name"><strong>${pkg.name}</strong></td>
+                                                        <td class="column-duration">${pkg.access_duration_months}</td>
+                                                        <td class="column-list-price"><fmt:formatNumber value="${pkg.list_price}" type="currency" currencySymbol="$" /></td>
+                                                        <td class="column-sale-price"><fmt:formatNumber value="${pkg.sale_price}" type="currency" currencySymbol="$" /></td>
+                                                        <td class="column-status">
                                                             <span class="package-status ${pkg.status == 'active' ? 'status-active' : 'status-inactive'}">
                                                                 ${pkg.status}
                                                             </span>
                                                         </td>
-                                                        <td>
+                                                        <td class="column-description">
                                                             <span title="${pkg.description}">
                                                                 ${pkg.description != null ? (fn:length(pkg.description) > 50 ? fn:substring(pkg.description, 0, 50).concat('...') : pkg.description) : 'No description'}
                                                             </span>
                                                         </td>
-                                                        <td>
+                                                        <td class="column-actions">
                                                             <div class="table-actions">
-                                                                <a type="button" class="action-edit edit-btn"
-                                                                     href="${pageContext.request.contextPath}/admin/pricepackage?action=details&id=${pkg.id}">
+                                                                <a href="${pageContext.request.contextPath}/admin/price-package-list?action=details&id=${pkg.id}" class="action-details">
                                                                     <i class="fas fa-eye"></i> Details
                                                                 </a>
-                                                                <a type="button" class="action-edit edit-btn"
-                                                                     href="${pageContext.request.contextPath}/admin/pricepackage?action=edit&id=${pkg.id}">
+                                                                <a href="${pageContext.request.contextPath}/admin/price-package-list?action=edit&id=${pkg.id}" class="action-edit">
                                                                     <i class="fas fa-edit"></i> Edit
                                                                 </a>
                                                                 <form method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this package?');">
@@ -333,63 +363,53 @@
         <!-- main-area-end -->
 
         <!-- Settings Modal -->
-        <div class="modal fade" id="settingModal" tabindex="-1" role="dialog" aria-labelledby="settingModalLabel" aria-hidden="true">
+        <div class="modal fade" id="columnSettingsModal" tabindex="-1" role="dialog" aria-labelledby="columnSettingsModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="settingModalLabel">Display Settings</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        <h5 class="modal-title" id="columnSettingsModalLabel">Customize Column Display</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label class="font-weight-bold mb-3">Select columns to display:</label>
-                            <div class="d-flex justify-content-end mb-3">
-                                <button type="button" class="btn btn-sm btn-outline-primary mr-2" id="selectAllColumns">Select All</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" id="deselectAllColumns">Deselect All</button>
+                        <form id="columnSettingsForm">
+                            <div class="column-checkbox">
+                                <input type="checkbox" id="col-id" value="id" checked>
+                                <label for="col-id">ID</label>
                             </div>
-                            <div class="column-option">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="id" id="idColumn" checked>
-                                    <label class="form-check-label" for="idColumn">ID</label>
-                                </div>
+                            <div class="column-checkbox">
+                                <input type="checkbox" id="col-name" value="name" checked>
+                                <label for="col-name">Name</label>
                             </div>
-                            <div class="column-option">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="name" id="nameColumn" checked>
-                                    <label class="form-check-label" for="nameColumn">Name</label>
-                                </div>
+                            <div class="column-checkbox">
+                                <input type="checkbox" id="col-duration" value="duration" checked>
+                                <label for="col-duration">Duration</label>
                             </div>
-                            <div class="column-option">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="duration" id="durationColumn" checked>
-                                    <label class="form-check-label" for="durationColumn">Duration</label>
-                                </div>
+                            <div class="column-checkbox">
+                                <input type="checkbox" id="col-list-price" value="list-price" checked>
+                                <label for="col-list-price">List Price</label>
                             </div>
-                            <div class="column-option">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="prices" id="pricesColumn" checked>
-                                    <label class="form-check-label" for="pricesColumn">Prices</label>
-                                </div>
+                            <div class="column-checkbox">
+                                <input type="checkbox" id="col-sale-price" value="sale-price" checked>
+                                <label for="col-sale-price">Sale Price</label>
                             </div>
-                            <div class="column-option">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="status" id="statusColumn" checked>
-                                    <label class="form-check-label" for="statusColumn">Status</label>
-                                </div>
+                            <div class="column-checkbox">
+                                <input type="checkbox" id="col-status" value="status" checked>
+                                <label for="col-status">Status</label>
                             </div>
-                            <div class="column-option">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="description" id="descriptionColumn" checked>
-                                    <label class="form-check-label" for="descriptionColumn">Description</label>
-                                </div>
+                            <div class="column-checkbox">
+                                <input type="checkbox" id="col-description" value="description" checked>
+                                <label for="col-description">Description</label>
                             </div>
+                        </form>
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="selectAllBtn">Select All</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="deselectAllBtn">Deselect All</button>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Apply</button>
+                        <button type="button" class="btn btn-primary" id="applySettingsBtn">Apply</button>
                     </div>
                 </div>
             </div>
@@ -436,27 +456,199 @@
                     });
                 }
                 
-                // Select all columns button
-                document.getElementById('selectAllColumns').addEventListener('click', function() {
-                    document.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
-                        checkbox.checked = true;
-                    });
-                });
-                
-                // Deselect all columns button
-                document.getElementById('deselectAllColumns').addEventListener('click', function() {
-                    document.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
-                        checkbox.checked = false;
-                    });
-                });
-                
-                // Change page size function
-                window.changePageSize = function(newSize) {
-                    var currentUrl = new URL(window.location);
-                    currentUrl.searchParams.set('pageSize', newSize);
-                    currentUrl.searchParams.set('page', '1'); // Reset to first page
-                    window.location.href = currentUrl.toString();
+                // Function to change page size
+                window.changePageSize = function(newSize, showAll) {
+                    // Set a flag to indicate navigation is due to pagination
+                    sessionStorage.setItem('isPricePackagePaginating', 'true');
+                    const url = new URL(window.location);
+                    
+                    if (showAll) {
+                        url.searchParams.set('showAll', 'true');
+                        url.searchParams.delete('pageSize');
+                    } else {
+                        url.searchParams.delete('showAll');
+                        url.searchParams.set('pageSize', newSize);
+                    }
+                    
+                    url.searchParams.set('page', '1'); // Reset to first page
+                    window.location.href = url.toString();
                 };
+                
+                // Function to apply custom page size from input
+                window.applyCustomPageSize = function() {
+                    const showAllCheckbox = document.getElementById('showAllCheckbox');
+                    
+                    if (showAllCheckbox.checked) {
+                        // Show all items
+                        changePageSize(null, true);
+                    } else {
+                        // Apply custom page size
+                        const customSizeInput = document.getElementById('customPageSize');
+                        let newSize = parseInt(customSizeInput.value);
+                        
+                        // Validate input
+                        if (isNaN(newSize) || newSize < 1) {
+                            newSize = 10; // Default value if invalid
+                            customSizeInput.value = newSize;
+                        } else if (newSize > 100) {
+                            newSize = 100; // Max limit
+                            customSizeInput.value = newSize;
+                        }
+                        
+                        // Apply the new page size
+                        changePageSize(newSize, false);
+                    }
+                };
+                
+                // Add event listener for Enter key on the input
+                document.getElementById('customPageSize').addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        applyCustomPageSize();
+                    }
+                });
+                
+                // Add event listener for checkbox
+                document.getElementById('showAllCheckbox').addEventListener('change', function() {
+                    const customSizeInput = document.getElementById('customPageSize');
+                    const showAllField = document.getElementById('showAllField');
+                    
+                    if (this.checked) {
+                        customSizeInput.disabled = true;
+                        customSizeInput.value = '';
+                        customSizeInput.placeholder = '-';
+                        showAllField.value = 'true';
+                    } else {
+                        customSizeInput.disabled = false;
+                        customSizeInput.value = '${pageSize == 2147483647 ? 10 : pageSize}';
+                        customSizeInput.placeholder = '';
+                        showAllField.value = '';
+                    }
+                });
+            });
+            
+            $(document).ready(function() {
+                const storageKey = 'pricePackageColumnPrefs';
+                const navigationFlag = 'isPricePackagePaginating';
+
+                // --- Main Event Handlers ---
+                $('#columnSettingsBtn').click(function() {
+                    syncModal();
+                    $('#columnSettingsModal').modal('show');
+                });
+
+                $('#applySettingsBtn').click(function() {
+                    saveAndApplySettings();
+                });
+
+                $('#selectAllBtn').click(function() {
+                    $('#columnSettingsForm input[type="checkbox"]').prop('checked', true);
+                });
+
+                $('#deselectAllBtn').click(function() {
+                    $('#columnSettingsForm input[type="checkbox"]').prop('checked', false);
+                });
+
+                // Add listener for pagination link clicks
+                $('.pagination a').on('click', function(e) {
+                    if (!$(this).parent().hasClass('disabled')) {
+                        sessionStorage.setItem(navigationFlag, 'true');
+                    }
+                });
+
+                // --- Helper Functions ---
+                function getPrefsFromSession() {
+                    const savedPrefs = sessionStorage.getItem(storageKey);
+                    if (savedPrefs) {
+                        return JSON.parse(savedPrefs);
+                    }
+                    // Default: show all columns
+                    return { 
+                        id: true, 
+                        name: true, 
+                        duration: true, 
+                        'list-price': true, 
+                        'sale-price': true, 
+                        status: true, 
+                        description: true 
+                    };
+                }
+
+                function savePrefsToSession() {
+                    const prefs = {};
+                    $('#columnSettingsForm input[type="checkbox"]').each(function() {
+                        prefs[this.value] = this.checked;
+                    });
+                    sessionStorage.setItem(storageKey, JSON.stringify(prefs));
+                    return prefs;
+                }
+
+                function applyColumnVisibility(prefs) {
+                    prefs = prefs || { 
+                        id: true, 
+                        name: true, 
+                        duration: true, 
+                        'list-price': true, 
+                        'sale-price': true, 
+                        status: true, 
+                        description: true 
+                    };
+                    
+                    $('#pricePackageTable .column-id').toggle(!!prefs.id);
+                    $('#pricePackageTable .column-name').toggle(!!prefs.name);
+                    $('#pricePackageTable .column-duration').toggle(!!prefs.duration);
+                    $('#pricePackageTable .column-list-price').toggle(!!prefs['list-price']);
+                    $('#pricePackageTable .column-sale-price').toggle(!!prefs['sale-price']);
+                    $('#pricePackageTable .column-status').toggle(!!prefs.status);
+                    $('#pricePackageTable .column-description').toggle(!!prefs.description);
+                }
+                
+                function syncModal() {
+                    const prefs = getPrefsFromSession();
+                    $('#columnSettingsForm input[type="checkbox"]').each(function() {
+                        this.checked = prefs[this.value] !== false;
+                    });
+                }
+
+                function saveAndApplySettings() {
+                    const prefs = savePrefsToSession();
+                    applyColumnVisibility(prefs);
+                    $('#columnSettingsModal').modal('hide');
+                    iziToast.success({
+                        title: 'Success',
+                        message: 'Display settings updated successfully!',
+                        position: 'topRight'
+                    });
+                }
+
+                function resetToDefault() {
+                    const defaultPrefs = { 
+                        id: true, 
+                        name: true, 
+                        duration: true, 
+                        'list-price': true, 
+                        'sale-price': true, 
+                        status: true, 
+                        description: true 
+                    };
+                    applyColumnVisibility(defaultPrefs);
+                    $('#columnSettingsForm input[type="checkbox"]').prop('checked', true);
+                    sessionStorage.setItem(storageKey, JSON.stringify(defaultPrefs));
+                }
+                
+                // --- Initial Load Logic ---
+                function initializeView() {
+                    if (sessionStorage.getItem(navigationFlag) === 'true') {
+                        const prefs = getPrefsFromSession();
+                        applyColumnVisibility(prefs);
+                        sessionStorage.removeItem(navigationFlag); // Consume the flag
+                    } else {
+                        resetToDefault();
+                    }
+                }
+                
+                // Run on page load
+                initializeView();
             });
         </script>
     </body>

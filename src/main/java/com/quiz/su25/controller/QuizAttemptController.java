@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 
 /**
@@ -127,7 +128,7 @@ public class QuizAttemptController extends HttpServlet {
             UserQuizAttempts existingAttempt = attemptsDAO.findLatestAttempt(userId, quizId);
             if (existingAttempt != null && GlobalConfig.QUIZ_ATTEMPT_STATUS_IN_PROGRESS.equals(existingAttempt.getStatus())) {
                 // Redirect to the existing attempt
-                response.sendRedirect("quiz-attempt-answer?attemptId=" + existingAttempt.getId());
+                response.sendRedirect(request.getContextPath() + "/quiz-handle?id=" + quizId);
                 return;
             }
 
@@ -135,20 +136,20 @@ public class QuizAttemptController extends HttpServlet {
             UserQuizAttempts newAttempt = UserQuizAttempts.builder()
                     .user_id(userId)
                     .quiz_id(quizId)
-                    .start_time(Date.valueOf(LocalDate.now()))
+                    .start_time(new Timestamp(System.currentTimeMillis()))
                     .status(GlobalConfig.QUIZ_ATTEMPT_STATUS_IN_PROGRESS)
-                    .created_at(Date.valueOf(LocalDate.now()))
-                    .update_at(Date.valueOf(LocalDate.now()))
+                    .created_at(new Timestamp(System.currentTimeMillis()))
+                    .update_at(new Timestamp(System.currentTimeMillis()))
                     .build();
 
             int attemptId = attemptsDAO.insert(newAttempt);
             if (attemptId > 0) {
-                // Redirect to the quiz attempt page with the new attempt ID
-                response.sendRedirect("quiz-attempt-answer?attemptId=" + attemptId);
+                // Redirect to the quiz handle page with the new attempt ID
+                response.sendRedirect(request.getContextPath() + "/quiz-handle?id=" + quizId);
             } else {
                 // Handle error - could not create attempt
                 request.setAttribute("error", "Could not start quiz attempt. Please try again.");
-                request.getRequestDispatcher("error.jsp").forward(request, response);
+                response.sendRedirect(request.getContextPath() + "/home");
             }
             
         } catch (NumberFormatException e) {
@@ -172,9 +173,9 @@ public class QuizAttemptController extends HttpServlet {
             if (attempt != null) {
                 // Only update if the attempt is still in progress
                 if (GlobalConfig.QUIZ_ATTEMPT_STATUS_IN_PROGRESS.equals(attempt.getStatus())) {
-                    attempt.setEnd_time(Date.valueOf(LocalDate.now()));
+                    attempt.setEnd_time(new Timestamp(System.currentTimeMillis()));
                     attempt.setStatus(GlobalConfig.QUIZ_ATTEMPT_STATUS_COMPLETED);
-                    attempt.setUpdate_at(Date.valueOf(LocalDate.now()));
+                    attempt.setUpdate_at(new Timestamp(System.currentTimeMillis()));
                     
                     if (attemptsDAO.update(attempt)) {
                         // Redirect to results page
@@ -182,7 +183,7 @@ public class QuizAttemptController extends HttpServlet {
                     } else {
                         // Handle error - could not update attempt
                         request.setAttribute("error", "Could not end quiz attempt. Please try again.");
-                        request.getRequestDispatcher("error.jsp").forward(request, response);
+                        response.sendRedirect(request.getContextPath() + "/home");
                     }
                 } else {
                     // Attempt is already completed
