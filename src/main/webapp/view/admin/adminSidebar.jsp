@@ -32,6 +32,18 @@
                     Subjects
                 </a>
             </li>
+            <li class="${param.active == 'questions-list' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/questions-list">
+                    <i class="skillgro-avatar"></i>
+                    Questions
+                </a>
+            </li>
+            <li class="${param.active == 'quizzes-lists' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/questions-list">
+                    <i class="skillgro-avatar"></i>
+                    Quiz
+                </a>
+            </li>
             <li class="${param.active == 'users' ? 'active' : ''}">
                 <a href="${pageContext.request.contextPath}/admin/users">
                     <i class="fas fa-users"></i>

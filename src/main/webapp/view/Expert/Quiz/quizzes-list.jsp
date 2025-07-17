@@ -331,7 +331,11 @@
 
             <div class="dashboard__inner-wrap">
                 <div class="row">
-                    <jsp:include page="../../common/user/sidebar.jsp"></jsp:include>
+                    <div class="col-lg-3">
+                            <jsp:include page="../../admin/adminSidebar.jsp">
+                                <jsp:param name="active" value="quizzes-lists"/>
+                            </jsp:include>
+                        </div>
                     
                     <div class="col-lg-9">
                         <div class="quiz-management">
