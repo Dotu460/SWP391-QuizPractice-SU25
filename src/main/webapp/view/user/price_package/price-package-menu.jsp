@@ -78,7 +78,9 @@
                     color: #dc3545;
                     font-weight: 500;
                 }
-                .d-none { display: none !important; }
+                .d-none {
+                    display: none !important;
+                }
             </style>
         </head>
 
@@ -90,14 +92,17 @@
             <!-- Scroll-top-end-->
 
             <!-- header-area -->
-        <jsp:include page="../../common/user/header.jsp"></jsp:include>
+            <jsp:include page="../../common/user/header.jsp"></jsp:include>
             <!-- header-area-end -->
+
+            <!-- main-area -->
             <main class="main-area">
                 <section class="dashboard__area section-pb-120">
                     <div class="container-fluid">
                         <div class="dashboard__inner-wrap">
                             <div class="row">
                             <jsp:include page="../../common/user/sidebarCustomer.jsp"></jsp:include>
+                            
                                 <div class="col-xl-9">
                                     <div class="dashboard__content-area">
                                         <div class="dashboard__content-title mb-4">
@@ -149,12 +154,15 @@
                                                         </span>
                                                     </div>
                                                     <div class="mt-3">
-                                                        <form action="${pageContext.request.contextPath}/user/buy-price-package" method="post">
+                                                        <form action="${pageContext.request.contextPath}/user/buy-price-package" method="post" style="display:inline-block;">
                                                             <input type="hidden" name="packageId" value="${pkg.id}"/>
                                                             <button type="submit" class="buy-btn" ${pkg.status != 'active' ? 'disabled' : ''}>
                                                                 Purchase
                                                             </button>
                                                         </form>
+                                                        <a href="${pageContext.request.contextPath}/price-package-menu?id=${pkg.id}" class="buy-btn" style="background:#6c757d; margin-left:8px; text-decoration:none; display:inline-block;">
+                                                            Learn More
+                                                        </a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -166,21 +174,28 @@
                     </div>
             </section>
         </main>
-        <jsp:include page="../../common/user/footer.jsp"/>
-        <jsp:include page="../../common/user/link_js_common.jsp"/>
+        <!-- main-area-end -->
+        
+         <!-- footer-area -->
+        <jsp:include page="../../common/user/footer.jsp"></jsp:include>
+        <!-- footer-area-end -->
+
+        <!-- JS here -->
+        <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
+
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 // Xử lý nút See more
-                document.querySelectorAll('.see-more-link').forEach(function(link) {
-                    link.addEventListener('click', function() {
+                document.querySelectorAll('.see-more-link').forEach(function (link) {
+                    link.addEventListener('click', function () {
                         var id = this.getAttribute('data-id');
                         document.getElementById('desc-short-' + id).classList.add('d-none');
                         document.getElementById('desc-full-' + id).classList.remove('d-none');
                     });
                 });
                 // Xử lý nút See less
-                document.querySelectorAll('.see-less-link').forEach(function(link) {
-                    link.addEventListener('click', function() {
+                document.querySelectorAll('.see-less-link').forEach(function (link) {
+                    link.addEventListener('click', function () {
                         var id = this.getAttribute('data-id');
                         document.getElementById('desc-full-' + id).classList.add('d-none');
                         document.getElementById('desc-short-' + id).classList.remove('d-none');

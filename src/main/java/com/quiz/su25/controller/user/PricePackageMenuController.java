@@ -38,7 +38,23 @@ public class PricePackageMenuController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Lấy danh sách các gói active
+        String idParam = request.getParameter("id");
+        if (idParam != null && !idParam.isEmpty()) {
+            try {
+                int id = Integer.parseInt(idParam);
+                PricePackage pricePackage = pricePackageDAO.findById(id);
+                if (pricePackage != null) {
+                    request.setAttribute("pricePackage", pricePackage);
+                    request.getRequestDispatcher("/view/user/price_package/price-package-learn-more.jsp").forward(request, response);
+                    return;
+                } else {
+                    request.setAttribute("error", "Price package not found");
+                }
+            } catch (NumberFormatException e) {
+                request.setAttribute("error", "Invalid package ID");
+            }
+        }
+        // Nếu không có id, hiển thị danh sách như cũ
         List<PricePackage> pricePackages = pricePackageDAO.findPricePackagesWithFilters(
             "active", null, null, null, 1, Integer.MAX_VALUE
         );
