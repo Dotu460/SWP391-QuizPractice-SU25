@@ -25,5 +25,4 @@ public class QuizQuestion {
     private Integer quiz_id;
     private Integer Question_id;
     private Integer order_in_quiz;
-    
-}
+} 

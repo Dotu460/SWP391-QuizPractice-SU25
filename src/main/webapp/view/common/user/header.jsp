@@ -12,36 +12,247 @@
         <div class="container">
             <div class="header-top">
                 <div class="row align-items-center">
-                    <div class="col-lg-8">
+                    <div class="col-lg-10">
                         <div class="header-top-left">
                             <ul class="list-inline">
                                 <li>
-                                    <img src="${pageContext.request.contextPath}/assets/icons/map_marker.svg" alt="location" class="icon">
-                                    589 5th Ave, NY 10024, USA
+                                    <img src="${pageContext.request.contextPath}/view/common/img/icons/map_marker.svg" alt="location" class="icon">
+                                    Hoa Lac Hi-tech Park, Km29, Thang Long Boulevard, Thach Hoa, Thach That, Ha Noi, Vietnam
                                 </li>
                                 <li>
-                                    <img src="${pageContext.request.contextPath}/assets/icons/envelope.svg" alt="email" class="icon">
-                                    <a href="mailto:info@skillgrodemo.com">info@skillgrodemo.com</a>
+                                    <img src="${pageContext.request.contextPath}/view/common/img/icons/envelope.svg" alt="email" class="icon">
+                                    <a href="mailto:info@skillgrodemo.com">se1931Group@gmail.com</a>
                                 </li>
                                 <li>
-                                    <img src="${pageContext.request.contextPath}/assets/icons/phone.svg" alt="phone" class="icon">
-                                    Call us: +123 599 8989
+                                    <img src="${pageContext.request.contextPath}/view/common/img/icons/phone.svg" alt="phone" class="icon">
+                                    Call us: +84 123 456 789
                                 </li>
                             </ul>
                         </div>
+                    
                     </div>
-                    <div class="col-lg-4">
-                        <div class="header-top-right text-end">
-                            <div class="header-social">
-                                <ul class="list-inline">
+                    <div class="col-lg-2">
+                    <ul class="tg-header__top-social list-wrap">
+                        <li>Follow Us:</li>
+                        <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
+                        <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                        <li><a href="#"><i class="fab fa-whatsapp"></i></a></li>
+                        <li><a href="#"><i class="fab fa-linkedin-in"></i></a></li>
+                        <li><a href="#"><i class="fab fa-youtube"></i></a></li>
+                    </ul>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="header-fixed-height"></div>
+    <div id="sticky-header" class="tg-header__area">
+        <div class="container custom-container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="tgmenu__wrap">
+                        <nav class="tgmenu__nav">
+                            <div class="logo">
+                                <a href="home"><img src="${pageContext.request.contextPath}/view/common/img/logo/logo.svg" alt="Logo"></a>
+                            </div>
+                            <div class="tgmenu__navbar-wrap tgmenu__main-menu d-none d-xl-flex">
+                                <ul class="navigation">
+                                    <li class="menu-item-has-children"><a href="#">Home</a>
+                                        <ul class="sub-menu mega-menu">
+                                            <li>
+                                                <ul class="list-wrap mega-sub-menu">
+                                                    <li>
+                                                        <a href="index.html">Main Home</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="index-2.html">Online Course <span class="tg-badge">Hot</span></a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="index-3.html">University <span class="tg-badge-two">New</span></a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="index-4.html">Yoga Instructor<span class="tg-badge-two">New</span></a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="index-5.html">Kindergarten<span class="tg-badge">Hot</span></a>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                            <li>
+                                                <ul class="list-wrap mega-sub-menu">
+                                                    <li>
+                                                        <a href="index-6.html">Language Academy<span class="tg-badge-two">New</span></a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="index-7.html">Business Coach <span class="tg-badge-two">New</span></a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="index-8.html">Kitchen Coach <span class="tg-badge">Hot</span></a>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                            <li>
+                                                <div class="mega-menu-img">
+                                                    <a href="courses.html"><img src="${pageContext.request.contextPath}/view/common/img/others/mega_menu_img.jpg" alt="img"></a>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="menu-item-has-children"><a href="#">Courses</a>
+                                        <ul class="sub-menu">
+                                            <li><a href="courses.html">All Courses</a></li>
+                                            <li><a href="course-details.html">Course Details</a></li>
+                                            <li><a href="lesson.html">Course Lesson</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="menu-item-has-children"><a href="#">Pages</a>
+                                        <ul class="sub-menu">
+                                            <li><a href="about-us.html">About Us</a></li>
+                                            <li class="menu-item-has-children">
+                                                <a href="instructors.html">Our Instructors</a>
+                                                <ul class="sub-menu">
+                                                    <li><a href="instructors.html">Our Instructors</a></li>
+                                                    <li><a href="instructor-details.html">Instructor Details</a></li>
+                                                </ul>
+                                            </li>
+                                            <li class="menu-item-has-children">
+                                                <a href="events.html">Our Events</a>
+                                                <ul class="sub-menu">
+                                                    <li><a href="events.html">Our Events</a></li>
+                                                    <li><a href="events-details.html">Event Details</a></li>
+                                                </ul>
+                                            </li>
+                                            <li class="menu-item-has-children">
+                                                <a href="shop.html">Shop</a>
+                                                <ul class="sub-menu">
+                                                    <li><a href="shop.html">Shop Page</a></li>
+                                                    <li><a href="shop-details.html">Shop Details</a></li>
+                                                    <li><a href="cart.html">Cart Page</a></li>
+                                                    <li><a href="check-out.html">Checkout</a></li>
+                                                </ul>
+                                            </li>
+                                            <li class="menu-item-has-children">
+                                                <a>Blog</a>
+                                                <ul class="sub-menu">
+                                                    <li><a href="${pageContext.request.contextPath}/blog">Blog List</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/post-details">Post Details</a></li>
+                                                </ul>
+                                            </li>
+                                            <li><a href="login.html">Student Login</a></li>
+                                            <li><a href="registration.html">Student Registration</a></li>
+                                            <li><a href="404.html">404 Page</a></li>
+                                            <li><a href="contact.html">contact</a></li>
+                                            <!-- Login/Logout button -->
+                                            <c:choose>
+                                                <c:when test="${not empty sessionScope.user}">
+                                                    <li>
+                                                        <a href="${pageContext.request.contextPath}/logout" class="logout-btn">
+                                                            <i class="fas fa-sign-out-alt"></i> Logout
+                                                        </a>
+                                                    </li>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <li>
+                                                        <a href="${pageContext.request.contextPath}/login" class="login-btn" >
+                                                            <i class="fas fa-sign-in-alt"></i> Login
+                                                        </a>
+                                                    </li>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </ul>
+                                    </li>
+                                    <li class="menu-item-has-children"><a href="#">Dashboard</a>
+                                        <ul class="sub-menu">
+                                            <li class="menu-item-has-children">
+                                                <a href="instructor-dashboard.html">Admin Dashboard</a>
+                                                <ul class="sub-menu">
+                                                    <li><a href="instructor-dashboard.html">Dashboard</a></li>
+                                                    <li><a href="instructor-profile.html">Profile</a></li>
+                                                    <li><a href="instructor-enrolled-courses.html">Enrolled Courses</a></li>
+                                                    <li><a href="instructor-wishlist.html">Wishlist</a></li>
+                                                    <li><a href="instructor-review.html">Reviews</a></li>
+                                                    <li><a href="instructor-attempts.html">My Quiz Attempts</a></li>
+                                                    <li><a href="instructor-history.html">Order History</a></li>
+                                                    <li><a href="instructor-courses.html">My Course</a></li>
+                                                    <li><a href="instructor-announcement.html">Announcements</a></li>
+                                                    <li class="active"><a href="instructor-quiz.html">Quiz Attempts</a></li>
+                                                    <li><a href="instructor-assignment.html">Assignments</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/setting">Settings</a></li>
+                                                </ul>
+                                            </li>
+                                            <li class="menu-item-has-children"><a href="student-dashboard.html">Student Dashboard</a>
+                                                <ul class="sub-menu">
+                                                    <li><a href="student-dashboard.html">Dashboard</a></li>
+                                                    <li><a href="student-profile.html">Profile</a></li>
+                                                    <li><a href="student-enrolled-courses.html">Enrolled Courses</a></li>
+                                                    <li><a href="student-wishlist.html">Wishlist</a></li>
+                                                    <li><a href="student-review.html">Reviews</a></li>
+                                                    <li><a href="student-attempts.html">My Quiz Attempts</a></li>
+                                                    <li><a href="student-history.html">Order History</a></li>
+                                                    <li><a href="student-setting.html">Settings</a></li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="tgmenu__action">
+                                <ul class="list-wrap">                                   
+                                    <c:choose>
+                                        <c:when test="${not empty sessionScope.account}">
+                                            <!-- Nút Change Password -->
+                                            <li style="display: inline;">
+                                                <a href="change-password" class="button-style">Change Password</a>
+                                            </li>
+                                            <!-- Nút Log out -->
+                                            <li style="display: inline;">
+                                                <a href="logout" class="button-style">Log out</a>
+                                            </li>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <!-- Nút Log in -->
+                                            <li style="display: inline;">
+                                                <a href="login" class="button-style">Log in</a>
+                                            </li>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </ul>
+                            </div>
+                            <div class="mobile-login-btn">
+                                <a href="login"><img src="${pageContext.request.contextPath}/view/common/img/icons/user.svg" alt="" class="injectable"></a>
+                            </div>
+                            <div class="mobile-nav-toggler"><i class="tg-flaticon-menu-1"></i></div>
+                        </nav>
+                    </div>
+                    <!-- Mobile Menu  -->
+                    <div class="tgmobile__menu">
+                        <nav class="tgmobile__menu-box">
+                            <div class="close-btn"><i class="tg-flaticon-close-1"></i></div>
+                            <div class="nav-logo">
+                                <a href="home"><img src="${pageContext.request.contextPath}/view/common/img/logo/logo.svg" alt="Logo"></a>
+                            </div>
+                            <div class="tgmobile__search">
+                                <form action="#">
+                                    <input type="text" placeholder="Search here...">
+                                    <button><i class="fas fa-search"></i></button>
+                                </form>
+                            </div>
+                            <div class="tgmobile__menu-outer">
+                                <!--Here Menu Will Come Automatically Via Javascript / Same Menu as in Header-->
+                            </div>
+                            <div class="social-links">
+                                <ul class="list-wrap">
                                     <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
                                     <li><a href="#"><i class="fab fa-twitter"></i></a></li>
                                     <li><a href="#"><i class="fab fa-instagram"></i></a></li>
                                     <li><a href="#"><i class="fab fa-linkedin-in"></i></a></li>
+                                    <li><a href="#"><i class="fab fa-youtube"></i></a></li>
                                 </ul>
                             </div>
-                        </div>
+                        </nav>
                     </div>
+                    <div class="tgmobile__menu-backdrop"></div>
+                    <!-- End Mobile Menu -->
                 </div>
             </div>
         </div>
@@ -49,159 +260,7 @@
     <!-- header-top-end -->
 
     <!-- header-area -->
-    <div class="header-area">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-3 col-sm-6">
-                    <div class="logo">
-                        <a href="${pageContext.request.contextPath}/home">
-                            <img src="${pageContext.request.contextPath}/assets/logo/logo.svg" alt="QuizPractice Logo">
-                        </a>
-                    </div>
-                </div>
-                <div class="col-lg-9 col-sm-6">
-                    <div class="header-menu">
-                        <nav class="navbar navbar-expand-lg">
-                            <div class="collapse navbar-collapse">
-                                <ul class="navbar-nav ms-auto">
-                                    </div>
-                                <div class="tgmenu__navbar-wrap tgmenu__main-menu d-none d-xl-flex">
-                                    <ul class="navigation">
-                                        <li class="active menu-item-has-children"><a href="#">Home</a>
-                                            <ul class="sub-menu mega-menu">
-                                                <li>
-                                                    <ul class="list-wrap mega-sub-menu">
-                                                        <li class="active">
-                                                            <a href="index.html">Main Home</a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="index-2.html">Online Course <span class="tg-badge">Hot</span></a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="index-3.html">University <span class="tg-badge-two">New</span></a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="index-4.html">Yoga Instructor<span class="tg-badge-two">New</span></a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="index-5.html">Kindergarten<span class="tg-badge">Hot</span></a>
-                                                        </li>
-                                                    </ul>
-                                                </li>
-                                                <li>
-                                                    <ul class="list-wrap mega-sub-menu">
-                                                        <li>
-                                                            <a href="index-6.html">Language Academy<span class="tg-badge-two">New</span></a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="index-7.html">Business Coach <span class="tg-badge-two">New</span></a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="index-8.html">Kitchen Coach <span class="tg-badge">Hot</span></a>
-                                                        </li>
-                                                    </ul>
-                                                </li>
-                                                <li>
-                                                    <div class="mega-menu-img">
-                                                        <a href="courses.html"><img src="assets/img/others/mega_menu_img.jpg" alt="img"></a>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </li>
-                                        <li class="menu-item-has-children"><a href="#">Courses</a>
-                                            <ul class="sub-menu">
-                                                <li><a href="courses.html">All Courses</a></li>
-                                                <li><a href="course-details.html">Course Details</a></li>
-                                                <li><a href="lesson.html">Course Lesson</a></li>
-                                            </ul>
-                                        </li>
-                                        <li class="menu-item-has-children"><a href="#">Pages</a>
-                                            <ul class="sub-menu">
-                                                <li><a href="about-us.html">About Us</a></li>
-                                                <li class="menu-item-has-children">
-                                                    <a href="instructors.html">Our Instructors</a>
-                                                    <ul class="sub-menu">
-                                                        <li><a href="instructors.html">Our Instructors</a></li>
-                                                        <li><a href="instructor-details.html">Instructor Details</a></li>
-                                                    </ul>
-                                                </li>
-                                                <li class="menu-item-has-children">
-                                                    <a href="events.html">Our Events</a>
-                                                    <ul class="sub-menu">
-                                                        <li><a href="events.html">Our Events</a></li>
-                                                        <li><a href="events-details.html">Event Details</a></li>
-                                                    </ul>
-                                                </li>
-                                                <li class="menu-item-has-children">
-                                                    <a href="shop.html">Shop</a>
-                                                    <ul class="sub-menu">
-                                                        <li><a href="shop.html">Shop Page</a></li>
-                                                        <li><a href="shop-details.html">Shop Details</a></li>
-                                                        <li><a href="cart.html">Cart Page</a></li>
-                                                        <li><a href="check-out.html">Checkout</a></li>
-                                                    </ul>
-                                                </li>
-                                                <li class="menu-item-has-children">
-                                                    <a href="blog.html">Blog</a>
-                                                    <ul class="sub-menu">
-                                                        <li><a href="blog.html">Blog Right Sidebar</a></li>
-                                                        <li><a href="blog-2.html">Blog Left Sidebar</a></li>
-                                                        <li><a href="blog-3.html">Blog Full Width</a></li>
-                                                        <li><a href="blog-details.html">Blog Details</a></li>
-                                                    </ul>
-                                                </li>
-                                                <li><a href="login.html">Student Login</a></li>
-                                                <li><a href="registration.html">Student Registration</a></li>
-                                                <li><a href="404.html">404 Page</a></li>
-                                                <li><a href="contact.html">contact</a></li>
-                                            </ul>
-                                        </li>
-                                        <li class="menu-item-has-children"><a href="#">Dashboard</a>
-                                            <ul class="sub-menu">
-                                                <li class="menu-item-has-children">
-                                                    <a href="instructor-dashboard.html">Instructor Dashboard</a>
-                                                    <ul class="sub-menu">
-                                                        <li><a href="instructor-dashboard.html">Dashboard</a></li>
-                                                        <li><a href="instructor-profile.html">Profile</a></li>
-                                                        <li><a href="instructor-enrolled-courses.html">Enrolled Courses</a></li>
-                                                        <li><a href="instructor-wishlist.html">Wishlist</a></li>
-                                                        <li><a href="instructor-review.html">Reviews</a></li>
-                                                        <li><a href="instructor-attempts.html">My Quiz Attempts</a></li>
-                                                        <li><a href="instructor-history.html">Order History</a></li>
-                                                        <li><a href="instructor-courses.html">My Course</a></li>
-                                                        <li><a href="instructor-announcement.html">Announcements</a></li>
-                                                        <li><a href="instructor-quiz.html">Quiz Attempts</a></li>
-                                                        <li><a href="instructor-assignment.html">Assignments</a></li>
-                                                        <li><a href="instructor-setting.html">Settings</a></li>
-                                                    </ul>
-                                                </li>
-                                                <li class="menu-item-has-children"><a href="student-dashboard.html">Student Dashboard</a>
-                                                    <ul class="sub-menu">
-                                                        <li><a href="student-dashboard.html">Dashboard</a></li>
-                                                        <li><a href="student-profile.html">Profile</a></li>
-                                                        <li><a href="student-enrolled-courses.html">Enrolled Courses</a></li>
-                                                        <li><a href="student-wishlist.html">Wishlist</a></li>
-                                                        <li><a href="student-review.html">Reviews</a></li>
-                                                        <li><a href="student-attempts.html">My Quiz Attempts</a></li>
-                                                        <li><a href="student-history.html">Order History</a></li>
-                                                        <li><a href="student-setting.html">Settings</a></li>
-                                                    </ul>
-                                                </li>
-                                            </ul>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a href="#" onclick="handleLoginLogout(event)" class="nav-link login-btn">
-                                                <%= session.getAttribute("user") != null ? "Log Out" : "Log In" %>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
-            <div>
-        </div>
+
     <!-- header-area-end -->
 
     <style>
@@ -266,6 +325,27 @@
         }
         .header-menu {
             margin-top: -10px;
+        }
+        .button-style {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #6559F5; /* màu tím */
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            border: 2px solid #0D006C; /* tím đậm hơn một chút */
+            border-radius: 999px; /* bo tròn hoàn toàn */
+            box-shadow: 0 4px 12px rgba(128, 0, 128, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .button-style:hover {
+            background-color: #6559F5;
+            box-shadow: 0 6px 15px rgba(128, 0, 128, 0.3);
+        }
+        .tgmenu__action .button-style {
+            margin-right: 10px; /* Khoảng cách giữa các nút */
         }
         .navbar {
             padding: 0;

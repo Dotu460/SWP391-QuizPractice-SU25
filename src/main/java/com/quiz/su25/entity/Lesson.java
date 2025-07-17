@@ -27,10 +27,7 @@ public class Lesson {
     private String title;
     private String content_text;
     private String content_url;
-    private String type;
     private Integer order_in_subject;
     private String status;
-    private Date created_at;
-    private Date updated_at;
 
 }

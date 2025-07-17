@@ -13,7 +13,7 @@ public class LessonDAO extends DBContext implements I_DAO<Lesson> {
 
     @Override
     public List<Lesson> findAll() {
-        String sql = "SELECT * FROM lesson";
+        String sql = "SELECT * FROM Lessons";
         List<Lesson> list = new ArrayList<>();
         try {
             connection = getConnection();
@@ -33,7 +33,7 @@ public class LessonDAO extends DBContext implements I_DAO<Lesson> {
 
     @Override
     public Lesson findById(Integer id) {
-        String sql = "SELECT * FROM lesson WHERE id = ?";
+        String sql = "SELECT * FROM Lessons WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -51,7 +51,7 @@ public class LessonDAO extends DBContext implements I_DAO<Lesson> {
     }
 
     public List<Lesson> findBySubjectId(Integer subjectId) {
-        String sql = "SELECT * FROM lesson WHERE subject_id = ? ORDER BY order_in_subject";
+        String sql = "SELECT * FROM Lessons WHERE subject_id = ? ORDER BY order_in_subject";
         List<Lesson> list = new ArrayList<>();
         try {
             connection = getConnection();
@@ -72,14 +72,16 @@ public class LessonDAO extends DBContext implements I_DAO<Lesson> {
 
     @Override
     public int insert(Lesson lesson) {
-        String sql = "INSERT INTO lesson (subject_id, title, order_in_subject, status) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO Lessons (subject_id, title, content_text, content_url, order_in_subject, status) VALUES (?, ?, ?, ?, ?, ?)";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             statement.setInt(1, lesson.getSubject_id());
             statement.setString(2, lesson.getTitle());
-            statement.setInt(3, lesson.getOrder_in_subject());
-            statement.setString(4, lesson.getStatus());
+            statement.setString(3, lesson.getContent_text());
+            statement.setString(4, lesson.getContent_url());
+            statement.setInt(5, lesson.getOrder_in_subject());
+            statement.setString(6, lesson.getStatus());
 
             int affectedRows = statement.executeUpdate();
 
@@ -103,15 +105,17 @@ public class LessonDAO extends DBContext implements I_DAO<Lesson> {
 
     @Override
     public boolean update(Lesson lesson) {
-        String sql = "UPDATE lesson SET subject_id = ?, title = ?, order_in_subject = ?, status = ? WHERE id = ?";
+        String sql = "UPDATE Lessons SET subject_id = ?, title = ?, content_text = ?, content_url = ?, order_in_subject = ?, status = ? WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setInt(1, lesson.getSubject_id());
             statement.setString(2, lesson.getTitle());
-            statement.setInt(3, lesson.getOrder_in_subject());
-            statement.setString(4, lesson.getStatus());
-            statement.setInt(5, lesson.getId());
+            statement.setString(3, lesson.getContent_text());
+            statement.setString(4, lesson.getContent_url());
+            statement.setInt(5, lesson.getOrder_in_subject());
+            statement.setString(6, lesson.getStatus());
+            statement.setInt(7, lesson.getId());
 
             return statement.executeUpdate() > 0;
         } catch (Exception e) {
@@ -124,7 +128,7 @@ public class LessonDAO extends DBContext implements I_DAO<Lesson> {
 
     @Override
     public boolean delete(Lesson lesson) {
-        String sql = "DELETE FROM lesson WHERE id = ?";
+        String sql = "DELETE FROM Lessons WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -139,7 +143,7 @@ public class LessonDAO extends DBContext implements I_DAO<Lesson> {
     }
 
     public boolean updateStatus(Integer id, String status) {
-        String sql = "UPDATE lesson SET status = ? WHERE id = ?";
+        String sql = "UPDATE Lessons SET status = ? WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -155,7 +159,7 @@ public class LessonDAO extends DBContext implements I_DAO<Lesson> {
     }
 
     public boolean updateOrder(Integer id, Integer order) {
-        String sql = "UPDATE lesson SET order_in_subject = ? WHERE id = ?";
+        String sql = "UPDATE Lessons SET order_in_subject = ? WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -176,13 +180,15 @@ public class LessonDAO extends DBContext implements I_DAO<Lesson> {
                 .id(rs.getInt("id"))
                 .subject_id(rs.getInt("subject_id"))
                 .title(rs.getString("title"))
+                .content_text(rs.getString("content_text"))
+                .content_url(rs.getString("content_url"))
                 .order_in_subject(rs.getInt("order_in_subject"))
                 .status(rs.getString("status"))
                 .build();
     }
 
     public List<Lesson> findBySubjectIdAndStatus(Integer subjectId, String status) {
-        String sql = "SELECT * FROM lesson WHERE subject_id = ? AND status = ? ORDER BY order_in_subject";
+        String sql = "SELECT * FROM Lessons WHERE subject_id = ? AND status = ? ORDER BY order_in_subject";
         List<Lesson> list = new ArrayList<>();
         try {
             connection = getConnection();
@@ -204,7 +210,7 @@ public class LessonDAO extends DBContext implements I_DAO<Lesson> {
     
     public List<Lesson> findLessonsWithPagination(Integer subjectId, Integer pageNumber, Integer pageSize) {
         int offset = (pageNumber - 1) * pageSize;
-        String sql = "SELECT * FROM lesson WHERE subject_id = ? ORDER BY order_in_subject LIMIT ? OFFSET ?";
+        String sql = "SELECT * FROM Lessons WHERE subject_id = ? ORDER BY order_in_subject LIMIT ? OFFSET ?";
         List<Lesson> list = new ArrayList<>();
         try {
             connection = getConnection();
@@ -226,7 +232,7 @@ public class LessonDAO extends DBContext implements I_DAO<Lesson> {
     }
     
     public int countLessonsBySubjectId(Integer subjectId) {
-        String sql = "SELECT COUNT(*) as total FROM lesson WHERE subject_id = ?";
+        String sql = "SELECT COUNT(*) as total FROM Lessons WHERE subject_id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -248,7 +254,7 @@ public class LessonDAO extends DBContext implements I_DAO<Lesson> {
      */
     public List<Lesson> findLessonsWithFilters(String statusFilter, String searchFilter, 
             Integer subjectId, int page, int pageSize) {
-        StringBuilder sql = new StringBuilder("SELECT l.* FROM lesson l");
+        StringBuilder sql = new StringBuilder("SELECT l.* FROM Lessons l");
         List<Object> parameters = new ArrayList<>();
         
         sql.append(" WHERE 1=1");
@@ -304,7 +310,7 @@ public class LessonDAO extends DBContext implements I_DAO<Lesson> {
      * Get total count of filtered lessons
      */
     public int getTotalFilteredLessons(String statusFilter, String searchFilter, Integer subjectId) {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) as total FROM lesson l");
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) as total FROM Lessons l");
         List<Object> parameters = new ArrayList<>();
         
         sql.append(" WHERE 1=1");

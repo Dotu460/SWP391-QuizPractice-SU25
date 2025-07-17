@@ -25,11 +25,11 @@ public class PricePackage {
     private Integer id;
     private String name;
     private Integer access_duration_months;
-    private Integer list_price;
-    private Integer sale_price;
+    private Double list_price;
+    private Double sale_price;
     private String status;
     private String description;
     private Date created_at;
-    private Date update_at;
+    private Date updated_at;
     
 }

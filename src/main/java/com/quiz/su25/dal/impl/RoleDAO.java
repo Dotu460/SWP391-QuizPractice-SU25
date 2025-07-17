@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 
 /**
  *
@@ -47,7 +49,7 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
 
     @Override
     public boolean update(Role t) {
-        String sql = "UPDATE Role SET role_name = ?, description = ?, created_at = ? WHERE id = ?";
+        String sql = "UPDATE role SET role_name = ?, description = ?, created_at = ? WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -67,7 +69,7 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
 
     @Override
     public boolean delete(Role t) {
-        String sql = "DELETE FROM Role WHERE id = ?";
+        String sql = "DELETE FROM role WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -84,7 +86,7 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
 
     @Override
     public int insert(Role t) {
-        String sql = "INSERT INTO Role (role_name, description, created_at) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO  (role_name, description, created_at) VALUES (?, ?, ?)";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -105,8 +107,8 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
         Role role = Role
                 .builder()
                 .id(resultSet.getInt("id"))
-                .role_name("role_name")
-                .description("description")
+                .role_name(resultSet.getString("role_name"))
+                .description(resultSet.getString("description"))
                 .created_at(resultSet.getDate("created_at"))
                 .build();
         return role;
@@ -114,7 +116,30 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
 
     @Override
     public Role findById(Integer id) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        String sql = "SELECT id, role_name, description FROM role WHERE id = ?";
+        Role role = null;
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, id);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                role = new Role();
+                role.setId(resultSet.getInt("id"));
+                role.setRole_name(resultSet.getString("role_name"));
+                role.setDescription(resultSet.getString("description"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error findById at class RoleDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return role;
+    }
+
+    public String getRoleNameById(Integer roleId) {
+        Role role = findById(roleId);
+        return role != null ? role.getRole_name() : "Unknown";
     }
 
 //    @Override

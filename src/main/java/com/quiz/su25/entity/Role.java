@@ -1,8 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.quiz.su25.entity;
+
 import java.sql.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,8 +18,9 @@ import lombok.ToString;
 @Setter
 
 public class Role {
-    private int id;
+    private Integer id;
     private String role_name;
     private String description;
     private Date created_at;
+    
 }

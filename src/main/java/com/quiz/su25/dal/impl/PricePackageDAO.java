@@ -11,10 +11,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.sql.Date;
 
 /**
  *
- * @author Admin
+ * @author quangmingdoc
  */
 public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
 
@@ -51,8 +52,8 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
             statement = connection.prepareStatement(sql);
             statement.setString(1, t.getName());
             statement.setInt(2, t.getAccess_duration_months());
-            statement.setInt(3, t.getList_price());
-            statement.setInt(4, t.getSale_price());
+            statement.setDouble(3, t.getList_price());
+            statement.setDouble(4, t.getSale_price());
             statement.setString(5, t.getStatus());
             statement.setString(6, t.getDescription());
             statement.setInt(7, t.getId());
@@ -73,8 +74,8 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
             statement = connection.prepareStatement(sql);
             statement.setString(1, t.getName());
             statement.setInt(2, t.getAccess_duration_months());
-            statement.setInt(3, t.getList_price());
-            statement.setInt(4, t.getSale_price());
+            statement.setDouble(3, t.getList_price());
+            statement.setDouble(4, t.getSale_price());
             statement.setString(5, t.getStatus());
             statement.setString(6, t.getDescription());
             
@@ -117,20 +118,28 @@ public class PricePackageDAO extends DBContext implements I_DAO<PricePackage>{
                 .name(resultSet.getString("name"))
                 .access_duration_months(resultSet.getInt("access_duration_months"))
                 .status(resultSet.getString("status"))
-                .list_price(resultSet.getInt("list_price"))
-                .sale_price(resultSet.getInt("sale_price"))
+                .list_price(resultSet.getDouble("list_price"))
+                .sale_price(resultSet.getDouble("sale_price"))
                 .description(resultSet.getString("description"))
+                .updated_at(resultSet.getDate("updated_at"))
+                .created_at(resultSet.getDate("created_at"))
                 .build();
         return pricePackage;
     }
 
     @Override
+    // Lấy thông tin từ database
     public PricePackage findById(Integer id) {
+        //Câu lệnh lấy dữ liệu
         String sql = "SELECT * FROM pricePackage WHERE id = ?";
         try {
+            // tạo 1 bảng trắng
             connection = getConnection();
+            // viết thông tin câu lệnh lênh bảng trắng đó
             statement = connection.prepareStatement(sql);
+            // Lấy id muốn lấy
             statement.setInt(1, id);
+            // thực hiện câu lệnh lấy kết quả
             resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return getFromResultSet(resultSet);

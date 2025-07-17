@@ -1,10 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package com.quiz.su25.entity;
 
-import java.sql.Date;
+package com.quiz.su25.entity;
+import jakarta.persistence.Entity;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+
 @ToString
 @Builder
 @Data
@@ -20,13 +18,31 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter
 @Setter
+
+
+//public class Subject {
+//    private Integer id;
+//    private String title;
+//    private String thumbnail_url;
+//    private String brief_info;
+//    private String description;
+//    private Integer subjectcategories_id;
+//    private String status;
+//}
+
 public class Subject {
     private Integer id;
     private String title;
     private String thumbnail_url;
     private String tag_line;
+    private String brief_info;
     private String description;
-    private Boolean featured;
-    private Integer subjectcategories_id;
+    private Boolean featured_flag;
+    private Integer category_id;
     private String status;
+    private Integer owner_id;
+    private Date created_at;
+    private Date updated_at;
+    private Integer created_by;
+    private Integer updated_by;
 }

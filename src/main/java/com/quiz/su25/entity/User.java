@@ -17,6 +17,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter
 @Setter
+
 public class User {
     private Integer id;
     private String full_name;
@@ -26,6 +27,6 @@ public class User {
     private String mobile;
     private String avatar_url;
     private Integer role_id;
-    private String status;
+    private String status; 
     
 }

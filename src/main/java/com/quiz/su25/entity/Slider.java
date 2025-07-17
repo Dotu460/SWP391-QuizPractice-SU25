@@ -25,7 +25,9 @@ import lombok.Setter;
 public class Slider {
     private Integer id;
     private String title;
-    private String image;
-    private String backlink;
+    private String image_url;
+    private String backlink_url;
     private Boolean status;
+    private Integer display_order;
+    private String notes;
 }

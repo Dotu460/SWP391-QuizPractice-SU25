@@ -4,7 +4,7 @@
  */
 package com.quiz.su25.entity;
 
-import java.sql.Date;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,14 +23,13 @@ import lombok.ToString;
 
 public class Question {
     private Integer id;
-    private Integer subject_id;
-    private Integer lesson_id;
-    private Integer dimension_id;
+    private Integer quiz_id;
+    private String type;
     private String content;
     private String media_url;
     private String level;
     private String status;
     private String explanation;
     private Integer created_by;
-    
+    private List<QuestionOption> questionOptions;
 }
