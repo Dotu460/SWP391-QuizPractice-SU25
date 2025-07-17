@@ -163,8 +163,8 @@
                                     </li>
                                     <li class="menu-item-has-children"><a href="#">Dashboard</a>
                                         <ul class="sub-menu">
-                                            <li class="active menu-item-has-children">
-                                                <a href="instructor-dashboard.html">Instructor Dashboard</a>
+                                            <li class="menu-item-has-children">
+                                                <a href="instructor-dashboard.html">Admin Dashboard</a>
                                                 <ul class="sub-menu">
                                                     <li><a href="instructor-dashboard.html">Dashboard</a></li>
                                                     <li><a href="instructor-profile.html">Profile</a></li>
@@ -177,7 +177,7 @@
                                                     <li><a href="instructor-announcement.html">Announcements</a></li>
                                                     <li class="active"><a href="instructor-quiz.html">Quiz Attempts</a></li>
                                                     <li><a href="instructor-assignment.html">Assignments</a></li>
-                                                    <li><a href="instructor-setting.html">Settings</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/setting">Settings</a></li>
                                                 </ul>
                                             </li>
                                             <li class="menu-item-has-children"><a href="student-dashboard.html">Student Dashboard</a>

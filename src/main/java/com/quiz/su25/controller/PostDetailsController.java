@@ -83,6 +83,7 @@ public class PostDetailsController extends HttpServlet {
             String postIdParam = request.getParameter("postId");
             String title = request.getParameter("title");
             String category = request.getParameter("category");
+            String author = request.getParameter("author");
             String briefInfo = request.getParameter("briefInfo");
             String description = request.getParameter("description");
             String status = request.getParameter("status");
@@ -104,6 +105,21 @@ public class PostDetailsController extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/post-details" + 
                     (postIdParam != null && !postIdParam.isEmpty() ? "?id=" + postIdParam : "") + 
                     "&error=category_required");
+                return;
+            }
+            if (author == null || author.trim().isEmpty()) {
+                System.out.println("ERROR: Author is required!");
+                response.sendRedirect(request.getContextPath() + "/post-details" + 
+                    (postIdParam != null && !postIdParam.isEmpty() ? "?id=" + postIdParam : "") + 
+                    "&error=author_required");
+                return;
+            }
+            // THÊM VALIDATION CHO AUTHOR LENGTH
+            if (author.trim().length() > 100) {
+                System.out.println("ERROR: Author name too long!");
+                response.sendRedirect(request.getContextPath() + "/post-details"
+                        + (postIdParam != null && !postIdParam.isEmpty() ? "?id=" + postIdParam : "")
+                        + "&error=author_too_long");
                 return;
             }
 
@@ -135,8 +151,8 @@ public class PostDetailsController extends HttpServlet {
                 post.setCategory_id(1); 
                 // TODO: Set author from session when authentication is implemented
                 // For now, set a default author (you should change this)
-                post.setAuthor("Admin");
-                System.out.println("Default values set: category_id=1, author=Admin");
+                post.setAuthor(author.trim());
+                System.out.println("Author set from form: " + author.trim());
                 
             } else {
                 System.out.println("Updating existing post...");
@@ -156,6 +172,10 @@ public class PostDetailsController extends HttpServlet {
                 // Update category_id if category changed
                 // Option 1: Set default category_id
                 post.setCategory_id(1);
+                
+                //Set author cho update
+                post.setAuthor(author.trim());  
+                System.out.println("Author updated from form: " + author.trim());
             }
 
             // Handle thumbnail upload
@@ -177,6 +197,7 @@ public class PostDetailsController extends HttpServlet {
             // Update post object with form data
             post.setTitle(title.trim());
             post.setCategory(category.trim());
+            post.setAuthor(author.trim());
             post.setBrief_info(briefInfo != null ? briefInfo.trim() : "");
             post.setContent(processedDescription);
             post.setStatus(status);

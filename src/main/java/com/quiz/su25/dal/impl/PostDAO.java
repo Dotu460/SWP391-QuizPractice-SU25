@@ -563,12 +563,7 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
      */
     public Map<String, Object> getPostDetailsWithAuthorAndCategory(int postId) {
         Map<String, Object> result = new HashMap<>();
-        String sql = "SELECT p.*, u.id as author_id, u.full_name as author_name, u.avatar_url as author_avatar, "
-                + "c.id as category_id, c.name as category_name "
-                + "FROM post p "
-                + "JOIN users u ON p.author_id = u.id "
-                + "JOIN category c ON p.category_id = c.id "
-                + "WHERE p.id = ?";
+        String sql = "SELECT * FROM post WHERE id = ?";
 
         try {
             connection = getConnection();
@@ -583,9 +578,7 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
 
                 // Get author details
                 Map<String, Object> author = new HashMap<>();
-                author.put("id", resultSet.getInt("author_id"));
-                author.put("name", resultSet.getString("author_name"));
-                author.put("avatar", resultSet.getString("author_avatar"));
+                author.put("name", post.getAuthor()); // Dùng author string
                 result.put("author", author);
 
                 // Get category details

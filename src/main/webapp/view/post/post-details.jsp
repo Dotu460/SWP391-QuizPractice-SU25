@@ -212,6 +212,15 @@
                                        value="${post.title}" required maxlength="255">
                             </div>
 
+                            <!-- Author -->
+                            <div class="mb-3">
+                                <label for="author" class="form-label">Author <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="author" name="author" 
+                                       value="${post.author}" required maxlength="100" 
+                                       placeholder="Enter author name">
+                                <div class="form-text">Enter the author name for this post (can be any name)</div>
+                            </div>
+
                             <!-- Category -->
                             <div class="mb-3">
                                 <label for="category" class="form-label">Category <span class="text-danger">*</span></label>
@@ -222,6 +231,8 @@
                                     <option value="Listening" ${post.category == 'Listening' ? 'selected' : ''}>Listening</option>
                                 </select>
                             </div>
+                            
+                                
 
                             <!-- Brief Information -->
                             <div class="mb-3">
