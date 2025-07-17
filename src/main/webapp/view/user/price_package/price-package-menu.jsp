@@ -70,13 +70,27 @@
                 .buy-btn:hover:enabled {
                     background: #3d38a1;
                 }
-                .status-active {
-                    color: #28a745;
-                    font-weight: 500;
+                .status-available {
+                    display: inline-block;
+                    background: #f3f1fd;
+                    color: #5751e1;
+                    font-weight: 600;
+                    border-radius: 999px;
+                    padding: 4px 16px;
+                    font-size: 0.98rem;
+                    letter-spacing: 0.2px;
+                    box-shadow: 0 2px 8px rgba(87,81,225,0.07);
                 }
-                .status-inactive {
-                    color: #dc3545;
-                    font-weight: 500;
+                .status-pending {
+                    display: inline-block;
+                    background: #f3f4f6;
+                    color: #888;
+                    font-weight: 600;
+                    border-radius: 999px;
+                    padding: 4px 16px;
+                    font-size: 0.98rem;
+                    letter-spacing: 0.2px;
+                    box-shadow: 0 2px 8px rgba(180,180,180,0.07);
                 }
                 .d-none {
                     display: none !important;
@@ -129,13 +143,15 @@
                                                             <c:when test="${not empty pkg.description}">
                                                                 <c:choose>
                                                                     <c:when test="${fn:length(pkg.description) > 50}">
-                                                                        Description: <span>
-                                                                            <c:out value="${fn:substring(pkg.description, 0, 50)}"/>...
+                                                                        <span>
+                                                                            <c:out value="${fn:replace(fn:substring(pkg.description, 0, 50), '
+', '<br/>')}" escapeXml="false"/>...
                                                                         </span>
                                                                         <a href="javascript:void(0);" class="see-more-link" data-id="${pkg.id}">See more</a>
                                                                     </c:when>
                                                                     <c:otherwise>
-                                                                        Description: <c:out value="${pkg.description}"/>
+                                                                        <c:out value="${fn:replace(pkg.description, '
+', '<br/>')}" escapeXml="false"/>
                                                                     </c:otherwise>
                                                                 </c:choose>
                                                             </c:when>
@@ -145,12 +161,13 @@
                                                         </c:choose>
                                                     </div>
                                                     <div class="package-description d-none" id="desc-full-${pkg.id}">
-                                                        Description: <c:out value="${pkg.description}"/>
+                                                        <c:out value="${fn:replace(pkg.description, '
+', '<br/>')}" escapeXml="false"/>
                                                         <a href="javascript:void(0);" class="see-less-link" data-id="${pkg.id}">See less</a>
                                                     </div>
                                                     <div>
-                                                        <span class="status-${pkg.status}">
-                                                            ${pkg.status == 'active' ? 'Selling' : 'Pending'}
+                                                        <span class="status-${pkg.status == 'active' ? 'available' : 'pending'}">
+                                                            ${pkg.status == 'active' ? 'Available' : 'Pending'}
                                                         </span>
                                                     </div>
                                                     <div class="mt-3">

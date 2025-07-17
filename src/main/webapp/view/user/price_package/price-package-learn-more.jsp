@@ -1,6 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!doctype html>
 <html class="no-js" lang="en">
 
@@ -217,7 +218,8 @@
                                                                 <div class="info-value">
                                                                     <c:choose>
                                                                         <c:when test="${not empty pricePackage.description}">
-                                                                            ${pricePackage.description}
+                                                                            <c:out value="${fn:replace(pricePackage.description, '
+', '<br/>')}" escapeXml="false"/>
                                                                         </c:when>
                                                                         <c:otherwise>
                                                                             <span class="text-muted">No description provided</span>
