@@ -120,9 +120,6 @@ public class ManageController extends HttpServlet {
         // Get filter parameters
         String categoryFilter = request.getParameter("category");
         String statusFilter = request.getParameter("status");
-        if (statusFilter == null || statusFilter.isEmpty()) {
-            statusFilter = "active"; // Default to active subjects
-        }
         String searchTerm = request.getParameter("search");
 
         // Set default sort
