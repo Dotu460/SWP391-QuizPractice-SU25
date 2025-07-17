@@ -32,5 +32,5 @@ public class Question {
     private String status;
     private String explanation;
     private Integer created_by;
-       
+    
 }
