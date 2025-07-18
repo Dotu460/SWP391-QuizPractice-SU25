@@ -235,7 +235,7 @@
                                                     <button type="submit" class="btn btn-primary" style="padding: 6px 15px; font-size: 15px;">Filter</button>
                                                     <a href="${pageContext.request.contextPath}/admin/price-package-list" class="btn btn-secondary ml-2" style="padding: 6px 15px; font-size: 15px; margin-left: 8px;">Reset</a>
                                                 </div>
-                                            </div>
+                                            </div>    
                                         </form>
                                     </div>
 
@@ -546,8 +546,14 @@
                 });
 
                 $('#deselectAllBtn').click(function() {
-                    $('#columnSettingsForm input[type="checkbox"]').prop('checked', false);
+                    // Uncheck all checkboxes except the name column
+                    $('#columnSettingsForm input[type="checkbox"]').not('#col-name').prop('checked', false);
+                    // Ensure name column stays checked
+                    $('#col-name').prop('checked', true);
                 });
+
+                // Make sure name column checkbox is always checked and disabled
+                $('#col-name').prop('disabled', true).prop('checked', true);
 
                 // Add listener for pagination link clicks
                 $('.pagination a').on('click', function(e) {
@@ -579,6 +585,8 @@
                     $('#columnSettingsForm input[type="checkbox"]').each(function() {
                         prefs[this.value] = this.checked;
                     });
+                    // Always ensure name is true before saving
+                    prefs.name = true;
                     sessionStorage.setItem(storageKey, JSON.stringify(prefs));
                     return prefs;
                 }
@@ -594,8 +602,11 @@
                         description: true 
                     };
                     
+                    // Always ensure name is visible regardless of preferences
+                    prefs.name = true;
+                    
                     $('#pricePackageTable .column-id').toggle(!!prefs.id);
-                    $('#pricePackageTable .column-name').toggle(!!prefs.name);
+                    $('#pricePackageTable .column-name').toggle(true); // Always show name column
                     $('#pricePackageTable .column-duration').toggle(!!prefs.duration);
                     $('#pricePackageTable .column-list-price').toggle(!!prefs['list-price']);
                     $('#pricePackageTable .column-sale-price').toggle(!!prefs['sale-price']);

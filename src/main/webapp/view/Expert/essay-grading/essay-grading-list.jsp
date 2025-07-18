@@ -90,7 +90,7 @@
         <div class="container">
             <h1>Essay Grading</h1>
             
-            <!-- Debug info -->
+<!--             Debug info 
             <div class="alert alert-info">
                 <h4>Debug Information:</h4>
                 <ul>
@@ -103,7 +103,7 @@
                     <li>totalPages: ${totalPages}</li>
                     <li>totalAttempts: ${totalAttempts}</li>
                 </ul>
-            </div>
+            </div>-->
             
             <div class="card">
                 <div class="card-header">
