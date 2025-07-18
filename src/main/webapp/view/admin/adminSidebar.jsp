@@ -39,7 +39,7 @@
                 </a>
             </li>
             <li class="${param.active == 'quizzes-lists' ? 'active' : ''}">
-                <a href="${pageContext.request.contextPath}/questions-list">
+                <a href="${pageContext.request.contextPath}/quizzes-list">
                     <i class="skillgro-avatar"></i>
                     Quiz
                 </a>
