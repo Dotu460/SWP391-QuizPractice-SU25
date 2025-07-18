@@ -62,7 +62,7 @@
                                             <li>
                                                 <ul class="list-wrap mega-sub-menu">
                                                     <li>
-                                                        <a href="index.html">Main Home</a>
+                                                        <a href="${pageContext.request.contextPath}/home">Main Home</a>
                                                     </li>
                                                     <li>
                                                         <a href="index-2.html">Online Course <span class="tg-badge">Hot</span></a>

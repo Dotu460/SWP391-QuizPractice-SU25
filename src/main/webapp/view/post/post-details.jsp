@@ -348,6 +348,24 @@
         
         <script>
             // Initialize TinyMCE with image upload functionality
+            function normalizeUploadUrl(url) {
+    if (!url) return url;
+    
+    // Remove any leading relative paths and normalize
+    url = url.replace(/^\.\.\//, '').replace(/^\.\//, '');
+    
+    // Handle different URL formats
+    if (url.startsWith('uploads/media/')) {
+        return '/SWP391_QUIZ_PRACTICE_SU25/' + url;
+    } else if (url.startsWith('/uploads/media/')) {
+        return '/SWP391_QUIZ_PRACTICE_SU25' + url;
+    } else if (url.startsWith('/SWP391_QUIZ_PRACTICE_SU25/')) {
+        return url; // Already has correct prefix
+    } else {
+        // Default case: add prefix and clean up any leading slashes
+        return '/SWP391_QUIZ_PRACTICE_SU25/' + url.replace(/^\/+/, '');
+    }
+}
             function initTinyMCE(selector = '#media_url') {
                 tinymce.init({
                     selector: selector,
@@ -368,32 +386,98 @@
                     image_advtab: true,
                     image_title: true,
                     image_description: true,
+                    // Thêm các dòng này vào trong tinymce.init config
+paste_data_images: true,
+paste_as_text: false,
+paste_enable_default_filters: true,
+paste_word_valid_elements: "b,strong,i,em,h1,h2,h3,p,br,img[src],video,source",
+paste_retain_style_properties: "all",
+extended_valid_elements: 'img[class|src|alt|title|width|height|style],video[*],source[*]',
+
+paste_postprocess: function (plugin, args) {
+    args.node.querySelectorAll('img').forEach(function (img) {
+        if (img.src.startsWith('data:')) {
+            // Upload directly instead of using blobCache
+            var base64Data = img.src.split(',')[1];
+            var filename = 'pasted-image-' + (new Date()).getTime() + '.png';
+            
+            // Convert base64 to blob
+            var byteCharacters = atob(base64Data);
+            var byteNumbers = new Array(byteCharacters.length);
+            for (var i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            var byteArray = new Uint8Array(byteNumbers);
+            var blob = new Blob([byteArray], {type: 'image/png'});
+            
+            // Upload blob directly
+            var formData = new FormData();
+            formData.append('file', blob, filename);
+            
+            fetch('/SWP391_QUIZ_PRACTICE_SU25/upload-media', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.location) {
+                    var url = normalizeUploadUrl(result.location);
+                    img.src = url;
+                }
+            })
+            .catch(error => {
+                console.error('Error uploading pasted image:', error);
+            });
+        }
+        // Thêm class và style cho ảnh
+        img.className = 'img-fluid';
+        img.style.maxWidth = '100%';
+        img.style.height = 'auto';
+    });
+},
                     
                     // File picker callback for browsing local files
                     file_picker_callback: function (callback, value, meta) {
                         // Create file input element
                         const input = document.createElement('input');
                         input.setAttribute('type', 'file');
-                        input.setAttribute('accept', 'image/*');
+                        if (meta.filetype === 'image') {
+                            input.setAttribute('accept', 'image/*');
+                        }else if (meta.filetype === 'media') {
+                            input.setAttribute('accept', 'video/*');
+                        }
                         
                         input.addEventListener('change', function (e) {
                             const file = e.target.files[0];
-                            if (file) {
-                                const reader = new FileReader();
-                                reader.onload = function () {
-                                    // Create a blob URL for immediate preview
-                                    const id = 'blobid' + (new Date()).getTime();
-                                    const blobCache = tinymce.activeEditor.editorUpload.blobCache;
-                                    const base64 = reader.result.split(',')[1];
-                                    const blobInfo = blobCache.create(id, file, base64);
-                                    blobCache.add(blobInfo);
-                                    
-                                    // Call the callback with the blob URL
-                                    callback(blobInfo.blobUri(), { title: file.name });
-                                };
-                                reader.readAsDataURL(file);
-                            }
-                        });
+        if (file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            fetch('/SWP391_QUIZ_PRACTICE_SU25/upload-media', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.location) {
+                    var url = normalizeUploadUrl(result.location);
+                    
+                    if (meta.filetype === 'image') {
+                        callback(url, { title: file.name });
+                    } else {
+                        var videoHtml = '<video controls width="100%"><source src="' + url + '" type="' + file.type + '"></video>';
+                        tinymce.activeEditor.insertContent(videoHtml);
+                    }
+                } else {
+                    throw new Error(result.message || 'Upload failed');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Upload failed: ' + error.message);
+            });
+        }
+    });
                         
                         input.click();
                     },
@@ -407,16 +491,17 @@
                         formData.append('file', blobInfo.blob(), blobInfo.filename());
                         
                         // Upload to server
-                        fetch('${pageContext.request.contextPath}/upload-image', {
+                        fetch('/SWP391_QUIZ_PRACTICE_SU25/upload-media', {
                             method: 'POST',
                             body: formData
                         })
                         .then(response => response.json())
                         .then(result => {
-                            if (result.success) {
-                                success(result.location);
+                            if (result.location) {
+                                var url = normalizeUploadUrl(result.location);
+                                success(url);
                             } else {
-                                failure('Image upload failed: ' + (result.error || 'Unknown error'));
+                                failure('Image upload failed: ' + (result.message || 'Unknown error'));
                             }
                         })
                         .catch(error => {
