@@ -7,9 +7,9 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<!doctype html>
-<html class="no-js" lang="en">
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html lang="en">
 
     <head>
         <meta charset="utf-8">
@@ -17,10 +17,10 @@
         <title>SkillGro - Price Package</title>
         <meta name="description" content="SkillGro - Price Package">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/view/common/img/favicon.png">
-        <!-- Place favicon.ico in the root directory -->
         <!-- CSS here -->
         <jsp:include page="../../common/user/link_css_common.jsp"></jsp:include>
+        <link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/view/common/img/favicon.png">
+        <!-- Place favicon.ico in the root directory -->
             <style>
                 .package-card {
                     border: 1px solid #e0e0e0;
@@ -99,15 +99,16 @@
         </head>
 
         <body>
+            <!-- header-area -->
+            <jsp:include page="../../common/user/header.jsp"></jsp:include>
+            <!-- header-area-end -->
             <!-- Scroll-top -->
             <button class="scroll__top scroll-to-target" data-target="html">
                 <i class="tg-flaticon-arrowhead-up"></i>
             </button>
             <!-- Scroll-top-end-->
 
-            <!-- header-area -->
-            <jsp:include page="../../common/user/header.jsp"></jsp:include>
-            <!-- header-area-end -->
+            
 
             <!-- main-area -->
             <main class="main-area">
@@ -144,14 +145,12 @@
                                                                 <c:choose>
                                                                     <c:when test="${fn:length(pkg.description) > 50}">
                                                                         <span>
-                                                                            <c:out value="${fn:replace(fn:substring(pkg.description, 0, 50), '
-', '<br/>')}" escapeXml="false"/>...
+                                                                            <c:out value="${fn:replace(fn:substring(pkg.description, 0, 50), '', '<br/>')}" escapeXml="false"/>...
                                                                         </span>
                                                                         <a href="javascript:void(0);" class="see-more-link" data-id="${pkg.id}">See more</a>
                                                                     </c:when>
                                                                     <c:otherwise>
-                                                                        <c:out value="${fn:replace(pkg.description, '
-', '<br/>')}" escapeXml="false"/>
+                                                                        <c:out value="${fn:replace(pkg.description, '', '<br/>')}" escapeXml="false"/>
                                                                     </c:otherwise>
                                                                 </c:choose>
                                                             </c:when>

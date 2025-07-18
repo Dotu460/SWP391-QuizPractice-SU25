@@ -179,6 +179,9 @@
     <body>
         <!-- Header -->
         <jsp:include page="../common/user/header.jsp"></jsp:include>
+        <button class="scroll__top scroll-to-target" data-target="html">
+                <i class="tg-flaticon-arrowhead-up"></i>
+        </button>
 
         <!-- Main Content -->
         <div class="container">

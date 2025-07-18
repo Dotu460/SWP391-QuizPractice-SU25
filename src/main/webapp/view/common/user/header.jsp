@@ -55,7 +55,7 @@
                             <div class="logo">
                                 <a href="home"><img src="${pageContext.request.contextPath}/view/common/img/logo/logo.svg" alt="Logo"></a>
                             </div>
-                            <div class="tgmenu__navbar-wrap tgmenu__main-menu d-none d-xl-flex">
+                            <div class="tgmenu__navbar-wrap tgmenu__main-menu d-flex"> 
                                 <ul class="navigation">
                                     <li class="menu-item-has-children"><a href="#">Home</a>
                                         <ul class="sub-menu mega-menu">
