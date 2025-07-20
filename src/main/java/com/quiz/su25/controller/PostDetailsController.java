@@ -28,8 +28,8 @@ import java.util.UUID;
 @WebServlet(name = "PostDetailsController", urlPatterns = {"/post-details","/upload-medias"})
 @MultipartConfig(
     fileSizeThreshold = 1024 * 1024 * 2, // 2MB
-    maxFileSize = 1024 * 1024 * 50,      // 50MB
-    maxRequestSize = 1024 * 1024 * 100   // 100MB
+    maxFileSize = 1024 * 1024 * 1024,      // 1024MB
+    maxRequestSize = 1024 * 1024 * 1024   // 1024MB
 )
 public class PostDetailsController extends HttpServlet {
 
