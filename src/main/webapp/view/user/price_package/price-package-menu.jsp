@@ -120,9 +120,7 @@
                             
                                 <div class="col-xl-9">
                                     <div class="dashboard__content-area">
-                                        <div class="dashboard__content-title mb-4">
-                                            <h4 class="title">Available Packages</h4>
-                                        </div>
+                                        
                                         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                                         <c:forEach items="${pricePackages}" var="pkg">
                                             <div class="col">
@@ -169,13 +167,41 @@
                                                             ${pkg.status == 'active' ? 'Available' : 'Pending'}
                                                         </span>
                                                     </div>
+                                                    
+                                                    
+                                                    
+                                                    
                                                     <div class="mt-3">
-                                                        <form action="${pageContext.request.contextPath}/user/buy-price-package" method="post" style="display:inline-block;">
-                                                            <input type="hidden" name="packageId" value="${pkg.id}"/>
-                                                            <button type="submit" class="buy-btn" ${pkg.status != 'active' ? 'disabled' : ''}>
-                                                                Purchase
-                                                            </button>
-                                                        </form>
+                                                        <c:choose>
+                                                            <c:when test="${not empty userPurchases[pkg.id]}">
+                                                                <!-- User has purchased this package -->
+                                                                <button class="buy-btn" style="background:#28a745; cursor:default;" disabled>
+                                                                    ✓ Đã thanh toán
+                                                                </button>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <!-- User hasn't purchased this package -->
+                                                                <c:choose>
+                                                                    <c:when test="${empty currentUser}">
+                                                                        <!-- User not logged in -->
+                                                                        <a href="${pageContext.request.contextPath}/login" class="buy-btn" style="text-decoration:none; display:inline-block;">
+                                                                           Purchase 
+                                                                        </a>
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        <!-- User logged in but haven't purchased -->
+                                                                        <!-- THAY BẰNG form này: -->
+                                                                        <form action="${pageContext.request.contextPath}/ajaxServlet" method="post" style="display:inline-block;">
+                                                                            <input type="hidden" name="packageId" value="${pkg.id}"/>
+                                                                            <input type="hidden" name="amount" value="${pkg.sale_price}"/>
+                                                                            <button type="submit" class="buy-btn" ${pkg.status != 'active' ? 'disabled' : ''}>
+                                                                                Purchase
+                                                                            </button>
+                                                                        </form>
+                                                                    </c:otherwise>
+                                                                </c:choose>
+                                                            </c:otherwise>
+                                                        </c:choose>
                                                         <a href="${pageContext.request.contextPath}/price-package-menu?id=${pkg.id}" class="buy-btn" style="background:#6c757d; margin-left:8px; text-decoration:none; display:inline-block;">
                                                             Learn More
                                                         </a>

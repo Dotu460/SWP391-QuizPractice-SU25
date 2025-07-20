@@ -291,10 +291,33 @@
                                                 <!-- End of Details -->
                                                 <c:if test="${pricePackage.status eq 'active'}">
                                                     <div class="text-end mt-4">
-                                                        <form action="${pageContext.request.contextPath}/user/buy-price-package" method="post">
-                                                            <input type="hidden" name="packageId" value="${pricePackage.id}"/>
-                                                            <button type="submit" class="purchase-btn-theme">Purchase</button>
-                                                        </form>
+                                                        <c:choose>
+                                                            <c:when test="${isPurchased}">
+                                                                <!-- User has purchased this package -->
+                                                                <button class="purchase-btn-theme" style="background:#28a745; cursor:default;" disabled>
+                                                                    ✓ Đã thanh toán
+                                                                </button>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <!-- User hasn't purchased this package -->
+                                                                <c:choose>
+                                                                    <c:when test="${empty currentUser}">
+                                                                        <!-- User not logged in -->
+                                                                        <a href="${pageContext.request.contextPath}/login" class="purchase-btn-theme" style="text-decoration:none; display:inline-block;">
+                                                                           Purchase 
+                                                                        </a>
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        <!-- User logged in but haven't purchased -->
+                                                                        <form action="${pageContext.request.contextPath}/ajaxServlet" method="post" style="display:inline-block;">
+                                                                            <input type="hidden" name="packageId" value="${pricePackage.id}"/>
+                                                                            <input type="hidden" name="amount" value="${pricePackage.sale_price}"/>
+                                                                            <button type="submit" class="purchase-btn-theme">Purchase</button>
+                                                                        </form>
+                                                                    </c:otherwise>
+                                                                </c:choose>
+                                                            </c:otherwise>
+                                                        </c:choose>
                                                     </div>
                                                 </c:if>
                                             </div>

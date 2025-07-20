@@ -63,8 +63,19 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setInt(1, t.getUser_id());
-            statement.setInt(2, t.getSubject_id());
-            statement.setInt(3, t.getPackage_id());
+            
+            // Handle NULL values properly  
+            if (t.getSubject_id() != null) {
+                statement.setInt(2, t.getSubject_id());
+            } else {
+                statement.setNull(2, java.sql.Types.INTEGER);
+            }
+            
+            if (t.getPackage_id() != null) {
+                statement.setInt(3, t.getPackage_id());
+            } else {
+                statement.setNull(3, java.sql.Types.INTEGER);
+            }
             statement.setDate(4, t.getRegistration_time());
             statement.setDouble(5, t.getTotal_cost());
             statement.setString(6, t.getStatus());
@@ -110,6 +121,12 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
      */
     @Override
     public int insert(Registration t) {
+        System.out.println("🚀 DAO.insert() CALLED");
+        System.out.println("   User ID: " + t.getUser_id());
+        System.out.println("   Subject ID: " + t.getSubject_id());
+        System.out.println("   Package ID: " + t.getPackage_id());
+        System.out.println("   Status: " + t.getStatus());
+        
         String sql = "INSERT INTO registrations (user_id, subject_id, package_id, "
                 + "registration_time, total_cost, status, valid_from, valid_to) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -117,24 +134,45 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
             connection = getConnection();
             statement = connection.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS);
             statement.setInt(1, t.getUser_id());
-            statement.setInt(2, t.getSubject_id());
-            statement.setInt(3, t.getPackage_id());
+            
+            // Handle NULL values properly
+            if (t.getSubject_id() != null) {
+                statement.setInt(2, t.getSubject_id());
+            } else {
+                statement.setNull(2, java.sql.Types.INTEGER);
+            }
+            
+            if (t.getPackage_id() != null) {
+                statement.setInt(3, t.getPackage_id());
+            } else {
+                statement.setNull(3, java.sql.Types.INTEGER);
+            }
+            
             statement.setDate(4, t.getRegistration_time());
             statement.setDouble(5, t.getTotal_cost());
             statement.setString(6, t.getStatus());
             statement.setDate(7, t.getValid_from());
             statement.setDate(8, t.getValid_to());
+            
+            System.out.println("💾 Executing SQL: " + sql);
             int affectedRows = statement.executeUpdate();
+            System.out.println("📊 Affected rows: " + affectedRows);
 
             if (affectedRows > 0) {
                 try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        return generatedKeys.getInt(1);
+                        int generatedId = generatedKeys.getInt(1);
+                        System.out.println("✅ Insert successful! Generated ID: " + generatedId);
+                        return generatedId;
                     }
                 }
             }
+            System.out.println("❌ Insert failed: No affected rows");
         } catch (SQLException e) {
-            System.out.println("Error insert at class RegistrationDAO: " + e.getMessage());
+            System.out.println("💥 SQLException in DAO.insert(): " + e.getMessage());
+            System.out.println("💥 SQL State: " + e.getSQLState());
+            System.out.println("💥 Error Code: " + e.getErrorCode());
+            e.printStackTrace();
         } finally {
             closeResources();
         }
@@ -149,11 +187,22 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
      */
     @Override
     public Registration getFromResultSet(ResultSet resultSet) throws SQLException {
+        // 🚨 Handle NULL values properly
+        Integer subjectId = resultSet.getInt("subject_id");
+        if (resultSet.wasNull()) {
+            subjectId = null;
+        }
+        
+        Integer packageId = resultSet.getInt("package_id"); 
+        if (resultSet.wasNull()) {
+            packageId = null;
+        }
+        
         return Registration.builder()
                 .id(resultSet.getInt("id"))
                 .user_id(resultSet.getInt("user_id"))
-                .subject_id(resultSet.getInt("subject_id"))
-                .package_id(resultSet.getInt("package_id"))
+                .subject_id(subjectId)
+                .package_id(packageId)
                 .registration_time(resultSet.getDate("registration_time"))
                 .total_cost(resultSet.getDouble("total_cost"))
                 .status(resultSet.getString("status"))
@@ -799,6 +848,56 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
             closeResources();
         }
         return statuses;
+    }
+
+    /**
+     * Finds all registrations for a specific user
+     * @param userId ID of the user
+     * @return List of Registration objects for the user
+     */
+    public List<Registration> findByUserId(Integer userId) {
+        String sql = "SELECT * FROM registrations WHERE user_id = ?";
+        List<Registration> listRegistration = new ArrayList<>();
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, userId);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Registration registration = getFromResultSet(resultSet);
+                listRegistration.add(registration);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error findByUserId at class RegistrationDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return listRegistration;
+    }
+    
+    /**
+     * Checks if a user is already registered for a specific subject/course
+     * @param userId ID of the user
+     * @param subjectId ID of the subject/course
+     * @return true if already registered, false otherwise
+     */
+    public boolean isAlreadyRegistered(Integer userId, Integer subjectId) {
+        String sql = "SELECT COUNT(*) FROM registrations WHERE user_id = ? AND subject_id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, userId);
+            statement.setInt(2, subjectId);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error isAlreadyRegistered at class RegistrationDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return false;
     }
 
     public static void main(String[] args) {
