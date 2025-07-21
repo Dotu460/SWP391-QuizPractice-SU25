@@ -57,80 +57,10 @@
                             </div>
                             <div class="tgmenu__navbar-wrap tgmenu__main-menu d-flex"> 
                                 <ul class="navigation">
-                                    <li class="menu-item-has-children"><a href="#">Home</a>
-                                        <ul class="sub-menu mega-menu">
-                                            <li>
-                                                <ul class="list-wrap mega-sub-menu">
-                                                    <li>
-                                                        <a href="index.html">Main Home</a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="index-2.html">Online Course <span class="tg-badge">Hot</span></a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="index-3.html">University <span class="tg-badge-two">New</span></a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="index-4.html">Yoga Instructor<span class="tg-badge-two">New</span></a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="index-5.html">Kindergarten<span class="tg-badge">Hot</span></a>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                            <li>
-                                                <ul class="list-wrap mega-sub-menu">
-                                                    <li>
-                                                        <a href="index-6.html">Language Academy<span class="tg-badge-two">New</span></a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="index-7.html">Business Coach <span class="tg-badge-two">New</span></a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="index-8.html">Kitchen Coach <span class="tg-badge">Hot</span></a>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                            <li>
-                                                <div class="mega-menu-img">
-                                                    <a href="courses.html"><img src="${pageContext.request.contextPath}/view/common/img/others/mega_menu_img.jpg" alt="img"></a>
-                                                </div>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li class="menu-item-has-children"><a href="#">Courses</a>
-                                        <ul class="sub-menu">
-                                            <li><a href="courses.html">All Courses</a></li>
-                                            <li><a href="course-details.html">Course Details</a></li>
-                                            <li><a href="lesson.html">Course Lesson</a></li>
-                                        </ul>
-                                    </li>
                                     <li class="menu-item-has-children"><a href="#">Pages</a>
                                         <ul class="sub-menu">
-                                            <li><a href="about-us.html">About Us</a></li>
-                                            <li class="menu-item-has-children">
-                                                <a href="instructors.html">Our Instructors</a>
-                                                <ul class="sub-menu">
-                                                    <li><a href="instructors.html">Our Instructors</a></li>
-                                                    <li><a href="instructor-details.html">Instructor Details</a></li>
-                                                </ul>
-                                            </li>
-                                            <li class="menu-item-has-children">
-                                                <a href="events.html">Our Events</a>
-                                                <ul class="sub-menu">
-                                                    <li><a href="events.html">Our Events</a></li>
-                                                    <li><a href="events-details.html">Event Details</a></li>
-                                                </ul>
-                                            </li>
-                                            <li class="menu-item-has-children">
-                                                <a href="shop.html">Shop</a>
-                                                <ul class="sub-menu">
-                                                    <li><a href="shop.html">Shop Page</a></li>
-                                                    <li><a href="shop-details.html">Shop Details</a></li>
-                                                    <li><a href="cart.html">Cart Page</a></li>
-                                                    <li><a href="check-out.html">Checkout</a></li>
-                                                </ul>
-                                            </li>
+                                            <li><a href="${pageContext.request.contextPath}/my-profile">Profile</a></li>
+                                            <li><a href="${pageContext.request.contextPath}/price-package-menu">Course</a></li>
                                             <li class="menu-item-has-children">
                                                 <a>Blog</a>
                                                 <ul class="sub-menu">
@@ -138,10 +68,6 @@
                                                     <li><a href="${pageContext.request.contextPath}/post-details">Post Details</a></li>
                                                 </ul>
                                             </li>
-                                            <li><a href="login.html">Student Login</a></li>
-                                            <li><a href="registration.html">Student Registration</a></li>
-                                            <li><a href="404.html">404 Page</a></li>
-                                            <li><a href="contact.html">contact</a></li>
                                             <!-- Login/Logout button -->
                                             <c:choose>
                                                 <c:when test="${not empty sessionScope.user}">
