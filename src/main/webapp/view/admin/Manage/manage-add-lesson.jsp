@@ -110,6 +110,19 @@
         .back-button:hover i {
             transform: translateX(-4px);
         }
+        
+        /* Error message styling */
+        .alert-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(238, 90, 36, 0.3);
+        }
+        
+        .alert-danger .btn-close {
+            filter: invert(1);
+        }
     </style>
 </head>
 
@@ -140,7 +153,10 @@
                             </div>
                             
                             <c:if test="${not empty errorMessage}">
-                                <div class="alert alert-danger" style="margin-bottom: 20px;">${errorMessage}</div>
+                                <div class="alert alert-danger alert-dismissible fade show" style="margin-bottom: 20px;">
+                                    <i class="fa fa-exclamation-triangle"></i> <strong>Error:</strong> ${errorMessage}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
                             </c:if>
                             
                             <!-- Add Form -->
