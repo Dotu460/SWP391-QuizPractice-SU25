@@ -246,6 +246,9 @@
                     </div>
 
                     <form action="login" method="post" onsubmit="return validateForm()">
+                    <c:if test="${not empty param.redirect}">
+                        <input type="hidden" name="redirect" value="${param.redirect}" />
+                    </c:if>
                     <c:if test="${message != null}">
                         <div class="alert alert-${type}">
                             ${message}

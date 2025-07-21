@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -314,6 +315,56 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
         }
         // Default to false if there's an error
         return false;
+    }
+
+    public List<Quizzes> findByPricePackageId(int packageId) {
+        List<Quizzes> quizzes = new ArrayList<>();
+        String sql = "SELECT q.* FROM Quizzes q " +
+                     "JOIN Lessons l ON q.lesson_id = l.id " +
+                     "JOIN subject s ON l.subject_id = s.id " +
+                     "WHERE s.price_package_id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, packageId);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                quizzes.add(getFromResultSet(resultSet));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error findByPricePackageId at class QuizzesDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return quizzes;
+    }
+
+    public List<Quizzes> findBySubjectIds(List<Integer> subjectIds) {
+        List<Quizzes> quizzes = new ArrayList<>();
+        if (subjectIds == null || subjectIds.isEmpty()) {
+            return quizzes;
+        }
+
+        String placeholders = subjectIds.stream().map(id -> "?").collect(Collectors.joining(","));
+        String sql = "SELECT q.* FROM quizzes q JOIN lessons l ON q.lesson_id = l.id WHERE l.subject_id IN (" + placeholders + ")";
+        
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            int i = 1;
+            for (Integer id : subjectIds) {
+                statement.setInt(i++, id);
+            }
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                quizzes.add(getFromResultSet(resultSet));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error findBySubjectIds at class QuizzesDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return quizzes;
     }
 
 }

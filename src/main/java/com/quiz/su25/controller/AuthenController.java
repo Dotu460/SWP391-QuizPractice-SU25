@@ -113,7 +113,12 @@ public class AuthenController extends HttpServlet {
                 HttpSession session = request.getSession();
                 session.setAttribute(GlobalConfig.SESSION_ACCOUNT, user);
                
-                response.sendRedirect("home");
+                String redirectUrl = request.getParameter("redirect");
+                if (redirectUrl != null && !redirectUrl.isEmpty()) {
+                    response.sendRedirect(redirectUrl);
+                } else {
+                    response.sendRedirect("home");
+                }
             } else {
                 request.setAttribute("error", "Invalid email or password");
                 request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
