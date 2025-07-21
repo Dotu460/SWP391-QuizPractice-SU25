@@ -70,6 +70,25 @@
                 .buy-btn:hover:enabled {
                     background: #3d38a1;
                 }
+                .access-btn {
+                    background: linear-gradient(90deg, #28a745 0%, #218838 100%) !important;
+                    color: #fff !important;
+                    border: none;
+                    padding: 8px 20px;
+                    border-radius: 4px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                    font-size: 1rem;
+                    display: inline-block;
+                    text-align: center;
+                    box-shadow: 0 2px 8px rgba(40,167,69,0.07);
+                }
+                .access-btn:hover {
+                    background: linear-gradient(90deg, #218838 0%, #28a745 100%) !important;
+                    text-decoration: none;
+                    color: #fff !important;
+                }
                 .status-available {
                     display: inline-block;
                     background: #f3f1fd;
@@ -175,9 +194,9 @@
                                                         <c:choose>
                                                             <c:when test="${not empty userPurchases[pkg.id]}">
                                                                 <!-- User has purchased this package -->
-                                                                <button class="buy-btn" style="background:#28a745; cursor:default;" disabled>
-                                                                    ✓ Đã thanh toán
-                                                                </button>
+                                                                <a href="${pageContext.request.contextPath}/package-access?id=${pkg.id}" class="buy-btn access-btn" style="margin-right:8px;">
+                                                                    Access
+                                                                </a>
                                                             </c:when>
                                                             <c:otherwise>
                                                                 <!-- User hasn't purchased this package -->
