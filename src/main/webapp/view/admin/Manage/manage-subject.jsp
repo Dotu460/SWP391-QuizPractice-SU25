@@ -229,7 +229,7 @@
                       </td>
                       <td>
                         <span class="badge bg-light text-dark">
-                          <%= (int)(Math.floor(Math.random() * 13) + 3) %>
+                          ${lessonCounts[subject.id]}
                         </span>
                       </td>
                       <td>${ownerNames[subject.owner_id]}</td>
