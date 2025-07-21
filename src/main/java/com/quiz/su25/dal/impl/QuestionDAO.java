@@ -498,6 +498,51 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
         return list;
     }
 
+    /**
+     * Check if question content exists within the same quiz
+     */
+    public boolean isContentExistsInQuiz(String content, Integer quizId) {
+        String sql = "SELECT COUNT(*) FROM Question WHERE content = ? AND quiz_id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, content);
+            statement.setInt(2, quizId);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            System.out.println("Error isContentExistsInQuiz at class QuestionDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return false;
+    }
+    
+    /**
+     * Check if question content exists within the same quiz excluding a specific question
+     */
+    public boolean isContentExistsInQuizExcluding(String content, Integer quizId, Integer excludeQuestionId) {
+        String sql = "SELECT COUNT(*) FROM Question WHERE content = ? AND quiz_id = ? AND id != ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, content);
+            statement.setInt(2, quizId);
+            statement.setInt(3, excludeQuestionId);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            System.out.println("Error isContentExistsInQuizExcluding at class QuestionDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return false;
+    }
+
     public static void main(String[] args) {
         QuestionDAO questionDAO = new QuestionDAO();
         questionDAO.findAll().forEach(item -> {
