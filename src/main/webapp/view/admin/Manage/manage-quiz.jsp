@@ -377,6 +377,32 @@
             color: #2c3e50;
             margin: 0;
         }
+        
+        /* Error message styling */
+        .alert-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(238, 90, 36, 0.3);
+        }
+        
+        .alert-danger .btn-close {
+            filter: invert(1);
+        }
+        
+        /* Success message styling */
+        .alert-success {
+            background: linear-gradient(135deg, #51cf66, #40c057);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(64, 192, 87, 0.3);
+        }
+        
+        .alert-success .btn-close {
+            filter: invert(1);
+        }
     </style>
 </head>
 
@@ -405,7 +431,17 @@
                             </div>
                             
                             <c:if test="${not empty errorMessage}">
-                                <div class="alert alert-danger" style="margin-bottom: 20px;">${errorMessage}</div>
+                                <div class="alert alert-danger alert-dismissible fade show" style="margin-bottom: 20px;">
+                                    <i class="fa fa-exclamation-triangle"></i> <strong>Error:</strong> ${errorMessage}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            </c:if>
+                            
+                            <c:if test="${not empty successMessage}">
+                                <div class="alert alert-success alert-dismissible fade show" style="margin-bottom: 20px;">
+                                    <i class="fa fa-check-circle"></i> <strong>Success:</strong> ${successMessage}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
                             </c:if>
                             
                             <form action="${pageContext.request.contextPath}/manage-subjects/update-quiz" method="post" id="quizForm" enctype="multipart/form-data">
@@ -588,6 +624,11 @@
 
     <script>
         $(document).ready(function() {
+            // Auto-hide success message after 5 seconds
+            setTimeout(function() {
+                $('.alert-success').fadeOut(500);
+            }, 5000);
+            
             // Initialize TinyMCE for all media editors
             $('.media-editor').each(function() {
                 var editorId = '#' + $(this).attr('id');
@@ -1145,6 +1186,8 @@
             
             // Validate questions
             var valid = true;
+            var questionContents = [];
+            
             $('.question-item').each(function(index) {
                 // Check question content
                 var content = $(this).find('input[name^="questions["][name$="].content"]').val();
@@ -1157,6 +1200,19 @@
                     valid = false;
                     return false;
                 }
+                
+                // Check for duplicate content within the form
+                var trimmedContent = content.trim().toLowerCase();
+                if (questionContents.includes(trimmedContent)) {
+                    iziToast.error({
+                        title: 'Error',
+                        message: `Question ${index + 1} has duplicate content with another question. Each question must have unique content.`,
+                        position: 'topRight'
+                    });
+                    valid = false;
+                    return false;
+                }
+                questionContents.push(trimmedContent);
                 
                 // Check answer options only if they exist
                 var answerOptions = $(this).find('.answer-option');
