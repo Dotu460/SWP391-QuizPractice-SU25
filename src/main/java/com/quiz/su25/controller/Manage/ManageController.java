@@ -130,17 +130,24 @@ public class ManageController extends HttpServlet {
         List<Subject> subjects = subjectDAO.getPaginatedSubjects(
                 page, pageSize, categoryFilter, statusFilter, searchTerm, sortBy, sortOrder);
 
-        // Get owner names for the subjects
+        // Get owner names and lesson counts for the subjects
         Map<Integer, String> ownerNames = new HashMap<>();
+        Map<Integer, Integer> lessonCounts = new HashMap<>();
         for (Subject subject : subjects) {
+            // Get owner names
             if (subject.getOwner_id() != null && !ownerNames.containsKey(subject.getOwner_id())) {
                 User owner = userDAO.findById(subject.getOwner_id());
                 if (owner != null) {
                     ownerNames.put(subject.getOwner_id(), owner.getFull_name());
                 }
             }
+            
+            // Get lesson count for each subject
+            List<Lesson> lessons = lessonDAO.findBySubjectId(subject.getId());
+            lessonCounts.put(subject.getId(), lessons.size());
         }
         request.setAttribute("ownerNames", ownerNames);
+        request.setAttribute("lessonCounts", lessonCounts);
 
         // Get total count for pagination
         int totalSubjects = subjectDAO.countTotalSubjects(categoryFilter, statusFilter, searchTerm);
@@ -244,6 +251,16 @@ public class ManageController extends HttpServlet {
             if (existingQuiz == null) {
                 throw new Exception("Quiz not found");
             }
+            
+            // Validate quiz name is not empty
+            if (name == null || name.trim().isEmpty()) {
+                throw new Exception("Quiz name is required");
+            }
+            
+            // Check for duplicate quiz name in the same lesson (excluding current quiz)
+            if (quizzesDAO.isNameExistsInLessonExcluding(name.trim(), lessonId, quizId)) {
+                throw new Exception("Quiz name already exists in this lesson. Please choose a different name.");
+            }
 
             // Update quiz with new values
             existingQuiz.setName(name);
@@ -294,6 +311,24 @@ public class ManageController extends HttpServlet {
                     } else {
                         question = new Question();
                         question.setQuiz_id(quizId);
+                    }
+                    
+                    // Validate question content
+                    if (content == null || content.trim().isEmpty()) {
+                        throw new Exception("Question content cannot be empty for question " + (index + 1));
+                    }
+                    
+                    // Check for duplicate question content
+                    if (questionIdStr != null && !questionIdStr.isEmpty()) {
+                        // For existing questions, check excluding current question
+                        if (questionDAO.isContentExistsInQuizExcluding(content.trim(), quizId, Integer.parseInt(questionIdStr))) {
+                            throw new Exception("Question content '" + content.trim() + "' already exists in this quiz. Please use different content for question " + (index + 1));
+                        }
+                    } else {
+                        // For new questions, check if content exists
+                        if (questionDAO.isContentExistsInQuiz(content.trim(), quizId)) {
+                            throw new Exception("Question content '" + content.trim() + "' already exists in this quiz. Please use different content for question " + (index + 1));
+                        }
                     }
                     
                     // Update question
@@ -435,12 +470,11 @@ public class ManageController extends HttpServlet {
                 }
             }
 
-            // Get lesson and subject info for redirect
-            Lesson lesson = lessonDAO.findById(lessonId);
-            int subjectId = lesson.getSubject_id();
-
-            // Redirect to manage-lesson page with success message
-            response.sendRedirect(request.getContextPath() + "/manage-subjects/view?id=" + subjectId + "&success=quiz_updated");
+            // Set success message and reload the quiz data
+            request.setAttribute("successMessage", "Quiz updated successfully!");
+            
+            // Reload quiz data and forward back to the same page
+            viewQuiz(request, response);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -622,6 +656,11 @@ public class ManageController extends HttpServlet {
                 throw new Exception("Lesson title is required");
             }
             
+            // Check for duplicate title in the same subject
+            if (lessonDAO.isTitleExistsInSubject(title.trim(), subjectId)) {
+                throw new Exception("Lesson title already exists in this subject. Please choose a different title.");
+            }
+            
             // Get next order number for this subject
             List<Lesson> existingLessons = lessonDAO.findBySubjectId(subjectId);
             int nextOrder = existingLessons.size() + 1;
@@ -688,6 +727,11 @@ public class ManageController extends HttpServlet {
             Lesson lesson = lessonDAO.findById(lessonId);
             if (lesson == null) {
                 throw new Exception("Lesson not found");
+            }
+            
+            // Check for duplicate title in the same subject (excluding current lesson)
+            if (lessonDAO.isTitleExistsInSubjectExcluding(title.trim(), lesson.getSubject_id(), lessonId)) {
+                throw new Exception("Lesson title already exists in this subject. Please choose a different title.");
             }
             
             // Update lesson properties
@@ -757,6 +801,11 @@ public class ManageController extends HttpServlet {
             Lesson lesson = lessonDAO.findById(lessonId);
             if (lesson == null) {
                 throw new Exception("Lesson not found");
+            }
+            
+            // Check for duplicate quiz name in the same lesson
+            if (quizzesDAO.isNameExistsInLesson(name.trim(), lessonId)) {
+                throw new Exception("Quiz name already exists in this lesson. Please choose a different name.");
             }
             
             // Create new quiz
