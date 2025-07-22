@@ -42,7 +42,11 @@
                             </div>
                             <div class="col-md-9">
                                 <h3>${user.full_name}</h3>
-                                <p class="text-muted">${user.role.role_name}</p>
+                                <p class="text-muted">
+                                    <c:forEach items="${roles}" var="role">
+                                        <c:if test="${role.id == user.role_id}">${role.name}</c:if>
+                                    </c:forEach>
+                                </p>
 
                                 <div class="mb-2">
                                     <i class="bi bi-envelope"></i> <strong>Email:</strong> ${user.email}
@@ -72,12 +76,13 @@
                                 <table class="table table-bordered">
                                     <tr>
                                         <th style="width: 30%">Role Name</th>
-                                        <td>${user.role.role_name}</td>
+                                        <td>
+                                            <c:forEach items="${roles}" var="role">
+                                                <c:if test="${role.id == user.role_id}">${role.name}</c:if>
+                                            </c:forEach>
+                                        </td>
                                     </tr>
-                                    <tr>
-                                        <th>Description</th>
-                                        <td>${user.role.description}</td>
-                                    </tr>
+                                </table>
                                     <tr>
                                         <th>Role Created At</th>
                                         <td>${user.role.created_at}</td>
