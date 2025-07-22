@@ -206,10 +206,10 @@
                                                     <i class="fas fa-user-circle"></i>
                                                 </a>
                                                 <div class="dropdown-menu-action" id="userDropdownAction">
-                                                    <a href="change-password" class="dropdown-item-action">
+                                                    <a href="${pageContext.request.contextPath}/change-password" class="dropdown-item-action">
                                                         <i class="fas fa-key"></i> Change Password
                                                     </a>
-                                                    <a href="logout" class="dropdown-item-action">
+                                                    <a href="${pageContext.request.contextPath}/logout" class="dropdown-item-action">
                                                         <i class="fas fa-sign-out-alt"></i> Log out
                                                     </a>
                                                 </div>
@@ -218,7 +218,7 @@
                                         <c:otherwise>
                                             <!-- Cùng User Icon khi chưa đăng nhập - click để vào login -->
                                             <li style="display: inline;">
-                                                <a href="login" class="user-profile-icon" title="Login">
+                                                <a href="${pageContext.request.contextPath}/login" class="user-profile-icon" title="Login">
                                                     <i class="fas fa-user-circle"></i>
                                                 </a>
                                             </li>
