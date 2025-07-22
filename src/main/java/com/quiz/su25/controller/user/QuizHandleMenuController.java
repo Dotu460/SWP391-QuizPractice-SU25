@@ -4,9 +4,11 @@ import com.quiz.su25.config.GlobalConfig;
 import com.quiz.su25.dal.impl.QuizzesDAO;
 import com.quiz.su25.dal.impl.SubjectDAO;
 import com.quiz.su25.dal.impl.UserQuizAttemptsDAO;
+import com.quiz.su25.dal.impl.LessonDAO;
 import com.quiz.su25.entity.Quizzes;
 import com.quiz.su25.entity.Subject;
 import com.quiz.su25.entity.UserQuizAttempts;
+import com.quiz.su25.entity.Lesson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -26,6 +28,7 @@ public class QuizHandleMenuController extends HttpServlet {
     private final QuizzesDAO quizzesDAO = new QuizzesDAO();
     private final UserQuizAttemptsDAO userQuizAttemptsDAO = new UserQuizAttemptsDAO();
     private final SubjectDAO subjectDAO = new SubjectDAO(); // Thêm SubjectDAO
+    private final LessonDAO lessonDAO = new LessonDAO();
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -98,6 +101,19 @@ public class QuizHandleMenuController extends HttpServlet {
                 }
             }
             
+            // Sau khi có quizzesList, tạo map lessonId -> lessonTitle
+            Map<Integer, String> lessonTitles = new HashMap<>();
+            for (Quizzes quiz : quizzesList) {
+                Integer lessonId = quiz.getLesson_id();
+                if (lessonId != null && !lessonTitles.containsKey(lessonId)) {
+                    Lesson lesson = lessonDAO.findById(lessonId);
+                    if (lesson != null) {
+                        lessonTitles.put(lessonId, lesson.getTitle());
+                    }
+                }
+            }
+            request.setAttribute("lessonTitles", lessonTitles);
+
             request.setAttribute("quizzesList", quizzesList);
             request.setAttribute("quizScores", quizScores);
             request.setAttribute("quizHasEssay", quizHasEssay);

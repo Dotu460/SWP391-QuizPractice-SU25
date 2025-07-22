@@ -35,6 +35,9 @@
         }
         .card-body {
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
         .quiz-level {
             position: absolute;
@@ -65,6 +68,11 @@
             font-size: 1.2rem;
             font-weight: bold;
             margin-bottom: 10px;
+            min-height: 2.6em;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
         .quiz-score {
             background-color: #f8f9fa;
@@ -278,10 +286,10 @@
                                                     <span class="quiz-level level-${quiz.level.toLowerCase()}">${quiz.level}</span>
                                                     
                                                     <h5 class="quiz-title">${quiz.name}</h5>
-                                                    <div class="quiz-info">
+                                                    <div class="quiz-info flex-grow-1">
                                                         <!--<p><i class="fas fa-clock"></i> Duration: ${quiz.duration_minutes} minutes</p>-->
                                                         <p><i class="fas fa-question-circle"></i> Questions: ${quiz.number_of_questions_target}</p>
-                                                        <p><i class="fas fa-book"></i> Lesson: ${quiz.lesson_id}</p>
+                                                        <p><i class="fas fa-book"></i> Lesson: ${lessonTitles[quiz.lesson_id]}</p>
                                                         
                                                         <!-- Simple Status Indicator -->
                                                         <c:if test="${not empty quizScores[quiz.id] && quizHasEssay[quiz.id]}">
@@ -316,7 +324,7 @@
                                                             </c:otherwise>
                                                         </c:choose>
                                                     </div>
-                                                    <div class="mt-3">
+                                                    <div class="mt-3" style="margin-top:auto !important;">
                                                         <c:choose>
                                                             <c:when test="${not empty quizScores[quiz.id]}">
                                                                 <div class="d-flex gap-2">
