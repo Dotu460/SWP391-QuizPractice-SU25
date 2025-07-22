@@ -12,6 +12,7 @@ import com.quiz.su25.dal.impl.LessonDAO;
 import com.quiz.su25.dal.impl.QuizzesDAO;
 import com.quiz.su25.dal.impl.QuestionDAO;
 import com.quiz.su25.dal.impl.QuestionOptionDAO;
+import com.quiz.su25.dal.impl.PricePackageDAO;
 import com.quiz.su25.entity.Subject;
 import com.quiz.su25.entity.SubjectCategories;
 import com.quiz.su25.entity.User;
@@ -56,6 +57,7 @@ public class ManageController extends HttpServlet {
     private final QuizzesDAO quizzesDAO = new QuizzesDAO();
     private final QuestionDAO questionDAO = new QuestionDAO();
     private final QuestionOptionDAO questionOptionDAO = new QuestionOptionDAO();
+    private final PricePackageDAO pricePackageDAO = new PricePackageDAO();
 
     @Override
     public void init() throws ServletException {
@@ -130,9 +132,17 @@ public class ManageController extends HttpServlet {
         List<Subject> subjects = subjectDAO.getPaginatedSubjects(
                 page, pageSize, categoryFilter, statusFilter, searchTerm, sortBy, sortOrder);
 
-        // Get owner names and lesson counts for the subjects
+        // Get owner names, lesson counts, and price packages for the subjects
         Map<Integer, String> ownerNames = new HashMap<>();
         Map<Integer, Integer> lessonCounts = new HashMap<>();
+        Map<Integer, com.quiz.su25.entity.PricePackage> pricePackages = new HashMap<>();
+        
+        // Load all price packages once to avoid multiple queries
+        List<com.quiz.su25.entity.PricePackage> allPricePackages = pricePackageDAO.findAll();
+        for (com.quiz.su25.entity.PricePackage pkg : allPricePackages) {
+            pricePackages.put(pkg.getId(), pkg);
+        }
+        
         for (Subject subject : subjects) {
             // Get owner names
             if (subject.getOwner_id() != null && !ownerNames.containsKey(subject.getOwner_id())) {
@@ -148,6 +158,7 @@ public class ManageController extends HttpServlet {
         }
         request.setAttribute("ownerNames", ownerNames);
         request.setAttribute("lessonCounts", lessonCounts);
+        request.setAttribute("pricePackages", pricePackages);
 
         // Get total count for pagination
         int totalSubjects = subjectDAO.countTotalSubjects(categoryFilter, statusFilter, searchTerm);

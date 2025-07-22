@@ -156,7 +156,7 @@
         <div class="row">
           <div class="col-lg-3">
             <jsp:include page="../adminSidebar.jsp">
-              <jsp:param name="active" value="subjects"/>
+              <jsp:param name="active" value="manage-subjects"/>
             </jsp:include>
           </div>
           <div class="col-lg-9">

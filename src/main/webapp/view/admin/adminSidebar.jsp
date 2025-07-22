@@ -50,7 +50,7 @@
                     Registrations
                 </a>
             </li>
-            <li class="${param.active == 'courses' ? 'active' : ''}">
+            <li class="${param.active == 'manage-subjects' ? 'active' : ''}">
                 <a href="${pageContext.request.contextPath}/manage-subjects">
                     <i class="skillgro-video-tutorial"></i>
                     Manage Subject
