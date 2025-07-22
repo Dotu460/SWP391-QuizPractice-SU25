@@ -442,6 +442,21 @@
                 #searchMode option {
                     white-space: normal;
                 }
+                .badge.level-easy {
+                    background: #e6f9e6;
+                    color: #28a745;
+                    border: 1.5px solid #28a745;
+                }
+                .badge.level-medium {
+                    background: #fffbe6;
+                    color: #ffc107;
+                    border: 1.5px solid #ffc107;
+                }
+                .badge.level-hard {
+                    background: #ffe6e6;
+                    color: #dc3545;
+                    border: 1.5px solid #dc3545;
+                }
             </style>
         </head>
 
@@ -562,8 +577,22 @@
                                                                             <h5 class="quiz-title">${quiz.name}</h5>
                                                                             <div class="quiz-info flex-grow-1">
                                                                                 <p><i class="fas fa-question-circle"></i> Questions: ${questionCounts[quiz.id]}</p>
-                                                                                <p><i class="fas fa-book"></i> Lesson: ${lessonTitles[quiz.lesson_id]}</p>
-                                                                                <p><i class="fas fa-layer-group"></i> Subject: ${subjectTitles[lessonToSubject[quiz.lesson_id]]}</p>
+                                                                                <p><i class="fas fa-signal"></i> Level: 
+                                                                                  <c:choose>
+                                                                                    <c:when test="${quiz.level eq 'Easy'}">
+                                                                                      <span class="badge level-easy" style="font-size:1em;">Easy</span>
+                                                                                    </c:when>
+                                                                                    <c:when test="${quiz.level eq 'Medium'}">
+                                                                                      <span class="badge level-medium" style="font-size:1em;">Medium</span>
+                                                                                    </c:when>
+                                                                                    <c:when test="${quiz.level eq 'Hard'}">
+                                                                                      <span class="badge level-hard" style="font-size:1em;">Hard</span>
+                                                                                    </c:when>
+                                                                                    <c:otherwise>
+                                                                                      <span class="badge bg-secondary" style="font-size:1em;">${quiz.level}</span>
+                                                                                    </c:otherwise>
+                                                                                  </c:choose>
+                                                                                </p>
                                                                                 <c:if test="${not empty quizScores[quiz.id] && quizHasEssay[quiz.id]}">
                                                                                     <c:choose>
                                                                                         <c:when test="${quizAttemptStatus[quiz.id] eq 'completed'}">
@@ -650,19 +679,12 @@
         <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
             <script>
                 function startQuiz(quizId, isRetake) {
-                    console.log("Starting quiz with ID:", quizId, isRetake ? "(retake)" : "");
-                    if (isRetake) {
-                        // Clear all browser session storage for the quiz
-                        sessionStorage.removeItem('answeredQuestions');
-                        sessionStorage.removeItem('markedQuestions');
-                        sessionStorage.removeItem('selectedAnswers');
-                        sessionStorage.removeItem('quizScore');
-
-                        // Make sure to include a timestamp to prevent caching
-                        window.location.href = '${pageContext.request.contextPath}/quiz-handle?id=' + quizId + '&retake=true&t=' + new Date().getTime();
-                    } else {
-                        window.location.href = '${pageContext.request.contextPath}/quiz-handle?id=' + quizId;
-                    }
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const packageId = urlParams.get('packageId');
+                    let url = '${pageContext.request.contextPath}/quiz-handle?id=' + quizId;
+                    if (packageId) url += '&packageId=' + packageId;
+                    if (isRetake) url += '&retake=true&t=' + new Date().getTime();
+                    window.location.href = url;
                 }
 
                 function reviewQuiz(quizId) {
