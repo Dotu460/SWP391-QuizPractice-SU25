@@ -6,19 +6,16 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<!doctype html>
-<html class="no-js" lang="en">
-
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>SkillGro - Quiz Menu</title>
     <meta name="description" content="SkillGro - Quiz Menu">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/view/common/img/favicon.png">
-    <!-- Place favicon.ico in the root directory -->
-
     <!-- CSS here -->
     <jsp:include page="../../common/user/link_css_common.jsp"></jsp:include>
     <style>
@@ -173,6 +170,35 @@
             margin-bottom: -5px;
             transform: translateX(-50%) rotate(180deg);
         }
+        .selected-package-banner {
+            background: #fff;
+            color: #5751e1;
+            padding: 20px 38px;
+            border-radius: 12px;
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            border: 2.5px solid #8B7FD2;
+            box-shadow: 0 4px 16px rgba(87,81,225,0.10);
+            letter-spacing: 0.3px;
+        }
+        .selected-package-banner i {
+            font-size: 2rem;
+            margin-right: 12px;
+            color: #8B7FD2;
+        }
+        .selected-package-banner b {
+            color: #3d38a1;
+            font-weight: 800;
+            letter-spacing: 0.7px;
+        }
+        .dashboard__area.section-pb-120 {
+            padding-top: 18px !important;
+            padding-bottom: 24px !important;
+        }
     </style>
 </head>
 
@@ -184,84 +210,7 @@
     <!-- Scroll-top-end-->
 
     <!-- header-area -->
-    <header>
-        <div class="header-top-wrap">
-            <div class="container">
-                <div class="header-top">
-                    <div class="logo header-logo">
-                        <a href="${pageContext.request.contextPath}/home"><img src="${pageContext.request.contextPath}/view/common/img/logo/logo.svg" alt="Logo"></a>
-                    </div>
-                    <div class="header-right">
-                        <div class="settings-menu">
-                            <div class="settings-icon" onclick="toggleSettingsDropdown()">
-                                <i class="fas fa-cog"></i>
-                            </div>
-                            <div class="settings-dropdown">
-                                <!-- No specific settings for menu page -->
-                            </div>
-                        </div>
-                        <div class="user-menu">
-                            <div class="user-icon" onclick="toggleDropdown()">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <div class="dropdown-menu">
-                                <div class="dropdown-header">
-                                    <c:choose>
-                                        <c:when test="${not empty sessionScope.account}">
-                                            <div class="user-info">
-                                                <div class="user-avatar">
-                                                    <img src="${pageContext.request.contextPath}/media/user-avatar.png" alt="User Avatar">
-                                                </div>
-                                                <div class="user-details">
-                                                    <span class="user-name">${sessionScope.account.full_name}</span>
-                                                    <span class="user-email">${sessionScope.account.email}</span>
-                                                </div>
-                                            </div>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <div class="guest-info">
-                                                <span>Welcome, Guest!</span>
-                                            </div>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </div>
-                                <div class="dropdown-body">
-                                    <c:choose>
-                                        <c:when test="${not empty sessionScope.account}">
-                                            <a href="${pageContext.request.contextPath}/my-profile" class="dropdown-item">
-                                                <i class="fas fa-user-circle"></i>
-                                                <span>My Profile</span>
-                                            </a>
-                                            <a href="${pageContext.request.contextPath}/my-courses" class="dropdown-item">
-                                                <i class="fas fa-graduation-cap"></i>
-                                                <span>My Courses</span>
-                                            </a>
-                                            <div class="dropdown-divider"></div>
-                                            <a href="${pageContext.request.contextPath}/login?action=logout" class="dropdown-item text-danger">
-                                                <i class="fas fa-sign-out-alt"></i>
-                                                <span>Log out</span>
-                                            </a>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <a href="${pageContext.request.contextPath}/login" class="dropdown-item">
-                                                <i class="fas fa-sign-in-alt"></i>
-                                                <span>Log in</span>
-                                            </a>
-                                            <a href="${pageContext.request.contextPath}/register" class="dropdown-item">
-                                                <i class="fas fa-user-plus"></i>
-                                                <span>Register</span>
-                                            </a>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="header-fixed-height"></div>
-    </header>
+    <jsp:include page="../../common/user/header.jsp"></jsp:include>
     <!-- header-area-end -->
 
     <!-- main-area -->  
@@ -274,6 +223,12 @@
 
                         <div class="col-xl-9">
                             <div class="dashboard__content-area">
+                                <c:if test="${not empty packageName}">
+                                    <div class="selected-package-banner">
+                                        <i class="fas fa-gift"></i>
+                                        <span>Package: <b>${packageName}</b></span>
+                                    </div>
+                                </c:if>
                                 <div class="dashboard__content-title mb-4">
                                     <h4 class="title">Available Quizzes</h4>
                                 </div>
@@ -290,6 +245,7 @@
                                                         <!--<p><i class="fas fa-clock"></i> Duration: ${quiz.duration_minutes} minutes</p>-->
                                                         <p><i class="fas fa-question-circle"></i> Questions: ${questionCounts[quiz.id]}</p>
                                                         <p><i class="fas fa-book"></i> Lesson: ${lessonTitles[quiz.lesson_id]}</p>
+                                                        <p><i class="fas fa-layer-group"></i> Subject: ${subjectTitles[lessonToSubject[quiz.lesson_id]]}</p>
                                                         
                                                         <!-- Simple Status Indicator -->
                                                         <c:if test="${not empty quizScores[quiz.id] && quizHasEssay[quiz.id]}">

@@ -114,6 +114,10 @@
                 .d-none {
                     display: none !important;
                 }
+                .dashboard__area.section-pb-120 {
+                    padding-top: 18px !important;
+                    padding-bottom: 24px !important;
+                }
             </style>
         </head>
 

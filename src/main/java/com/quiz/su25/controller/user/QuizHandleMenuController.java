@@ -6,10 +6,12 @@ import com.quiz.su25.dal.impl.SubjectDAO;
 import com.quiz.su25.dal.impl.UserQuizAttemptsDAO;
 import com.quiz.su25.dal.impl.LessonDAO;
 import com.quiz.su25.dal.impl.QuestionDAO;
+import com.quiz.su25.dal.impl.PricePackageDAO;
 import com.quiz.su25.entity.Quizzes;
 import com.quiz.su25.entity.Subject;
 import com.quiz.su25.entity.UserQuizAttempts;
 import com.quiz.su25.entity.Lesson;
+import com.quiz.su25.entity.PricePackage;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -30,6 +32,7 @@ public class QuizHandleMenuController extends HttpServlet {
     private final UserQuizAttemptsDAO userQuizAttemptsDAO = new UserQuizAttemptsDAO();
     private final SubjectDAO subjectDAO = new SubjectDAO(); // Thêm SubjectDAO
     private final LessonDAO lessonDAO = new LessonDAO();
+    private final PricePackageDAO pricePackageDAO = new PricePackageDAO();
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -104,16 +107,31 @@ public class QuizHandleMenuController extends HttpServlet {
             
             // Sau khi có quizzesList, tạo map lessonId -> lessonTitle
             Map<Integer, String> lessonTitles = new HashMap<>();
+            Map<Integer, Integer> lessonToSubject = new HashMap<>();
             for (Quizzes quiz : quizzesList) {
                 Integer lessonId = quiz.getLesson_id();
                 if (lessonId != null && !lessonTitles.containsKey(lessonId)) {
                     Lesson lesson = lessonDAO.findById(lessonId);
                     if (lesson != null) {
                         lessonTitles.put(lessonId, lesson.getTitle());
+                        lessonToSubject.put(lessonId, lesson.getSubject_id());
                     }
                 }
             }
             request.setAttribute("lessonTitles", lessonTitles);
+            request.setAttribute("lessonToSubject", lessonToSubject);
+
+            // Tạo map subjectId -> subjectTitle
+            Map<Integer, String> subjectTitles = new HashMap<>();
+            for (Integer subjectId : lessonToSubject.values()) {
+                if (subjectId != null && !subjectTitles.containsKey(subjectId)) {
+                    Subject subject = subjectDAO.findById(subjectId);
+                    if (subject != null) {
+                        subjectTitles.put(subjectId, subject.getTitle());
+                    }
+                }
+            }
+            request.setAttribute("subjectTitles", subjectTitles);
 
             // Tạo map quizId -> số lượng câu hỏi thực tế
             QuestionDAO questionDAO = new QuestionDAO();
@@ -123,6 +141,20 @@ public class QuizHandleMenuController extends HttpServlet {
                 questionCounts.put(quiz.getId(), count);
             }
             request.setAttribute("questionCounts", questionCounts);
+
+            String packageName = null;
+            if (packageIdParam != null && !packageIdParam.isEmpty()) {
+                try {
+                    int packageId = Integer.parseInt(packageIdParam);
+                    PricePackage pkg = pricePackageDAO.findById(packageId);
+                    if (pkg != null) {
+                        packageName = pkg.getName();
+                    }
+                } catch (NumberFormatException e) {
+                    // ignore
+                }
+            }
+            request.setAttribute("packageName", packageName);
 
             request.setAttribute("quizzesList", quizzesList);
             request.setAttribute("quizScores", quizScores);
