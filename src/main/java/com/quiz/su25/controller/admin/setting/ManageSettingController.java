@@ -8,7 +8,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import com.quiz.su25.dal.impl.SettingDAO;
 import com.quiz.su25.entity.Setting;
+import com.quiz.su25.entity.User;
 import com.quiz.su25.listener.AppContextListener;
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 
 @WebServlet(name = "ManageSettingController", urlPatterns = {"/setting"})
@@ -23,7 +25,12 @@ public class ManageSettingController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
-        
+//        // Kiểm tra quyền admin
+//        if (!isAdmin(request)) {
+//            request.setAttribute("errorMessage", "You don't have permission to access this page. Only administrators can manage system settings.");
+//            request.getRequestDispatcher("/view/common/access-denied.jsp").forward(request, response);
+//            return;
+//        }
         if ("edit".equals(action)) {
             handleEdit(request, response);
         } else if ("details".equals(action)) {
@@ -32,7 +39,23 @@ public class ManageSettingController extends HttpServlet {
             handleListWithFilters(request, response);
         }
     }
-    
+//    /**
+//     * Kiểm tra xem user hiện tại có phải admin không
+//     */
+//    private boolean isAdmin(HttpServletRequest request) {
+//        HttpSession session = request.getSession(false);
+//        if (session == null) {
+//            return false;
+//        }
+//        
+//        User account = (User) session.getAttribute("account");
+//        if (account == null) {
+//            return false;
+//        }
+//        
+//        // Admin có role_id = 1
+//        return account.getRole_id() != null && account.getRole_id() == 1;
+//    }
     private void handleEdit(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String idParam = request.getParameter("id");
         if (idParam != null && !idParam.isEmpty()) {
@@ -146,6 +169,11 @@ public class ManageSettingController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+//        if (!isAdmin(request)) {
+//        request.setAttribute("errorMessage", "You don't have permission to perform this action. Only administrators can manage system settings.");
+//        request.getRequestDispatcher("/view/common/access-denied.jsp").forward(request, response);
+//        return;
+//    }
         String action = request.getParameter("action");
         
         if ("update".equals(action)) {
