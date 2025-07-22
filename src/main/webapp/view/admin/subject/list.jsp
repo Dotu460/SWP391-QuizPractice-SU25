@@ -225,7 +225,7 @@
 
               <!-- Add Subject Button -->
               <div class="dashboard__actions">
-                <h5>Total Subjects: <span class="text-primary">${subjects.size()}</span></h5>
+                <h5>Numbers of Subject display: <span class="text-primary">${subjects.size()}</span></h5>
                 <a href="${pageContext.request.contextPath}/admin/subject/new" class="add-subject-btn">
                   <i class="fas fa-plus"></i> Add New Subject
                 </a>
@@ -261,14 +261,10 @@
                           </c:if>
                         </c:forEach>
                       </td>
-                        <%--                                            <td>--%>
-                        <%--                                                <span class="badge bg-light text-dark">${lessonCounts[subject.]}</span>--%>
-                        <%--                                            </td>--%>
                       <td>
-                                                <span class="badge bg-light text-dark">
-
-                                                    <%= (int)(Math.floor(Math.random() * 13) + 3) %>
-                                                </span>
+                        <span class="badge bg-light text-dark">
+                          ${lessonCounts[subject.id]}
+                        </span>
                       </td>
                       <td>${ownerNames[subject.owner_id]}</td>
                       <td>
@@ -286,7 +282,7 @@
                       </td>
                       <td>
                         <div class="dashboard__review-action">
-                          <a href="${pageContext.request.contextPath}/admin/subject/details?id=${subject.id}" class="subject-action-link edit-link" title="Edit"><i class="skillgro-edit"></i> Edit</a>
+<%--                          <a href="${pageContext.request.contextPath}/admin/subject/details?id=${subject.id}" class="subject-action-link edit-link" title="Edit"><i class="skillgro-edit"></i> Edit</a>--%>
                           <a href="${pageContext.request.contextPath}/admin/subject/view?id=${subject.id}" class="subject-action-link view-link" title="View"><i class="skillgro-book-2"></i> View</a>
                         </div>
                       </td>

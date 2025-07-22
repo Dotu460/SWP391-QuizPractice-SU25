@@ -5,6 +5,7 @@ import com.quiz.su25.dal.impl.SubjectDAO;
 import com.quiz.su25.dal.impl.UserDAO;
 import com.quiz.su25.dal.impl.PricePackageDAO;
 import com.quiz.su25.dal.impl.MediaDAO;
+import com.quiz.su25.dal.impl.LessonDAO;
 import com.quiz.su25.entity.PricePackage;
 import com.quiz.su25.entity.Subject;
 import com.quiz.su25.entity.SubjectCategories;
@@ -39,6 +40,7 @@ public class SubjectController extends HttpServlet {
     private final PricePackageDAO packageDAO = new PricePackageDAO();
     private final UserDAO userDAO = new UserDAO();
     private final MediaDAO mediaDAO = new MediaDAO();
+    private final LessonDAO lessonDAO = new LessonDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -93,6 +95,13 @@ public class SubjectController extends HttpServlet {
         List<Subject> subjects = subjectDAO.getPaginatedSubjects(
                 page, pageSize, categoryFilter, statusFilter, searchTerm, sortBy, sortOrder);
 
+        // Get lesson counts for each subject
+        Map<Integer, Integer> lessonCounts = new HashMap<>();
+        for (Subject subject : subjects) {
+            int count = lessonDAO.countLessonsBySubjectId(subject.getId());
+            lessonCounts.put(subject.getId(), count);
+        }
+
         // Get owner names for the subjects
         Map<Integer, String> ownerNames = new HashMap<>();
         for (Subject subject : subjects) {
@@ -104,6 +113,7 @@ public class SubjectController extends HttpServlet {
             }
         }
         request.setAttribute("ownerNames", ownerNames);
+        request.setAttribute("lessonCounts", lessonCounts);
 
         // Get total count for pagination
         int totalSubjects = subjectDAO.countTotalSubjects(categoryFilter, statusFilter, searchTerm);

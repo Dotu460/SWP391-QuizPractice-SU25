@@ -20,7 +20,4 @@ import lombok.ToString;
 public class Role {
     private Integer id;
     private String role_name;
-    private String description;
-    private Date created_at;
-    
 }
