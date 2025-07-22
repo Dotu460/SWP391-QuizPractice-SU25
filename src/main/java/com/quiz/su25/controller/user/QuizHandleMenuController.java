@@ -3,6 +3,7 @@ package com.quiz.su25.controller.user;
 import com.quiz.su25.config.GlobalConfig;
 import com.quiz.su25.dal.impl.QuizzesDAO;
 import com.quiz.su25.dal.impl.UserQuizAttemptsDAO;
+import com.quiz.su25.dal.impl.QuestionDAO;
 import com.quiz.su25.entity.Quizzes;
 import com.quiz.su25.entity.UserQuizAttempts;
 import jakarta.servlet.ServletException;
@@ -65,6 +66,16 @@ public class QuizHandleMenuController extends HttpServlet {
                 request.setAttribute("quizzesList", quizzesList);
                 request.setAttribute("quizScores", quizScores);
                 System.out.println("Set quizzesList and quizScores attributes");
+                
+                // Get question counts for each quiz
+                QuestionDAO questionDAO = new QuestionDAO();
+                Map<Integer, Integer> questionCounts = new HashMap<>();
+                for (Quizzes quiz : quizzesList) {
+                    int count = questionDAO.countQuestionsByQuizId(quiz.getId());
+                    questionCounts.put(quiz.getId(), count);
+                }
+                request.setAttribute("questionCounts", questionCounts);
+                System.out.println("Set questionCounts attribute");
                 
                 // Forward to the quiz menu page
                 String forwardPath = "/view/user/quizHandle/quiz-handle-menu.jsp";
