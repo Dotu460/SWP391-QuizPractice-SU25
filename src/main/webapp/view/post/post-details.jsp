@@ -7,7 +7,41 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-
+<%-- THÊM VÀO ĐÂY - Kiểm tra quyền admin --%>
+<c:choose>
+    <c:when test="${sessionScope.account.role_id != 1}">
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Access Denied - SkillGro</title>
+            <jsp:include page="../common/user/link_css_common.jsp"></jsp:include>
+        </head>
+        <body>
+            <jsp:include page="../common/user/header.jsp"></jsp:include>
+            
+            <div class="container" style="padding: 100px 0; text-align: center;">
+                <div class="alert alert-danger" style="max-width: 600px; margin: 0 auto;">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Access Denied</h3>
+                    <p>You don't have permission to access this page. Only administrators can edit posts.</p>
+                    <a href="${pageContext.request.contextPath}/blog" class="btn btn-primary">
+                        <i class="fas fa-arrow-left"></i> Back to Blog
+                    </a>
+                </div>
+            </div>
+            
+            <jsp:include page="../common/user/footer.jsp"></jsp:include>
+        </body>
+        </html>
+    </c:when>
+    <c:otherwise>
+        <%-- Nội dung trang bình thường cho admin --%>
+        <!DOCTYPE html>
+        <html lang="en">
+        <%-- Phần còn lại của post-details.jsp --%>
+    </c:otherwise>
+</c:choose>
 <!DOCTYPE html>
 <html lang="en">
     <head>

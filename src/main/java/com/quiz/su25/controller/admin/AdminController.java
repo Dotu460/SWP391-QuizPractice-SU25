@@ -213,13 +213,28 @@ public class AdminController extends HttpServlet {
             user.setAvatar_url(request.getParameter("avatarUrl"));
             user.setStatus(request.getParameter("status"));
 
-            // Set role
-            int roleId = Integer.parseInt(request.getParameter("roleId"));
-            // Validate role ID - only allow existing roles (2 or 3)
-            if (roleId != 2 && roleId != 3) {
-                roleId = 2; // Default to role 2 if invalid role ID provided
+            // Set role - default to 2 (student)
+            String roleIdParam = request.getParameter("roleId");
+            int roleId = 2; // Default to student
+            if (roleIdParam != null && !roleIdParam.isEmpty()) {
+                try {
+                    roleId = Integer.parseInt(roleIdParam);
+                    // Validate role ID - only allow existing roles (2 or 3)
+                    if (roleId != 2 && roleId != 3) {
+                        roleId = 2; // Default to role 2 if invalid role ID provided
+                    }
+                } catch (NumberFormatException e) {
+                    roleId = 2; // Default if parsing fails
+                }
             }
             user.setRole_id(roleId);
+
+// Set status - default to active
+            String status = request.getParameter("status");
+            if (status == null || status.isEmpty()) {
+                status = "active"; // Default status
+            }
+            user.setStatus(status);
 
             return user;
         } catch (Exception e) {
