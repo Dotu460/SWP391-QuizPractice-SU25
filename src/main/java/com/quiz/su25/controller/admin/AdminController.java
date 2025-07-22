@@ -98,7 +98,11 @@ public class AdminController extends HttpServlet {
             User user = userDAO.findById(userId);
 
             if (user != null) {
+                // Get all roles for role display
+                List<Role> roles = roleDAO.findAll();
+                
                 request.setAttribute("user", user);
+                request.setAttribute("roles", roles);
                 request.getRequestDispatcher("/view/admin/user-view.jsp").forward(request, response);
             } else {
                 response.sendRedirect(request.getContextPath() + "/admin/users?error=userNotFound");
