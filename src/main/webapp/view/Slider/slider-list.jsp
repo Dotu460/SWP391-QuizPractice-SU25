@@ -361,7 +361,7 @@
                                 <label for="col-id">ID</label>
                             </div>
                             <div class="column-checkbox">
-                                <input type="checkbox" id="col-title" value="title" checked>
+                                <input type="checkbox" id="col-title" value="title" checked disabled>
                                 <label for="col-title">Title</label>
                             </div>
                             <div class="column-checkbox">
@@ -508,7 +508,9 @@
                 });
 
                 $('#deselectAllBtn').click(function() {
-                    $('#columnSettingsForm input[type="checkbox"]').prop('checked', false);
+                    $('#columnSettingsForm input[type="checkbox"]').not('#col-title').prop('checked', false);
+                    // Đảm bảo Title luôn được check
+                    $('#col-title').prop('checked', true);
                 });
 
                 // Add listener for pagination link clicks
