@@ -5,6 +5,7 @@ import com.quiz.su25.dal.impl.QuizzesDAO;
 import com.quiz.su25.dal.impl.SubjectDAO;
 import com.quiz.su25.dal.impl.UserQuizAttemptsDAO;
 import com.quiz.su25.dal.impl.LessonDAO;
+import com.quiz.su25.dal.impl.QuestionDAO;
 import com.quiz.su25.entity.Quizzes;
 import com.quiz.su25.entity.Subject;
 import com.quiz.su25.entity.UserQuizAttempts;
@@ -113,6 +114,15 @@ public class QuizHandleMenuController extends HttpServlet {
                 }
             }
             request.setAttribute("lessonTitles", lessonTitles);
+
+            // Tạo map quizId -> số lượng câu hỏi thực tế
+            QuestionDAO questionDAO = new QuestionDAO();
+            Map<Integer, Integer> questionCounts = new HashMap<>();
+            for (Quizzes quiz : quizzesList) {
+                int count = questionDAO.countQuestionsByQuizId(quiz.getId());
+                questionCounts.put(quiz.getId(), count);
+            }
+            request.setAttribute("questionCounts", questionCounts);
 
             request.setAttribute("quizzesList", quizzesList);
             request.setAttribute("quizScores", quizScores);

@@ -288,7 +288,7 @@
                                                     <h5 class="quiz-title">${quiz.name}</h5>
                                                     <div class="quiz-info flex-grow-1">
                                                         <!--<p><i class="fas fa-clock"></i> Duration: ${quiz.duration_minutes} minutes</p>-->
-                                                        <p><i class="fas fa-question-circle"></i> Questions: ${quiz.number_of_questions_target}</p>
+                                                        <p><i class="fas fa-question-circle"></i> Questions: ${questionCounts[quiz.id]}</p>
                                                         <p><i class="fas fa-book"></i> Lesson: ${lessonTitles[quiz.lesson_id]}</p>
                                                         
                                                         <!-- Simple Status Indicator -->
