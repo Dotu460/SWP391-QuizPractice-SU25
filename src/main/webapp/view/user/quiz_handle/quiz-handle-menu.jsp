@@ -199,6 +199,39 @@
             padding-top: 18px !important;
             padding-bottom: 24px !important;
         }
+        .subject-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #5751e1;
+            margin-bottom: 18px;
+            margin-top: 28px;
+            letter-spacing: 0.5px;
+            padding: 10px 18px 10px 32px;
+            background: #f6f7fb;
+            border-left: 6px solid #8B7FD2;
+            border-radius: 6px 12px 12px 6px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 8px rgba(87,81,225,0.04);
+        }
+        .subject-title:before {
+            content: '\f02d'; /* fa-book-open icon */
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            color: #8B7FD2;
+            font-size: 1.2em;
+            margin-right: 10px;
+            display: inline-block;
+        }
+        .accordion-item {
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1.5px solid #e0e0e0;
+            margin-bottom: 18px;
+            background: #fff;
+        }
     </style>
 </head>
 
@@ -232,80 +265,92 @@
                                 <div class="dashboard__content-title mb-4">
                                     <h4 class="title">Available Quizzes</h4>
                                 </div>
-                                <!-- Quiz List -->
-                                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                                    <c:forEach items="${quizzesList}" var="quiz">
-                                        <div class="col">
-                                            <div class="card h-100 quiz-card">
-                                                <div class="card-body">
-                                                    <span class="quiz-level level-${quiz.level.toLowerCase()}">${quiz.level}</span>
-                                                    
-                                                    <h5 class="quiz-title">${quiz.name}</h5>
-                                                    <div class="quiz-info flex-grow-1">
-                                                        <!--<p><i class="fas fa-clock"></i> Duration: ${quiz.duration_minutes} minutes</p>-->
-                                                        <p><i class="fas fa-question-circle"></i> Questions: ${questionCounts[quiz.id]}</p>
-                                                        <p><i class="fas fa-book"></i> Lesson: ${lessonTitles[quiz.lesson_id]}</p>
-                                                        <p><i class="fas fa-layer-group"></i> Subject: ${subjectTitles[lessonToSubject[quiz.lesson_id]]}</p>
-                                                        
-                                                        <!-- Simple Status Indicator -->
-                                                        <c:if test="${not empty quizScores[quiz.id] && quizHasEssay[quiz.id]}">
-                                                            <c:choose>
-                                                                <c:when test="${quizAttemptStatus[quiz.id] eq 'completed'}">
-                                                                    <p><i class="fas fa-check-circle"></i> Status: <span class="status-graded">Graded</span></p>
-                                                                </c:when>
-                                                                <c:when test="${quizAttemptStatus[quiz.id] eq 'partially_graded'}">
-                                                                    <p><i class="fas fa-hourglass-half"></i> Status: <span class="status-in-process">In process</span></p>
-                                                                </c:when>
-                                                            </c:choose>
-                                                        </c:if>
-                                                    </div>
-                                                    <div class="quiz-score">
-                                                        <div class="score-label">Your Score</div>
-                                                        <c:choose>
-                                                            <c:when test="${not empty quizScores[quiz.id]}">
-                                                                <div class="score-value">${quizScores[quiz.id]}%</div>
-                                                                
-                                                                <!-- Thêm thông báo khi quiz đang chờ chấm điểm tự luận -->
-                                                                <c:if test="${quizAttemptStatus[quiz.id] eq 'partially_graded'}">
-                                                                    <div class="waiting-for-grading-note mt-2">
-                                                                        <small class="text-warning">
-                                                                            <i class="fas fa-info-circle"></i> 
-                                                                            This is a temporary score. Waiting for the essay score...
-                                                                        </small>
+                                <!-- Quiz List as Accordion -->
+                                <div class="accordion" id="subjectAccordion">
+                                    <c:forEach var="subjectId" items="${quizzesBySubject.keySet()}" varStatus="status">
+                                        <div class="accordion-item mb-3">
+                                            <h2 class="accordion-header" id="heading${subjectId}">
+                                                <button class="accordion-button${status.first ? '' : ' collapsed'}"
+                                                        type="button"
+                                                        data-bs-toggle="collapse"
+                                                        data-bs-target="#collapse${subjectId}"
+                                                        aria-expanded="${status.first ? 'true' : 'false'}"
+                                                        aria-controls="collapse${subjectId}">
+                                                    <i class="fas fa-book-open me-2"></i> ${subjectTitles[subjectId]}
+                                                </button>
+                                            </h2>
+                                            <div id="collapse${subjectId}" class="accordion-collapse collapse${status.first ? ' show' : ''}"
+                                                 aria-labelledby="heading${subjectId}">
+                                                <div class="accordion-body">
+                                                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                                                        <c:forEach var="quiz" items="${quizzesBySubject[subjectId]}">
+                                                            <div class="col">
+                                                                <div class="card h-100 quiz-card">
+                                                                    <div class="card-body">
+                                                                        <span class="quiz-level level-${quiz.level.toLowerCase()}">${quiz.level}</span>
+                                                                        <h5 class="quiz-title">${quiz.name}</h5>
+                                                                        <div class="quiz-info flex-grow-1">
+                                                                            <p><i class="fas fa-question-circle"></i> Questions: ${questionCounts[quiz.id]}</p>
+                                                                            <p><i class="fas fa-book"></i> Lesson: ${lessonTitles[quiz.lesson_id]}</p>
+                                                                            <p><i class="fas fa-layer-group"></i> Subject: ${subjectTitles[lessonToSubject[quiz.lesson_id]]}</p>
+                                                                            <c:if test="${not empty quizScores[quiz.id] && quizHasEssay[quiz.id]}">
+                                                                                <c:choose>
+                                                                                    <c:when test="${quizAttemptStatus[quiz.id] eq 'completed'}">
+                                                                                        <p><i class="fas fa-check-circle"></i> Status: <span class="status-graded">Graded</span></p>
+                                                                                    </c:when>
+                                                                                    <c:when test="${quizAttemptStatus[quiz.id] eq 'partially_graded'}">
+                                                                                        <p><i class="fas fa-hourglass-half"></i> Status: <span class="status-in-process">In process</span></p>
+                                                                                    </c:when>
+                                                                                </c:choose>
+                                                                            </c:if>
+                                                                        </div>
+                                                                        <div class="quiz-score">
+                                                                            <div class="score-label">Your Score</div>
+                                                                            <c:choose>
+                                                                                <c:when test="${not empty quizScores[quiz.id]}">
+                                                                                    <div class="score-value">${quizScores[quiz.id]}%</div>
+                                                                                    <c:if test="${quizAttemptStatus[quiz.id] eq 'partially_graded'}">
+                                                                                        <div class="waiting-for-grading-note mt-2">
+                                                                                            <small class="text-warning">
+                                                                                                <i class="fas fa-info-circle"></i> 
+                                                                                                This is a temporary score. Waiting for the essay score...
+                                                                                            </small>
+                                                                                        </div>
+                                                                                    </c:if>
+                                                                                </c:when>
+                                                                                <c:otherwise>
+                                                                                    <div class="no-score">Not attempted yet</div>
+                                                                                </c:otherwise>
+                                                                            </c:choose>
+                                                                        </div>
+                                                                        <div class="mt-3" style="margin-top:auto !important;">
+                                                                            <c:choose>
+                                                                                <c:when test="${not empty quizScores[quiz.id]}">
+                                                                                    <div class="d-flex gap-2">
+                                                                                        <c:choose>
+                                                                                            <c:when test="${quizAttemptStatus[quiz.id] eq 'partially_graded'}">
+                                                                                                <button class="btn btn-primary flex-grow-1 disabled-retake-btn" 
+                                                                                                        disabled 
+                                                                                                        title="Available when expert graded the essay quiz">
+                                                                                                    Retake Quiz
+                                                                                                </button>
+                                                                                            </c:when>
+                                                                                            <c:otherwise>
+                                                                                                <button class="btn btn-primary flex-grow-1" onclick="startQuiz('${quiz.id}', true)">Retake Quiz</button>
+                                                                                            </c:otherwise>
+                                                                                        </c:choose>
+                                                                                        <button class="btn btn-secondary flex-grow-1" onclick="reviewQuiz('${quiz.id}')">Review Quiz</button>
+                                                                                    </div>
+                                                                                </c:when>
+                                                                                <c:otherwise>
+                                                                                    <button class="btn btn-primary w-100" onclick="startQuiz('${quiz.id}', false)">Start Quiz</button>
+                                                                                </c:otherwise>
+                                                                            </c:choose>
+                                                                        </div>
                                                                     </div>
-                                                                </c:if>
-                                                            </c:when>
-                                                            <c:otherwise>
-                                                                <div class="no-score">Not attempted yet</div>
-                                                            </c:otherwise>
-                                                        </c:choose>
-                                                    </div>
-                                                    <div class="mt-3" style="margin-top:auto !important;">
-                                                        <c:choose>
-                                                            <c:when test="${not empty quizScores[quiz.id]}">
-                                                                <div class="d-flex gap-2">
-                                                                    <!-- Nút Retake Quiz: bị vô hiệu hóa khi đang chờ chấm điểm, có thể bấm khi đã chấm xong -->
-                                                                    <c:choose>
-                                                                        <c:when test="${quizAttemptStatus[quiz.id] eq 'partially_graded'}">
-                                                                            <button class="btn btn-primary flex-grow-1 disabled-retake-btn" 
-                                                                                    disabled 
-                                                                                    title="Available when expert graded the essay quiz">
-                                                                                Retake Quiz
-                                                                            </button>
-                                                                        </c:when>
-                                                                        <c:otherwise>
-                                                                            <button class="btn btn-primary flex-grow-1" onclick="startQuiz('${quiz.id}', true)">Retake Quiz</button>
-                                                                        </c:otherwise>
-                                                                    </c:choose>
-                                                                    
-                                                                    <!-- Nút Review Quiz luôn có thể bấm được -->
-                                                                    <button class="btn btn-secondary flex-grow-1" onclick="reviewQuiz('${quiz.id}')">Review Quiz</button>
                                                                 </div>
-                                                            </c:when>
-                                                            <c:otherwise>
-                                                                <button class="btn btn-primary w-100" onclick="startQuiz('${quiz.id}', false)">Start Quiz</button>
-                                                            </c:otherwise>
-                                                        </c:choose>
+                                                            </div>
+                                                        </c:forEach>
                                                     </div>
                                                 </div>
                                             </div>

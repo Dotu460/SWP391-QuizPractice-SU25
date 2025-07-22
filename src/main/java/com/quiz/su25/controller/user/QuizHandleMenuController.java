@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 @WebServlet(name = "QuizHandleMenuController", urlPatterns = {"/quiz-handle-menu"})
 public class QuizHandleMenuController extends HttpServlet {
@@ -155,6 +156,17 @@ public class QuizHandleMenuController extends HttpServlet {
                 }
             }
             request.setAttribute("packageName", packageName);
+
+            // Group quizzes by subjectId
+            Map<Integer, List<Quizzes>> quizzesBySubject = new LinkedHashMap<>();
+            for (Quizzes quiz : quizzesList) {
+                Integer lessonId = quiz.getLesson_id();
+                Integer subjectId = lessonToSubject.get(lessonId);
+                if (subjectId != null) {
+                    quizzesBySubject.computeIfAbsent(subjectId, k -> new java.util.ArrayList<>()).add(quiz);
+                }
+            }
+            request.setAttribute("quizzesBySubject", quizzesBySubject);
 
             request.setAttribute("quizzesList", quizzesList);
             request.setAttribute("quizScores", quizScores);
