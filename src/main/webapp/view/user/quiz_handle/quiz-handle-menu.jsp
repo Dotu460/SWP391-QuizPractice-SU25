@@ -10,88 +10,88 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="x-ua-compatible" content="ie=edge">
-        <title>SkillGro - Quiz Menu</title>
-        <meta name="description" content="SkillGro - Quiz Menu">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <!-- CSS here -->
-        <jsp:include page="../../common/user/link_css_common.jsp"></jsp:include>
-            <style>
-                .quiz-card {
-                    transition: transform 0.2s;
-                    cursor: pointer;
-                    width: 100%;
-                    border: 1px solid #e0e0e0;
-                    border-radius: 8px;
-                }
-                .quiz-card:hover {
-                    transform: translateY(-5px);
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                }
-                .card-body {
-                    padding: 20px;
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>SkillGro - Quiz Menu</title>
+    <meta name="description" content="SkillGro - Quiz Menu">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- CSS here -->
+    <jsp:include page="../../common/user/link_css_common.jsp"></jsp:include>
+    <style>
+        .quiz-card {
+            transition: transform 0.2s;
+            cursor: pointer;
+            width: 100%;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        .quiz-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .card-body {
+            padding: 20px;
                     display: flex;
                     flex-direction: column;
                     height: 100%;
-                }
-                .quiz-level {
-                    position: absolute;
-                    top: 10px;
-                    right: 10px;
-                    padding: 5px 10px;
-                    border-radius: 15px;
-                    font-size: 0.8rem;
-                    font-weight: bold;
-                }
-                .level-easy {
-                    background-color: #28a745;
-                    color: white;
-                }
-                .level-medium {
-                    background-color: #ffc107;
-                    color: black;
-                }
-                .level-hard {
-                    background-color: #dc3545;
-                    color: white;
-                }
-                .quiz-info {
-                    font-size: 0.9rem;
-                    color: #6c757d;
-                }
-                .quiz-title {
-                    font-size: 1.2rem;
-                    font-weight: bold;
-                    margin-bottom: 10px;
+        }
+        .quiz-level {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .level-easy {
+            background-color: #28a745;
+            color: white;
+        }
+        .level-medium {
+            background-color: #ffc107;
+            color: black;
+        }
+        .level-hard {
+            background-color: #dc3545;
+            color: white;
+        }
+        .quiz-info {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        .quiz-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
                     min-height: 2.6em;
                     display: -webkit-box;
                     -webkit-line-clamp: 2;
                     -webkit-box-orient: vertical;
                     overflow: hidden;
-                }
-                .quiz-score {
-                    background-color: #f8f9fa;
-                    border-radius: 8px;
-                    padding: 10px;
-                    margin-top: 15px;
-                    text-align: center;
-                }
-                .score-value {
-                    font-size: 1.5rem;
-                    font-weight: bold;
-                    color: #007bff;
-                }
-                .score-label {
-                    font-size: 0.9rem;
-                    color: #6c757d;
-                    margin-bottom: 5px;
-                }
-                .no-score {
-                    color: #6c757d;
-                    font-style: italic;
-                }
+        }
+        .quiz-score {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        .score-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .score-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        .no-score {
+            color: #6c757d;
+            font-style: italic;
+        }
                 .header-top-wrap{
                     background:#1A1B3D;
                     padding:8px 0;
@@ -235,83 +235,83 @@
                     background-color:#eee;
                     margin:8px 0
                 }
-
-                /* Simple quiz status styles */
-                .quiz-status {
-                    display: inline-block;
-                    margin-top: 5px;
-                    font-size: 0.9rem;
-                }
-
-                .status-graded {
-                    color: #28a745;
-                }
-
-                .status-in-process {
-                    color: #ffc107;
-                }
-
-                /* Styles for waiting for grading message */
-                .waiting-for-grading-note {
-                    font-size: 0.85rem;
-                    padding: 5px 0;
-                }
-
-                .waiting-for-grading-note small {
-                    display: block;
-                    text-align: center;
-                }
-
-                /* Style for disabled review button */
-                .disabled-review-btn {
-                    background-color: #e9ecef;
-                    border-color: #ced4da;
-                    color: #6c757d;
-                    cursor: not-allowed;
-                    opacity: 0.65;
-                    position: relative;
-                }
-
-                /* Style for disabled retake button */
-                .disabled-retake-btn {
-                    background-color: #e9ecef;
-                    border-color: #ced4da;
-                    color: #6c757d;
-                    cursor: not-allowed;
-                    opacity: 0.65;
-                    position: relative;
-                }
-
-                /* Add custom tooltip styling */
-                .disabled-retake-btn:hover::after {
-                    content: attr(title);
-                    position: absolute;
-                    bottom: 100%;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    background-color: rgba(0, 0, 0, 0.8);
-                    color: white;
-                    padding: 5px 10px;
-                    border-radius: 4px;
-                    font-size: 12px;
-                    white-space: nowrap;
-                    z-index: 10;
-                    margin-bottom: 5px;
-                }
-
-                /* Add arrow to tooltip */
-                .disabled-retake-btn:hover::before {
-                    content: "";
-                    position: absolute;
-                    bottom: 100%;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    border-width: 5px;
-                    border-style: solid;
-                    border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
-                    margin-bottom: -5px;
-                    transform: translateX(-50%) rotate(180deg);
-                }
+        
+        /* Simple quiz status styles */
+        .quiz-status {
+            display: inline-block;
+            margin-top: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .status-graded {
+            color: #28a745;
+        }
+        
+        .status-in-process {
+            color: #ffc107;
+        }
+        
+        /* Styles for waiting for grading message */
+        .waiting-for-grading-note {
+            font-size: 0.85rem;
+            padding: 5px 0;
+        }
+        
+        .waiting-for-grading-note small {
+            display: block;
+            text-align: center;
+        }
+        
+        /* Style for disabled review button */
+        .disabled-review-btn {
+            background-color: #e9ecef;
+            border-color: #ced4da;
+            color: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.65;
+            position: relative;
+        }
+        
+        /* Style for disabled retake button */
+        .disabled-retake-btn {
+            background-color: #e9ecef;
+            border-color: #ced4da;
+            color: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.65;
+            position: relative;
+        }
+        
+        /* Add custom tooltip styling */
+        .disabled-retake-btn:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 10;
+            margin-bottom: 5px;
+        }
+        
+        /* Add arrow to tooltip */
+        .disabled-retake-btn:hover::before {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px;
+            border-style: solid;
+            border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+            margin-bottom: -5px;
+            transform: translateX(-50%) rotate(180deg);
+        }
                 .selected-package-banner {
                     background: #fff;
                     color: #5751e1;
@@ -457,39 +457,39 @@
                     color: #dc3545;
                     border: 1.5px solid #dc3545;
                 }
-            </style>
-        </head>
+    </style>
+</head>
 
-        <body>
-            <!-- Scroll-top -->
-            <button class="scroll__top scroll-to-target" data-target="html">
-                <i class="tg-flaticon-arrowhead-up"></i>
-            </button>
-            <!-- Scroll-top-end-->
+<body>
+    <!-- Scroll-top -->
+    <button class="scroll__top scroll-to-target" data-target="html">
+        <i class="tg-flaticon-arrowhead-up"></i>
+    </button>
+    <!-- Scroll-top-end-->
 
-            <!-- header-area -->
+    <!-- header-area -->
         <jsp:include page="../../common/user/header.jsp"></jsp:include>
-            <!-- header-area-end -->
+    <!-- header-area-end -->
 
-            <!-- main-area -->  
-            <main class="main-area">
-                <section class="dashboard__area section-pb-120">
-                    <div class="container-fluid">
-                        <div class="dashboard__inner-wrap">
-                            <div class="row">
-                            <jsp:include page="../../common/user/sidebarCustomer.jsp"></jsp:include>
+    <!-- main-area -->  
+    <main class="main-area">
+        <section class="dashboard__area section-pb-120">
+            <div class="container-fluid">
+                <div class="dashboard__inner-wrap">
+                    <div class="row">
+                        <jsp:include page="../../common/user/sidebarCustomer.jsp"></jsp:include>
 
-                                <div class="col-xl-9">
-                                    <div class="dashboard__content-area">
+                        <div class="col-xl-9">
+                            <div class="dashboard__content-area">
                                     <c:if test="${not empty packageName}">
                                         <div class="selected-package-banner">
                                             <i class="fas fa-gift"></i>
                                             <span>Package: <b>${packageName}</b></span>
                                         </div>
                                     </c:if>
-                                    <div class="dashboard__content-title mb-4">
-                                        <h4 class="title">Available Quizzes</h4>
-                                    </div>
+                                <div class="dashboard__content-title mb-4">
+                                    <h4 class="title">Available Quizzes</h4>
+                                </div>
                                     <!-- Search and Filter -->
                                     <div class="mb-4 d-flex align-items-center gap-3">
                                         <select id="searchMode" class="form-select" style="min-width: 100px; max-width: 145px; font-size: 0.98rem;">
@@ -565,16 +565,16 @@
                                                             <c:forEach var="quiz" items="${quizzesBySubject[subjectId]}" varStatus="quizStatus">
                                                                 <c:set var="displayClass" value="${quizStatus.index < 3 ? '' : 'd-none'}" />
                                                                 <div class="col quiz-card-wrapper ${displayClass}" data-quiz-name="${fn:toLowerCase(quiz.name)}">
-                                                                    <div class="card h-100 quiz-card">
-                                                                        <div class="card-body">
-                                                                            <span class="quiz-level level-${quiz.level.toLowerCase()}">${quiz.level}</span>
+                                            <div class="card h-100 quiz-card">
+                                                <div class="card-body">
+                                                    <span class="quiz-level level-${quiz.level.toLowerCase()}">${quiz.level}</span>
                                                                             <!-- Lesson badge -->
                                                                             <span class="badge lesson-badge mb-2" 
                                                                                   style="font-size:0.98em; font-weight:600; background:linear-gradient(90deg,#e9e6fa,#cfc6f7);color:#4b2991; border:1.5px solid #8B7FD2; padding:6px 14px; display:inline-flex; align-items:center; gap:6px; cursor:pointer;"
                                                                                   title="Lesson: ${lessonTitles[quiz.lesson_id]} - thuộc subject: ${subjectTitles[lessonToSubject[quiz.lesson_id]]}">
                                                                                 <i class="fas fa-book-open me-1" style="color:#8B7FD2;"></i> ${lessonTitles[quiz.lesson_id]}
                                                                             </span>
-                                                                            <h5 class="quiz-title">${quiz.name}</h5>
+                                                    <h5 class="quiz-title">${quiz.name}</h5>
                                                                             <div class="quiz-info flex-grow-1">
                                                                                 <p><i class="fas fa-question-circle"></i> Questions: ${questionCounts[quiz.id]}</p>
                                                                                 <p><i class="fas fa-signal"></i> Level: 
@@ -593,64 +593,64 @@
                                                                                     </c:otherwise>
                                                                                   </c:choose>
                                                                                 </p>
-                                                                                <c:if test="${not empty quizScores[quiz.id] && quizHasEssay[quiz.id]}">
-                                                                                    <c:choose>
-                                                                                        <c:when test="${quizAttemptStatus[quiz.id] eq 'completed'}">
-                                                                                            <p><i class="fas fa-check-circle"></i> Status: <span class="status-graded">Graded</span></p>
-                                                                                        </c:when>
-                                                                                        <c:when test="${quizAttemptStatus[quiz.id] eq 'partially_graded'}">
-                                                                                            <p><i class="fas fa-hourglass-half"></i> Status: <span class="status-in-process">In process</span></p>
-                                                                                        </c:when>
-                                                                                    </c:choose>
-                                                                                </c:if>
-                                                                            </div>
-                                                                            <div class="quiz-score">
-                                                                                <div class="score-label">Your Score</div>
-                                                                                <c:choose>
-                                                                                    <c:when test="${not empty quizScores[quiz.id]}">
-                                                                                        <div class="score-value">${quizScores[quiz.id]}%</div>
-                                                                                        <c:if test="${quizAttemptStatus[quiz.id] eq 'partially_graded'}">
-                                                                                            <div class="waiting-for-grading-note mt-2">
-                                                                                                <small class="text-warning">
-                                                                                                    <i class="fas fa-info-circle"></i> 
-                                                                                                    This is a temporary score. Waiting for the essay score...
-                                                                                                </small>
-                                                                                            </div>
-                                                                                        </c:if>
-                                                                                    </c:when>
-                                                                                    <c:otherwise>
-                                                                                        <div class="no-score">Not attempted yet</div>
-                                                                                    </c:otherwise>
-                                                                                </c:choose>
-                                                                            </div>
-                                                                            <div class="mt-3" style="margin-top:auto !important;">
-                                                                                <c:choose>
-                                                                                    <c:when test="${not empty quizScores[quiz.id]}">
-                                                                                        <div class="d-flex gap-2">
-                                                                                            <c:choose>
-                                                                                                <c:when test="${quizAttemptStatus[quiz.id] eq 'partially_graded'}">
-                                                                                                    <button class="btn btn-primary flex-grow-1 disabled-retake-btn" 
-                                                                                                            disabled 
-                                                                                                            title="Available when expert graded the essay quiz">
-                                                                                                        Retake Quiz
-                                                                                                    </button>
-                                                                                                </c:when>
-                                                                                                <c:otherwise>
-                                                                                                    <button class="btn btn-primary flex-grow-1" onclick="startQuiz('${quiz.id}', true)">Retake Quiz</button>
-                                                                                                </c:otherwise>
-                                                                                            </c:choose>
-                                                                                            <button class="btn btn-secondary flex-grow-1" onclick="reviewQuiz('${quiz.id}')">Review Quiz</button>
-                                                                                        </div>
-                                                                                    </c:when>
-                                                                                    <c:otherwise>
-                                                                                        <button class="btn btn-primary w-100" onclick="startQuiz('${quiz.id}', false)">Start Quiz</button>
-                                                                                    </c:otherwise>
-                                                                                </c:choose>
-                                                                            </div>
-                                                                        </div>
+                                                        <c:if test="${not empty quizScores[quiz.id] && quizHasEssay[quiz.id]}">
+                                                            <c:choose>
+                                                                <c:when test="${quizAttemptStatus[quiz.id] eq 'completed'}">
+                                                                    <p><i class="fas fa-check-circle"></i> Status: <span class="status-graded">Graded</span></p>
+                                                                </c:when>
+                                                                <c:when test="${quizAttemptStatus[quiz.id] eq 'partially_graded'}">
+                                                                    <p><i class="fas fa-hourglass-half"></i> Status: <span class="status-in-process">In process</span></p>
+                                                                </c:when>
+                                                            </c:choose>
+                                                        </c:if>
+                                                    </div>
+                                                    <div class="quiz-score">
+                                                        <div class="score-label">Your Score</div>
+                                                        <c:choose>
+                                                            <c:when test="${not empty quizScores[quiz.id]}">
+                                                                <div class="score-value">${quizScores[quiz.id]}%</div>
+                                                                <c:if test="${quizAttemptStatus[quiz.id] eq 'partially_graded'}">
+                                                                    <div class="waiting-for-grading-note mt-2">
+                                                                        <small class="text-warning">
+                                                                            <i class="fas fa-info-circle"></i> 
+                                                                            This is a temporary score. Waiting for the essay score...
+                                                                        </small>
                                                                     </div>
+                                                                </c:if>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <div class="no-score">Not attempted yet</div>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </div>
+                                                                            <div class="mt-3" style="margin-top:auto !important;">
+                                                        <c:choose>
+                                                            <c:when test="${not empty quizScores[quiz.id]}">
+                                                                <div class="d-flex gap-2">
+                                                                    <c:choose>
+                                                                        <c:when test="${quizAttemptStatus[quiz.id] eq 'partially_graded'}">
+                                                                            <button class="btn btn-primary flex-grow-1 disabled-retake-btn" 
+                                                                                    disabled 
+                                                                                    title="Available when expert graded the essay quiz">
+                                                                                Retake Quiz
+                                                                            </button>
+                                                                        </c:when>
+                                                                        <c:otherwise>
+                                                                            <button class="btn btn-primary flex-grow-1" onclick="startQuiz('${quiz.id}', true)">Retake Quiz</button>
+                                                                        </c:otherwise>
+                                                                    </c:choose>
+                                                                    <button class="btn btn-secondary flex-grow-1" onclick="reviewQuiz('${quiz.id}')">Review Quiz</button>
                                                                 </div>
-                                                            </c:forEach>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <button class="btn btn-primary w-100" onclick="startQuiz('${quiz.id}', false)">Start Quiz</button>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </c:forEach>
                                                         </div>
                                                         <c:if test="${fn:length(quizzesBySubject[subjectId]) > 3}">
                                                             <div class="d-flex justify-content-center mt-3">
@@ -662,78 +662,78 @@
                                             </div>
                                         </c:forEach>
                                     </div>
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
-        </main>
-        <!-- main-area-end -->  
+            </div>
+        </section>
+    </main>
+    <!-- main-area-end -->  
+            
+    <!-- footer-area -->
+    <jsp:include page="../../common/user/footer.jsp"></jsp:include>
+    <!-- footer-area-end -->
 
-        <!-- footer-area -->
-        <jsp:include page="../../common/user/footer.jsp"></jsp:include>
-            <!-- footer-area-end -->
-
-            <!-- JS here -->
-        <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
-            <script>
-                function startQuiz(quizId, isRetake) {
+    <!-- JS here -->
+    <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
+    <script>
+        function startQuiz(quizId, isRetake) {
                     const urlParams = new URLSearchParams(window.location.search);
                     const packageId = urlParams.get('packageId');
                     let url = '${pageContext.request.contextPath}/quiz-handle?id=' + quizId;
                     if (packageId) url += '&packageId=' + packageId;
                     if (isRetake) url += '&retake=true&t=' + new Date().getTime();
                     window.location.href = url;
-                }
+        }
 
-                function reviewQuiz(quizId) {
-                    console.log("Reviewing quiz with ID:", quizId);
-                    window.location.href = '${pageContext.request.contextPath}/quiz-review?quizId=' + quizId;
-                }
-
+        function reviewQuiz(quizId) {
+            console.log("Reviewing quiz with ID:", quizId);
+            window.location.href = '${pageContext.request.contextPath}/quiz-review?quizId=' + quizId;
+        }
+        
                 $(document).ready(function () {
                     if ($.fn.select2) {
-                        $('.select2').select2();
-                    }
-                });
+                $('.select2').select2();
+            }
+        });
+        
+        function toggleDropdown() {
+            const dropdown = document.querySelector('.user-menu .dropdown-menu');
+            dropdown.classList.toggle('show');
+        }
 
-                function toggleDropdown() {
-                    const dropdown = document.querySelector('.user-menu .dropdown-menu');
-                    dropdown.classList.toggle('show');
-                }
-
-                function toggleSettingsDropdown() {
-                    const dropdown = document.querySelector('.settings-menu .settings-dropdown');
-                    dropdown.classList.toggle('show');
-                }
+        function toggleSettingsDropdown() {
+            const dropdown = document.querySelector('.settings-menu .settings-dropdown');
+            dropdown.classList.toggle('show');
+        }
 
                 document.addEventListener('click', function (event) {
-                    if (!event.target.closest('.user-menu')) {
-                        document.querySelector('.user-menu .dropdown-menu').classList.remove('show');
-                    }
-                    if (!event.target.closest('.settings-menu')) {
-                        document.querySelector('.settings-menu .settings-dropdown').classList.remove('show');
-                    }
-                });
-        </script>
-
-        <script>
-            //hiển thị điểm vừa đạt
+            if (!event.target.closest('.user-menu')) {
+                document.querySelector('.user-menu .dropdown-menu').classList.remove('show');
+            }
+            if (!event.target.closest('.settings-menu')) {
+                document.querySelector('.settings-menu .settings-dropdown').classList.remove('show');
+            }
+        });
+    </script>
+    
+    <script>
+        //hiển thị điểm vừa đạt
             document.addEventListener('DOMContentLoaded', function () {
-                const score = sessionStorage.getItem('quizScore');
-                if (score) {
-                    // Using iziToast for consistency
-                    iziToast.success({
-                        title: 'Quiz Completed!',
-                        message: 'Your score: ' + score,
-                        position: 'topRight',
-                        timeout: 7000
-                    });
-                    sessionStorage.removeItem('quizScore');
-                }
-            });
-        </script>
+            const score = sessionStorage.getItem('quizScore');
+            if (score) {
+                // Using iziToast for consistency
+                iziToast.success({
+                    title: 'Quiz Completed!',
+                    message: 'Your score: ' + score,
+                    position: 'topRight',
+                    timeout: 7000
+                });
+                sessionStorage.removeItem('quizScore');
+            }
+        });
+    </script>
 
         <script>
             // SEARCH/FILTER
@@ -811,5 +811,5 @@
                 }
             }
         </script>
-    </body>
+</body>
 </html>
