@@ -194,7 +194,7 @@
                                                         <c:choose>
                                                             <c:when test="${not empty userPurchases[pkg.id]}">
                                                                 <!-- User has purchased this package -->
-                                                                <a href="${pageContext.request.contextPath}/package-access?id=${pkg.id}" class="buy-btn access-btn" style="margin-right:8px;">
+                                                                <a href="${pageContext.request.contextPath}/quiz-handle-menu?packageId=${pkg.id}" class="buy-btn access-btn" style="margin-right:8px;">
                                                                     Access
                                                                 </a>
                                                             </c:when>
@@ -203,7 +203,7 @@
                                                                 <c:choose>
                                                                     <c:when test="${empty currentUser}">
                                                                         <!-- User not logged in -->
-                                                                        <a href="${pageContext.request.contextPath}/login" class="buy-btn" style="text-decoration:none; display:inline-block;">
+                                                                        <a href="${pageContext.request.contextPath}/login?redirect=${pageContext.request.contextPath}/price-package-menu${not empty param.id ? ('?id=' + param.id) : ''}" class="buy-btn" style="text-decoration:none; display:inline-block;">
                                                                            Purchase 
                                                                         </a>
                                                                     </c:when>

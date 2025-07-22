@@ -55,26 +55,27 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
     @Override
     public int insert(Subject subject) {
         String sql = "INSERT INTO subject "
-                + "(title, thumbnail_url, tag_line, brief_info, description, category_id, "
+                + "(price_package_id, title, thumbnail_url, tag_line, brief_info, description, category_id, "
                 + "owner_id, status, featured_flag, created_at, updated_at, created_by, updated_by) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         int generatedId = -1;
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            statement.setString(1, subject.getTitle());
-            statement.setString(2, subject.getThumbnail_url());
-            statement.setString(3, subject.getTag_line());
-            statement.setString(4, subject.getBrief_info());
-            statement.setString(5, subject.getDescription());
-            statement.setInt(6, subject.getCategory_id());
-            statement.setInt(7, subject.getOwner_id());
-            statement.setString(8, subject.getStatus());
-            statement.setBoolean(9, subject.getFeatured_flag());
-            statement.setDate(10, subject.getCreated_at() != null ? new java.sql.Date(subject.getCreated_at().getTime()) : null);
-            statement.setDate(11, subject.getUpdated_at() != null ? new java.sql.Date(subject.getUpdated_at().getTime()) : null);
-            statement.setInt(12, subject.getCreated_by());
-            statement.setInt(13, subject.getUpdated_by());
+            statement.setInt(1, subject.getPrice_package_id());
+            statement.setString(2, subject.getTitle());
+            statement.setString(3, subject.getThumbnail_url());
+            statement.setString(4, subject.getTag_line());
+            statement.setString(5, subject.getBrief_info());
+            statement.setString(6, subject.getDescription());
+            statement.setInt(7, subject.getCategory_id());
+            statement.setInt(8, subject.getOwner_id());
+            statement.setString(9, subject.getStatus());
+            statement.setBoolean(10, subject.getFeatured_flag());
+            statement.setDate(11, subject.getCreated_at() != null ? new java.sql.Date(subject.getCreated_at().getTime()) : null);
+            statement.setDate(12, subject.getUpdated_at() != null ? new java.sql.Date(subject.getUpdated_at().getTime()) : null);
+            statement.setInt(13, subject.getCreated_by());
+            statement.setInt(14, subject.getUpdated_by());
 
             statement.executeUpdate();
             resultSet = statement.getGeneratedKeys();
@@ -92,7 +93,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
     @Override
     public boolean update(Subject subject) {
         String sql = "UPDATE subject SET "
-                + "title = ?, thumbnail_url = ?, tag_line = ?, brief_info = ?, description = ?, "
+                + "price_package_id = ?, title = ?, thumbnail_url = ?, tag_line = ?, brief_info = ?, description = ?, "
                 + "category_id = ?, owner_id = ?, status = ?, featured_flag = ?, "
                 + "updated_at = ?, updated_by = ? "
                 + "WHERE id = ?";
@@ -100,18 +101,19 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setString(1, subject.getTitle());
-            statement.setString(2, subject.getThumbnail_url());
-            statement.setString(3, subject.getTag_line());
-            statement.setString(4, subject.getBrief_info());
-            statement.setString(5, subject.getDescription());
-            statement.setInt(6, subject.getCategory_id());
-            statement.setInt(7, subject.getOwner_id());
-            statement.setString(8, subject.getStatus());
-            statement.setBoolean(9, subject.getFeatured_flag());
-            statement.setDate(10, subject.getUpdated_at() != null ? new java.sql.Date(subject.getUpdated_at().getTime()) : null);
-            statement.setInt(11, subject.getUpdated_by());
-            statement.setInt(12, subject.getId());
+            statement.setInt(1, subject.getPrice_package_id());
+            statement.setString(2, subject.getTitle());
+            statement.setString(3, subject.getThumbnail_url());
+            statement.setString(4, subject.getTag_line());
+            statement.setString(5, subject.getBrief_info());
+            statement.setString(6, subject.getDescription());
+            statement.setInt(7, subject.getCategory_id());
+            statement.setInt(8, subject.getOwner_id());
+            statement.setString(9, subject.getStatus());
+            statement.setBoolean(10, subject.getFeatured_flag());
+            statement.setDate(11, subject.getUpdated_at() != null ? new java.sql.Date(subject.getUpdated_at().getTime()) : null);
+            statement.setInt(12, subject.getUpdated_by());
+            statement.setInt(13, subject.getId());
 
             int rowsAffected = statement.executeUpdate();
             success = rowsAffected > 0;
@@ -121,6 +123,25 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
             closeResources();
         }
         return success;
+    }
+
+    public List<Subject> findByPricePackageId(Integer packageId) {
+        List<Subject> subjects = new ArrayList<>();
+        String sql = "SELECT * FROM subject WHERE price_package_id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, packageId);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                subjects.add(getFromResultSet(resultSet));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error findByPricePackageId at class SubjectDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return subjects;
     }
 
     @Override
@@ -153,6 +174,7 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
     public Subject getFromResultSet(ResultSet resultSet) throws SQLException {
         return Subject.builder()
                 .id(resultSet.getInt("id"))
+                .price_package_id(resultSet.getInt("price_package_id"))
                 .title(resultSet.getString("title"))
                 .thumbnail_url(resultSet.getString("thumbnail_url"))
                 .tag_line(resultSet.getString("tag_line"))
