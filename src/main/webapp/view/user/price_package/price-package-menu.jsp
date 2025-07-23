@@ -114,6 +114,10 @@
                 .d-none {
                     display: none !important;
                 }
+                .dashboard__area.section-pb-120 {
+                    padding-top: 18px !important;
+                    padding-bottom: 24px !important;
+                }
             </style>
         </head>
 
@@ -140,9 +144,52 @@
                                 <div class="col-xl-9">
                                     <div class="dashboard__content-area">
                                         
+                                        <!-- Search bar giống quiz-handle-menu -->
+                                        <div class="mb-4 d-flex align-items-center gap-3">
+                                            <input id="packageSearchInput" type="text" class="form-control" style="max-width: 350px; border: 2px solid #8B7FD2; border-radius: 8px; font-size: 1.08rem; padding: 10px 18px; color: #3d38a1; background: #f6f7fb; transition: border-color 0.2s; box-shadow: 0 2px 8px rgba(87,81,225,0.04);" placeholder="Search package by name..." oninput="filterAndSortPackages()">
+                                            <select id="packageSortMode" class="form-select" style="min-width: 180px; max-width: 260px; font-size: 0.98rem;" onchange="filterAndSortPackages()">
+                                                <option value="name-asc">Sort by Name A-Z</option>
+                                                <option value="name-desc">Sort by Name Z-A</option>
+                                                <option value="price-asc">Sort by Price Low-High</option>
+                                                <option value="price-desc">Sort by Price High-Low</option>
+                                            </select>
+                                        </div>
+                                        <script>
+                                            function filterAndSortPackages() {
+                                                const search = document.getElementById('packageSearchInput').value.trim().toLowerCase();
+                                                const sortMode = document.getElementById('packageSortMode').value;
+                                                const packageList = document.querySelector('.row.row-cols-1.row-cols-md-2.row-cols-lg-3.g-4');
+                                                const packageCards = Array.from(document.querySelectorAll('.package-card-wrapper'));
+                                                // Filter by name
+                                                let filtered = packageCards.filter(card => {
+                                                    const name = card.getAttribute('data-package-name') || '';
+                                                    return name.includes(search);
+                                                });
+                                                // Sort
+                                                filtered.sort((a, b) => {
+                                                    if (sortMode === 'name-asc') {
+                                                        return a.getAttribute('data-package-name').localeCompare(b.getAttribute('data-package-name'));
+                                                    } else if (sortMode === 'name-desc') {
+                                                        return b.getAttribute('data-package-name').localeCompare(a.getAttribute('data-package-name'));
+                                                    } else if (sortMode === 'price-asc') {
+                                                        return parseFloat(a.getAttribute('data-package-price')) - parseFloat(b.getAttribute('data-package-price'));
+                                                    } else if (sortMode === 'price-desc') {
+                                                        return parseFloat(b.getAttribute('data-package-price')) - parseFloat(a.getAttribute('data-package-price'));
+                                                    }
+                                                    return 0;
+                                                });
+                                                // Remove all
+                                                packageCards.forEach(card => card.style.display = 'none');
+                                                // Append filtered & sorted
+                                                filtered.forEach(card => {
+                                                    card.style.display = '';
+                                                    packageList.appendChild(card);
+                                                });
+                                            }
+                                        </script>
                                         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                                         <c:forEach items="${pricePackages}" var="pkg">
-                                            <div class="col">
+                                            <div class="col package-card-wrapper" data-package-name="${fn:toLowerCase(pkg.name)}" data-package-price="${pkg.sale_price}">
                                                 <div class="package-card h-100">
                                                     <div class="package-title">${pkg.name}</div>
                                                     <div>

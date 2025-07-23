@@ -140,8 +140,8 @@ public class AuthenController extends HttpServlet {
                 if (redirectUrl != null && !redirectUrl.isEmpty()) {
                     response.sendRedirect(redirectUrl);
                 } else {
-                    response.sendRedirect("home");
-                }
+                    response.sendRedirect(request.getContextPath() + "/home");
+                }   
             } else {
                 request.setAttribute("error", "Invalid email or password");
                 request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
