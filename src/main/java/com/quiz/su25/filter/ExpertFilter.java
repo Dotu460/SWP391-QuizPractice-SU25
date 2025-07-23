@@ -19,13 +19,13 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
- * Filter để kiểm tra xem người dùng có phải là Admin không.
- * Chỉ xử lý các trang thuần Admin.
+ * Filter để kiểm tra xem người dùng có phải là Expert không.
+ * Chỉ xử lý các trang thuần Expert.
  */
-@WebFilter(filterName = "AdminFilter", urlPatterns = {
-    "/admin/*", "/admin/users", "/admin/subjects", "/admin/registrations"
+@WebFilter(filterName = "ExpertFilter", urlPatterns = {
+    "/expert/*", "/expert/essay-grading", "/essay-score", "/upload-media"
 })
-public class AdminFilter implements Filter {
+public class ExpertFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -44,11 +44,12 @@ public class AdminFilter implements Filter {
         if (isLoggedIn) {
             User user = (User) session.getAttribute(GlobalConfig.SESSION_ACCOUNT);
             
-            if (user.getRole_id() == GlobalConfig.ROLE_ADMIN) {
-                // Người dùng là Admin, cho phép truy cập
+            // Chỉ Expert mới có thể truy cập các trang Expert
+            if (user.getRole_id().equals(GlobalConfig.ROLE_EXPERT)) {
+                // Người dùng là Expert, cho phép truy cập
                 chain.doFilter(request, response);
             } else {
-                // Không phải Admin, chuyển hướng đến trang chủ với thông báo lỗi
+                // Không phải Expert, chuyển hướng đến trang chủ với thông báo lỗi
                 session.setAttribute("errorMessage", "Bạn không có quyền truy cập trang này");
                 httpResponse.sendRedirect(httpRequest.getContextPath() + "/home");
             }

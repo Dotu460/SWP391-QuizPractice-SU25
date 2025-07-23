@@ -92,30 +92,19 @@
                                             <li class="menu-item-has-children">
                                                 <a href="instructor-dashboard.html">Admin Dashboard</a>
                                                 <ul class="sub-menu">
-                                                    <li><a href="instructor-dashboard.html">Dashboard</a></li>
-                                                    <li><a href="instructor-profile.html">Profile</a></li>
-                                                    <li><a href="instructor-enrolled-courses.html">Enrolled Courses</a></li>
-                                                    <li><a href="instructor-wishlist.html">Wishlist</a></li>
-                                                    <li><a href="instructor-review.html">Reviews</a></li>
-                                                    <li><a href="instructor-attempts.html">My Quiz Attempts</a></li>
-                                                    <li><a href="instructor-history.html">Order History</a></li>
-                                                    <li><a href="instructor-courses.html">My Course</a></li>
-                                                    <li><a href="instructor-announcement.html">Announcements</a></li>
-                                                    <li class="active"><a href="instructor-quiz.html">Quiz Attempts</a></li>
-                                                    <li><a href="instructor-assignment.html">Assignments</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/admin/users">Manage users</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/admin/registrations">Registration</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/admin/price-package-list">Price Package</a></li>
                                                     <li><a href="${pageContext.request.contextPath}/setting">Settings</a></li>
                                                 </ul>
                                             </li>
-                                            <li class="menu-item-has-children"><a href="student-dashboard.html">Student Dashboard</a>
+                                            <li class="menu-item-has-children"><a href="student-dashboard.html">Expert Dashboard</a>
                                                 <ul class="sub-menu">
                                                     <li><a href="student-dashboard.html">Dashboard</a></li>
                                                     <li><a href="student-profile.html">Profile</a></li>
                                                     <li><a href="student-enrolled-courses.html">Enrolled Courses</a></li>
                                                     <li><a href="student-wishlist.html">Wishlist</a></li>
                                                     <li><a href="student-review.html">Reviews</a></li>
-                                                    <li><a href="student-attempts.html">My Quiz Attempts</a></li>
-                                                    <li><a href="student-history.html">Order History</a></li>
-                                                    <li><a href="student-setting.html">Settings</a></li>
                                                 </ul>
                                             </li>
                                         </ul>

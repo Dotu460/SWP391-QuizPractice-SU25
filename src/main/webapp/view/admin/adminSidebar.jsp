@@ -10,16 +10,36 @@
 
 <div class="dashboard__sidebar-wrap">
     <div class="dashboard__sidebar-title mb-20">
-        <h6 class="title">Welcome, ${sessionScope.user.full_name != null ? sessionScope.user.full_name : 'Admin'}</h6>
+        <h6 class="title">, ${sessionScope.user.full_name != null ? sessionScope.user.full_name : 'Admin'}</h6>
     </div>
     <nav class="dashboard__sidebar-menu">
         <ul class="list-wrap">
-            <li class="${param.active == 'profile' ? 'active' : ''}">
-                <a href="${pageContext.request.contextPath}/my-profile">
-                    <i class="skillgro-avatar"></i>
-                    My Profile
+            <li class="${param.active == 'users' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/admin/users">
+                    <i class="fas fa-users"></i>
+                    Users
                 </a>
             </li>
+            <li class="${param.active == 'registrations' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/admin/registrations">
+                    <i class="skillgro-book-2"></i>
+                    Registrations
+                </a>
+            </li>
+             <li class="${param.active == 'price-package' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/admin/price-package-list">
+                    <i class="skillgro-book-2"></i>
+                    Price Package
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="dashboard__sidebar-title mt-40 mb-20">
+        <h6 class="title">Admin, Expert</h6>
+    </div>
+    <nav class="dashboard__sidebar-menu">
+        <ul class="list-wrap">
             <li class="${param.active == 'subjects' ? 'active' : ''}">
                 <a href="${pageContext.request.contextPath}/admin/subjects">
                     <i class="skillgro-book"></i>
@@ -38,18 +58,6 @@
                     Quiz
                 </a>
             </li>
-            <li class="${param.active == 'users' ? 'active' : ''}">
-                <a href="${pageContext.request.contextPath}/admin/users">
-                    <i class="fas fa-users"></i>
-                    Users
-                </a>
-            </li>
-            <li class="${param.active == 'registrations' ? 'active' : ''}">
-                <a href="${pageContext.request.contextPath}/admin/registrations">
-                    <i class="skillgro-book-2"></i>
-                    Registrations
-                </a>
-            </li>
             <li class="${param.active == 'manage-subjects' ? 'active' : ''}">
                 <a href="${pageContext.request.contextPath}/manage-subjects">
                     <i class="skillgro-video-tutorial"></i>
@@ -58,4 +66,31 @@
             </li>
         </ul>
     </nav>
+    <div class="dashboard__sidebar-title mt-40 mb-20">
+        <h6 class="title">Grading</h6>
+    </div>
+    <nav class="dashboard__sidebar-menu">
+        <ul class="list-wrap">
+            <li class="${param.active == 'grading' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/expert/essay-grading">
+                    <i class="skillgro-video-tutorial"></i>
+                    essay grading
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <div class="dashboard__sidebar-title mt-40 mb-20">
+        <h6 class="title">Setting</h6>
+    </div>
+    <nav class="dashboard__sidebar-menu">
+        <ul class="list-wrap">
+            <li class="${param.active == 'setting' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/setting">
+                    <i class="skillgro-video-tutorial"></i>
+                    Setting
+                </a>
+            </li>
+        </ul>
+    </nav>
+
 </div>

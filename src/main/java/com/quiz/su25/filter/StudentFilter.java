@@ -19,13 +19,16 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
- * Filter để kiểm tra xem người dùng có phải là Admin không.
- * Chỉ xử lý các trang thuần Admin.
+ * Filter để kiểm tra xem người dùng có phải là Student không.
+ * Chỉ Student mới có thể truy cập các trang dành cho học sinh.
+ * Nếu không phải Student, chuyển hướng đến trang chủ với thông báo lỗi.
  */
-@WebFilter(filterName = "AdminFilter", urlPatterns = {
-    "/admin/*", "/admin/users", "/admin/subjects", "/admin/registrations"
+@WebFilter(filterName = "StudentFilter", urlPatterns = {
+    "/student/*", "/practice-list", "/my-registration", 
+    "/quiz-handle-menu", "/quiz-attempt/*", "/my-courses",
+    "/student-dashboard", "/student-profile",
 })
-public class AdminFilter implements Filter {
+public class StudentFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -44,11 +47,11 @@ public class AdminFilter implements Filter {
         if (isLoggedIn) {
             User user = (User) session.getAttribute(GlobalConfig.SESSION_ACCOUNT);
             
-            if (user.getRole_id() == GlobalConfig.ROLE_ADMIN) {
-                // Người dùng là Admin, cho phép truy cập
+            if (user.getRole_id().equals(GlobalConfig.ROLE_STUDENT)) {
+                // Người dùng là Student, cho phép truy cập
                 chain.doFilter(request, response);
             } else {
-                // Không phải Admin, chuyển hướng đến trang chủ với thông báo lỗi
+                // Không phải Student, chuyển hướng đến trang chủ với thông báo lỗi
                 session.setAttribute("errorMessage", "Bạn không có quyền truy cập trang này");
                 httpResponse.sendRedirect(httpRequest.getContextPath() + "/home");
             }
