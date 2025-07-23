@@ -214,7 +214,7 @@
                                 </div>
                                 
                                 <!-- Edit Button (for authorized users) -->
-                                <c:if test="${sessionScope.account.role_id == 1}">
+                                <c:if test="${sessionScope.account.role_id == 4}">
                                     <div class="post-actions">
                                         <a href="${pageContext.request.contextPath}/post-details?id=${post.id}" class="btn btn-outline-primary btn-sm">
                                             <i class="fas fa-edit"></i> Edit Post

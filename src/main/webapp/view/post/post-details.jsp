@@ -9,7 +9,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%-- THÊM VÀO ĐÂY - Kiểm tra quyền admin --%>
 <c:choose>
-    <c:when test="${sessionScope.account.role_id != 1}">
+    <c:when test="${sessionScope.account.role_id != 4}">
         <!DOCTYPE html>
         <html lang="en">
         <head>
