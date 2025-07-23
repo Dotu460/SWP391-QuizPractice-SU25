@@ -57,36 +57,12 @@
                             </div>
                             <div class="tgmenu__navbar-wrap tgmenu__main-menu d-flex"> 
                                 <ul class="navigation">
-                                    <li class="menu-item-has-children"><a href="#">Pages</a>
-                                        <ul class="sub-menu">
-                                            <li><a href="${pageContext.request.contextPath}/my-profile">Profile</a></li>
-                                            <li><a href="${pageContext.request.contextPath}/price-package-menu">Course</a></li>
-                                            <li class="menu-item-has-children">
-                                                <a>Blog</a>
-                                                <ul class="sub-menu">
-                                                    <li><a href="${pageContext.request.contextPath}/blog">Blog List</a></li>
-                                                    <li><a href="${pageContext.request.contextPath}/post-details">Post Details</a></li>
-                                                </ul>
-                                            </li>
-                                            <!-- Login/Logout button -->
-                                            <c:choose>
-                                                <c:when test="${not empty sessionScope.user}">
-                                                    <li>
-                                                        <a href="${pageContext.request.contextPath}/logout" class="logout-btn">
-                                                            <i class="fas fa-sign-out-alt"></i> Logout
-                                                        </a>
-                                                    </li>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <li>
-                                                        <a href="${pageContext.request.contextPath}/login" class="login-btn" >
-                                                            <i class="fas fa-sign-in-alt"></i> Login
-                                                        </a>
-                                                    </li>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </ul>
-                                    </li>
+                                    <li><a href="${pageContext.request.contextPath}/my-profile">Profile</a></li>
+                                    <li><a href="${pageContext.request.contextPath}/price-package-menu">Course</a></li>
+                                    <li><a href="${pageContext.request.contextPath}/blog">Blog List</a></li>
+                                    <c:if test="${sessionScope.account.role_id == 4}"> 
+                                    <li><a href="${pageContext.request.contextPath}/slider-list">Slide List</a></li>
+                                    </c:if>
                                     <li class="menu-item-has-children"><a href="#">Dashboard</a>
                                         <ul class="sub-menu">
                                             <li class="menu-item-has-children">
@@ -100,11 +76,11 @@
                                             </li>
                                             <li class="menu-item-has-children"><a href="student-dashboard.html">Expert Dashboard</a>
                                                 <ul class="sub-menu">
-                                                    <li><a href="student-dashboard.html">Dashboard</a></li>
-                                                    <li><a href="student-profile.html">Profile</a></li>
-                                                    <li><a href="student-enrolled-courses.html">Enrolled Courses</a></li>
-                                                    <li><a href="student-wishlist.html">Wishlist</a></li>
-                                                    <li><a href="student-review.html">Reviews</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/manage-subjects">Manage Subject</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/admin/subjects">Subject</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/quizzes-list">Quiz</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/questions-list">Question</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/expert/essay-grading">Essay grading</a></li>
                                                 </ul>
                                             </li>
                                         </ul>

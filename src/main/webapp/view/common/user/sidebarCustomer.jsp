@@ -14,15 +14,15 @@
                     </a>
                 </li>
                 <li>
-                    <a href="${pageContext.request.contextPath}/practice-list">
+                    <a href="${pageContext.request.contextPath}/blog">
                         <i class="skillgro-question"></i>
-                        Practice List
+                        Blog List
                     </a>
                 </li>
                 <li>
-                    <a href="${pageContext.request.contextPath}/my-registration">
+                    <a href="${pageContext.request.contextPath}/price-package-menu">
                         <i class="skillgro-satchel"></i>
-                        My Registration
+                        Course
                     </a>
                 </li>
             </ul>
@@ -34,7 +34,7 @@
         <nav class="dashboard__sidebar-menu">
             <ul class="list-wrap">
                 <li>
-                    <a href="index.html">
+                    <a href= "${pageContext.request.contextPath}/logout">
                         <i class="skillgro-logout"></i>
                         Logout
                     </a>

@@ -10,7 +10,7 @@
 
 <div class="dashboard__sidebar-wrap">
     <div class="dashboard__sidebar-title mb-20">
-        <h6 class="title">, ${sessionScope.user.full_name != null ? sessionScope.user.full_name : 'Admin'}</h6>
+        <h6 class="title">${sessionScope.user.full_name != null ? sessionScope.user.full_name : 'Admin'}</h6>
     </div>
     <nav class="dashboard__sidebar-menu">
         <ul class="list-wrap">
