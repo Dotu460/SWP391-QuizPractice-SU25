@@ -89,7 +89,7 @@
                 <option value="">Select Role</option>
                 <c:forEach var="role" items="${roles}">
                   <option value="${role.id}" ${user.role.id == role.id ? 'selected' : ''}>
-                      ${role.role_name}
+                      ${role.name}
                   </option>
                 </c:forEach>
               </select>

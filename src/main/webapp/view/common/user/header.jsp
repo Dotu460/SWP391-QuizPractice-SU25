@@ -57,80 +57,10 @@
                             </div>
                             <div class="tgmenu__navbar-wrap tgmenu__main-menu d-flex"> 
                                 <ul class="navigation">
-                                    <li class="menu-item-has-children"><a href="#">Home</a>
-                                        <ul class="sub-menu mega-menu">
-                                            <li>
-                                                <ul class="list-wrap mega-sub-menu">
-                                                    <li>
-                                                        <a href="index.html">Main Home</a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="index-2.html">Online Course <span class="tg-badge">Hot</span></a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="index-3.html">University <span class="tg-badge-two">New</span></a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="index-4.html">Yoga Instructor<span class="tg-badge-two">New</span></a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="index-5.html">Kindergarten<span class="tg-badge">Hot</span></a>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                            <li>
-                                                <ul class="list-wrap mega-sub-menu">
-                                                    <li>
-                                                        <a href="index-6.html">Language Academy<span class="tg-badge-two">New</span></a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="index-7.html">Business Coach <span class="tg-badge-two">New</span></a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="index-8.html">Kitchen Coach <span class="tg-badge">Hot</span></a>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                            <li>
-                                                <div class="mega-menu-img">
-                                                    <a href="courses.html"><img src="${pageContext.request.contextPath}/view/common/img/others/mega_menu_img.jpg" alt="img"></a>
-                                                </div>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li class="menu-item-has-children"><a href="#">Courses</a>
-                                        <ul class="sub-menu">
-                                            <li><a href="courses.html">All Courses</a></li>
-                                            <li><a href="course-details.html">Course Details</a></li>
-                                            <li><a href="lesson.html">Course Lesson</a></li>
-                                        </ul>
-                                    </li>
                                     <li class="menu-item-has-children"><a href="#">Pages</a>
                                         <ul class="sub-menu">
-                                            <li><a href="about-us.html">About Us</a></li>
-                                            <li class="menu-item-has-children">
-                                                <a href="instructors.html">Our Instructors</a>
-                                                <ul class="sub-menu">
-                                                    <li><a href="instructors.html">Our Instructors</a></li>
-                                                    <li><a href="instructor-details.html">Instructor Details</a></li>
-                                                </ul>
-                                            </li>
-                                            <li class="menu-item-has-children">
-                                                <a href="events.html">Our Events</a>
-                                                <ul class="sub-menu">
-                                                    <li><a href="events.html">Our Events</a></li>
-                                                    <li><a href="events-details.html">Event Details</a></li>
-                                                </ul>
-                                            </li>
-                                            <li class="menu-item-has-children">
-                                                <a href="shop.html">Shop</a>
-                                                <ul class="sub-menu">
-                                                    <li><a href="shop.html">Shop Page</a></li>
-                                                    <li><a href="shop-details.html">Shop Details</a></li>
-                                                    <li><a href="cart.html">Cart Page</a></li>
-                                                    <li><a href="check-out.html">Checkout</a></li>
-                                                </ul>
-                                            </li>
+                                            <li><a href="${pageContext.request.contextPath}/my-profile">Profile</a></li>
+                                            <li><a href="${pageContext.request.contextPath}/price-package-menu">Course</a></li>
                                             <li class="menu-item-has-children">
                                                 <a>Blog</a>
                                                 <ul class="sub-menu">
@@ -138,10 +68,6 @@
                                                     <li><a href="${pageContext.request.contextPath}/post-details">Post Details</a></li>
                                                 </ul>
                                             </li>
-                                            <li><a href="login.html">Student Login</a></li>
-                                            <li><a href="registration.html">Student Registration</a></li>
-                                            <li><a href="404.html">404 Page</a></li>
-                                            <li><a href="contact.html">contact</a></li>
                                             <!-- Login/Logout button -->
                                             <c:choose>
                                                 <c:when test="${not empty sessionScope.user}">
@@ -200,19 +126,27 @@
                                 <ul class="list-wrap">                                   
                                     <c:choose>
                                         <c:when test="${not empty sessionScope.account}">
-                                            <!-- Nút Change Password -->
-                                            <li style="display: inline;">
-                                                <a href="change-password" class="button-style">Change Password</a>
-                                            </li>
-                                            <!-- Nút Log out -->
-                                            <li style="display: inline;">
-                                                <a href="logout" class="button-style">Log out</a>
+                                            <!-- User Icon với Dropdown khi đã đăng nhập -->
+                                            <li class="user-dropdown-action" style="display: inline; position: relative;">
+                                                <a href="#" class="user-profile-icon" onclick="toggleUserDropdownAction(event)" title="User Menu">
+                                                    <i class="fas fa-user-circle"></i>
+                                                </a>
+                                                <div class="dropdown-menu-action" id="userDropdownAction">
+                                                    <a href="change-password" class="dropdown-item-action">
+                                                        <i class="fas fa-key"></i> Change Password
+                                                    </a>
+                                                    <a href="logout" class="dropdown-item-action">
+                                                        <i class="fas fa-sign-out-alt"></i> Log out
+                                                    </a>
+                                                </div>
                                             </li>
                                         </c:when>
                                         <c:otherwise>
-                                            <!-- Nút Log in -->
+                                            <!-- Cùng User Icon khi chưa đăng nhập - click để vào login -->
                                             <li style="display: inline;">
-                                                <a href="login" class="button-style">Log in</a>
+                                                <a href="login" class="user-profile-icon" title="Login">
+                                                    <i class="fas fa-user-circle"></i>
+                                                </a>
                                             </li>
                                         </c:otherwise>
                                     </c:choose>
@@ -361,50 +295,8 @@
         .navbar-nav .nav-link:hover {
             color: #4A90E2;
         }
-        .navbar-nav .login-btn {
-            background-color: #8B7FD2;
-            color: white !important;
-            border: none;
-            border-radius: 8px;
-            padding: 2px 10px;
-            height: 22px;
-            line-height: 22px;
-            font-size: 13px;
-            font-weight: 300;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 1px 3px rgba(139, 127, 210, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-        .navbar-nav .login-btn:hover {
-            background-color: #7A6DC0;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 5px rgba(139, 127, 210, 0.3);
-        }
-        .navbar-nav .login-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                120deg,
-                transparent,
-                rgba(255, 255, 255, 0.2),
-                transparent
-            );
-            transition: 0.5s;
-        }
-        .navbar-nav .login-btn:hover::before {
-            left: 100%;
-        }
+        
+       
         .navbar-nav {
             display: flex;
             align-items: center;
@@ -434,52 +326,105 @@
         .tgmenu__navbar-wrap {
             margin-top: -5px;
         }
-        .tgmenu__navbar-wrap .navigation .nav-item .nav-link.login-btn {
-            background-color: #8B7FD2;
-            color: white !important;
-            border: none;
-            border-radius: 8px;
-            padding: 4px 16px;
-            height: 28px;
-            line-height: 28px;
-            font-size: 15px;
-            font-weight: 400;
-            text-decoration: none;
-            display: inline-flex;
+
+        /* User Profile Icon - dùng chung cho cả 2 trạng thái */
+        .user-profile-icon {
+            display: inline-flex !important;
             align-items: center;
             justify-content: center;
-            margin: 0;
-            margin-left: 15px;
-            cursor: pointer;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background-color: #6559F5;
+            color: white !important;
+            text-decoration: none;
             transition: all 0.3s ease;
-            box-shadow: 0 1px 3px rgba(139, 127, 210, 0.2);
-            position: relative;
-            overflow: hidden;
-            min-height: unset;
-            max-height: 28px;
+            border: 2px solid #0D006C;
+            box-shadow: 0 2px 8px rgba(101, 89, 245, 0.3);
+            cursor: pointer;
         }
-        .tgmenu__navbar-wrap .navigation .nav-item .nav-link.login-btn:hover {
-            background-color: #7A6DC0;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 5px rgba(139, 127, 210, 0.3);
+
+        .user-profile-icon:hover {
+            background-color: #5a4de6 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(101, 89, 245, 0.4);
+            color: white !important;
+            text-decoration: none;
         }
-        .tgmenu__navbar-wrap .navigation .nav-item .nav-link.login-btn::before {
+
+        .user-profile-icon i {
+            font-size: 22px;
+        }
+
+        /* Dropdown Menu cho Action */
+        .user-dropdown-action {
+            position: relative !important;
+        }
+
+        .dropdown-menu-action {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            min-width: 200px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+
+        .dropdown-menu-action.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item-action {
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            color: #2d3748;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f7fafc;
+        }
+
+        .dropdown-item-action:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item-action:hover {
+            background-color: #f7fafc;
+            color: #6559F5;
+            text-decoration: none;
+        }
+
+        .dropdown-item-action i {
+            margin-right: 10px;
+            width: 18px;
+            font-size: 16px;
+        }
+
+        /* Arrow cho dropdown action */
+        .dropdown-menu-action::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                120deg,
-                transparent,
-                rgba(255, 255, 255, 0.2),
-                transparent
-            );
-            transition: 0.5s;
-        }
-        .tgmenu__navbar-wrap .navigation .nav-item .nav-link.login-btn:hover::before {
-            left: 100%;
+            top: -6px;
+            right: 15px;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-bottom: none;
+            border-right: none;
+            transform: rotate(45deg);
         }
     </style>
 </header>
@@ -504,30 +449,31 @@
 </div>
 
 <script>
-function handleLoginLogout(event) {
+function toggleUserDropdownAction(event) {
     event.preventDefault();
-    const loginBtn = document.querySelector('.login-btn');
+    event.stopPropagation();
     
-    if (loginBtn.textContent.trim() === 'Log Out') {
-        console.log('Attempting to logout...');
-        fetch('${pageContext.request.contextPath}/logout', {
-            method: 'GET',
-            credentials: 'include'
-        })
-        .then(response => {
-            console.log('Logout response:', response);
-            if (response.ok) {
-                console.log('Logout successful');
-                loginBtn.textContent = 'Log In';
-            } else {
-                console.error('Logout failed:', response.status);
-            }
-        })
-        .catch(error => {
-            console.error('Logout error:', error);
-        });
-    } else {
-        window.location.href = '${pageContext.request.contextPath}/login';
-    }
+    const dropdown = document.getElementById('userDropdownAction');
+    dropdown.classList.toggle('show');
 }
+
+// Đóng dropdown khi click ra ngoài (cho action)
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('userDropdownAction');
+    const userBtn = document.querySelector('.user-dropdown-action .user-profile-icon');
+    
+    if (dropdown && !dropdown.contains(event.target) && userBtn && !userBtn.contains(event.target)) {
+        dropdown.classList.remove('show');
+    }
+});
+
+// Đóng dropdown khi nhấn ESC (cho action)
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        const dropdown = document.getElementById('userDropdownAction');
+        if (dropdown) {
+            dropdown.classList.remove('show');
+        }
+    }
+});
 </script>

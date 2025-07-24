@@ -24,16 +24,11 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
 
     @Override
     public List<Role> findAll() {
-        String sql = "select * from role";
+        String sql = "SELECT id, name FROM role";
         List<Role> listRole = new ArrayList<>();
         try {
-            //tao connection
             connection = getConnection();
-            //chuan bi cho statmenet
             statement = connection.prepareStatement(sql);
-            //set parameter (optional)
-
-            //thuc thi cau lenh
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 Role role = getFromResultSet(resultSet);
@@ -49,15 +44,14 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
 
     @Override
     public boolean update(Role t) {
-        String sql = "UPDATE role SET role_name = ?, description = ?, created_at = ? WHERE id = ?";
+        String sql = "UPDATE role SET name = ? WHERE id = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setString(1, t.getRole_name());
-            statement.setString(2, t.getDescription());
-            statement.setDate(3, t.getCreated_at());
-            statement.setInt(4, t.getId());
-            statement.executeUpdate();
+            statement.setString(1, t.getName());
+            statement.setInt(2, t.getId());
+            int rowsAffected = statement.executeUpdate();
+            return rowsAffected > 0;
         } catch (SQLException e) {
             System.out.println("Error update at class RoleDAO: " + e.getMessage());
         } finally {
@@ -86,14 +80,13 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
 
     @Override
     public int insert(Role t) {
-        String sql = "INSERT INTO  (role_name, description, created_at) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO role (name) VALUES (?)";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setString(1, t.getRole_name());
-            statement.setString(2, t.getDescription());
-            statement.setDate(3, t.getCreated_at());
-            statement.executeUpdate();
+            statement.setString(1, t.getName());
+            int rowsAffected = statement.executeUpdate();
+            return rowsAffected;
         } catch (SQLException e) {
             System.out.println("Error insert at class RoleDAO: " + e.getMessage());
         } finally {
@@ -107,16 +100,14 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
         Role role = Role
                 .builder()
                 .id(resultSet.getInt("id"))
-                .role_name(resultSet.getString("role_name"))
-                .description(resultSet.getString("description"))
-                .created_at(resultSet.getDate("created_at"))
+                .name(resultSet.getString("name"))
                 .build();
         return role;
     }
 
     @Override
     public Role findById(Integer id) {
-        String sql = "SELECT id, role_name, description FROM role WHERE id = ?";
+        String sql = "SELECT id, name FROM role WHERE id = ?";
         Role role = null;
         try {
             connection = getConnection();
@@ -126,8 +117,7 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
             if (resultSet.next()) {
                 role = new Role();
                 role.setId(resultSet.getInt("id"));
-                role.setRole_name(resultSet.getString("role_name"));
-                role.setDescription(resultSet.getString("description"));
+                role.setName(resultSet.getString("name"));
             }
         } catch (SQLException e) {
             System.out.println("Error findById at class RoleDAO: " + e.getMessage());
@@ -139,7 +129,7 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
 
     public String getRoleNameById(Integer roleId) {
         Role role = findById(roleId);
-        return role != null ? role.getRole_name() : "Unknown";
+        return role != null ? role.getName() : "Unknown";
     }
 
 //    @Override

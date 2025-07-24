@@ -108,8 +108,31 @@ public class AuthenController extends HttpServlet {
         
         try {
             User user = userDAO.findByEmailAndPassword(email, password);
+             if (user != null) {
+            // Ensure user có defaults nếu chưa có
+            boolean needUpdate = false;
             
-            if (user != null) {
+            if (user.getRole_id() == null || user.getRole_id() == 0) {
+                user.setRole_id(2);  // Student role
+                needUpdate = true;
+            }
+            
+            if (user.getStatus() == null || user.getStatus().isEmpty()) {
+                user.setStatus("active");
+                needUpdate = true;
+            }
+            
+            // Update database nếu cần
+            if (needUpdate) {
+                userDAO.update(user);
+            }
+            
+            // Chỉ cho phép login nếu status = active
+            if (!"active".equals(user.getStatus())) {
+                request.setAttribute("error", "Your account is not active. Please contact administrator.");
+                request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
+                return;
+            }
                 HttpSession session = request.getSession();
                 session.setAttribute(GlobalConfig.SESSION_ACCOUNT, user);
                
@@ -424,6 +447,9 @@ public class AuthenController extends HttpServlet {
             newUser.setEmail(email);
             newUser.setPassword(password);
             newUser.setMobile(mobile);
+            
+            newUser.setRole_id(2);        // Student role
+            newUser.setStatus("active");  // Active status
             
             // Optional fields - let them be NULL
             String fullName = (String) session.getAttribute("fullName");

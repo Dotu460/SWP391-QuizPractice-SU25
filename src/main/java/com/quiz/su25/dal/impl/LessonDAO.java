@@ -359,4 +359,49 @@ public class LessonDAO extends DBContext implements I_DAO<Lesson> {
         LessonDAO dao = new LessonDAO();
         dao.findAll().forEach(System.out::println);
     }
+    
+    /**
+     * Check if lesson title exists within the same subject
+     */
+    public boolean isTitleExistsInSubject(String title, Integer subjectId) {
+        String sql = "SELECT COUNT(*) FROM Lessons WHERE title = ? AND subject_id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, title);
+            statement.setInt(2, subjectId);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            System.out.println("Error isTitleExistsInSubject at class LessonDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return false;
+    }
+    
+    /**
+     * Check if lesson title exists within the same subject excluding a specific lesson
+     */
+    public boolean isTitleExistsInSubjectExcluding(String title, Integer subjectId, Integer excludeLessonId) {
+        String sql = "SELECT COUNT(*) FROM Lessons WHERE title = ? AND subject_id = ? AND id != ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, title);
+            statement.setInt(2, subjectId);
+            statement.setInt(3, excludeLessonId);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            System.out.println("Error isTitleExistsInSubjectExcluding at class LessonDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return false;
+    }
 } 

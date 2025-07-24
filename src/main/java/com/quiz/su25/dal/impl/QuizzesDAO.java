@@ -292,6 +292,51 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
         int total = quizzesDAO.getTotalFilteredQuizzes(null, null, null, null);
         System.out.println(total);
     }
+    
+    /**
+     * Check if quiz name exists within the same lesson
+     */
+    public boolean isNameExistsInLesson(String name, Integer lessonId) {
+        String sql = "SELECT COUNT(*) FROM Quizzes WHERE name = ? AND lesson_id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, name);
+            statement.setInt(2, lessonId);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            System.out.println("Error isNameExistsInLesson at class QuizzesDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return false;
+    }
+    
+    /**
+     * Check if quiz name exists within the same lesson excluding a specific quiz
+     */
+    public boolean isNameExistsInLessonExcluding(String name, Integer lessonId, Integer excludeQuizId) {
+        String sql = "SELECT COUNT(*) FROM Quizzes WHERE name = ? AND lesson_id = ? AND id != ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, name);
+            statement.setInt(2, lessonId);
+            statement.setInt(3, excludeQuizId);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            System.out.println("Error isNameExistsInLessonExcluding at class QuizzesDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return false;
+    }
 
     public boolean hasEssayQuestions(Quizzes quiz) {
         // Implementation of hasEssayQuestions method

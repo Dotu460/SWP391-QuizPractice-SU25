@@ -4,6 +4,7 @@
  */
 package com.quiz.su25.controller;
 
+import com.quiz.su25.config.GlobalConfig;
 import com.quiz.su25.dal.impl.UserDAO;
 import com.quiz.su25.dal.impl.RoleDAO;
 import com.quiz.su25.entity.Role;
@@ -54,25 +55,21 @@ public class UserProfileController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-//        HttpSession session = request.getSession();
-//        User sessionUser = (User) session.getAttribute("user");
-        // Kiểm tra xem user đã login hay chưa
-//        if (sessionUser == null) {
-//            response.sendRedirect("login");
-//            return;
-//        }
-        // Lấy thông tin user mới nhất từ database
-//        User currentUser = userDAO.findById(sessionUser.getId());
-//        if (currentUser != null) {
-//            session.setAttribute("user", currentUser);
-//        }
-        User currentUser = userDAO.findById(10);
+        // Lấy thông tin user từ session
+        HttpSession session = request.getSession();
+        User currentUser = (User) session.getAttribute(GlobalConfig.SESSION_ACCOUNT);
+        
+        if (currentUser == null) {
+            // Nếu user chưa đăng nhập, chuyển hướng về trang login
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
 
-        // Lấy role name từ database
-        String roleName = roleDAO.getRoleNameById(currentUser.getRole_id());
-        request.setAttribute("roleName", roleName);
+        // Set roleDAO vào request để JSP có thể sử dụng
+        request.setAttribute("roleDAO", roleDAO);
 
-        request.getSession().setAttribute("user", currentUser);
+        // JSP sử dụng sessionScope.user, nên set vào session
+        session.setAttribute("user", currentUser);
         request.getRequestDispatcher("view/user/myprofile/my-profile.jsp").forward(request, response);
     }
 
@@ -81,7 +78,13 @@ public class UserProfileController extends HttpServlet {
             throws ServletException, IOException {
         String action = request.getParameter("action");
         HttpSession session = request.getSession();
-        User sessionUser = (User) session.getAttribute("user");
+        User sessionUser = (User) session.getAttribute(GlobalConfig.SESSION_ACCOUNT);
+
+        // Kiểm tra user authentication
+        if (sessionUser == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
 
         try {
             switch (action) {
