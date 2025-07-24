@@ -42,6 +42,12 @@ public class StudentFilter implements Filter {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         HttpSession session = httpRequest.getSession(false);
 
+        System.out.println("StudentFilter: session=" + session);
+        if (session != null) {
+            Object acc = session.getAttribute(com.quiz.su25.config.GlobalConfig.SESSION_ACCOUNT);
+            System.out.println("StudentFilter: account=" + acc);
+        }
+
         boolean isLoggedIn = (session != null && session.getAttribute(GlobalConfig.SESSION_ACCOUNT) != null);
         
         if (isLoggedIn) {

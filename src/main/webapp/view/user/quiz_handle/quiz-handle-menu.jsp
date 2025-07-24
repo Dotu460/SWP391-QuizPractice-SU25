@@ -457,6 +457,17 @@
                     color: #dc3545;
                     border: 1.5px solid #dc3545;
                 }
+        .badge.lesson-badge {
+            max-width: 100%;
+            display: inline-block;
+            white-space: normal;
+            overflow: visible;
+            text-overflow: unset;
+            vertical-align: middle;
+            word-break: break-word;
+            line-height: 1.3;
+            padding: 6px 14px;
+        }
     </style>
 </head>
 
@@ -487,6 +498,20 @@
                                             <span>Package: <b>${packageName}</b></span>
                                         </div>
                                     </c:if>
+                                <div class="mb-4 d-flex justify-content-between align-items-center">
+                                    <c:choose>
+                                        <c:when test="${not empty param.packageId}">
+                                            <a href="${pageContext.request.contextPath}/price-package-menu?id=${param.packageId}" class="btn btn-secondary rounded-pill">
+                                                <i ></i> Package Detail
+                                            </a>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <a href="${pageContext.request.contextPath}/price-package-menu" class="btn btn-secondary rounded-pill">
+                                                <i ></i> Package Detail
+                                            </a>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
                                 <div class="dashboard__content-title mb-4">
                                     <h4 class="title">Available Quizzes</h4>
                                 </div>
@@ -567,8 +592,7 @@
                                                                 <div class="col quiz-card-wrapper ${displayClass}" data-quiz-name="${fn:toLowerCase(quiz.name)}">
                                             <div class="card h-100 quiz-card">
                                                 <div class="card-body">
-                                                    <span class="quiz-level level-${quiz.level.toLowerCase()}">${quiz.level}</span>
-                                                                            <!-- Lesson badge -->
+                                                    <!-- Lesson badge -->
                                                                             <span class="badge lesson-badge mb-2" 
                                                                                   style="font-size:0.98em; font-weight:600; background:linear-gradient(90deg,#e9e6fa,#cfc6f7);color:#4b2991; border:1.5px solid #8B7FD2; padding:6px 14px; display:inline-flex; align-items:center; gap:6px; cursor:pointer;"
                                                                                   title="Lesson: ${lessonTitles[quiz.lesson_id]} - thuộc subject: ${subjectTitles[lessonToSubject[quiz.lesson_id]]}">
@@ -679,12 +703,19 @@
     <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
     <script>
         function startQuiz(quizId, isRetake) {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const packageId = urlParams.get('packageId');
-                    let url = '${pageContext.request.contextPath}/quiz-handle?id=' + quizId;
-                    if (packageId) url += '&packageId=' + packageId;
-                    if (isRetake) url += '&retake=true&t=' + new Date().getTime();
-                    window.location.href = url;
+            // Clear previous answers and state if retake
+            if (isRetake) {
+                sessionStorage.removeItem('selectedAnswers');
+                sessionStorage.removeItem('answeredQuestions');
+                sessionStorage.removeItem('markedQuestions');
+                sessionStorage.removeItem('quizScore');
+            }
+            const urlParams = new URLSearchParams(window.location.search);
+            const packageId = urlParams.get('packageId');
+            let url = '${pageContext.request.contextPath}/quiz-handle?id=' + quizId;
+            if (packageId) url += '&packageId=' + packageId;
+            if (isRetake) url += '&retake=true&t=' + new Date().getTime();
+            window.location.href = url;
         }
 
         function reviewQuiz(quizId) {

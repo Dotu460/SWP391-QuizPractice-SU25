@@ -116,6 +116,18 @@
             color: #fff;
             box-shadow: 0 10px 32px 0 rgba(87,81,225,0.22);
         }
+        .main-title-package {
+            font-size: 2.1rem;
+            font-weight: 800;
+            color: #5751e1;
+            letter-spacing: 1px;
+            margin-bottom: 18px;
+            text-shadow: 0 2px 8px rgba(87,81,225,0.08);
+            background: linear-gradient(90deg, #8B7FD2 0%, #5751e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
     </style>
 </head>
 
@@ -142,8 +154,8 @@
                                 <!-- Title and Back Button Row -->
                                 <div class="row mb-4">
                                     <div class="col">
-                                        <div class="dashboard__content-title d-flex justify-content-between">
-                                            <h4 class="title">Price Package Details</h4>
+                                        <div class="dashboard__content-title d-flex justify-content-between align-items-center">
+                                            <h4 class="main-title-package">Price Package Details</h4>
                                             <a href="${pageContext.request.contextPath}/price-package-menu" class="btn btn-secondary rounded-pill">
                                                 <i class="fa fa-arrow-left me-2"></i> Back to Packages
                                             </a>
@@ -158,18 +170,6 @@
                                                 <h5 class="mb-0">Package #${pricePackage.id} - ${pricePackage.name}</h5>
                                             </div>
                                             <div class="card-body">
-                                                <!-- Status Badge -->
-                                                <div class="text-end mb-4">
-                                                    <span class="package-status 
-                                                        <c:choose>
-                                                            <c:when test="${pricePackage.status eq 'active'}">status-active</c:when>
-                                                            <c:when test="${pricePackage.status eq 'inactive'}">status-inactive</c:when>
-                                                            <c:otherwise>status-draft</c:otherwise>
-                                                        </c:choose>
-                                                    ">
-                                                        ${pricePackage.status}
-                                                    </span>
-                                                </div>
                                                 <!-- Package Basic Information Section -->
                                                 <div class="details-section">
                                                     <h5>Package Information</h5>
@@ -294,9 +294,9 @@
                                                         <c:choose>
                                                             <c:when test="${isPurchased}">
                                                                 <!-- User has purchased this package -->
-                                                                <button class="purchase-btn-theme" style="background:#28a745; cursor:default;" disabled>
-                                                                    ✓ Already purchased
-                                                                </button>
+                                                                <a href="${pageContext.request.contextPath}/quiz-handle-menu?packageId=${pricePackage.id}" class="purchase-btn-theme" style="background:#28a745; text-decoration:none; display:inline-block;">
+                                                                    Access
+                                                                </a>
                                                             </c:when>
                                                             <c:otherwise>
                                                                 <!-- User hasn't purchased this package -->
