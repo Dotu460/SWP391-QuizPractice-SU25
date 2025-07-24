@@ -51,7 +51,7 @@ public class AdminExpertFilter implements Filter {
                 chain.doFilter(request, response);
             } else {
                 // Không phải Expert hoặc Admin, chuyển hướng đến trang chủ với thông báo lỗi
-                session.setAttribute("errorMessage", "Bạn không có quyền truy cập trang này");
+                //session.setAttribute("errorMessage", "Bạn không có quyền truy cập trang này");
                 httpResponse.sendRedirect(httpRequest.getContextPath() + "/home");
             }
         } else {

@@ -101,10 +101,6 @@ public class QuestionListController extends HttpServlet {
         String path = request.getServletPath();
         String action = request.getParameter("action");
 
-        if ("/upload-media".equals(path)) {
-            handleMediaUpload(request, response);
-            return;
-        }
 
         if (action == null) {
             action = "list";
@@ -176,13 +172,13 @@ public class QuestionListController extends HttpServlet {
             int totalRecords = questionDAO.getTotalFilteredQuestions(content, subjectId, lessonId, quizId, status);
 
             // Handle records per page
-            int recordsPerPage = totalRecords;
+            int recordsPerPage = 5;
             String recordsPerPageStr = request.getParameter("recordsPerPage");
             if (recordsPerPageStr != null && !recordsPerPageStr.trim().isEmpty()) {
                 try {
                     recordsPerPage = Integer.parseInt(recordsPerPageStr);
                     if (recordsPerPage < 1) {
-                        recordsPerPage = totalRecords;
+                        recordsPerPage = 5;
                     }
                 } catch (NumberFormatException e) {
                     System.out.println("Invalid records per page format: " + e.getMessage());
@@ -518,91 +514,7 @@ public class QuestionListController extends HttpServlet {
         }
     }
 
-    private void handleMediaUpload(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("application/json");
-        PrintWriter out = response.getWriter();
-        StringBuilder jsonResponse = new StringBuilder();
-        jsonResponse.append("{");
 
-        try {
-            Part filePart = request.getPart("file");
-
-            if (filePart == null) {
-                jsonResponse.append("\"success\": false,");
-                jsonResponse.append("\"message\": \"No file found in the request\"");
-                jsonResponse.append("}");
-                out.print(jsonResponse.toString());
-                return;
-            }
-
-            String fileName = getFileName(filePart);
-            if (fileName == null || fileName.isEmpty()) {
-                jsonResponse.append("\"success\": false,");
-                jsonResponse.append("\"message\": \"Invalid file name\"");
-                jsonResponse.append("}");
-                out.print(jsonResponse.toString());
-                return;
-            }
-
-            // Validate file type
-            String fileType = filePart.getContentType();
-            if (!fileType.startsWith("image/") && !fileType.startsWith("video/")) {
-                jsonResponse.append("\"success\": false,");
-                jsonResponse.append("\"message\": \"Only image and video files are allowed\"");
-                jsonResponse.append("}");
-                out.print(jsonResponse.toString());
-                return;
-            }
-
-            // Create year/month based subdirectories
-            String timestamp = String.valueOf(System.currentTimeMillis());
-            String uniqueFileName = timestamp + "_" + fileName;
-
-            // Create upload directory if it doesn't exist
-            String uploadPath = getServletContext().getRealPath("/" + UPLOAD_DIRECTORY);
-            File uploadDir = new File(uploadPath);
-            if (!uploadDir.exists()) {
-                uploadDir.mkdirs();
-            }
-
-            String filePath = uploadPath + File.separator + uniqueFileName;
-            filePart.write(filePath);
-
-            String fileUrl = "/SWP391_QUIZ_PRACTICE_SU25/" + UPLOAD_DIRECTORY + "/" + uniqueFileName;
-
-            // Return response based on TinyMCE requirements
-            if (fileType.startsWith("image/")) {
-                jsonResponse.append("\"location\": \"").append(fileUrl).append("\"");
-            } else {
-                // For video, return both location and additional info
-                jsonResponse.append("\"location\": \"").append(fileUrl).append("\",");
-                jsonResponse.append("\"title\": \"").append(fileName).append("\",");
-                jsonResponse.append("\"success\": true");
-            }
-
-        } catch (Exception e) {
-            jsonResponse.append("\"success\": false,");
-            jsonResponse.append("\"message\": \"Error uploading file: ").append(e.getMessage()).append("\"");
-            e.printStackTrace();
-        }
-
-        jsonResponse.append("}");
-        out.print(jsonResponse.toString());
-    }
-
-    private String getFileName(Part part) {
-        String contentDisposition = part.getHeader("content-disposition");
-        String[] elements = contentDisposition.split(";");
-
-        for (String element : elements) {
-            if (element.trim().startsWith("filename")) {
-                return element.substring(element.indexOf('=') + 1).trim().replace("\"", "");
-            }
-        }
-
-        return null;
-    }
 
     private void importFromExcel(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
@@ -876,27 +788,81 @@ public class QuestionListController extends HttpServlet {
             Question question = questionDAO.findById(questionId);
 
             if (question != null) {
-                boolean success = questionDAO.delete(question);
-                if (success) {
+                // Delete all question options first to avoid foreign key constraint violation
+                boolean optionsDeleted = questionOptionDAO.deleteByQuestionId(questionId);
+                
+                // Then delete the question
+                boolean questionDeleted = questionDAO.delete(question);
+                
+                if (questionDeleted) {
                     request.getSession().setAttribute("toastMessage", "Question deleted successfully");
                     request.getSession().setAttribute("toastType", "success");
                 } else {
                     request.getSession().setAttribute("toastMessage", "Failed to delete question");
-                    request.getSession().setAttribute("toastType", "danger");
+                    request.getSession().setAttribute("toastType", "error");
                 }
             } else {
                 request.getSession().setAttribute("toastMessage", "Question not found");
-                request.getSession().setAttribute("toastType", "danger");
+                request.getSession().setAttribute("toastType", "error");
             }
         } catch (NumberFormatException e) {
             request.getSession().setAttribute("toastMessage", "Invalid question ID");
-            request.getSession().setAttribute("toastType", "danger");
+            request.getSession().setAttribute("toastType", "error");
         } catch (Exception e) {
             request.getSession().setAttribute("toastMessage", "Error deleting question: " + e.getMessage());
-            request.getSession().setAttribute("toastType", "danger");
+            request.getSession().setAttribute("toastType", "error");
         }
 
-        response.sendRedirect(request.getContextPath() + "/questions-list");
+        // Preserve filter state after deletion
+        StringBuilder redirectURL = new StringBuilder(request.getContextPath()).append("/questions-list");
+        List<String> params = new ArrayList<>();
+
+        // Add filter parameters if they exist
+        String page = request.getParameter("page");
+        String content = request.getParameter("content");
+        String subjectId = request.getParameter("subjectId");
+        String lessonId = request.getParameter("lessonId");
+        String quizId = request.getParameter("quizId");
+        String status = request.getParameter("status");
+        String recordsPerPage = request.getParameter("recordsPerPage");
+
+        if (page != null && !page.isEmpty()) {
+            params.add("page=" + page);
+        }
+        if (content != null && !content.isEmpty()) {
+            try {
+                params.add("content=" + URLEncoder.encode(content, "UTF-8"));
+            } catch (Exception e) {
+                // If encoding fails, skip this parameter
+            }
+        }
+        if (subjectId != null && !subjectId.isEmpty() && !"0".equals(subjectId)) {
+            params.add("subjectId=" + subjectId);
+        }
+        if (lessonId != null && !lessonId.isEmpty() && !"0".equals(lessonId)) {
+            params.add("lessonId=" + lessonId);
+        }
+        if (quizId != null && !quizId.isEmpty() && !"0".equals(quizId)) {
+            params.add("quizId=" + quizId);
+        }
+        if (status != null && !status.isEmpty()) {
+            try {
+                params.add("status=" + URLEncoder.encode(status, "UTF-8"));
+            } catch (Exception e) {
+                // If encoding fails, skip this parameter
+            }
+        }
+        if (recordsPerPage != null && !recordsPerPage.isEmpty()) {
+            params.add("recordsPerPage=" + recordsPerPage);
+        }
+
+        // Add parameters to URL
+        if (!params.isEmpty()) {
+            redirectURL.append("?").append(String.join("&", params));
+        }
+
+        // Redirect back to list with preserved filters
+        response.sendRedirect(redirectURL.toString());
     }
 
     private void deleteQuestionOption(HttpServletRequest request, HttpServletResponse response) 

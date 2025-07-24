@@ -187,12 +187,12 @@ public class QuizzesListController extends HttpServlet {
             if (quiz != null) {
                 boolean deleted = quizzesDAO.delete(quiz);
                 if (deleted) {
-                    request.setAttribute("successMessage", "Quiz deleted successfully!");
+                    request.getSession().setAttribute("successMessage", "Quiz deleted successfully!");
                 } else {
-                    request.setAttribute("errorMessage", "Failed to delete quiz!");
+                    request.getSession().setAttribute("errorMessage", "Failed to delete quiz!");
                 }
             } else {
-                request.setAttribute("errorMessage", "Quiz not found!");
+                request.getSession().setAttribute("errorMessage", "Quiz not found!");
             }
 
             // Preserve filter state after deletion
@@ -227,7 +227,7 @@ public class QuizzesListController extends HttpServlet {
             response.sendRedirect(redirectURL.toString());
 
         } catch (NumberFormatException e) {
-            request.setAttribute("errorMessage", "Invalid quiz ID!");
+            request.getSession().setAttribute("errorMessage", "Invalid quiz ID!");
             response.sendRedirect(request.getContextPath() + "/quizzes-list");
         }
     }

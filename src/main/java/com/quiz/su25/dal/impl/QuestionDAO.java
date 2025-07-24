@@ -88,7 +88,7 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
         String sql = "INSERT INTO Question (quiz_id, type, content, media_url, level, status, explanation, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             connection = getConnection();
-            statement = connection.prepareStatement(sql);
+            statement = connection.prepareStatement(sql, statement.RETURN_GENERATED_KEYS);
             statement.setInt(1, t.getQuiz_id());
             statement.setString(2, t.getType());
             statement.setString(3, t.getContent());
@@ -96,9 +96,17 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
             statement.setString(5, t.getLevel());
             statement.setString(6, t.getStatus());
             statement.setString(7, t.getExplanation());
-            statement.setInt(8, t.getCreated_by());
+            statement.setInt(8, t.getCreated_by() != null ? t.getCreated_by() : 0);
             
-            return statement.executeUpdate();
+            int result = statement.executeUpdate();
+            if (result > 0) {
+                // Get the generated ID
+                ResultSet generatedKeys = statement.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                }
+            }
+            return 0;
         } catch (Exception e) {
             System.out.println("Error insert at class QuestionDAO: " + e.getMessage());
             return 0;

@@ -349,6 +349,34 @@
                                 </div>
                             </div>
 
+                            <!-- Success/Error Messages -->
+                            <c:if test="${not empty sessionScope.successMessage}">
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="fa fa-check-circle"></i> <strong>Success:</strong> ${sessionScope.successMessage}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                                <c:remove var="successMessage" scope="session" />
+                            </c:if>
+                            <c:if test="${not empty sessionScope.errorMessage}">
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="fa fa-exclamation-triangle"></i> <strong>Error:</strong> ${sessionScope.errorMessage}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                                <c:remove var="errorMessage" scope="session" />
+                            </c:if>
+                            <c:if test="${not empty successMessage}">
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="fa fa-check-circle"></i> <strong>Success:</strong> ${successMessage}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            </c:if>
+                            <c:if test="${not empty errorMessage}">
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="fa fa-exclamation-triangle"></i> <strong>Error:</strong> ${errorMessage}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            </c:if>
+
                             <!-- Filter Section -->
                             <div class="filter-section">
                                 <form action="${pageContext.request.contextPath}/quizzes-list" method="get" id="filterForm">
@@ -680,6 +708,13 @@
                 this.value = ''; // Empty value to show all records
             }
             this.form.submit();
+        });
+        
+        // Auto-hide success/error alerts after 5 seconds
+        $(document).ready(function() {
+            setTimeout(function() {
+                $('.alert').fadeOut(500);
+            }, 5000);
         });
     </script>
 </body>

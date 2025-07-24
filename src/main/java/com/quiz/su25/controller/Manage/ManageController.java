@@ -307,8 +307,10 @@ public class ManageController extends HttpServlet {
                     String mediaUrl = request.getParameter("questions[" + index + "].media_url");
                     String questionType = request.getParameter("questions[" + index + "].type");
                     String questionLevel = request.getParameter("questions[" + index + "].level");
+                    String questionStatus = request.getParameter("questions[" + index + "].status");
                     String explanation = request.getParameter("questions[" + index + "].explanation");
                     String questionIdStr = request.getParameter("questions[" + index + "].id");
+                    
                     
                     Question question;
                     int questionId = 0;
@@ -348,20 +350,25 @@ public class ManageController extends HttpServlet {
                     question.setType(questionType);
                     question.setLevel(questionLevel);
                     question.setExplanation(explanation);
-                    question.setStatus("active");
+                    question.setStatus(questionStatus != null && !questionStatus.isEmpty() ? questionStatus : "active");
                     
                     if (questionIdStr != null && !questionIdStr.isEmpty()) {
+                        System.out.println("  Updating existing question with ID: " + questionIdStr);
                         boolean questionUpdated = questionDAO.update(question);
                         if (!questionUpdated) {
                             throw new Exception("Failed to update question: " + questionId);
                         }
                         questionId = question.getId();
+                        System.out.println("  Question updated successfully");
                     } else {
+                        System.out.println("  Creating new question...");
                         questionId = questionDAO.insert(question);
+                        System.out.println("  QuestionDAO.insert() returned: " + questionId);
                         if (questionId <= 0) {
                             throw new Exception("Failed to create new question");
                         }
                         question.setId(questionId);
+                        System.out.println("  New question created with ID: " + questionId);
                     }
 
                     // Process options - only if they exist in the form
@@ -484,13 +491,24 @@ public class ManageController extends HttpServlet {
             // Set success message and reload the quiz data
             request.setAttribute("successMessage", "Quiz updated successfully!");
             
+            // Set the id parameter for viewQuiz method
+            request.setAttribute("id", String.valueOf(quizId));
+            
             // Reload quiz data and forward back to the same page
-            viewQuiz(request, response);
+            viewQuizWithId(request, response, quizId);
 
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", e.getMessage());
-            viewQuiz(request, response);
+            
+            // Set the id parameter for viewQuiz method in case of error
+            try {
+                int quizId = Integer.parseInt(request.getParameter("quizId"));
+                request.setAttribute("id", String.valueOf(quizId));
+                viewQuizWithId(request, response, quizId);
+            } catch (Exception ex) {
+                response.sendRedirect(request.getContextPath() + "/manage-subjects?error=invalidQuizId");
+            }
         }
     }
 
@@ -542,7 +560,17 @@ public class ManageController extends HttpServlet {
     private void viewQuiz(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             int quizId = Integer.parseInt(request.getParameter("id"));
-            
+            viewQuizWithId(request, response, quizId);
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/manage-subjects?error=invalidQuizId");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect(request.getContextPath() + "/manage-subjects?error=" + e.getMessage());
+        }
+    }
+    
+    private void viewQuizWithId(HttpServletRequest request, HttpServletResponse response, int quizId) throws ServletException, IOException {
+        try {
             // Get quiz information
             Quizzes quiz = quizzesDAO.findById(quizId);
             if (quiz != null) {
@@ -575,8 +603,6 @@ public class ManageController extends HttpServlet {
             } else {
                 response.sendRedirect(request.getContextPath() + "/manage-subjects?error=quizNotFound");
             }
-        } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/manage-subjects?error=invalidQuizId");
         } catch (Exception e) {
             e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/manage-subjects?error=" + e.getMessage());

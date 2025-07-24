@@ -173,6 +173,19 @@
                                                                             </option>
                                                                         </c:forEach>
                                                                     </select>
+                                                                    
+                                                                    <!-- Check if no lessons available -->
+                                                                    <c:if test="${empty lessonsList}">
+                                                                        <div class="alert alert-warning mt-2 mb-0" role="alert">
+                                                                            <i class="fa fa-exclamation-triangle me-2"></i>
+                                                                            <strong>No lessons found!</strong> 
+                                                                            You need to create lessons first before creating quizzes.
+                                                                            <br>
+                                                                            <a href="${pageContext.request.contextPath}/manage-subjects/add-lesson" class="btn btn-sm btn-outline-primary mt-2">
+                                                                                <i class="fa fa-plus"></i> Create New Lesson
+                                                                            </a>
+                                                                        </div>
+                                                                    </c:if>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-6">
@@ -187,12 +200,12 @@
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
-                                                                    <label for="level" class="form-label">LevelLevel <span class="required">*</span></label>
+                                                                    <label for="level" class="form-label">Level <span class="required">*</span></label>
                                                                     <select class="form-control" id="level" name="level" required>
                                                                         <option value="">Choose Level</option>
-                                                                        <option value="easy" ${param.level == 'easy' ? 'selected' : ''}>easy</option>
+                                                                        <option value="easy" ${param.level == 'easy' ? 'selected' : ''}>Easy</option>
                                                                         <option value="medium" ${param.level == 'medium' ? 'selected' : ''}>Medium</option>
-                                                                        <option value="hard" ${param.level == 'hard' ? 'selected' : ''}>hard</option>
+                                                                        <option value="hard" ${param.level == 'hard' ? 'selected' : ''}>Hard</option>
                                                                     </select>
                                                                 </div>
                                                             </div>
@@ -224,10 +237,19 @@
                                                         <a href="${pageContext.request.contextPath}/quizzes-list" class="btn btn-secondary">
                                                             <i class="fa fa-times"></i> Cancel
                                                         </a>
-                                                        <button type="submit" class="btn btn-success">
+                                                        <button type="submit" class="btn btn-success" 
+                                                                ${empty lessonsList ? 'disabled title="Please create lessons first"' : ''}>
                                                             <i class="fa fa-plus"></i> Create Quiz
                                                         </button>
                                                     </div>
+                                                    
+                                                    <c:if test="${empty lessonsList}">
+                                                        <div class="alert alert-info mt-3" role="alert">
+                                                            <i class="fa fa-info-circle me-2"></i>
+                                                            <strong>Important:</strong> You cannot create a quiz without lessons. 
+                                                            Please create at least one lesson first, then come back to create your quiz.
+                                                        </div>
+                                                    </c:if>
                                                 </form>
                                             </div>
                                         </div>
@@ -249,8 +271,44 @@
     <!-- JS here -->
     <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
     
-
-
+    <script>
+        $(document).ready(function() {
+            // Check if lessons list is empty
+            <c:choose>
+                <c:when test="${not empty lessonsList}">
+                    var hasLessons = true;
+                </c:when>
+                <c:otherwise>
+                    var hasLessons = false;
+                </c:otherwise>
+            </c:choose>
+            
+            // Handle form submission
+            $('form').on('submit', function(e) {
+                if (!hasLessons) {
+                    e.preventDefault();
+                    alert('Cannot create quiz without lessons. Please create lessons first.');
+                    return false;
+                }
+                
+                // Additional validation
+                var lessonId = $('#lesson_id').val();
+                if (!lessonId || lessonId === '') {
+                    e.preventDefault();
+                    alert('Please select a lesson for this quiz.');
+                    $('#lesson_id').focus();
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            // Auto-hide success/error alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert').fadeOut(500);
+            }, 5000);
+        });
+    </script>
     
 </body>
 
