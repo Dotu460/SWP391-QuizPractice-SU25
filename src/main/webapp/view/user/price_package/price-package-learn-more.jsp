@@ -303,7 +303,7 @@
                                                                 <c:choose>
                                                                     <c:when test="${empty currentUser}">
                                                                         <!-- User not logged in -->
-                                                                        <a href="${pageContext.request.contextPath}/login" class="purchase-btn-theme" style="text-decoration:none; display:inline-block;">
+                                                                        <a href="${pageContext.request.contextPath}/login?redirect=${pageContext.request.contextPath}/price-package-menu?id=${pricePackage.id}" class="purchase-btn-theme" style="text-decoration:none; display:inline-block;">
                                                                            Purchase 
                                                                         </a>
                                                                     </c:when>
