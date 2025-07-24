@@ -295,7 +295,7 @@
                                                             <c:when test="${isPurchased}">
                                                                 <!-- User has purchased this package -->
                                                                 <button class="purchase-btn-theme" style="background:#28a745; cursor:default;" disabled>
-                                                                    ✓ Đã thanh toán
+                                                                    ✓ Already purchased
                                                                 </button>
                                                             </c:when>
                                                             <c:otherwise>

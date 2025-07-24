@@ -40,9 +40,13 @@ public class QuizHandleMenuController extends HttpServlet {
             throws ServletException, IOException {
         try {
             System.out.println("=== Starting QuizHandleMenuController ===");
-            
-            HttpSession session = request.getSession(true);
-            int userId = 10; // Hardcoded user id for testing
+            HttpSession session = request.getSession(false);
+            com.quiz.su25.entity.User user = (session != null) ? (com.quiz.su25.entity.User) session.getAttribute(com.quiz.su25.config.GlobalConfig.SESSION_ACCOUNT) : null;
+            if (user == null || user.getRole_id() != com.quiz.su25.config.GlobalConfig.ROLE_STUDENT) {
+                response.sendRedirect(request.getContextPath() + "/home");
+                return;
+            }
+            int userId = user.getId();
             session.setAttribute("user", userId);
             System.out.println("Set session with user id = " + userId);
 
