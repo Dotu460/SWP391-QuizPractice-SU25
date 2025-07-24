@@ -83,7 +83,7 @@ public class SubjectController extends HttpServlet {
         String categoryFilter = request.getParameter("category");
         String statusFilter = request.getParameter("status");
         if (statusFilter == null || statusFilter.isEmpty()) {
-            statusFilter = "active"; // Default to active subjects if not specified
+//            statusFilter = "active"; // Default to active subjects if not specified
         }
         String searchTerm = request.getParameter("search");
 
@@ -286,6 +286,13 @@ public class SubjectController extends HttpServlet {
             // Validate required fields
             if (title == null || title.trim().isEmpty() || categoryId == 0) {
                 request.getSession().setAttribute("errorMessage", "Course name and category are required!");
+                response.sendRedirect(request.getContextPath() + "/admin/subject/new");
+                return;
+            }
+
+            // Kiểm tra trùng tên course (không phân biệt hoa thường)
+            if (subjectDAO.existsByTitle(title.trim())) {
+                request.getSession().setAttribute("errorMessage", "Course name already exists! Please choose another name.");
                 response.sendRedirect(request.getContextPath() + "/admin/subject/new");
                 return;
             }

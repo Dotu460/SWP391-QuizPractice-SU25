@@ -16,6 +16,41 @@
 
   <!-- Custom CSS for this page -->
   <style>
+    /* Đảm bảo container chiếm full width */
+    .container {
+      max-width: 100%;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+    }
+
+    .dashboard__inner-wrap {
+      width: 100%;
+      padding: 0;
+    }
+
+    .dashboard__content-wrap {
+      width: 100%;
+      padding: 0 15px;
+      background: none !important;
+      border: none !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+    }
+
+    /* Xóa bỏ viền của các phần tử con nếu có */
+    .dashboard__content-wrap > * {
+      border: none;
+      box-shadow: none;
+    }
+
+    .dashboard__content-title {
+      background: none;
+      border: none;
+      box-shadow: none;
+      padding: 20px 0;
+    }
+
     .dashboard__subjects-filter {
       padding: 25px;
       background-color: #f8f9fa;
@@ -156,6 +191,28 @@
     .status-draft {
       background-color: #f0f0f0;
       color: #6c757d;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .dashboard__content-wrap {
+        padding: 0 10px;
+      }
+      
+      .dashboard__subjects-filter form {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .dashboard__subjects-filter .form-group {
+        min-width: 100%;
+      }
+      
+      .dashboard__actions {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+      }
     }
   </style>
 </head>

@@ -308,6 +308,26 @@ public class SubjectDAO extends DBContext implements I_DAO<Subject> {
         return list;
     }
 
+    // Kiểm tra tên course đã tồn tại (không phân biệt hoa thường)
+    public boolean existsByTitle(String title) {
+        String sql = "SELECT COUNT(*) FROM subject WHERE LOWER(title) = LOWER(?)";
+        boolean exists = false;
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, title);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                exists = resultSet.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error existsByTitle at class SubjectDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return exists;
+    }
+
     public static void main(String[] args) {
         // Create DAO instance
         SubjectDAO dao = new SubjectDAO();
