@@ -63,6 +63,7 @@
                                     <c:if test="${sessionScope.account.role_id == 4}"> 
                                     <li><a href="${pageContext.request.contextPath}/slider-list">Slide List</a></li>
                                     </c:if>
+                                    <c:if test="${sessionScope.account.role_id == 4 ||sessionScope.account.role_id == 1 || sessionScope.account.role_id == 3 }"> 
                                     <li class="menu-item-has-children"><a href="#">Dashboard</a>
                                         <ul class="sub-menu">
                                             <li class="menu-item-has-children">
@@ -85,6 +86,7 @@
                                             </li>
                                         </ul>
                                     </li>
+                                    </c:if>
                                 </ul>
                             </div>
                             <div class="tgmenu__action">

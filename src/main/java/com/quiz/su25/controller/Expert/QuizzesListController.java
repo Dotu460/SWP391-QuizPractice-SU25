@@ -109,13 +109,13 @@ public class QuizzesListController extends HttpServlet {
             int totalRecords = quizzesDAO.getTotalFilteredQuizzes(quizName, subjectId, null, quizType);
 
             // Handle records per page - default to total records count
-            int recordsPerPage = totalRecords;
+            int recordsPerPage = 5;
             String recordsPerPageStr = request.getParameter("recordsPerPage");
             if (recordsPerPageStr != null && !recordsPerPageStr.trim().isEmpty()) {
                 try {
                     recordsPerPage = Integer.parseInt(recordsPerPageStr);
                     if (recordsPerPage < 1) {
-                        recordsPerPage = totalRecords;
+                        recordsPerPage = 5;
                     }
                 } catch (NumberFormatException e) {
                     System.out.println("Invalid records per page format: " + e.getMessage());

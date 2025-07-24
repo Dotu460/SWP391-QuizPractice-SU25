@@ -5,6 +5,7 @@
 
 package com.quiz.su25.controller.Manage;
 
+import com.quiz.su25.config.GlobalConfig;
 import com.quiz.su25.dal.impl.SubjectCategoriesDAO;
 import com.quiz.su25.dal.impl.SubjectDAO;
 import com.quiz.su25.dal.impl.UserDAO;
@@ -26,6 +27,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import java.io.File;
 import java.io.IOException;
@@ -96,7 +98,7 @@ public class ManageController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
-        
+
         if (pathInfo.equals("/update-quiz")) {
             updateQuiz(request, response);
         } else if (pathInfo.equals("/upload-media")) {

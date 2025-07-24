@@ -193,8 +193,8 @@
                                                                     <label for="quiz_type" class="form-label">Quiz Type <span class="required">*</span></label>
                                                                     <select class="form-control" id="quiz_type" name="quiz_type" required>
                                                                         <option value="">Select Type</option>
-                                                                        <option value="Practice" ${param.quiz_type == 'Practice' ? 'selected' : ''}>Practice</option>
-                                                                        <option value="Exam" ${param.quiz_type == 'Exam' ? 'selected' : ''}>Exam</option>
+                                                                        <option value="practice" ${param.quiz_type == 'practice' ? 'selected' : ''}>Practice</option>
+                                                                        <option value="exam" ${param.quiz_type == 'exam' ? 'selected' : ''}>Exam</option>
                                                                     </select>
                                                                 </div>
                                                             </div>
