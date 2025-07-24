@@ -10,7 +10,9 @@ import com.quiz.su25.dal.impl.RoleDAO;
 import com.quiz.su25.entity.Role;
 import com.quiz.su25.entity.User;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -21,7 +23,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import jakarta.servlet.annotation.MultipartConfig;
 
-@WebServlet("/my-profile")
+@WebServlet(urlPatterns = {"/my-profile", "/uploads/*"})
 @MultipartConfig(maxFileSize = 1024 * 1024 * 5) // 5MB
 public class UserProfileController extends HttpServlet {
 
@@ -55,6 +57,15 @@ public class UserProfileController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // Check if this is a request for uploaded files
+        String pathInfo = request.getPathInfo();
+        String servletPath = request.getServletPath();
+        
+        if ("/uploads".equals(servletPath) && pathInfo != null) {
+            serveUploadedFile(request, response);
+            return;
+        }
+
         // Lấy thông tin user từ session
         HttpSession session = request.getSession();
         User currentUser = (User) session.getAttribute(GlobalConfig.SESSION_ACCOUNT);
@@ -71,6 +82,49 @@ public class UserProfileController extends HttpServlet {
         // JSP sử dụng sessionScope.user, nên set vào session
         session.setAttribute("user", currentUser);
         request.getRequestDispatcher("view/user/myprofile/my-profile.jsp").forward(request, response);
+    }
+
+    private void serveUploadedFile(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        String requestedFile = request.getPathInfo();
+        if (requestedFile == null || requestedFile.equals("/")) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        
+        // Get the file from the uploads directory
+        String uploadsPath = getServletContext().getRealPath("/uploads");
+        File file = new File(uploadsPath + requestedFile);
+        
+        if (!file.exists() || !file.isFile()) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        
+        // Set content type based on file extension
+        String contentType = getServletContext().getMimeType(file.getName());
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+        response.setContentType(contentType);
+        
+        // Set content length
+        response.setContentLengthLong(file.length());
+        
+        // Set caching headers
+        response.setHeader("Cache-Control", "public, max-age=31536000"); // 1 year
+        
+        // Stream the file to response
+        try (FileInputStream fis = new FileInputStream(file);
+             OutputStream os = response.getOutputStream()) {
+            
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = fis.read(buffer)) != -1) {
+                os.write(buffer, 0, bytesRead);
+            }
+        }
     }
 
     @Override
@@ -147,8 +201,10 @@ public class UserProfileController extends HttpServlet {
 
         if (success) {
             request.setAttribute("message", "Profile updated successfully!");
-            // Update session user
-            request.getSession().setAttribute("user", updatedUser);
+            // Update session user with both keys
+            HttpSession session = request.getSession();
+            session.setAttribute("user", updatedUser);
+            session.setAttribute(GlobalConfig.SESSION_ACCOUNT, updatedUser);
         } else {
             request.setAttribute("error", "Failed to update profile!");
         }
@@ -268,8 +324,10 @@ public class UserProfileController extends HttpServlet {
             if (success) {
                 // Gửi thông báo thành công
                 request.setAttribute("message", "Profile picture updated successfully!");
-                // Cập nhật thông tin user trong session
-                request.getSession().setAttribute("user", updatedUser);
+                // Cập nhật thông tin user trong session với cả hai key
+                HttpSession session = request.getSession();
+                session.setAttribute("user", updatedUser);
+                session.setAttribute(GlobalConfig.SESSION_ACCOUNT, updatedUser);
             } else {
                 // Gửi thông báo lỗi
                 request.setAttribute("error", "Failed to update profile picture!");
@@ -318,8 +376,10 @@ public class UserProfileController extends HttpServlet {
         if (success) {
             // Gửi thông báo thành công
             request.setAttribute("message", "Profile picture removed successfully!");
-            // Cập nhật thông tin user trong session
-            request.getSession().setAttribute("user", updatedUser);
+            // Cập nhật thông tin user trong session với cả hai key
+            HttpSession session = request.getSession();
+            session.setAttribute("user", updatedUser);
+            session.setAttribute(GlobalConfig.SESSION_ACCOUNT, updatedUser);
         } else {
             // Gửi thông báo lỗi
             request.setAttribute("error", "Failed to remove profile picture!");

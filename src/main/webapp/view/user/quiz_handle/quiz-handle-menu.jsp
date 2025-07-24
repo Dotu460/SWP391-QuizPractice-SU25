@@ -796,15 +796,25 @@
                 const section = document.querySelector('.subject-section[data-subject-id="' + subjectId + '"]');
                 const quizCards = section.querySelectorAll('.quiz-card-wrapper');
                 const isShowingMore = btn.getAttribute('data-showing') === 'more';
+                
                 if (!isShowingMore) {
-                    // Show all
-                    quizCards.forEach(card => card.style.display = 'block');
+                    // Show all - currently showing less, so show more
+                    quizCards.forEach(card => {
+                        card.style.display = 'block';
+                        card.classList.remove('d-none'); // Remove d-none class
+                    });
                     btn.textContent = 'Show less';
                     btn.setAttribute('data-showing', 'more');
                 } else {
-                    // Show only first 3
+                    // Show only first 3 - currently showing more, so show less
                     quizCards.forEach((card, idx) => {
-                        card.style.display = idx < 3 ? 'block' : 'none';
+                        if (idx < 3) {
+                            card.style.display = 'block';
+                            card.classList.remove('d-none');
+                        } else {
+                            card.style.display = 'none';
+                            card.classList.add('d-none');
+                        }
                     });
                     btn.textContent = 'Show more';
                     btn.setAttribute('data-showing', 'less');

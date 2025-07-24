@@ -182,9 +182,9 @@
                         <div class="col-lg-8">
                             <!-- Action Buttons -->
                             <div class="d-flex justify-content-between align-items-center mb-4">
-                                <!-- Chỉ hiển thị nút Create New Post cho Admin -->
+                                <!-- Chỉ hiển thị nút Create New Post cho Marketing -->
                                 <div>
-                                    <c:if test="${sessionScope.account.role_id == 1}">
+                                    <c:if test="${sessionScope.account.role_id == 4}">
                                         <a href="${pageContext.request.contextPath}/post-details" class="btn btn-success">
                                         <i class="fas fa-plus"></i> Create New Post
                                         </a>

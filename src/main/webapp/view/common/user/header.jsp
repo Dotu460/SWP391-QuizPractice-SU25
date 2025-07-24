@@ -57,65 +57,30 @@
                             </div>
                             <div class="tgmenu__navbar-wrap tgmenu__main-menu d-flex"> 
                                 <ul class="navigation">
-                                    <li class="menu-item-has-children"><a href="#">Pages</a>
-                                        <ul class="sub-menu">
-                                            <li><a href="${pageContext.request.contextPath}/my-profile">Profile</a></li>
-                                            <li><a href="${pageContext.request.contextPath}/price-package-menu">Course</a></li>
-                                            <li class="menu-item-has-children">
-                                                <a>Blog</a>
-                                                <ul class="sub-menu">
-                                                    <li><a href="${pageContext.request.contextPath}/blog">Blog List</a></li>
-                                                    <li><a href="${pageContext.request.contextPath}/post-details">Post Details</a></li>
-                                                </ul>
-                                            </li>
-                                            <!-- Login/Logout button -->
-                                            <c:choose>
-                                                <c:when test="${not empty sessionScope.user}">
-                                                    <li>
-                                                        <a href="${pageContext.request.contextPath}/logout" class="logout-btn">
-                                                            <i class="fas fa-sign-out-alt"></i> Logout
-                                                        </a>
-                                                    </li>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <li>
-                                                        <a href="${pageContext.request.contextPath}/login" class="login-btn" >
-                                                            <i class="fas fa-sign-in-alt"></i> Login
-                                                        </a>
-                                                    </li>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </ul>
-                                    </li>
+                                    <li><a href="${pageContext.request.contextPath}/my-profile">Profile</a></li>
+                                    <li><a href="${pageContext.request.contextPath}/price-package-menu">Course</a></li>
+                                    <li><a href="${pageContext.request.contextPath}/blog">Blog List</a></li>
+                                    <c:if test="${sessionScope.account.role_id == 4}"> 
+                                    <li><a href="${pageContext.request.contextPath}/slider-list">Slide List</a></li>
+                                    </c:if>
                                     <li class="menu-item-has-children"><a href="#">Dashboard</a>
                                         <ul class="sub-menu">
                                             <li class="menu-item-has-children">
                                                 <a href="instructor-dashboard.html">Admin Dashboard</a>
                                                 <ul class="sub-menu">
-                                                    <li><a href="instructor-dashboard.html">Dashboard</a></li>
-                                                    <li><a href="instructor-profile.html">Profile</a></li>
-                                                    <li><a href="instructor-enrolled-courses.html">Enrolled Courses</a></li>
-                                                    <li><a href="instructor-wishlist.html">Wishlist</a></li>
-                                                    <li><a href="instructor-review.html">Reviews</a></li>
-                                                    <li><a href="instructor-attempts.html">My Quiz Attempts</a></li>
-                                                    <li><a href="instructor-history.html">Order History</a></li>
-                                                    <li><a href="instructor-courses.html">My Course</a></li>
-                                                    <li><a href="instructor-announcement.html">Announcements</a></li>
-                                                    <li class="active"><a href="instructor-quiz.html">Quiz Attempts</a></li>
-                                                    <li><a href="instructor-assignment.html">Assignments</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/admin/users">Manage users</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/admin/registrations">Registration</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/admin/price-package-list">Price Package</a></li>
                                                     <li><a href="${pageContext.request.contextPath}/setting">Settings</a></li>
                                                 </ul>
                                             </li>
-                                            <li class="menu-item-has-children"><a href="student-dashboard.html">Student Dashboard</a>
+                                            <li class="menu-item-has-children"><a href="student-dashboard.html">Expert Dashboard</a>
                                                 <ul class="sub-menu">
-                                                    <li><a href="student-dashboard.html">Dashboard</a></li>
-                                                    <li><a href="student-profile.html">Profile</a></li>
-                                                    <li><a href="student-enrolled-courses.html">Enrolled Courses</a></li>
-                                                    <li><a href="student-wishlist.html">Wishlist</a></li>
-                                                    <li><a href="student-review.html">Reviews</a></li>
-                                                    <li><a href="student-attempts.html">My Quiz Attempts</a></li>
-                                                    <li><a href="student-history.html">Order History</a></li>
-                                                    <li><a href="student-setting.html">Settings</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/manage-subjects">Manage Subject</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/admin/subjects">Subject</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/quizzes-list">Quiz</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/questions-list">Question</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/expert/essay-grading">Essay grading</a></li>
                                                 </ul>
                                             </li>
                                         </ul>
@@ -132,10 +97,10 @@
                                                     <i class="fas fa-user-circle"></i>
                                                 </a>
                                                 <div class="dropdown-menu-action" id="userDropdownAction">
-                                                    <a href="change-password" class="dropdown-item-action">
+                                                    <a href="${pageContext.request.contextPath}/change-password" class="dropdown-item-action">
                                                         <i class="fas fa-key"></i> Change Password
                                                     </a>
-                                                    <a href="logout" class="dropdown-item-action">
+                                                    <a href="${pageContext.request.contextPath}/logout" class="dropdown-item-action">
                                                         <i class="fas fa-sign-out-alt"></i> Log out
                                                     </a>
                                                 </div>
@@ -144,7 +109,7 @@
                                         <c:otherwise>
                                             <!-- Cùng User Icon khi chưa đăng nhập - click để vào login -->
                                             <li style="display: inline;">
-                                                <a href="login" class="user-profile-icon" title="Login">
+                                                <a href="${pageContext.request.contextPath}/login" class="user-profile-icon" title="Login">
                                                     <i class="fas fa-user-circle"></i>
                                                 </a>
                                             </li>

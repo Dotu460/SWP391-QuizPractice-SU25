@@ -15,7 +15,8 @@ public class GlobalConfig {
     // Role Constants
     public static final int ROLE_ADMIN = 1;
     public static final int ROLE_STUDENT = 2;
-    public static final int ROLE_INSTRUCTOR = 3;
+    public static final int ROLE_EXPERT = 3;
+    public static final int ROLE_MARKETING = 4;
     
     // Quiz Attempt Status Constants
     public static final String QUIZ_ATTEMPT_STATUS_IN_PROGRESS = "in_progress";
