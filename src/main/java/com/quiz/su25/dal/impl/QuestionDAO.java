@@ -176,7 +176,7 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
      * @return Danh sách câu hỏi thuộc quiz
      */
     public List<Question> findByQuizId(Integer quizId) {
-        String sql = "SELECT * FROM Question WHERE quiz_id = ?";
+        String sql = "SELECT * FROM Question WHERE quiz_id = ? AND status = 'active'";
         List<Question> list = new ArrayList<>();
         try {
             connection = getConnection();
