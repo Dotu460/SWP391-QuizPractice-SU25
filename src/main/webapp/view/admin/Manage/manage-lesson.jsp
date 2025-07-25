@@ -527,6 +527,91 @@
                 .question-actions .custom-btn {
                     margin-right: 8px;
                 }
+
+                /* Filter Section Styles */
+                .filter-section .card {
+                    border: 1px solid #e0e0e0;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                }
+
+                .filter-section .card-header {
+                    background-color: #f8f9fa;
+                    border-bottom: 1px solid #e0e0e0;
+                    padding: 12px 20px;
+                }
+
+                .filter-section .card-header h6 {
+                    color: #2c3e50;
+                    font-weight: 600;
+                }
+
+                /* Pagination Styles */
+                .pagination-wrapper {
+                    padding: 20px;
+                    border-top: 1px solid #e0e0e0;
+                    background-color: #f8f9fa;
+                }
+
+                .pagination {
+                    margin: 0;
+                }
+
+                .page-link {
+                    color: #2c3e50;
+                    border: 1px solid #e0e0e0;
+                    padding: 8px 12px;
+                    margin: 0 2px;
+                    border-radius: 4px;
+                    transition: all 0.3s ease;
+                }
+
+                .page-link:hover {
+                    color: #1976d2;
+                    background-color: #f8f9fa;
+                    border-color: #1976d2;
+                    transform: translateY(-1px);
+                }
+
+                .page-item.active .page-link {
+                    background-color: #1976d2;
+                    border-color: #1976d2;
+                    color: white;
+                }
+
+                .page-item.disabled .page-link {
+                    color: #6c757d;
+                    background-color: #fff;
+                    border-color: #e0e0e0;
+                    cursor: not-allowed;
+                }
+
+                .pagination-info {
+                    color: #6c757d;
+                    font-size: 0.9rem;
+                }
+
+                .content-stats small {
+                    color: #6c757d;
+                    font-weight: 500;
+                }
+
+                /* Responsive adjustments */
+                @media (max-width: 768px) {
+                    .pagination-wrapper {
+                        flex-direction: column;
+                        gap: 15px;
+                        text-align: center;
+                    }
+
+                    .filter-section .row {
+                        margin-bottom: 10px;
+                    }
+
+                    .filter-section .col-md-4,
+                    .filter-section .col-md-2 {
+                        margin-bottom: 15px;
+                    }
+                }
             </style>
         </head>
 
@@ -566,6 +651,48 @@
                                         <p class="subject-description">${subject.description}</p>
                                     </div>
 
+                                    <!-- Filter Section -->
+                                    <div class="filter-section mb-4">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h6 class="mb-0"><i class="fa fa-filter"></i> Filter Content</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <form method="get" action="${pageContext.request.contextPath}/manage-subjects/view" id="filterForm">
+                                                    <input type="hidden" name="id" value="${subject.id}">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <label for="lessonName" class="form-label">Lesson Name:</label>
+                                                            <input type="text" class="form-control" id="lessonName" name="lessonName" 
+                                                                   placeholder="Search lessons..." value="${lessonNameFilter}">
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label for="quizName" class="form-label">Quiz Name:</label>
+                                                            <input type="text" class="form-control" id="quizName" name="quizName" 
+                                                                   placeholder="Search quizzes..." value="${quizNameFilter}">
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <label for="pageSize" class="form-label">Page Size:</label>
+                                                            <select class="form-control" id="pageSize" name="pageSize">
+                                                                <option value="5" ${pageSize == 5 ? 'selected' : ''}>5</option>
+                                                                <option value="10" ${pageSize == 10 ? 'selected' : ''}>10</option>
+                                                                <option value="20" ${pageSize == 20 ? 'selected' : ''}>20</option>
+                                                                <option value="50" ${pageSize == 50 ? 'selected' : ''}>50</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-2 d-flex align-items-end">
+                                                            <div class="btn-group">
+                                                                <button type="submit" class="custom-btn btn-primary-soft">
+                                                                    <i class="fa fa-search"></i> Search
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <!-- Add Content Buttons -->
                                     <div class="add-content-buttons">
                                         <h5><i class="fa fa-plus-circle"></i> Add New Content</h5>
@@ -581,7 +708,19 @@
                                     <!-- Lessons List with Nested Quizzes -->
                                     <div class="content-list">
                                         <div class="content-list-header">
-                                            <h5><i class="fa fa-list"></i> Subject Content</h5>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h5><i class="fa fa-list"></i> Subject Content</h5>
+                                                <div class="content-stats">
+                                                    <c:if test="${totalLessons > 0}">
+                                                        <small class="text-muted">
+                                                            Showing ${startRecord}-${endRecord} of ${totalLessons} lessons
+                                                            <c:if test="${currentPage > 1 || currentPage < totalPages}">
+                                                                (Page ${currentPage} of ${totalPages})
+                                                            </c:if>
+                                                        </small>
+                                                    </c:if>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="content-items">
                                             <c:forEach var="lesson" items="${lessons}" varStatus="status">
@@ -668,10 +807,100 @@
                                             <c:if test="${empty lessons}">
                                                 <div class="no-content-message">
                                                     <i class="fa fa-info-circle"></i>
-                                                    No lessons available. Add your first lesson to get started.
+                                                    <c:choose>
+                                                        <c:when test="${not empty lessonNameFilter or not empty quizNameFilter}">
+                                                            No lessons or quizzes match your search criteria. Try adjusting your filters.
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            No lessons available. Add your first lesson to get started.
+                                                        </c:otherwise>
+                                                    </c:choose>
                                                 </div>
                                             </c:if>
                                         </div>
+                                        
+                                        <!-- Pagination Controls -->
+                                        <c:if test="${totalPages > 1}">
+                                            <div class="pagination-wrapper mt-4 d-flex justify-content-between align-items-center">
+                                                <div class="pagination-info">
+                                                    <small class="text-muted">
+                                                        Showing ${startRecord}-${endRecord} of ${totalLessons} lessons
+                                                    </small>
+                                                </div>
+                                                <nav aria-label="Page navigation">
+                                                    <ul class="pagination mb-0">
+                                                        <!-- Previous Button -->
+                                                        <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
+                                                            <a class="page-link" 
+                                                               href="${pageContext.request.contextPath}/manage-subjects/view?id=${subject.id}&page=${currentPage - 1}&pageSize=${pageSize}&lessonName=${lessonNameFilter}&quizName=${quizNameFilter}"
+                                                               ${currentPage == 1 ? 'tabindex="-1" aria-disabled="true"' : ''}>
+                                                                <i class="fa fa-chevron-left"></i> Previous
+                                                            </a>
+                                                        </li>
+
+                                                        <!-- Page Numbers -->
+                                                        <c:choose>
+                                                            <c:when test="${totalPages <= 7}">
+                                                                <!-- Show all pages if total pages <= 7 -->
+                                                                <c:forEach begin="1" end="${totalPages}" var="i">
+                                                                    <li class="page-item ${i == currentPage ? 'active' : ''}">
+                                                                        <a class="page-link" 
+                                                                           href="${pageContext.request.contextPath}/manage-subjects/view?id=${subject.id}&page=${i}&pageSize=${pageSize}&lessonName=${lessonNameFilter}&quizName=${quizNameFilter}">
+                                                                            ${i}
+                                                                        </a>
+                                                                    </li>
+                                                                </c:forEach>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <!-- Show pagination with ellipsis for more pages -->
+                                                                <c:if test="${currentPage > 3}">
+                                                                    <li class="page-item">
+                                                                        <a class="page-link" 
+                                                                           href="${pageContext.request.contextPath}/manage-subjects/view?id=${subject.id}&page=1&pageSize=${pageSize}&lessonName=${lessonNameFilter}&quizName=${quizNameFilter}">1</a>
+                                                                    </li>
+                                                                    <c:if test="${currentPage > 4}">
+                                                                        <li class="page-item disabled">
+                                                                            <span class="page-link">...</span>
+                                                                        </li>
+                                                                    </c:if>
+                                                                </c:if>
+
+                                                                <c:forEach begin="${currentPage - 2 < 1 ? 1 : currentPage - 2}" 
+                                                                           end="${currentPage + 2 > totalPages ? totalPages : currentPage + 2}" var="i">
+                                                                    <li class="page-item ${i == currentPage ? 'active' : ''}">
+                                                                        <a class="page-link" 
+                                                                           href="${pageContext.request.contextPath}/manage-subjects/view?id=${subject.id}&page=${i}&pageSize=${pageSize}&lessonName=${lessonNameFilter}&quizName=${quizNameFilter}">
+                                                                            ${i}
+                                                                        </a>
+                                                                    </li>
+                                                                </c:forEach>
+
+                                                                <c:if test="${currentPage < totalPages - 2}">
+                                                                    <c:if test="${currentPage < totalPages - 3}">
+                                                                        <li class="page-item disabled">
+                                                                            <span class="page-link">...</span>
+                                                                        </li>
+                                                                    </c:if>
+                                                                    <li class="page-item">
+                                                                        <a class="page-link" 
+                                                                           href="${pageContext.request.contextPath}/manage-subjects/view?id=${subject.id}&page=${totalPages}&pageSize=${pageSize}&lessonName=${lessonNameFilter}&quizName=${quizNameFilter}">${totalPages}</a>
+                                                                    </li>
+                                                                </c:if>
+                                                            </c:otherwise>
+                                                        </c:choose>
+
+                                                        <!-- Next Button -->
+                                                        <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
+                                                            <a class="page-link" 
+                                                               href="${pageContext.request.contextPath}/manage-subjects/view?id=${subject.id}&page=${currentPage + 1}&pageSize=${pageSize}&lessonName=${lessonNameFilter}&quizName=${quizNameFilter}"
+                                                               ${currentPage == totalPages ? 'tabindex="-1" aria-disabled="true"' : ''}>
+                                                                Next <i class="fa fa-chevron-right"></i>
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </nav>
+                                            </div>
+                                        </c:if>
                                     </div>
 
                                     <!-- Floating Action Button -->
@@ -764,17 +993,50 @@
                     });
                 }
 
-                // Handle delete lesson
+                // Filter reset function
+                function resetFilter() {
+                    document.getElementById('lessonName').value = '';
+                    document.getElementById('quizName').value = '';
+                    document.getElementById('pageSize').value = '10';
+                    document.getElementById('filterForm').submit();
+                }
+
+                // Page size change handler
                 document.addEventListener('DOMContentLoaded', function () {
+                    const pageSizeSelect = document.getElementById('pageSize');
+                    if (pageSizeSelect) {
+                        pageSizeSelect.addEventListener('change', function() {
+                            document.getElementById('filterForm').submit();
+                        });
+                    }
+
+                    // Search on Enter key
+                    const searchInputs = document.querySelectorAll('#lessonName, #quizName');
+                    searchInputs.forEach(input => {
+                        input.addEventListener('keypress', function(e) {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                document.getElementById('filterForm').submit();
+                            }
+                        });
+                    });
+
+                    // Handle delete lesson
                     const deleteLessonBtns = document.querySelectorAll('.delete-lesson-btn');
                     deleteLessonBtns.forEach(btn => {
                         btn.addEventListener('click', function () {
                             const lessonId = this.getAttribute('data-lesson-id');
                             const lessonTitle = this.getAttribute('data-lesson-title');
 
-                            if (confirm('Are you sure you want to delete lesson "' + lessonTitle + '"?\n\nThis will also delete all quizzes in this lesson and cannot be undone.')) {
-                                window.location.href = '${pageContext.request.contextPath}/manage-subjects/delete-lesson?id=' + lessonId;
-                            }
+                                                                        if (confirm('Are you sure you want to delete lesson "' + lessonTitle + '"?\n\nThis will also delete all quizzes in this lesson and cannot be undone.')) {
+                                                const currentUrl = new URL(window.location);
+                                                const redirectUrl = '${pageContext.request.contextPath}/manage-subjects/delete-lesson?id=' + lessonId + 
+                                                                  '&returnPage=' + currentUrl.searchParams.get('page') + 
+                                                                  '&returnPageSize=' + currentUrl.searchParams.get('pageSize') +
+                                                                  '&returnLessonName=' + encodeURIComponent(currentUrl.searchParams.get('lessonName') || '') +
+                                                                  '&returnQuizName=' + encodeURIComponent(currentUrl.searchParams.get('quizName') || '');
+                                                window.location.href = redirectUrl;
+                                            }
                         });
                     });
 
@@ -784,9 +1046,15 @@
                             const quizId = this.getAttribute('data-quiz-id');
                             const quizName = this.getAttribute('data-quiz-name');
 
-                            if (confirm('Are you sure you want to delete quiz "' + quizName + '"?\n\nThis will also delete all questions and options in this quiz and cannot be undone.')) {
-                                window.location.href = '${pageContext.request.contextPath}/manage-subjects/delete-quiz?id=' + quizId;
-                            }
+                                                                        if (confirm('Are you sure you want to delete quiz "' + quizName + '"?\n\nThis will also delete all questions and options in this quiz and cannot be undone.')) {
+                                                const currentUrl = new URL(window.location);
+                                                const redirectUrl = '${pageContext.request.contextPath}/manage-subjects/delete-quiz?id=' + quizId + 
+                                                                  '&returnPage=' + currentUrl.searchParams.get('page') + 
+                                                                  '&returnPageSize=' + currentUrl.searchParams.get('pageSize') +
+                                                                  '&returnLessonName=' + encodeURIComponent(currentUrl.searchParams.get('lessonName') || '') +
+                                                                  '&returnQuizName=' + encodeURIComponent(currentUrl.searchParams.get('quizName') || '');
+                                                window.location.href = redirectUrl;
+                                            }
                         });
                     });
                 });
