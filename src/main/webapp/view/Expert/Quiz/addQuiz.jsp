@@ -87,6 +87,29 @@
             border-radius: 4px;
             margin-bottom: 20px;
         }
+        
+        .is-valid {
+            border-color: #28a745 !important;
+        }
+        
+        .is-invalid {
+            border-color: #dc3545 !important;
+        }
+        
+        .valid-feedback {
+            color: #28a745;
+            font-size: 0.875em;
+        }
+        
+        .invalid-feedback {
+            color: #dc3545;
+            font-size: 0.875em;
+        }
+        
+        .checking {
+            color: #6c757d;
+            font-size: 0.875em;
+        }
     </style>
 </head>
 
@@ -157,6 +180,7 @@
                                                                     <label for="name" class="form-label">Quiz Name <span class="required">*</span></label>
                                                                     <input type="text" class="form-control" id="name" name="name" 
                                                                            value="${param.name != null ? param.name : ''}" required>
+                                                                    <div id="nameValidation" class="form-text mt-1" style="display: none;"></div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -165,13 +189,20 @@
                                                                 <div class="form-group">
                                                                     <label for="lesson_id" class="form-label">Lesson <span class="required">*</span></label>
                                                                     <select class="form-control" id="lesson_id" name="lesson_id" required>
-                                                                        <option value="">Select Lesson</option>
-                                                                        <c:forEach items="${lessonsList}" var="lesson">
-                                                                            <c:set var="subject" value="${subjectDAO.findById(lesson.subject_id)}" />
-                                                                            <option value="${lesson.id}" ${param.lesson_id == lesson.id ? 'selected' : ''}>
-                                                                                ${subject.title}: ${lesson.title}
-                                                                            </option>
-                                                                        </c:forEach>
+                                                                        <c:choose>
+                                                                            <c:when test="${not empty lessonsList}">
+                                                                                <option value="">Select Lesson</option>
+                                                                                <c:forEach items="${lessonsList}" var="lesson">
+                                                                                    <c:set var="subject" value="${subjectDAO.findById(lesson.subject_id)}" />
+                                                                                    <option value="${lesson.id}" ${param.lesson_id == lesson.id ? 'selected' : ''}>
+                                                                                        ${subject.title}: ${lesson.title}
+                                                                                    </option>
+                                                                                </c:forEach>
+                                                                            </c:when>
+                                                                            <c:otherwise>
+                                                                                <option value="">No lessons available - Please create lessons first</option>
+                                                                            </c:otherwise>
+                                                                        </c:choose>
                                                                     </select>
                                                                     
                                                                     <!-- Check if no lessons available -->
@@ -283,11 +314,85 @@
                 </c:otherwise>
             </c:choose>
             
+            var nameCheckTimeout;
+            var isNameValid = true;
+            
+            // Real-time quiz name validation
+            $('#name, #lesson_id').on('input change', function() {
+                var nameInput = $('#name');
+                var lessonSelect = $('#lesson_id');
+                var nameValidation = $('#nameValidation');
+                
+                var quizName = nameInput.val().trim();
+                var lessonId = lessonSelect.val();
+                
+                // Clear previous timeout
+                clearTimeout(nameCheckTimeout);
+                
+                if (quizName === '' || lessonId === '') {
+                    nameValidation.hide();
+                    nameInput.removeClass('is-valid is-invalid');
+                    isNameValid = true;
+                    return;
+                }
+                
+                // Show checking status
+                nameValidation.show()
+                    .removeClass('valid-feedback invalid-feedback')
+                    .addClass('checking')
+                    .html('<i class="fa fa-spinner fa-spin"></i> Checking availability...');
+                nameInput.removeClass('is-valid is-invalid');
+                
+                // Delay AJAX call for better UX
+                nameCheckTimeout = setTimeout(function() {
+                    $.ajax({
+                        url: '${pageContext.request.contextPath}/quizzes-list',
+                        type: 'POST',
+                        data: {
+                            action: 'checkName',
+                            name: quizName,
+                            lessonId: lessonId
+                        },
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.valid) {
+                                nameValidation.removeClass('checking invalid-feedback')
+                                    .addClass('valid-feedback')
+                                    .html('<i class="fa fa-check"></i> Quiz name is available');
+                                nameInput.removeClass('is-invalid').addClass('is-valid');
+                                isNameValid = true;
+                            } else {
+                                nameValidation.removeClass('checking valid-feedback')
+                                    .addClass('invalid-feedback')
+                                    .html('<i class="fa fa-times"></i> ' + response.message);
+                                nameInput.removeClass('is-valid').addClass('is-invalid');
+                                isNameValid = false;
+                            }
+                        },
+                        error: function() {
+                            nameValidation.removeClass('checking valid-feedback invalid-feedback')
+                                .addClass('checking')
+                                .html('<i class="fa fa-exclamation-triangle"></i> Unable to check name availability');
+                            nameInput.removeClass('is-valid is-invalid');
+                            isNameValid = true; // Allow submission on error
+                        }
+                    });
+                }, 500); // 500ms delay
+            });
+            
             // Handle form submission
             $('form').on('submit', function(e) {
                 if (!hasLessons) {
                     e.preventDefault();
                     alert('Cannot create quiz without lessons. Please create lessons first.');
+                    return false;
+                }
+                
+                // Check name validation
+                if (!isNameValid) {
+                    e.preventDefault();
+                    alert('Please choose a different quiz name as the current one already exists.');
+                    $('#name').focus();
                     return false;
                 }
                 

@@ -71,8 +71,44 @@ public class QuizzesListController extends HttpServlet {
             createQuiz(request, response);
         } else if ("update".equals(action)) {
             updateQuiz(request, response);
+        } else if ("checkName".equals(action)) {
+            checkQuizName(request, response);
         } else {
             response.sendRedirect(request.getContextPath() + "/quizzes-list");
+        }
+    }
+
+    /**
+     * AJAX endpoint to check if quiz name exists in lesson
+     */
+    private void checkQuizName(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        
+        try {
+            String name = request.getParameter("name");
+            String lessonIdStr = request.getParameter("lessonId");
+            
+            if (name == null || name.trim().isEmpty() || lessonIdStr == null || lessonIdStr.isEmpty()) {
+                response.getWriter().write("{\"valid\": true, \"message\": \"\"}");
+                return;
+            }
+            
+            int lessonId = Integer.parseInt(lessonIdStr);
+            boolean exists = quizzesDAO.isNameExistsInLesson(name.trim(), lessonId);
+            
+            if (exists) {
+                response.getWriter().write("{\"valid\": false, \"message\": \"Quiz name already exists in this lesson\"}");
+            } else {
+                response.getWriter().write("{\"valid\": true, \"message\": \"Quiz name is available\"}");
+            }
+            
+        } catch (NumberFormatException e) {
+            response.getWriter().write("{\"valid\": true, \"message\": \"\"}");
+        } catch (Exception e) {
+            System.out.println("Error in checkQuizName: " + e.getMessage());
+            response.getWriter().write("{\"valid\": true, \"message\": \"\"}");
         }
     }
 
@@ -266,23 +302,16 @@ public class QuizzesListController extends HttpServlet {
             int durationMinutes = Integer.parseInt(request.getParameter("duration_minutes"));
             int numberOfQuestions = Integer.parseInt(request.getParameter("number_of_questions"));
 
-            // Check if quiz with same information exists
-            List<Quizzes> allQuizzes = quizzesDAO.findAll();
-            boolean isDuplicate = false;
-            for (Quizzes quiz : allQuizzes) {
-                if (quiz.getName().equals(name) 
-                    && quiz.getLesson_id() == lessonId
-                    && quiz.getLevel().equals(level)
-                    && quiz.getQuiz_type().equals(quizType)
-                    && quiz.getDuration_minutes() == durationMinutes
-                    && quiz.getNumber_of_questions_target() == numberOfQuestions) {
-                    isDuplicate = true;
-                    break;
-                }
+            // Validate quiz name is not empty
+            if (name == null || name.trim().isEmpty()) {
+                request.setAttribute("error", "Quiz name is required!");
+                showAddQuizForm(request, response);
+                return;
             }
 
-            if (isDuplicate) {
-                request.setAttribute("error", "A quiz with identical information already exists!");
+            // Check if quiz name already exists in the same lesson
+            if (quizzesDAO.isNameExistsInLesson(name.trim(), lessonId)) {
+                request.setAttribute("error", "Quiz name '" + name.trim() + "' already exists in this lesson. Please choose a different name.");
                 showAddQuizForm(request, response);
                 return;
             }

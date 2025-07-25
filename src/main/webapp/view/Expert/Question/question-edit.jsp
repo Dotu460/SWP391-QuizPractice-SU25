@@ -310,13 +310,45 @@
                                         <div class="form-group">
                                             <label class="form-label">Quiz</label>
                                             <select class="form-control" id="quizId" name="quizId" required>
-                                                <option value="">-- Select Quiz --</option>
-                                                <c:forEach items="${quizzesList}" var="quiz">
-                                                    <option value="${quiz.id}" ${question.quiz_id == quiz.id ? 'selected' : ''}>
-                                                        ${quiz.name}
-                                                    </option>
-                                                </c:forEach>
+                                                <c:choose>
+                                                    <c:when test="${not empty quizzesList}">
+                                                        <option value="">-- Select Quiz --</option>
+                                                        <c:forEach items="${quizzesList}" var="quiz">
+                                                            <c:set var="lesson" value="${lessonDAO.findById(quiz.lesson_id)}" />
+                                                            <c:set var="subject" value="${subjectDAO.findById(lesson.subject_id)}" />
+                                                            <option value="${quiz.id}" ${question.quiz_id == quiz.id ? 'selected' : ''}>
+                                                                <c:choose>
+                                                                    <c:when test="${not empty subject and not empty lesson}">
+                                                                        ${subject.title} - ${lesson.title}: ${quiz.name}
+                                                                    </c:when>
+                                                                    <c:when test="${not empty lesson}">
+                                                                        Unknown Subject - ${lesson.title}: ${quiz.name}
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        ${quiz.name}
+                                                                    </c:otherwise>
+                                                                </c:choose>
+                                                            </option>
+                                                        </c:forEach>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <option value="">No quizzes available - Please create quizzes first</option>
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </select>
+                                            
+                                            <!-- Check if no quizzes available -->
+                                            <c:if test="${empty quizzesList}">
+                                                <div class="alert alert-warning mt-2 mb-0" role="alert">
+                                                    <i class="fa fa-exclamation-triangle me-2"></i>
+                                                    <strong>No quizzes found!</strong> 
+                                                    You need to create quizzes first before adding questions.
+                                                    <br>
+                                                    <a href="${pageContext.request.contextPath}/quizzes-list?action=add" class="btn btn-sm btn-outline-primary mt-2">
+                                                        <i class="fa fa-plus"></i> Create New Quiz
+                                                    </a>
+                                                </div>
+                                            </c:if>
                                         </div>
 
                                         <!-- Question Type -->
@@ -442,8 +474,19 @@
 
                                     <div class="form-actions">
                                         <a href="${pageContext.request.contextPath}/questions-list" class="btn btn-outline-secondary">Cancel</a>
-                                        <button type="submit" class="btn btn-primary">Save Question</button>
+                                        <button type="submit" class="btn btn-primary" 
+                                                ${empty quizzesList ? 'disabled title="Please create quizzes first"' : ''}>
+                                            Save Question
+                                        </button>
                                     </div>
+                                    
+                                    <c:if test="${empty quizzesList}">
+                                        <div class="alert alert-info mt-3" role="alert">
+                                            <i class="fa fa-info-circle me-2"></i>
+                                            <strong>Important:</strong> You cannot create questions without quizzes. 
+                                            Please create at least one quiz first, then come back to add your questions.
+                                        </div>
+                                    </c:if>
                                 </form>
                             </div>
                         </div>
@@ -463,6 +506,15 @@
 
             <script>
                                                 $(document).ready(function () {
+                                    // Check if quizzes list is empty
+                                    <c:choose>
+                                        <c:when test="${not empty quizzesList}">
+                                            var hasQuizzes = true;
+                                        </c:when>
+                                        <c:otherwise>
+                                            var hasQuizzes = false;
+                                        </c:otherwise>
+                                    </c:choose>
                                                     function normalizeUploadUrl(url) {
                                                         if (!url) return url;
                                                         
@@ -708,6 +760,12 @@
 
                                     // Form validation
                                     $('#questionForm').submit(function (e) {
+                                        if (!hasQuizzes) {
+                                            e.preventDefault();
+                                            alert('Cannot create questions without quizzes. Please create quizzes first.');
+                                            return false;
+                                        }
+                                        
                                         tinymce.triggerSave();
 
                                         if (!validateForm()) {
@@ -773,6 +831,7 @@
                                 function validateForm() {
                                     var content = $('input[name="content"]').val();
                                     var answerType = $('#answerType').val();
+                                    var quizId = $('#quizId').val();
                                     
                                     if (!content || content.trim() === '') {
                                         iziToast.error({
@@ -781,6 +840,18 @@
                                             position: 'topRight',
                                             timeout: 3000
                                         });
+                                        return false;
+                                    }
+                                    
+                                    // Check quiz selection
+                                    if (!quizId || quizId === '') {
+                                        iziToast.error({
+                                            title: 'Error',
+                                            message: 'Please select a quiz for this question',
+                                            position: 'topRight',
+                                            timeout: 3000
+                                        });
+                                        $('#quizId').focus();
                                         return false;
                                     }
 

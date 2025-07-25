@@ -323,6 +323,8 @@ public class QuestionListController extends HttpServlet {
             request.setAttribute("subjectsList", subjectsList);
             request.setAttribute("lessonsList", lessonsList);
             request.setAttribute("quizzesList", quizzesList);
+            request.setAttribute("lessonDAO", lessonDAO);
+            request.setAttribute("subjectDAO", subjectDAO);
 
             // Forward to the add question page
             request.getRequestDispatcher("view/Expert/Question/addQuestion.jsp").forward(request, response);
@@ -360,6 +362,8 @@ public class QuestionListController extends HttpServlet {
             List<Quizzes> quizzesList = quizzesDAO.findAll();
             request.setAttribute("question", question);
             request.setAttribute("quizzesList", quizzesList);
+            request.setAttribute("lessonDAO", lessonDAO);
+            request.setAttribute("subjectDAO", subjectDAO);
             // Forward tới trang edit
             request.getRequestDispatcher("/view/Expert/Question/question-edit.jsp").forward(request, response);
         } catch (NumberFormatException e) {
@@ -736,22 +740,156 @@ public class QuestionListController extends HttpServlet {
 
     private void downloadTemplate(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=\"question_template.xlsx\"");
+        response.setHeader("Content-Disposition", "attachment; filename=\"question_import_template.xlsx\"");
 
         try (Workbook workbook = new XSSFWorkbook()) {
-            Sheet sheet = workbook.createSheet("Questions");
+            
+            // ===== CREATE INSTRUCTIONS SHEET =====
+            Sheet instructionsSheet = workbook.createSheet("Instructions");
+            
+            // Create styles
+            CellStyle titleStyle = workbook.createCellStyle();
+            Font titleFont = workbook.createFont();
+            titleFont.setBold(true);
+            titleFont.setFontHeightInPoints((short) 14);
+            titleStyle.setFont(titleFont);
+            
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerFont.setFontHeightInPoints((short) 12);
+            headerStyle.setFont(headerFont);
+            
+            CellStyle boldStyle = workbook.createCellStyle();
+            Font boldFont = workbook.createFont();
+            boldFont.setBold(true);
+            boldStyle.setFont(boldFont);
+            
+            int rowNum = 0;
+            
+            // Title
+            Row titleRow = instructionsSheet.createRow(rowNum++);
+            Cell titleCell = titleRow.createCell(0);
+            titleCell.setCellValue("QUESTION IMPORT TEMPLATE - INSTRUCTIONS");
+            titleCell.setCellStyle(titleStyle);
+            rowNum++; // Empty row
+            
+            // General instructions
+            Row generalRow = instructionsSheet.createRow(rowNum++);
+            Cell generalCell = generalRow.createCell(0);
+            generalCell.setCellValue("GENERAL INSTRUCTIONS:");
+            generalCell.setCellStyle(headerStyle);
+            
+            instructionsSheet.createRow(rowNum++).createCell(0).setCellValue("1. Fill data in the 'Questions' sheet starting from row 2");
+            instructionsSheet.createRow(rowNum++).createCell(0).setCellValue("2. Do not modify the header row in the 'Questions' sheet");
+            instructionsSheet.createRow(rowNum++).createCell(0).setCellValue("3. All fields are required except 'Media URL'");
+            instructionsSheet.createRow(rowNum++).createCell(0).setCellValue("4. Save file as .xlsx format before importing");
+            rowNum++; // Empty row
+            
+            // Field descriptions
+            Row fieldsRow = instructionsSheet.createRow(rowNum++);
+            Cell fieldsCell = fieldsRow.createCell(0);
+            fieldsCell.setCellValue("FIELD DESCRIPTIONS:");
+            fieldsCell.setCellStyle(headerStyle);
+            
+            // Quiz ID section
+            Row quizIdRow = instructionsSheet.createRow(rowNum++);
+            Cell quizIdCell = quizIdRow.createCell(0);
+            quizIdCell.setCellValue("1. Quiz ID:");
+            quizIdCell.setCellStyle(boldStyle);
+            instructionsSheet.createRow(rowNum++).createCell(0).setCellValue("   - Enter the numeric ID of the quiz");
+            instructionsSheet.createRow(rowNum++).createCell(0).setCellValue("   - Available Quiz IDs and Names:");
+            
+            // Get all quizzes to show available IDs
+            List<Quizzes> allQuizzes = quizzesDAO.findAll();
+            for (Quizzes quiz : allQuizzes) {
+                try {
+                    // Get lesson and subject info
+                    Lesson lesson = lessonDAO.findById(quiz.getLesson_id());
+                    if (lesson != null) {
+                        Subject subject = subjectDAO.findById(lesson.getSubject_id());
+                        String displayText = String.format("     ID: %d - %s (%s - %s)", 
+                            quiz.getId(), quiz.getName(), 
+                            subject != null ? subject.getTitle() : "Unknown Subject", 
+                            lesson.getTitle());
+                        instructionsSheet.createRow(rowNum++).createCell(0).setCellValue(displayText);
+                    }
+                } catch (Exception e) {
+                    String displayText = String.format("     ID: %d - %s", quiz.getId(), quiz.getName());
+                    instructionsSheet.createRow(rowNum++).createCell(0).setCellValue(displayText);
+                }
+            }
+            rowNum++; // Empty row
+            
+            // Question Type section
+            Row typeRow = instructionsSheet.createRow(rowNum++);
+            Cell typeCell = typeRow.createCell(0);
+            typeCell.setCellValue("2. Question Type:");
+            typeCell.setCellStyle(boldStyle);
+            instructionsSheet.createRow(rowNum++).createCell(0).setCellValue("   - multiple: Multiple choice question");
+            instructionsSheet.createRow(rowNum++).createCell(0).setCellValue("   - essay: Essay/text answer question");
+            rowNum++; // Empty row
+            
+            // Content section
+            Row contentRow = instructionsSheet.createRow(rowNum++);
+            Cell contentCell = contentRow.createCell(0);
+            contentCell.setCellValue("3. Content:");
+            contentCell.setCellStyle(boldStyle);
+            instructionsSheet.createRow(rowNum++).createCell(0).setCellValue("   - The question text/content");
+            instructionsSheet.createRow(rowNum++).createCell(0).setCellValue("   - Can contain HTML tags for formatting");
+            rowNum++; // Empty row
+            
+            // Media URL section  
+            Row mediaRow = instructionsSheet.createRow(rowNum++);
+            Cell mediaCell = mediaRow.createCell(0);
+            mediaCell.setCellValue("4. Media URL (Optional):");
+            mediaCell.setCellStyle(boldStyle);
+            instructionsSheet.createRow(rowNum++).createCell(0).setCellValue("   - URL to image, video or other media");
+            instructionsSheet.createRow(rowNum++).createCell(0).setCellValue("   - Leave empty if no media needed");
+            instructionsSheet.createRow(rowNum++).createCell(0).setCellValue("   - Example: https://example.com/image.jpg");
+            rowNum++; // Empty row
+            
+            // Level section
+            Row levelRow = instructionsSheet.createRow(rowNum++);
+            Cell levelCell = levelRow.createCell(0);
+            levelCell.setCellValue("5. Level:");
+            levelCell.setCellStyle(boldStyle);
+            instructionsSheet.createRow(rowNum++).createCell(0).setCellValue("   - easy: Easy difficulty");
+            instructionsSheet.createRow(rowNum++).createCell(0).setCellValue("   - medium: Medium difficulty");
+            instructionsSheet.createRow(rowNum++).createCell(0).setCellValue("   - hard: Hard difficulty");
+            rowNum++; // Empty row
+            
+            // Status section
+            Row statusRow = instructionsSheet.createRow(rowNum++);
+            Cell statusCell = statusRow.createCell(0);
+            statusCell.setCellValue("6. Status:");
+            statusCell.setCellStyle(boldStyle);
+            instructionsSheet.createRow(rowNum++).createCell(0).setCellValue("   - active: Question is active and visible");
+            instructionsSheet.createRow(rowNum++).createCell(0).setCellValue("   - hidden: Question is hidden from users");
+            rowNum++; // Empty row
+            
+            // Explanation section
+            Row explanationRow = instructionsSheet.createRow(rowNum++);
+            Cell explanationCell = explanationRow.createCell(0);
+            explanationCell.setCellValue("7. Explanation:");
+            explanationCell.setCellStyle(boldStyle);
+            instructionsSheet.createRow(rowNum++).createCell(0).setCellValue("   - Explanation for the correct answer");
+            instructionsSheet.createRow(rowNum++).createCell(0).setCellValue("   - Helps students understand the solution");
+            
+            // Auto-size columns for instructions
+            for (int i = 0; i < 2; i++) {
+                instructionsSheet.autoSizeColumn(i);
+            }
+            
+            // ===== CREATE QUESTIONS SHEET =====
+            Sheet questionsSheet = workbook.createSheet("Questions");
 
             // Create header row
-            Row headerRow = sheet.createRow(0);
+            Row headerRow = questionsSheet.createRow(0);
             String[] headers = {
                 "Quiz ID", "Question Type", "Content", "Media URL (optional)",
                 "Level", "Status", "Explanation"
             };
-
-            CellStyle headerStyle = workbook.createCellStyle();
-            Font headerFont = workbook.createFont();
-            headerFont.setBold(true);
-            headerStyle.setFont(headerFont);
 
             for (int i = 0; i < headers.length; i++) {
                 Cell cell = headerRow.createCell(i);
@@ -759,26 +897,35 @@ public class QuestionListController extends HttpServlet {
                 cell.setCellStyle(headerStyle);
             }
 
-            // Create sample data row
-            Row sampleRow = sheet.createRow(1);
-            sampleRow.createCell(0).setCellValue(1);
-            sampleRow.createCell(1).setCellValue("multiple_choice");
-            sampleRow.createCell(2).setCellValue("Sample question content");
-            sampleRow.createCell(3).setCellValue("https://example.com/media.jpg");
-            sampleRow.createCell(4).setCellValue("easy");
-            sampleRow.createCell(5).setCellValue("active");
-            sampleRow.createCell(6).setCellValue("Sample explanation");
+            // Create sample data rows
+            Row sampleRow1 = questionsSheet.createRow(1);
+            sampleRow1.createCell(0).setCellValue(allQuizzes.isEmpty() ? 1 : allQuizzes.get(0).getId());
+            sampleRow1.createCell(1).setCellValue("multiple");
+            sampleRow1.createCell(2).setCellValue("What is the capital of France?");
+            sampleRow1.createCell(3).setCellValue("");
+            sampleRow1.createCell(4).setCellValue("easy");
+            sampleRow1.createCell(5).setCellValue("active");
+            sampleRow1.createCell(6).setCellValue("Paris is the capital and largest city of France.");
+            
+            Row sampleRow2 = questionsSheet.createRow(2);
+            sampleRow2.createCell(0).setCellValue(allQuizzes.isEmpty() ? 1 : allQuizzes.get(0).getId());
+            sampleRow2.createCell(1).setCellValue("essay");
+            sampleRow2.createCell(2).setCellValue("Explain the importance of renewable energy sources.");
+            sampleRow2.createCell(3).setCellValue("https://example.com/renewable-energy.jpg");
+            sampleRow2.createCell(4).setCellValue("medium");
+            sampleRow2.createCell(5).setCellValue("active");
+            sampleRow2.createCell(6).setCellValue("Renewable energy is important for sustainability and reducing carbon emissions.");
 
-            // Auto-size columns
+            // Auto-size columns for questions sheet
             for (int i = 0; i < headers.length; i++) {
-                sheet.autoSizeColumn(i);
+                questionsSheet.autoSizeColumn(i);
             }
 
             workbook.write(response.getOutputStream());
         } catch (Exception e) {
-            request.getSession().setAttribute("toastMessage", "Error creating template: " + e.getMessage());
-            request.getSession().setAttribute("toastType", "error");
-            response.sendRedirect(request.getContextPath() + "/questions-list");
+            System.out.println("Error creating template: " + e.getMessage());
+            e.printStackTrace();
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error creating template");
         }
     }
 
