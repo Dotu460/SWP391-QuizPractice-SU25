@@ -1,4 +1,4 @@
-<%-- 
+    <%-- 
     Document   : quiz-handle-menu
     Created on : 14 thg 6, 2025, 00:44:45
     Author     : kenngoc
@@ -449,8 +449,8 @@
                 }
                 .badge.level-medium {
                     background: #fffbe6;
-                    color: #ffc107;
-                    border: 1.5px solid #ffc107;
+                    color: #ff9800;
+                    border: 1.5px solid #ff9800;
                 }
                 .badge.level-hard {
                     background: #ffe6e6;
@@ -522,29 +522,80 @@
                                             <option value="subject" title="Subject name">Subject name</option>
                                         </select>
                                         <input id="quizSearchInput" type="text" class="form-control" style="max-width: 350px;" placeholder="Search..." oninput="filterQuizzesByName()">
-                                        <select id="levelSort" class="form-select" style="min-width: 100px; max-width: 145px; font-size: 0.98rem;" onchange="sortQuizzesByLevel()">
+                                        <select id="levelSort" class="form-select" style="min-width: 100px; max-width: 145px; font-size: 0.98rem;" onchange="applyAllFilters()">
                                             <option value="all">All Levels</option>
                                             <option value="easy">Easy</option>
                                             <option value="medium">Medium</option>
                                             <option value="hard">Hard</option>
                                         </select>
+                                        <select id="doneFilter" class="form-select" style="min-width: 100px; max-width: 145px; font-size: 0.98rem;" onchange="applyAllFilters()">
+                                            <option value="all">All Status</option>
+                                            <option value="done">Done</option>
+                                            <option value="notdone">Not done</option>
+                                        </select>
                                     </div>
                                     <script>
-                                        function sortQuizzesByLevel() {
+                                        function applyAllFilters() {
                                             const level = document.getElementById('levelSort').value;
+                                            const done = document.getElementById('doneFilter').value;
+                                            const search = document.getElementById('quizSearchInput').value.trim().toLowerCase();
+                                            const mode = document.getElementById('searchMode').value;
                                             const subjectSections = document.querySelectorAll('.subject-section');
                                             subjectSections.forEach(section => {
+                                                const subjectId = section.getAttribute('data-subject-id');
+                                                const subjectTitle = section.getAttribute('data-subject-title') || '';
                                                 const quizCards = section.querySelectorAll('.quiz-card-wrapper');
+                                                let anyVisible = false;
                                                 let visibleCount = 0;
-                                                quizCards.forEach((card, idx) => {
-                                                    const quizLevel = card.querySelector('.quiz-level').textContent.trim().toLowerCase();
-                                                    if (level === 'all' || quizLevel === level) {
-                                                        card.style.display = (visibleCount < 3 || card.classList.contains('show-all')) ? 'block' : 'none';
-                                                        visibleCount++;
+                                                if (mode === 'quiz') {
+                                                    quizCards.forEach((card, idx) => {
+                                                        const quizName = card.getAttribute('data-quiz-name');
+                                                        const quizLevel = card.getAttribute('data-quiz-level');
+                                                        // Lấy trạng thái đã làm/chưa làm
+                                                        const hasScore = card.querySelector('.score-value') !== null;
+                                                        let match = true;
+                                                        if (search && !quizName.includes(search)) match = false;
+                                                        if (level !== 'all' && quizLevel !== level) match = false;
+                                                        if (done === 'done' && !hasScore) match = false;
+                                                        if (done === 'notdone' && hasScore) match = false;
+                                                        if (match) {
+                                                            if (visibleCount < 3 || card.classList.contains('show-all')) {
+                                                                card.style.display = 'block';
+                                                            } else {
+                                                                card.style.display = 'none';
+                                                            }
+                                                            anyVisible = true;
+                                                            visibleCount++;
+                                                        } else {
+                                                            card.style.display = 'none';
+                                                        }
+                                                    });
+                                                    section.style.display = anyVisible ? '' : 'none';
+                                                } else if (mode === 'subject') {
+                                                    if (subjectTitle.includes(search)) {
+                                                        section.style.display = '';
+                                                        quizCards.forEach((card, idx) => {
+                                                            const quizLevel = card.getAttribute('data-quiz-level');
+                                                            const hasScore = card.querySelector('.score-value') !== null;
+                                                            let match = true;
+                                                            if (level !== 'all' && quizLevel !== level) match = false;
+                                                            if (done === 'done' && !hasScore) match = false;
+                                                            if (done === 'notdone' && hasScore) match = false;
+                                                            if (match) {
+                                                                if (visibleCount < 3 || card.classList.contains('show-all')) {
+                                                                    card.style.display = 'block';
+                                                                } else {
+                                                                    card.style.display = 'none';
+                                                                }
+                                                                visibleCount++;
+                                                            } else {
+                                                                card.style.display = 'none';
+                                                            }
+                                                        });
                                                     } else {
-                                                        card.style.display = 'none';
+                                                        section.style.display = 'none';
                                                     }
-                                                });
+                                                }
                                                 // Hide/show Show more button
                                                 const showMoreBtn = section.querySelector('.show-more-btn');
                                                 if (showMoreBtn) {
@@ -552,10 +603,12 @@
                                                     showMoreBtn.textContent = 'Show more';
                                                     showMoreBtn.setAttribute('data-showing', 'less');
                                                 }
-                                                // Hide subject section if no quiz visible
-                                                section.style.display = visibleCount > 0 ? '' : 'none';
                                             });
                                         }
+                                        // Gọi applyAllFilters khi search input thay đổi
+                                        document.getElementById('quizSearchInput').oninput = applyAllFilters;
+                                        // Gọi applyAllFilters khi searchMode thay đổi
+                                        document.getElementById('searchMode').onchange = applyAllFilters;
                                     </script>
 
                                     <!-- Quiz List as Accordion -->
@@ -589,7 +642,7 @@
                                                         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 quiz-list" data-subject-id="${subjectId}">
                                                             <c:forEach var="quiz" items="${quizzesBySubject[subjectId]}" varStatus="quizStatus">
                                                                 <c:set var="displayClass" value="${quizStatus.index < 3 ? '' : 'd-none'}" />
-                                                                <div class="col quiz-card-wrapper ${displayClass}" data-quiz-name="${fn:toLowerCase(quiz.name)}">
+                                                                <div class="col quiz-card-wrapper ${displayClass}" data-quiz-name="${fn:toLowerCase(quiz.name)}" data-quiz-level="${fn:toLowerCase(quiz.level)}">
                                             <div class="card h-100 quiz-card">
                                                 <div class="card-body">
                                                     <!-- Lesson badge -->
