@@ -317,7 +317,7 @@
                                             <table class="table table-hover mb-0">
                                                 <thead class="thead-light">
                                                     <tr>
-                                                        <th>ID</th>
+                                                        <th>No.</th>
                                                         <th>Content</th>
                                                         <th>Subject</th>
                                                         <th>Lesson</th>
@@ -328,9 +328,9 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <c:forEach items="${questionsList}" var="question">
+                                                    <c:forEach items="${questionsList}" var="question" varStatus="status">
                                                         <tr>
-                                                            <td>${question.id}</td>
+                                                            <td>${(currentPage - 1) * recordsPerPage + status.index + 1}</td>
                                                             <td>${question.content}</td>
                                                             <td>
                                                                 <c:set var="quiz" value="${quizDAO.findById(question.quiz_id)}" />

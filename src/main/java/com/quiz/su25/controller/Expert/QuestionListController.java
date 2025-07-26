@@ -30,9 +30,9 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 @WebServlet(name = "QuestionListController", urlPatterns = {"/questions-list", "/upload-media"})
 @MultipartConfig(
-        fileSizeThreshold = 1024 * 1024, // 1 MB
-        maxFileSize = 1024 * 1024 * 10, // 10 MB
-        maxRequestSize = 1024 * 1024 * 15 // 15 MB
+        fileSizeThreshold = 1024 * 1024 * 2,
+        maxFileSize = 1024 * 1024 * 1024,
+        maxRequestSize = 1024 * 1024 * 1024 
 )
 public class QuestionListController extends HttpServlet {
 

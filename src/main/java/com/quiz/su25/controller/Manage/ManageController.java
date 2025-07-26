@@ -45,9 +45,9 @@ import java.util.stream.Collectors;
 
 @WebServlet(name = "ManageController", urlPatterns = {"/manage-subjects/*"})
 @MultipartConfig(
-    fileSizeThreshold = 1024 * 1024, // 1 MB
-    maxFileSize = 1024 * 1024 * 10,  // 10 MB
-    maxRequestSize = 1024 * 1024 * 15 // 15 MB
+    fileSizeThreshold = 1024 * 1024 * 2, // 1 MB
+    maxFileSize = 1024 * 1024 * 1024,  // 10 MB
+    maxRequestSize = 1024 * 1024 * 1024 // 15 MB
 )
 public class ManageController extends HttpServlet {
     private static final int DEFAULT_PAGE_SIZE = 8;

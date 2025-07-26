@@ -504,6 +504,10 @@
 
                                                 <div class="form-group">
                                                     <label class="form-label">Media (Images/Video)</label>
+                                                    <small class="form-text text-muted mb-2">
+                                                        <i class="fa fa-info-circle"></i> 
+                                                        Maximum file size: <strong>Images: 1024MB</strong> | <strong>Videos: 1024MB</strong>
+                                                    </small>
                                                     <textarea id="media_url_${status.index}" name="questions[${status.index}].media_url" 
                                                               class="form-control media-editor"><c:out value="${question.media_url}" escapeXml="false"/></textarea>
                                                 </div>
@@ -1150,6 +1154,10 @@
 
                 '<div class="form-group">' +
                     '<label class="form-label">Media (Images/Video)</label>' +
+                    '<small class="form-text text-muted mb-2">' +
+                        '<i class="fa fa-info-circle"></i> ' +
+                        'Maximum file size: <strong>Images: 10MB</strong> | <strong>Videos: 100MB</strong>' +
+                    '</small>' +
                     '<textarea id="media_url_' + questionIndex + '" name="questions[' + questionIndex + '].media_url" ' +
                               'class="form-control media-editor"></textarea>' +
                 '</div>' +

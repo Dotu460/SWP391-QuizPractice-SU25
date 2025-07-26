@@ -202,7 +202,7 @@
                 <table class="table table-borderless">
                   <thead>
                   <tr>
-                    <th>ID</th>
+                    <th>No.</th>
                     <th>Subject Name</th>
                     <th>Category</th>
                     <th>Number of Lessons</th>
@@ -212,9 +212,9 @@
                   </tr>
                   </thead>
                   <tbody>
-                  <c:forEach var="subject" items="${subjects}">
+                  <c:forEach var="subject" items="${subjects}" varStatus="status">
                     <tr>
-                      <td>${subject.id}</td>
+                      <td>${(page - 1) * pageSize + status.index + 1}</td>
                       <td>
                         <div class="dashboard__quiz-info">
                           <h6 class="title">${subject.title}</h6>

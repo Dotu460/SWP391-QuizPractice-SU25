@@ -301,10 +301,18 @@ public class QuizzesListController extends HttpServlet {
             String quizType = request.getParameter("quiz_type");
             int durationMinutes = Integer.parseInt(request.getParameter("duration_minutes"));
             int numberOfQuestions = Integer.parseInt(request.getParameter("number_of_questions"));
+            String status = request.getParameter("status");
 
             // Validate quiz name is not empty
             if (name == null || name.trim().isEmpty()) {
                 request.setAttribute("error", "Quiz name is required!");
+                showAddQuizForm(request, response);
+                return;
+            }
+
+            // Validate status is not empty
+            if (status == null || status.trim().isEmpty()) {
+                request.setAttribute("error", "Status is required!");
                 showAddQuizForm(request, response);
                 return;
             }
@@ -324,7 +332,7 @@ public class QuizzesListController extends HttpServlet {
             newQuiz.setLevel(level);
             newQuiz.setQuiz_type(quizType);
             newQuiz.setDuration_minutes(durationMinutes);
-            newQuiz.setStatus("active");
+            newQuiz.setStatus(status);
 
             // Insert into database
             int result = quizzesDAO.insertNewQuiz(newQuiz);
@@ -361,12 +369,20 @@ public class QuizzesListController extends HttpServlet {
             int durationMinutes = Integer.parseInt(request.getParameter("duration_minutes"));
             int numberOfQuestions = Integer.parseInt(request.getParameter("number_of_questions"));
             String redirect = request.getParameter("redirect");
+            String status = request.getParameter("status");
 
             // Get existing quiz
             Quizzes existingQuiz = quizzesDAO.findById(quizId);
             if (existingQuiz == null) {
                 request.setAttribute("error", "Quiz not found!");
                 response.sendRedirect(request.getContextPath() + "/quizzes-list");
+                return;
+            }
+
+            // Validate status is not empty
+            if (status == null || status.trim().isEmpty()) {
+                request.setAttribute("error", "Status is required!");
+                response.sendRedirect(request.getContextPath() + "/QuizDetails?id=" + quizId);
                 return;
             }
 
@@ -380,7 +396,8 @@ public class QuizzesListController extends HttpServlet {
                     quiz.getLevel().equals(level) &&
                     quiz.getQuiz_type().equals(quizType) &&
                     quiz.getDuration_minutes() == durationMinutes &&
-                    quiz.getNumber_of_questions_target() == numberOfQuestions) {
+                    quiz.getNumber_of_questions_target() == numberOfQuestions &&
+                    quiz.getStatus().equals(status)) {
                     isDuplicate = true;
                     break;
                 }
@@ -399,6 +416,7 @@ public class QuizzesListController extends HttpServlet {
             existingQuiz.setQuiz_type(quizType);
             existingQuiz.setDuration_minutes(durationMinutes);
             existingQuiz.setNumber_of_questions_target(numberOfQuestions);
+            existingQuiz.setStatus(status);
 
             // Update in database
             boolean updated = quizzesDAO.update(existingQuiz);

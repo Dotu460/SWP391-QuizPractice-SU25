@@ -229,6 +229,16 @@
                                                     </select>
                                                 </div>
                                             </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="status" class="form-label">Status <span class="required">*</span></label>
+                                                    <select class="form-control" id="status" name="status" required>
+                                                        <option value="">Select Status</option>
+                                                        <option value="active" ${quiz.status == 'active' ? 'selected' : ''}>Active</option>
+                                                        <option value="hidden" ${quiz.status == 'hidden' ? 'selected' : ''}>Hidden</option>
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     

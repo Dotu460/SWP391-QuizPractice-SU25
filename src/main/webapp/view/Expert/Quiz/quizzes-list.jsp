@@ -111,8 +111,7 @@
         }
         
         .status-active { background-color: #d4edda; color: #155724; }
-        .status-inactive { background-color: #f8d7da; color: #721c24; }
-        .status-draft { background-color: #fff3cd; color: #856404; }
+        .status-hidden { background-color: #f8d7da; color: #721c24; }
         
         .settings-btn {
             background-color: #6c757d;
@@ -433,10 +432,11 @@
                                         <table class="table table-hover mb-0" id="quizTable">
                                             <thead class="thead-light">
                                                 <tr>
-                                                    <th class="column-id" data-column="id">ID</th>
+                                                    <th class="column-id" data-column="id">No.</th>
                                                     <th class="column-name" data-column="name">Quiz Name</th>   
                                                     <th class="column-type" data-column="type">Quiz Type</th>
                                                     <th class="column-level" data-column="level">Level</th>
+                                                    <th class="column-status" data-column="status">Status</th>
                                                     <th class="column-subject" data-column="subject">Subject</th>
                                                     <th class="column-lesson" data-column="lesson">Lesson</th>
                                                     <th class="column-questions" data-column="questions">Number of Questions</th>
@@ -447,11 +447,16 @@
                                             <tbody>
                                                         <c:forEach items="${quizzesList}" var="quiz" varStatus="status">
                                                             <tr>
-                                                                <td class="column-id" data-column="id">${quiz.id}</td>
+                                                                <td class="column-id" data-column="id">${(currentPage - 1) * recordsPerPage + status.index + 1}</td>
                                                                 <td class="column-name" data-column="name"><strong>${quiz.name}</strong></td>
                                                                 <td class="column-type" data-column="type"> ${quiz.quiz_type}
                                                                 </td>
                                                                 <td class="column-level" data-column="level">${quiz.level}
+                                                                </td>
+                                                                <td class="column-status" data-column="status">
+                                                                    <span class="quiz-status ${quiz.status == 'active' ? 'status-active' : 'status-hidden'}">
+                                                                        ${quiz.status}
+                                                                    </span>
                                                                 </td>
                                                                 <td class="column-subject" data-column="subject">
                                                                     <c:set var="lesson" value="${lessonDAO.findById(quiz.lesson_id)}" />
@@ -573,7 +578,7 @@
                     <form id="columnSettingsForm">
                         <div class="column-checkbox">
                             <input type="checkbox" id="col-id" value="id" checked>
-                            <label for="col-id">ID</label>
+                            <label for="col-id">NO</label>
                         </div>
                         <div class="column-checkbox">
                             <input type="checkbox" id="col-name" value="name" checked>
@@ -586,6 +591,10 @@
                         <div class="column-checkbox">
                             <input type="checkbox" id="col-level" value="level" checked>
                             <label for="col-level">Level</label>
+                        </div>
+                        <div class="column-checkbox">
+                            <input type="checkbox" id="col-status" value="status" checked>
+                            <label for="col-status">Status</label>
                         </div>
                         <div class="column-checkbox">
                             <input type="checkbox" id="col-subject" value="subject" checked>
@@ -651,7 +660,7 @@
         // Hàm áp dụng cài đặt cột
         function applySettings() {
             // Ẩn tất cả cột trước
-            $('.column-id, .column-name, .column-type, .column-level, .column-subject, .column-lesson, .column-questions, .column-duration').hide();
+            $('.column-id, .column-name, .column-type, .column-level, .column-status, .column-subject, .column-lesson, .column-questions, .column-duration').hide();
             
             // Hiện các cột được chọn
             if ($('#col-id').is(':checked')) {
@@ -665,6 +674,9 @@
             }
             if ($('#col-level').is(':checked')) {
                 $('.column-level').show();
+            }
+            if ($('#col-status').is(':checked')) {
+                $('.column-status').show();
             }
             if ($('#col-subject').is(':checked')) {
                 $('.column-subject').show();
