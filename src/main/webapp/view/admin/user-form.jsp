@@ -154,46 +154,17 @@
                                     <div class="card-body">
           <c:if test="${not empty error}">
             <div class="alert alert-danger" role="alert">
-                ${error}
+                <h6 style="margin-bottom: 15px; font-weight: bold;">
+                    <i class="fas fa-exclamation-triangle"></i> User Creation Failed
+                </h6>
+                <pre style="white-space: pre-wrap; font-size: 13px; margin: 0; background: #f8f9fa; padding: 15px; border-radius: 4px; border-left: 4px solid #dc3545;">${error}</pre>
+                <small style="display: block; margin-top: 10px; color: #666;">
+                    <strong>Note:</strong> Please review the errors above and correct the form data before submitting again.
+                </small>
             </div>
           </c:if>
 
-          <!-- Validation Error Messages -->
-          <c:if test="${not empty fullNameError}">
-            <div class="alert alert-danger" role="alert">
-                <strong>Full Name Error:</strong> ${fullNameError}
-            </div>
-          </c:if>
-          
-          <c:if test="${not empty emailError}">
-            <div class="alert alert-danger" role="alert">
-                <strong>Email Error:</strong> ${emailError}
-            </div>
-          </c:if>
-          
-          <c:if test="${not empty mobileError}">
-            <div class="alert alert-danger" role="alert">
-                <strong>Mobile Error:</strong> ${mobileError}
-            </div>
-          </c:if>
-          
-          <c:if test="${not empty genderError}">
-            <div class="alert alert-danger" role="alert">
-                <strong>Gender Error:</strong> ${genderError}
-            </div>
-          </c:if>
-          
-          <c:if test="${not empty roleError}">
-            <div class="alert alert-danger" role="alert">
-                <strong>Role Error:</strong> ${roleError}
-            </div>
-          </c:if>
-          
-          <c:if test="${not empty statusError}">
-            <div class="alert alert-danger" role="alert">
-                <strong>Status Error:</strong> ${statusError}
-            </div>
-          </c:if>
+
 
           <form action="${pageContext.request.contextPath}/admin/user" method="post" class="needs-validation" novalidate>
             <input type="hidden" name="action" value="${action}">

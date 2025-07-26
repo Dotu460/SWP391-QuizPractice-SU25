@@ -6,10 +6,7 @@ import com.quiz.su25.entity.Role;
 import com.quiz.su25.entity.User;
 import com.quiz.su25.utils.EmailUtils;
 import com.quiz.su25.utils.PasswordUtils;
-import com.quiz.su25.utils.PasswordHasher;
 import com.quiz.su25.validation.UserValidation;
-import java.util.Map;
-
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -18,8 +15,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
-@WebServlet(name = "AdminController", urlPatterns = {"/admin/users", "/admin/user"})
+@WebServlet(name = "AdminController", urlPatterns = {"/admin/users", "/admin/user", "/admin/user/*"})
 public class AdminController extends HttpServlet {
     private static final int DEFAULT_PAGE_SIZE = 10;
     private final UserDAO userDAO = new UserDAO();
@@ -49,6 +48,8 @@ public class AdminController extends HttpServlet {
             addUser(request, response);
         } else if ("update".equals(action)) {
             updateUser(request, response);
+        } else {
+            response.sendRedirect(request.getContextPath() + "/admin/users");
         }
     }
 
@@ -162,7 +163,16 @@ public class AdminController extends HttpServlet {
         String fullName = request.getParameter("fullName");
         String email = request.getParameter("email");
         String mobile = request.getParameter("mobile");
-        Integer gender = "male".equals(request.getParameter("gender")) ? 1 : 0;
+        
+        // Handle gender properly
+        Integer gender = null;
+        String genderParam = request.getParameter("gender");
+        if ("male".equals(genderParam)) {
+            gender = 1;
+        } else if ("female".equals(genderParam)) {
+            gender = 0;
+        }
+        
         Integer roleId = null;
         try {
             roleId = Integer.parseInt(request.getParameter("roleId"));
@@ -175,10 +185,16 @@ public class AdminController extends HttpServlet {
         Map<String, String> errors = UserValidation.validateUser(fullName, email, mobile, gender, roleId, status);
 
         if (!errors.isEmpty()) {
-            // Store error messages in request
+            // Create detailed error message
+            StringBuilder detailedError = new StringBuilder();
+            detailedError.append("Validation failed. Please correct the following errors:\n\n");
+            
             for (Map.Entry<String, String> error : errors.entrySet()) {
-                request.setAttribute(error.getKey() + "Error", error.getValue());
+                detailedError.append("• ").append(error.getValue()).append("\n");
             }
+            
+            // Store detailed error message
+            request.setAttribute("error", detailedError.toString());
             
             // Store form data for repopulating form
             request.setAttribute("user", createUserFromFormData(fullName, email, mobile, gender, roleId, status));
@@ -197,10 +213,9 @@ public class AdminController extends HttpServlet {
         user.setRole_id(roleId);
         user.setStatus(status);
 
-        // Generate password for new user
+        // Generate password for new user (no encryption needed)
         String generatedPassword = PasswordUtils.generateRandomPassword();
-        String hashedPassword = PasswordHasher.hashPassword(generatedPassword);
-        user.setPassword(hashedPassword);
+        user.setPassword(generatedPassword);
 
         // Insert user
         int userId = userDAO.insert(user);
@@ -218,24 +233,16 @@ public class AdminController extends HttpServlet {
                     "Welcome to Quiz Practice System! Your account has been created by an administrator. Please change your password after your first login for security."
                 );
                 
-                // Store password note in session for admin to see
-                request.getSession().setAttribute("passwordNote", 
-                    String.format("User account created successfully!\n\nLogin Credentials:\nEmail: %s\nPassword: %s\n\nAn email with login instructions has been sent to the user.", 
-                    user.getEmail(), generatedPassword));
-                
                 response.sendRedirect(request.getContextPath() + "/admin/users?success=userAddedWithEmail");
             } catch (Exception e) {
                 System.err.println("Failed to send welcome email: " + e.getMessage());
                 
-                // Store password note even if email failed
-                request.getSession().setAttribute("passwordNote", 
-                    String.format("User account created successfully!\n\nIMPORTANT - Email sending failed!\nPlease manually provide these credentials to the user:\n\nEmail: %s\nPassword: %s", 
-                    user.getEmail(), generatedPassword));
-                
                 response.sendRedirect(request.getContextPath() + "/admin/users?success=userAddedNoEmail");
             }
         } else {
-            request.setAttribute("error", "Failed to add user");
+            // Determine the specific reason for failure
+            String errorMessage = determineAddUserError(user);
+            request.setAttribute("error", errorMessage);
             request.setAttribute("user", user);
             request.setAttribute("action", "add");
             request.setAttribute("roles", roleDAO.findAll());
@@ -298,6 +305,60 @@ public class AdminController extends HttpServlet {
         user.setRole_id(roleId);
         user.setStatus(status);
         return user;
+    }
+
+    /**
+     * Determines the specific reason why adding a user failed
+     * @param user The user object that failed to be added
+     * @return Detailed error message explaining the failure reason
+     */
+    private String determineAddUserError(User user) {
+        StringBuilder errorMessage = new StringBuilder();
+        errorMessage.append("Failed to add user. Possible reasons:\n\n");
+
+        // Check if email already exists
+        if (user.getEmail() != null) {
+            User existingUser = userDAO.findByEmail(user.getEmail());
+            if (existingUser != null) {
+                errorMessage.append("• Email address '").append(user.getEmail()).append("' already exists in the system.\n");
+                errorMessage.append("  Please use a different email address.\n\n");
+            }
+        }
+
+        // Check if mobile number already exists (if provided)
+        // Note: findByMobile method doesn't exist in UserDAO, so we'll skip this check
+        // TODO: Add findByMobile method to UserDAO if mobile uniqueness is required
+
+        // Check database constraints
+        errorMessage.append("• Database constraints:\n");
+        errorMessage.append("  - Full name cannot be null or empty\n");
+        errorMessage.append("  - Email cannot be null or empty\n");
+        errorMessage.append("  - Role ID must be valid (2 for Student, 3 for Expert)\n");
+        errorMessage.append("  - Status must be valid (active, inactive, pending)\n");
+        errorMessage.append("  - Gender must be 0 (Female) or 1 (Male)\n\n");
+
+        // Check for null or invalid values
+        if (user.getFull_name() == null || user.getFull_name().trim().isEmpty()) {
+            errorMessage.append("• Full name is missing or empty.\n");
+        }
+        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+            errorMessage.append("• Email is missing or empty.\n");
+        }
+        if (user.getRole_id() == null || (user.getRole_id() != 2 && user.getRole_id() != 3)) {
+            errorMessage.append("• Invalid role ID. Must be 2 (Student) or 3 (Expert).\n");
+        }
+        if (user.getStatus() == null || user.getStatus().trim().isEmpty()) {
+            errorMessage.append("• Status is missing or empty.\n");
+        }
+        if (user.getGender() == null || (user.getGender() != 0 && user.getGender() != 1)) {
+            errorMessage.append("• Invalid gender value. Must be 0 (Female) or 1 (Male).\n");
+        }
+
+        // Add general database error message
+        errorMessage.append("\n• Database connection or constraint violation may have occurred.\n");
+        errorMessage.append("  Please check all required fields and try again.\n");
+
+        return errorMessage.toString();
     }
 
     private int getIntParameter(HttpServletRequest request, String paramName, int defaultValue) {
