@@ -1,14 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!doctype html>
-"From the Subjects List screen, the user can click to edit or delete an existing course subject
-When editing, the user can update fields such as name, images with notes, videos with notes, category, featured flag, owner, status, and description
-
-
-When deleting, a confirmation dialog is shown. If the subject is linked to active registrations, the system may block the deletion and show a warning
-
-
-After saving or deleting, the Subjects List is updated accordingly"
 <html class="no-js" lang="en">
 <head>
     <meta charset="utf-8">
@@ -113,7 +105,7 @@ After saving or deleting, the Subjects List is updated accordingly"
                                                 <strong>Mobile:</strong> ${not empty user.mobile ? user.mobile : 'Not specified'}<br>
                                                 <strong>Current Role:</strong> 
                                                 <span class="badge bg-primary">
-                                                    ${not empty userRole ? userRole.role_name : 'Unknown Role'}
+                                                    ${not empty userRole ? userRole.name : 'Unknown Role'}
                                                 </span><br>
                                                 <strong>Current Status:</strong> 
                                                 <span class="badge ${user.status == 'active' ? 'bg-success' : user.status == 'inactive' ? 'bg-danger' : 'bg-warning'}">
@@ -156,7 +148,7 @@ After saving or deleting, the Subjects List is updated accordingly"
                                                     <option value="">Select Role</option>
                                                     <c:forEach var="role" items="${roles}">
                                                         <option value="${role.id}" ${user.role_id == role.id ? 'selected' : ''}>
-                                                            ${role.role_name}
+                                                            ${role.name}
                                                         </option>
                                                     </c:forEach>
                                                 </select>
@@ -213,7 +205,7 @@ After saving or deleting, the Subjects List is updated accordingly"
 <!-- footer-area-end -->
 
 <!-- JS here -->
-<jsp:include page="../common/js/"></jsp:include>
+<jsp:include page="../common/user/link_js_common.jsp"></jsp:include>
 
 <script>
     SVGInject(document.querySelectorAll("img.injectable"));

@@ -93,51 +93,52 @@ public class PricePackageMenuController extends HttpServlet {
                 request.setAttribute("error", "Invalid package ID");
             }
         }
-        // Nếu không có id, hiển thị danh sách như cũ
+        // --- PHÂN TRANG ---
+        String pageStr = request.getParameter("page");
+        String pageSizeStr = request.getParameter("pageSize");
+        String showAllParam = request.getParameter("showAll");
+        int page = 1;
+        int pageSize = 10; // default 10 items/page
+        boolean showAll = "true".equals(showAllParam);
+        if (pageStr != null && !pageStr.isEmpty()) {
+            try { page = Integer.parseInt(pageStr); if (page < 1) page = 1; } catch (NumberFormatException e) { page = 1; }
+        }
+        if (showAll) {
+            pageSize = Integer.MAX_VALUE;
+            page = 1;
+        } else if (pageSizeStr != null && !pageSizeStr.isEmpty()) {
+            try { pageSize = Integer.parseInt(pageSizeStr); if (pageSize < 1) pageSize = 10; if (pageSize > 100) pageSize = 100; } catch (NumberFormatException e) { pageSize = 10; }
+        }
+        // Lấy tổng số packages
+        int totalPackages = pricePackageDAO.getTotalFilteredPricePackages("active", null, null, null);
+        int totalPages = showAll ? 1 : (int) Math.ceil((double) totalPackages / pageSize);
+        if (page > totalPages && totalPages > 0) page = totalPages;
+        // Lấy danh sách packages theo trang
         List<PricePackage> pricePackages = pricePackageDAO.findPricePackagesWithFilters(
-            "active", null, null, null, 1, Integer.MAX_VALUE
+            "active", null, null, null, page, pageSize
         );
-        
         // Check user login status and get purchased packages
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute(GlobalConfig.SESSION_ACCOUNT);
         Map<Integer, Registration> userPurchases = new HashMap<>();
-        
         if (user != null) {
-            // Get user's registrations
             List<Registration> userRegistrations = registrationDAO.findByUserId(user.getId());
             Date currentDate = new Date(System.currentTimeMillis());
-            
-            System.out.println("User " + user.getId() + " has " + userRegistrations.size() + " registrations");
-            
-            // Create map of purchased packages that are still valid
             for (Registration reg : userRegistrations) {
-                System.out.println("Registration: Package ID=" + reg.getPackage_id() + 
-                                 ", Status=" + reg.getStatus() + 
-                                 ", Valid To=" + reg.getValid_to());
-                                 
                 if (("paid".equals(reg.getStatus()) || "active".equals(reg.getStatus()) || "Approved".equals(reg.getStatus())) && 
-                    reg.getValid_to() != null && 
-                    reg.getValid_to().after(currentDate)) {
+                    reg.getValid_to() != null && reg.getValid_to().after(currentDate)) {
                     userPurchases.put(reg.getPackage_id(), reg);
-                    System.out.println("Added package " + reg.getPackage_id() + " to userPurchases");
                 }
             }
-            
-            System.out.println("Total purchased packages: " + userPurchases.size());
-            
-            // 🚨 DEBUG: In chi tiết userPurchases map
-            System.out.println("=== FINAL userPurchases MAP ===");
-            for (Map.Entry<Integer, Registration> entry : userPurchases.entrySet()) {
-                System.out.println("Package ID " + entry.getKey() + " -> Registration ID " + entry.getValue().getId() + 
-                                 " (Status: " + entry.getValue().getStatus() + ")");
-            }
-            System.out.println("===============================");
         }
-        
         request.setAttribute("pricePackages", pricePackages);
         request.setAttribute("userPurchases", userPurchases);
         request.setAttribute("currentUser", user);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("pageSize", showAll ? 10 : pageSize);
+        request.setAttribute("showAll", showAll);
+        request.setAttribute("totalPackages", totalPackages);
         request.getRequestDispatcher("/view/user/price_package/price-package-menu.jsp").forward(request, response);
     }
 
@@ -166,4 +167,5 @@ public class PricePackageMenuController extends HttpServlet {
     }// </editor-fold>
 
 }
+
 

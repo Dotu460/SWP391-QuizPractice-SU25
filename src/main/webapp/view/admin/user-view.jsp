@@ -130,7 +130,7 @@
                                             <h2 class="text-primary mb-1">${user.full_name}</h2>
                                             <h5 class="text-muted mb-3">
                                                 <i class="fas fa-user-tag"></i> 
-                                                ${not empty userRole ? userRole.role_name : 'No Role Assigned'}
+                                                ${not empty userRole ? userRole.name : 'No Role Assigned'}
                                             </h5>
                                             
                                             <div class="info-card">
@@ -208,7 +208,7 @@
 <!-- footer-area-end -->
 
 <!-- JS here -->
-<jsp:include page="../common/js/"></jsp:include>
+<jsp:include page="../common/user/link_js_common.jsp"></jsp:include>
 
 <script>
     SVGInject(document.querySelectorAll("img.injectable"));
