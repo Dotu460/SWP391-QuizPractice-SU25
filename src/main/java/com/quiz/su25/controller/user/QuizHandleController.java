@@ -629,7 +629,12 @@ public class QuizHandleController extends HttpServlet {
             }
 
             // Chuyển hướng đến câu hỏi tiếp theo, đảm bảo có quizId trong URL
-            response.sendRedirect(request.getContextPath() + "/quiz-handle?id=" + quizId + "&questionNumber=" + nextNumber);
+            String packageId = request.getParameter("packageId");
+            String redirectUrl = request.getContextPath() + "/quiz-handle?id=" + quizId + "&questionNumber=" + nextNumber;
+            if (packageId != null && !packageId.isEmpty()) {
+                redirectUrl += "&packageId=" + packageId;
+            }
+            response.sendRedirect(redirectUrl);
 
         } catch (Exception e) {
             handleSaveAnswerError(request, response, e);

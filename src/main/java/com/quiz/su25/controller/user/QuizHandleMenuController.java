@@ -80,6 +80,12 @@ public class QuizHandleMenuController extends HttpServlet {
             session.setAttribute("user", userId);
             System.out.println("Set session with user id = " + userId);
 
+            // Lưu packageId vào session nếu có
+            if (packageIdParam != null && !packageIdParam.isEmpty()) {
+                session.setAttribute("packageId", packageIdParam);
+                System.out.println("Set session with packageId = " + packageIdParam);
+            }
+
             List<Quizzes> quizzesList;
 
             if (packageIdParam != null && !packageIdParam.isEmpty()) {

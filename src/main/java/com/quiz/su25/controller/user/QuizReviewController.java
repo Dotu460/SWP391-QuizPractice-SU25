@@ -55,19 +55,48 @@ public class QuizReviewController extends HttpServlet {
 
         try {
             int quizId = Integer.parseInt(quizIdStr);
-            int userId = 10; // Hardcoded user ID as requested
+            
+            // Lấy user từ session thay vì hardcode
+            com.quiz.su25.entity.User user = (com.quiz.su25.entity.User) session.getAttribute(com.quiz.su25.config.GlobalConfig.SESSION_ACCOUNT);
+            if (user == null) {
+                response.sendRedirect(request.getContextPath() + "/login");
+                return;
+            }
+            int userId = user.getId();
 
             System.out.println("\n===== QUIZ REVIEW =====");
             System.out.println("Reviewing quiz ID: " + quizId + " for user ID: " + userId);
 
+            // Debug: Kiểm tra tất cả attempts của user cho quiz này
+            List<UserQuizAttempts> allAttempts = attemptsDAO.findByUserId(userId);
+            System.out.println("Total attempts for user " + userId + ": " + allAttempts.size());
+            for (UserQuizAttempts attempt : allAttempts) {
+                if (attempt.getQuiz_id().equals(quizId)) {
+                    System.out.println("Found attempt for quiz " + quizId + ": ID=" + attempt.getId() + 
+                                      ", Status=" + attempt.getStatus() + 
+                                      ", Score=" + attempt.getScore() +
+                                      ", End_time=" + attempt.getEnd_time());
+                }
+            }
+
             // Tìm attempt mới nhất đã hoàn thành (status=completed)
             List<UserQuizAttempts> completedAttempts = attemptsDAO.findCompletedAttemptsByQuizId(userId, quizId);
+            
+            System.out.println("Found " + (completedAttempts != null ? completedAttempts.size() : 0) + " completed attempts");
             
             if (completedAttempts == null || completedAttempts.isEmpty()) {
                 System.out.println("No completed attempts found");
                 session.setAttribute("toastMessage", "No completed quiz attempt found to review.");
                 session.setAttribute("toastType", "error");
-                response.sendRedirect(request.getContextPath() + "/quiz-handle-menu");
+                
+                // Lấy packageId từ request để giữ context khi redirect
+                String packageId = request.getParameter("packageId");
+                String redirectUrl = request.getContextPath() + "/quiz-handle-menu";
+                if (packageId != null && !packageId.isEmpty()) {
+                    redirectUrl += "?packageId=" + packageId;
+                }
+                System.out.println("Redirecting to: " + redirectUrl);
+                response.sendRedirect(redirectUrl);
                 return;
             }
 
@@ -127,11 +156,23 @@ public class QuizReviewController extends HttpServlet {
 
         } catch (NumberFormatException e) {
             System.out.println("Error parsing quiz ID: " + e.getMessage());
-            response.sendRedirect("home");
+            // Lấy packageId từ request để giữ context khi redirect
+            String packageId = request.getParameter("packageId");
+            String redirectUrl = request.getContextPath() + "/quiz-handle-menu";
+            if (packageId != null && !packageId.isEmpty()) {
+                redirectUrl += "?packageId=" + packageId;
+            }
+            response.sendRedirect(redirectUrl);
         } catch (Exception e) {
             System.out.println("Error in QuizReviewController: " + e.getMessage());
             e.printStackTrace();
-            response.sendRedirect("home");
+            // Lấy packageId từ request để giữ context khi redirect
+            String packageId = request.getParameter("packageId");
+            String redirectUrl = request.getContextPath() + "/quiz-handle-menu";
+            if (packageId != null && !packageId.isEmpty()) {
+                redirectUrl += "?packageId=" + packageId;
+            }
+            response.sendRedirect(redirectUrl);
         }
     }
 

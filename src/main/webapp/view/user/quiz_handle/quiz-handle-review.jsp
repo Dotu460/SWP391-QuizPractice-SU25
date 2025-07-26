@@ -23,8 +23,20 @@
         <!-- All styles from quiz-handle.jsp -->
         <style>
             .header-top-wrap{background:#1A1B3D;padding:8px 0;color:#fff;position:relative}.header-logo{position:relative;z-index:2;display:flex;align-items:center}.header-logo a{display:block;width:auto;height:100%}.header-logo img{max-height:50px;width:auto;height:auto;display:block;object-fit:contain;filter:brightness(0) invert(1)}.header-top{display:flex;align-items:center;justify-content:space-between;min-height:60px}.header-right{display:flex;align-items:center}.user-menu{position:relative}.user-icon{width:40px;height:40px;border-radius:50%;background:#5751E1;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s ease}.user-icon i{color:#fff;font-size:18px}.user-icon:hover{background:#7A6DC0;transform:translateY(-1px)}.dropdown-menu{position:absolute;top:120%;right:0;width:280px;background:#fff;border-radius:8px;box-shadow:0 5px 15px rgba(0,0,0,.15);opacity:0;visibility:hidden;transform:translateY(10px);transition:all .3s ease;z-index:1000}.dropdown-menu.show{opacity:1;visibility:visible;transform:translateY(0)}.dropdown-header{padding:16px;border-bottom:1px solid #eee}.user-info{display:flex;align-items:center;gap:12px}.user-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden}.user-avatar img{width:100%;height:100%;object-fit:cover}.user-details{display:flex;flex-direction:column}.user-name{font-weight:600;color:#1A1B3D;font-size:14px}.user-email{color:#666;font-size:12px}.guest-info{padding:8px 0;color:#666;font-size:14px}.dropdown-body{padding:8px 0}.dropdown-item{display:flex;align-items:center;padding:10px 16px;color:#1A1B3D;text-decoration:none;transition:background-color .3s ease}.dropdown-item:hover{background-color:#f8f9fa}.dropdown-item i{width:20px;margin-right:12px;font-size:16px}.dropdown-item span{font-size:14px}.text-danger{color:#dc3545!important}.dropdown-divider{height:1px;background-color:#eee;margin:8px 0}
-            .question-header{padding:20px 0;border-bottom:1px solid #eee}.media-content{width:40%}.question-info{display:flex;justify-content:space-between;align-items:center;font-size:16px;color:#1A1B3D}.question-number{font-weight:500}.question-id{color:#1A1B3D}.navigation-footer{display:flex;justify-content:space-between;align-items:center;padding:20px 0;margin-top:30px;border-top:1px solid #eee}.btn-review-back{background:#5751E1;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .3s ease; text-decoration: none;}.btn-review-back:hover{background:#7A6DC0;transform:translateY(-1px)}.navigation-buttons{display:flex;flex-direction:column;align-items:flex-end;gap:10px;margin-left:auto;width:auto}.action-buttons{display:flex;gap:8px}.nav-buttons{display:flex;justify-content:flex-end;width:100%}.nav-group{display:flex;gap:8px;width:fit-content}.btn-action,.btn-nav{background:#fff;border:2px solid #5751E1;border-radius:8px;padding:8px 16px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all .3s ease;color:#1A1B3D;width:100px;justify-content:center}.btn-peek:hover{background:#f0f0f0}.btn-prev{justify-content:flex-start}.btn-next{justify-content:flex-end}.btn-nav:hover{background:#8B7FD2;color:#fff}.peek-popup{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1000;justify-content:center;align-items:center}.peek-popup.show{display:flex}.peek-popup .popup-content{background:#fff;border-radius:12px;width:90%;max-width:500px;padding:24px;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.15)}.peek-popup .popup-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid #eee}.peek-popup .popup-header h3{font-size:20px;font-weight:600;color:#1A1B3D;margin:0}.peek-popup .close-btn{background:0 0;border:none;font-size:20px;color:#666;cursor:pointer;padding:4px;transition:color .3s ease}.peek-popup .close-btn:hover{color:#1A1B3D}.peek-popup .explanation-text{font-size:16px;line-height:1.6;color:#4B5563;padding:16px;background:#f8f9fa;border-radius:8px}
+            .question-header{padding:20px 0;border-bottom:1px solid #eee}.question-info{display:flex;justify-content:space-between;align-items:center;font-size:16px;color:#1A1B3D}.question-number{font-weight:500}.question-id{color:#1A1B3D}.navigation-footer{display:flex;justify-content:space-between;align-items:center;padding:20px 0;margin-top:30px;border-top:1px solid #eee}.btn-review-back{background:#5751E1;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .3s ease; text-decoration: none;}.btn-review-back:hover{background:#7A6DC0;transform:translateY(-1px)}.navigation-buttons{display:flex;flex-direction:column;align-items:flex-end;gap:10px;margin-left:auto;width:auto}.action-buttons{display:flex;gap:8px}.nav-buttons{display:flex;justify-content:flex-end;width:100%}.nav-group{display:flex;gap:8px;width:fit-content}.btn-action,.btn-nav{background:#fff;border:2px solid #5751E1;border-radius:8px;padding:8px 16px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all .3s ease;color:#1A1B3D;width:100px;justify-content:center}.btn-peek:hover{background:#f0f0f0}.btn-prev{justify-content:flex-start}.btn-next{justify-content:flex-end}.btn-nav:hover{background:#8B7FD2;color:#fff}.peek-popup{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1000;justify-content:center;align-items:center}.peek-popup.show{display:flex}.peek-popup .popup-content{background:#fff;border-radius:12px;width:90%;max-width:500px;padding:24px;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.15)}.peek-popup .popup-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid #eee}.peek-popup .popup-header h3{font-size:20px;font-weight:600;color:#1A1B3D;margin:0}.peek-popup .close-btn{background:0 0;border:none;font-size:20px;color:#666;cursor:pointer;padding:4px;transition:color .3s ease}.peek-popup .close-btn:hover{color:#1A1B3D}.peek-popup .explanation-text{font-size:16px;line-height:1.6;color:#4B5563;padding:16px;background:#f8f9fa;border-radius:8px}
             .question-content{margin:40px 0;padding:30px;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}.question-text{font-size:18px;color:#1A1B3D;line-height:1.6;margin-bottom:30px;font-weight:500}.answers-container{display:flex;flex-direction:column;gap:16px}.answer-option{position:relative}
+            
+            /* Media content styles */
+            .media-content {
+                margin-top: 20px;
+            }
+            
+            .media-content img,
+            .media-content video {
+                max-width: 100%;
+                height: auto;
+                border-radius: 8px;
+            }
             
             /* --- Improved Review Mode Styles --- */
             .form-check-input { display: none; }
@@ -133,6 +145,42 @@
             .no-feedback {
                 color: #6c757d;
                 font-style: italic;
+            }
+            
+            /* HTML Media Content Styles */
+            .html-media-content {
+                max-width: 100%;
+                overflow: hidden;
+            }
+            
+            .html-media-content video {
+                max-width: 100%;
+                height: auto;
+                border-radius: 8px;
+            }
+            
+            .html-media-content img {
+                max-width: 100%;
+                height: auto;
+                border-radius: 8px;
+                display: block;
+                margin: 10px 0;
+            }
+            
+            .html-media-content p {
+                margin: 10px 0;
+                line-height: 1.6;
+                color: #1A1B3D;
+            }
+            
+            .html-media-content div {
+                margin: 10px 0;
+            }
+            
+            /* Bootstrap img-fluid class support */
+            .img-fluid {
+                max-width: 100%;
+                height: auto;
             }
             
             /* Review Popup Styles */
@@ -412,10 +460,18 @@
                 <div class="question-content">
                     <div class="question-text">${question.content}</div>
                     
+
+                    
+                    <!-- Media URL nếu có (video / ảnh) -->
                     <c:if test="${not empty question.media_url}">
-                       <!-- Media display logic here -->
-                       <div class="media-content mt-3">
+                        <div class="media-content mt-3">
                             <c:choose>
+                                <c:when test="${fn:contains(question.media_url, '<') && (fn:contains(question.media_url, 'video') || fn:contains(question.media_url, 'img') || fn:contains(question.media_url, '<p>'))}">
+                                    <!-- HTML Content - render directly -->
+                                    <div class="html-media-content">
+                                        ${question.media_url}
+                                    </div>
+                                </c:when>
                                 <c:when test="${fn:contains(question.media_url, 'youtube.com') || fn:contains(question.media_url, 'youtu.be')}">
                                     <!-- YouTube Video Embed -->
                                     <div class="youtube-embed-container" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; border-radius: 8px;">
@@ -591,7 +647,7 @@
 
                 <div class="navigation-footer">
                      <div class="left-buttons">
-                         <a href="${pageContext.request.contextPath}/quiz-handle-menu" class="btn-review-back">
+                         <a href="${pageContext.request.contextPath}/quiz-handle-menu${not empty param.packageId ? '?packageId='.concat(param.packageId) : ''}" class="btn-review-back">
                             <i class="fas fa-arrow-left"></i>
                             Back to Quizzes
                         </a>
@@ -612,13 +668,13 @@
                         <div class="nav-buttons">
                             <div class="nav-group">
                                 <c:if test="${currentNumber > 1}">
-                                    <a href="quiz-review?quizId=${quiz.id}&questionNumber=${currentNumber - 1}" class="btn-nav btn-prev">
+                                    <a href="quiz-review?quizId=${quiz.id}&questionNumber=${currentNumber - 1}${not empty param.packageId ? '&packageId='.concat(param.packageId) : ''}" class="btn-nav btn-prev">
                                         <i class="fas fa-arrow-left"></i>
                                         Previous
                                     </a>
                                 </c:if>
                                 <c:if test="${currentNumber < fn:length(questions)}">
-                                    <a href="quiz-review?quizId=${quiz.id}&questionNumber=${currentNumber + 1}" class="btn-nav btn-next">
+                                    <a href="quiz-review?quizId=${quiz.id}&questionNumber=${currentNumber + 1}${not empty param.packageId ? '&packageId='.concat(param.packageId) : ''}" class="btn-nav btn-next">
                                         Next
                                         <i class="fas fa-arrow-right"></i>
                                     </a>
@@ -769,6 +825,34 @@
                     }
                 });
             }
+            
+            // Fix relative paths in HTML media content
+            document.addEventListener('DOMContentLoaded', function() {
+                const htmlMediaContent = document.querySelector('.html-media-content');
+                if (htmlMediaContent) {
+                    // Fix video sources
+                    const videos = htmlMediaContent.querySelectorAll('video source');
+                    videos.forEach(source => {
+                        const src = source.getAttribute('src');
+                        if (src && src.startsWith('/SWP391_QUIZ_PRACTICE_SU25/uploads/')) {
+                            source.setAttribute('src', '${pageContext.request.contextPath}' + src);
+                        } else if (src && src.startsWith('../uploads/')) {
+                            source.setAttribute('src', '${pageContext.request.contextPath}/' + src.substring(3));
+                        }
+                    });
+                    
+                    // Fix image sources
+                    const images = htmlMediaContent.querySelectorAll('img');
+                    images.forEach(img => {
+                        const src = img.getAttribute('src');
+                        if (src && src.startsWith('/SWP391_QUIZ_PRACTICE_SU25/uploads/')) {
+                            img.setAttribute('src', '${pageContext.request.contextPath}' + src);
+                        } else if (src && src.startsWith('../uploads/')) {
+                            img.setAttribute('src', '${pageContext.request.contextPath}/' + src.substring(3));
+                        }
+                    });
+                }
+            });
             
             // Navigate to question
             function navigateToQuestion(questionNumber) {

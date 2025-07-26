@@ -709,7 +709,7 @@
                                                     </div>
                                                                             <div class="mt-3" style="margin-top:auto !important;">
                                                         <c:choose>
-                                                            <c:when test="${not empty quizScores[quiz.id]}">
+                                                            <c:when test="${not empty quizScores[quiz.id] || quizAttemptStatus[quiz.id] eq 'completed' || quizAttemptStatus[quiz.id] eq 'partially_graded'}">
                                                                 <div class="d-flex gap-2">
                                                                     <c:choose>
                                                                         <c:when test="${quizAttemptStatus[quiz.id] eq 'partially_graded'}">
@@ -779,8 +779,21 @@
         }
 
         function reviewQuiz(quizId) {
+            console.log("=== REVIEW QUIZ DEBUG ===");
             console.log("Reviewing quiz with ID:", quizId);
-            window.location.href = '${pageContext.request.contextPath}/quiz-review?quizId=' + quizId;
+            console.log("Current URL:", window.location.href);
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const packageId = urlParams.get('packageId');
+            console.log("PackageId from URL:", packageId);
+            
+            let url = '${pageContext.request.contextPath}/quiz-review?quizId=' + quizId;
+            if (packageId) {
+                url += '&packageId=' + packageId;
+            }
+            console.log("Final URL:", url);
+            
+            window.location.href = url;
         }
         
                 $(document).ready(function () {

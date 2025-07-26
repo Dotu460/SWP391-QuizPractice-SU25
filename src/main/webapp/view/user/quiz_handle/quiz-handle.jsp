@@ -2147,12 +2147,17 @@
             function navigateToQuestion(questionNumber) {
                 saveCurrentState();
                 
-                // Lấy quizId từ URL hiện tại
+                // Lấy quizId và packageId từ URL hiện tại
                 const urlParams = new URLSearchParams(window.location.search);
                 const quizId = urlParams.get('id');
+                const packageId = urlParams.get('packageId');
                 
-                // Thêm quizId vào URL điều hướng
-                window.location.href = '${pageContext.request.contextPath}/quiz-handle?id=' + quizId + '&questionNumber=' + questionNumber;
+                // Tạo URL điều hướng với packageId
+                let url = '${pageContext.request.contextPath}/quiz-handle?id=' + quizId + '&questionNumber=' + questionNumber;
+                if (packageId) {
+                    url += '&packageId=' + packageId;
+                }
+                window.location.href = url;
             }
 
             // Hàm xử lý điều hướng
@@ -2178,6 +2183,7 @@
                 // Lấy quizId từ URL và thêm vào form nếu chưa có
                 const urlParams = new URLSearchParams(window.location.search);
                 const quizId = urlParams.get('id');
+                const packageId = urlParams.get('packageId');
                 
                 let quizIdInput = form.querySelector('input[name="quizId"]');
                 if (!quizIdInput) {
@@ -2187,6 +2193,18 @@
                     form.appendChild(quizIdInput);
                 }
                 quizIdInput.value = quizId;
+                
+                // Thêm packageId vào form nếu có
+                if (packageId) {
+                    let packageIdInput = form.querySelector('input[name="packageId"]');
+                    if (!packageIdInput) {
+                        packageIdInput = document.createElement('input');
+                        packageIdInput.type = 'hidden';
+                        packageIdInput.name = 'packageId';
+                        form.appendChild(packageIdInput);
+                    }
+                    packageIdInput.value = packageId;
+                }
                 
                 console.log('Updated form data:', {
                     action: form.querySelector('input[name="action"]').value,
@@ -2429,6 +2447,13 @@
                 // Lấy ID câu hỏi hiện tại
                 const currentQuestionId = parseInt(document.querySelector('input[name="questionId"]').value);
                 
+                // Thêm packageId vào formData nếu có
+                const urlParams = new URLSearchParams(window.location.search);
+                const packageId = urlParams.get('packageId');
+                if (packageId) {
+                    formData.set('packageId', packageId);
+                }
+                
                 // Gửi request để lưu câu trả lời
                 fetch('${pageContext.request.contextPath}/quiz-handle', {
                     method: 'POST',
@@ -2497,10 +2522,16 @@
                         if (data.score !== undefined) {
                             // Lưu điểm vào sessionStorage
                             sessionStorage.setItem('quizScore', data.score);
-                            // Redirect về trang quiz-handle-menu
-                            window.location.href = '${pageContext.request.contextPath}/quiz-handle-menu';
+                            // Redirect về trang quiz-handle-menu với packageId
+                            const urlParams = new URLSearchParams(window.location.search);
+                            const packageId = urlParams.get('packageId');
+                            let url = '${pageContext.request.contextPath}/quiz-handle-menu';
+                            if (packageId) {
+                                url += '?packageId=' + packageId;
+                            }
+                            window.location.href = url;
                             
-                            // Xóa dữ liệu trong sessionStorage
+                            // Xóa dữ liệu trong sessionStorage sau khi chấm điểm thành công
                             sessionStorage.removeItem('selectedAnswers');
                             sessionStorage.removeItem('answeredQuestions');
                             sessionStorage.removeItem('markedQuestions');
@@ -2570,8 +2601,14 @@
                         const data = JSON.parse(text);
                         // Lưu điểm vào sessionStorage (hoặc localStorage)
                         sessionStorage.setItem('quizScore', data.score);
-                        //rediẻc về trang quiz-handle-menu.jsp để hiển thị điểm
-                        window.location.href = '${pageContext.request.contextPath}/quiz-handle-menu';
+                        // Redirect về trang quiz-handle-menu với packageId
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const packageId = urlParams.get('packageId');
+                        let url = '${pageContext.request.contextPath}/quiz-handle-menu';
+                        if (packageId) {
+                            url += '?packageId=' + packageId;
+                        }
+                        window.location.href = url;
                         
                         // Xóa dữ liệu trong sessionStorage sau khi chấm điểm thành công
                         sessionStorage.removeItem('selectedAnswers');
@@ -2595,13 +2632,26 @@
 
             // Hàm xem lại câu trả lời
             function reviewAnswers() {
-                // Chuyển hướng đến trang xem lại câu trả lời
-                window.location.href = '${pageContext.request.contextPath}/quiz-review';
+                // Lấy packageId từ URL hiện tại
+                const urlParams = new URLSearchParams(window.location.search);
+                const packageId = urlParams.get('packageId');
+                let url = '${pageContext.request.contextPath}/quiz-review?quizId=${quiz.id}';
+                if (packageId) {
+                    url += '&packageId=' + packageId;
+                }
+                window.location.href = url;
             }
 
             // Hàm trở về dashboard
             function returnToDashboard() {
-                window.location.href = '${pageContext.request.contextPath}/dashboard';
+                // Lấy packageId từ URL hiện tại
+                const urlParams = new URLSearchParams(window.location.search);
+                const packageId = urlParams.get('packageId');
+                let url = '${pageContext.request.contextPath}/quiz-handle-menu';
+                if (packageId) {
+                    url += '?packageId=' + packageId;
+                }
+                window.location.href = url;
             }
         </script>
         
