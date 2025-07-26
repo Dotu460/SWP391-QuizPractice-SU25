@@ -1,4 +1,4 @@
-<%-- 
+    <%-- 
     Document   : quiz-handle-menu
     Created on : 14 thg 6, 2025, 00:44:45
     Author     : kenngoc
@@ -449,14 +449,25 @@
                 }
                 .badge.level-medium {
                     background: #fffbe6;
-                    color: #ffc107;
-                    border: 1.5px solid #ffc107;
+                    color: #ff9800;
+                    border: 1.5px solid #ff9800;
                 }
                 .badge.level-hard {
                     background: #ffe6e6;
                     color: #dc3545;
                     border: 1.5px solid #dc3545;
                 }
+        .badge.lesson-badge {
+            max-width: 100%;
+            display: inline-block;
+            white-space: normal;
+            overflow: visible;
+            text-overflow: unset;
+            vertical-align: middle;
+            word-break: break-word;
+            line-height: 1.3;
+            padding: 6px 14px;
+        }
     </style>
 </head>
 
@@ -487,6 +498,20 @@
                                             <span>Package: <b>${packageName}</b></span>
                                         </div>
                                     </c:if>
+                                <div class="mb-4 d-flex justify-content-between align-items-center">
+                                    <c:choose>
+                                        <c:when test="${not empty param.packageId}">
+                                            <a href="${pageContext.request.contextPath}/price-package-menu?id=${param.packageId}" class="btn btn-secondary rounded-pill">
+                                                <i ></i> Package Detail
+                                            </a>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <a href="${pageContext.request.contextPath}/price-package-menu" class="btn btn-secondary rounded-pill">
+                                                <i ></i> Package Detail
+                                            </a>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
                                 <div class="dashboard__content-title mb-4">
                                     <h4 class="title">Available Quizzes</h4>
                                 </div>
@@ -497,29 +522,80 @@
                                             <option value="subject" title="Subject name">Subject name</option>
                                         </select>
                                         <input id="quizSearchInput" type="text" class="form-control" style="max-width: 350px;" placeholder="Search..." oninput="filterQuizzesByName()">
-                                        <select id="levelSort" class="form-select" style="min-width: 100px; max-width: 145px; font-size: 0.98rem;" onchange="sortQuizzesByLevel()">
+                                        <select id="levelSort" class="form-select" style="min-width: 100px; max-width: 145px; font-size: 0.98rem;" onchange="applyAllFilters()">
                                             <option value="all">All Levels</option>
                                             <option value="easy">Easy</option>
                                             <option value="medium">Medium</option>
                                             <option value="hard">Hard</option>
                                         </select>
+                                        <select id="doneFilter" class="form-select" style="min-width: 100px; max-width: 145px; font-size: 0.98rem;" onchange="applyAllFilters()">
+                                            <option value="all">All Status</option>
+                                            <option value="done">Done</option>
+                                            <option value="notdone">Not done</option>
+                                        </select>
                                     </div>
                                     <script>
-                                        function sortQuizzesByLevel() {
+                                        function applyAllFilters() {
                                             const level = document.getElementById('levelSort').value;
+                                            const done = document.getElementById('doneFilter').value;
+                                            const search = document.getElementById('quizSearchInput').value.trim().toLowerCase();
+                                            const mode = document.getElementById('searchMode').value;
                                             const subjectSections = document.querySelectorAll('.subject-section');
                                             subjectSections.forEach(section => {
+                                                const subjectId = section.getAttribute('data-subject-id');
+                                                const subjectTitle = section.getAttribute('data-subject-title') || '';
                                                 const quizCards = section.querySelectorAll('.quiz-card-wrapper');
+                                                let anyVisible = false;
                                                 let visibleCount = 0;
-                                                quizCards.forEach((card, idx) => {
-                                                    const quizLevel = card.querySelector('.quiz-level').textContent.trim().toLowerCase();
-                                                    if (level === 'all' || quizLevel === level) {
-                                                        card.style.display = (visibleCount < 3 || card.classList.contains('show-all')) ? 'block' : 'none';
-                                                        visibleCount++;
+                                                if (mode === 'quiz') {
+                                                    quizCards.forEach((card, idx) => {
+                                                        const quizName = card.getAttribute('data-quiz-name');
+                                                        const quizLevel = card.getAttribute('data-quiz-level');
+                                                        // Lấy trạng thái đã làm/chưa làm
+                                                        const hasScore = card.querySelector('.score-value') !== null;
+                                                        let match = true;
+                                                        if (search && !quizName.includes(search)) match = false;
+                                                        if (level !== 'all' && quizLevel !== level) match = false;
+                                                        if (done === 'done' && !hasScore) match = false;
+                                                        if (done === 'notdone' && hasScore) match = false;
+                                                        if (match) {
+                                                            if (visibleCount < 3 || card.classList.contains('show-all')) {
+                                                                card.style.display = 'block';
+                                                            } else {
+                                                                card.style.display = 'none';
+                                                            }
+                                                            anyVisible = true;
+                                                            visibleCount++;
+                                                        } else {
+                                                            card.style.display = 'none';
+                                                        }
+                                                    });
+                                                    section.style.display = anyVisible ? '' : 'none';
+                                                } else if (mode === 'subject') {
+                                                    if (subjectTitle.includes(search)) {
+                                                        section.style.display = '';
+                                                        quizCards.forEach((card, idx) => {
+                                                            const quizLevel = card.getAttribute('data-quiz-level');
+                                                            const hasScore = card.querySelector('.score-value') !== null;
+                                                            let match = true;
+                                                            if (level !== 'all' && quizLevel !== level) match = false;
+                                                            if (done === 'done' && !hasScore) match = false;
+                                                            if (done === 'notdone' && hasScore) match = false;
+                                                            if (match) {
+                                                                if (visibleCount < 3 || card.classList.contains('show-all')) {
+                                                                    card.style.display = 'block';
+                                                                } else {
+                                                                    card.style.display = 'none';
+                                                                }
+                                                                visibleCount++;
+                                                            } else {
+                                                                card.style.display = 'none';
+                                                            }
+                                                        });
                                                     } else {
-                                                        card.style.display = 'none';
+                                                        section.style.display = 'none';
                                                     }
-                                                });
+                                                }
                                                 // Hide/show Show more button
                                                 const showMoreBtn = section.querySelector('.show-more-btn');
                                                 if (showMoreBtn) {
@@ -527,10 +603,12 @@
                                                     showMoreBtn.textContent = 'Show more';
                                                     showMoreBtn.setAttribute('data-showing', 'less');
                                                 }
-                                                // Hide subject section if no quiz visible
-                                                section.style.display = visibleCount > 0 ? '' : 'none';
                                             });
                                         }
+                                        // Gọi applyAllFilters khi search input thay đổi
+                                        document.getElementById('quizSearchInput').oninput = applyAllFilters;
+                                        // Gọi applyAllFilters khi searchMode thay đổi
+                                        document.getElementById('searchMode').onchange = applyAllFilters;
                                     </script>
 
                                     <!-- Quiz List as Accordion -->
@@ -564,11 +642,10 @@
                                                         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 quiz-list" data-subject-id="${subjectId}">
                                                             <c:forEach var="quiz" items="${quizzesBySubject[subjectId]}" varStatus="quizStatus">
                                                                 <c:set var="displayClass" value="${quizStatus.index < 3 ? '' : 'd-none'}" />
-                                                                <div class="col quiz-card-wrapper ${displayClass}" data-quiz-name="${fn:toLowerCase(quiz.name)}">
+                                                                <div class="col quiz-card-wrapper ${displayClass}" data-quiz-name="${fn:toLowerCase(quiz.name)}" data-quiz-level="${fn:toLowerCase(quiz.level)}">
                                             <div class="card h-100 quiz-card">
                                                 <div class="card-body">
-                                                    <span class="quiz-level level-${quiz.level.toLowerCase()}">${quiz.level}</span>
-                                                                            <!-- Lesson badge -->
+                                                    <!-- Lesson badge -->
                                                                             <span class="badge lesson-badge mb-2" 
                                                                                   style="font-size:0.98em; font-weight:600; background:linear-gradient(90deg,#e9e6fa,#cfc6f7);color:#4b2991; border:1.5px solid #8B7FD2; padding:6px 14px; display:inline-flex; align-items:center; gap:6px; cursor:pointer;"
                                                                                   title="Lesson: ${lessonTitles[quiz.lesson_id]} - thuộc subject: ${subjectTitles[lessonToSubject[quiz.lesson_id]]}">
@@ -679,12 +756,19 @@
     <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
     <script>
         function startQuiz(quizId, isRetake) {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const packageId = urlParams.get('packageId');
-                    let url = '${pageContext.request.contextPath}/quiz-handle?id=' + quizId;
-                    if (packageId) url += '&packageId=' + packageId;
-                    if (isRetake) url += '&retake=true&t=' + new Date().getTime();
-                    window.location.href = url;
+            // Clear previous answers and state if retake
+            if (isRetake) {
+                sessionStorage.removeItem('selectedAnswers');
+                sessionStorage.removeItem('answeredQuestions');
+                sessionStorage.removeItem('markedQuestions');
+                sessionStorage.removeItem('quizScore');
+            }
+            const urlParams = new URLSearchParams(window.location.search);
+            const packageId = urlParams.get('packageId');
+            let url = '${pageContext.request.contextPath}/quiz-handle?id=' + quizId;
+            if (packageId) url += '&packageId=' + packageId;
+            if (isRetake) url += '&retake=true&t=' + new Date().getTime();
+            window.location.href = url;
         }
 
         function reviewQuiz(quizId) {

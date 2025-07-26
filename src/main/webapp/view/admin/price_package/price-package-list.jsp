@@ -164,6 +164,9 @@
                                 <c:if test="${not empty param.pageSize}">
                                     <c:param name="pageSize" value="${param.pageSize}" />
                                 </c:if>
+                                <c:if test="${not empty param.showAll}">
+                                    <c:param name="showAll" value="${param.showAll}" />
+                                </c:if>
                             </c:url>
 
                             <div class="col-xl-9">
@@ -198,6 +201,14 @@
                                     <div class="filter-form">
                                         <form action="${pageContext.request.contextPath}/admin/price-package-list" method="get" id="filterForm">
                                             <div class="row">
+
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="search">Search</label>
+                                                        <input type="text" class="form-control" id="search" name="search" 
+                                                               placeholder="Search by name, description..." value="${param.search}">
+                                                    </div>
+                                                </div>
                                                 <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label for="status">Status</label>
@@ -206,13 +217,6 @@
                                                             <option value="active" ${param.status == 'active' ? 'selected' : ''}>Active</option>
                                                             <option value="inactive" ${param.status == 'inactive' ? 'selected' : ''}>Inactive</option>
                                                         </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <div class="form-group">
-                                                        <label for="search">Search</label>
-                                                        <input type="text" class="form-control" id="search" name="search" 
-                                                               placeholder="Search by name, description..." value="${param.search}">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-3">
@@ -236,8 +240,8 @@
 
                                             <div class="row mt-2">
                                                 <div class="col-md-12 d-flex justify-content-end">
-                                                    <button type="submit" class="btn btn-primary" style="padding: 6px 15px; font-size: 15px;">Filter</button>
-                                                    <a href="${pageContext.request.contextPath}/admin/price-package-list" class="btn btn-secondary ml-2" style="padding: 6px 15px; font-size: 15px; margin-left: 8px;">Reset</a>
+                                                    <button type="submit" class="btn btn-primary" style="padding: 6px 15px; font-size: 15px;" onclick="updateShowAllField()">Filter</button>
+                                                    <a href="${pageContext.request.contextPath}/admin/price-package-list" class="btn btn-secondary ml-2" style="padding: 6px 15px; font-size: 15px; margin-left: 8px;" onclick="resetForm()">Reset</a>
                                                 </div>
                                             </div>    
                                         </form>
@@ -268,7 +272,7 @@
                                         <table class="table table-striped table-hover" id="pricePackageTable">
                                             <thead>
                                                 <tr>
-                                                    <th class="column-id">ID</th>
+                                                    <th class="column-id">No.</th>
                                                     <th class="column-name">Name</th>
                                                     <th class="column-duration">Duration (Months)</th>
                                                     <th class="column-list-price">List Price</th>
@@ -281,11 +285,20 @@
                                             <tbody>
                                                 <c:forEach items="${pricePackages}" var="pkg" varStatus="loop">
                                                     <tr>
-                                                        <td class="column-id">${pkg.id}</td>
+                                                        <td class="column-id">
+                                                            <c:choose>
+                                                                <c:when test="${showAll}">
+                                                                    ${loop.index + 1}
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    ${(currentPage - 1) * pageSize + loop.index + 1}
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </td>
                                                         <td class="column-name"><strong>${pkg.name}</strong></td>
                                                         <td class="column-duration">${pkg.access_duration_months}</td>
-                                                        <td class="column-list-price"><fmt:formatNumber value="${pkg.list_price}" type="currency" currencySymbol="$" /></td>
-                                                        <td class="column-sale-price"><fmt:formatNumber value="${pkg.sale_price}" type="currency" currencySymbol="$" /></td>
+                                                        <td class="column-list-price"><fmt:formatNumber value="${pkg.list_price}" type="currency" currencySymbol="₫" /></td>
+                                                        <td class="column-sale-price"><fmt:formatNumber value="${pkg.sale_price}" type="currency" currencySymbol="₫" /></td>
                                                         <td class="column-status">
                                                             <span class="package-status ${pkg.status == 'active' ? 'status-active' : 'status-inactive'}">
                                                                 ${pkg.status}
@@ -378,7 +391,7 @@
                         <form id="columnSettingsForm">
                             <div class="column-checkbox">
                                 <input type="checkbox" id="col-id" value="id" checked>
-                                <label for="col-id">ID</label>
+                                <label for="col-id">No.</label>
                             </div>
                             <div class="column-checkbox">
                                 <input type="checkbox" id="col-name" value="name" checked>
@@ -529,6 +542,56 @@
                                                                                 showAllField.value = '';
                                                                             }
                                                                         });
+
+                                                                        // Function to update showAll field before form submission
+                                                                        window.updateShowAllField = function () {
+                                                                            const showAllCheckbox = document.getElementById('showAllCheckbox');
+                                                                            const showAllField = document.getElementById('showAllField');
+
+                                                                            if (showAllCheckbox.checked) {
+                                                                                showAllField.value = 'true';
+                                                                            } else {
+                                                                                showAllField.value = '';
+                                                                            }
+                                                                        };
+
+                                                                        // Add form submit event listener to ensure showAll state is preserved
+                                                                        document.getElementById('filterForm').addEventListener('submit', function (e) {
+                                                                            updateShowAllField();
+                                                                        });
+
+                                                                        // Initialize checkbox state based on URL parameters
+                                                                        function initializeCheckboxState() {
+                                                                            const showAllCheckbox = document.getElementById('showAllCheckbox');
+                                                                            const customSizeInput = document.getElementById('customPageSize');
+                                                                            const showAllField = document.getElementById('showAllField');
+
+                                                                            // Check if showAll parameter is in URL
+                                                                            const urlParams = new URLSearchParams(window.location.search);
+                                                                            const showAllParam = urlParams.get('showAll');
+
+                                                                            if (showAllParam === 'true') {
+                                                                                showAllCheckbox.checked = true;
+                                                                                customSizeInput.disabled = true;
+                                                                                customSizeInput.value = '';
+                                                                                customSizeInput.placeholder = '-';
+                                                                                showAllField.value = 'true';
+                                                                            } else {
+                                                                                showAllCheckbox.checked = false;
+                                                                                customSizeInput.disabled = false;
+                                                                                customSizeInput.value = '${pageSize == 2147483647 ? 10 : pageSize}';
+                                                                                customSizeInput.placeholder = '';
+                                                                                showAllField.value = '';
+                                                                            }
+                                                                        }
+
+                                                                        // Call initialization function
+                                                                        initializeCheckboxState();
+
+                                                                        // Function to reset form and redirect to base URL
+                                                                        window.resetForm = function () {
+                                                                            window.location.href = '${pageContext.request.contextPath}/admin/price-package-list';
+                                                                        };
                                                                     });
 
                                                                     $(document).ready(function () {

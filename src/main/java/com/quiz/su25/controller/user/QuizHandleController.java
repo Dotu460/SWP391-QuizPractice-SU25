@@ -52,6 +52,14 @@ public class QuizHandleController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
+            HttpSession session = request.getSession(false);
+            com.quiz.su25.entity.User user = (session != null) ? (com.quiz.su25.entity.User) session.getAttribute(com.quiz.su25.config.GlobalConfig.SESSION_ACCOUNT) : null;
+            if (user == null) {
+                response.sendRedirect(request.getContextPath() + "/login");
+                return;
+            }
+            int userId = user.getId();
+            
             // In ra tất cả các tham số request để debug
             System.out.println("\n===== QUIZ HANDLE REQUEST PARAMS =====");
             java.util.Enumeration<String> paramNames = request.getParameterNames();
@@ -62,12 +70,9 @@ public class QuizHandleController extends HttpServlet {
             System.out.println("====================================\n");
             
             // Tạo attempt mới khi bắt đầu quiz
-            HttpSession session = request.getSession();
-            UserDAO userDAO = new UserDAO();
-
             // Set user ID cứng là 10 và quiz ID là 1 (hoặc ID thực tế của quiz)
-            Integer userId = 10;
-            session.setAttribute(GlobalConfig.SESSION_ACCOUNT, userDAO.findById(userId));
+            // Integer userId = 10; // REMOVED
+            // session.setAttribute(GlobalConfig.SESSION_ACCOUNT, userDAO.findById(userId)); // REMOVED
 
             // Lấy quizId từ request thay vì gán cứng
             String quizIdParam = request.getParameter("id");
@@ -275,10 +280,16 @@ public class QuizHandleController extends HttpServlet {
 
     private void handleScoreAction(HttpServletRequest request, HttpServletResponse response, PrintWriter out) throws IOException {
         try {
+            HttpSession session = request.getSession(false);
+            com.quiz.su25.entity.User user = (session != null) ? (com.quiz.su25.entity.User) session.getAttribute(com.quiz.su25.config.GlobalConfig.SESSION_ACCOUNT) : null;
+            if (user == null) {
+                response.sendRedirect(request.getContextPath() + "/login");
+                return;
+            }
+            int userId = user.getId();
             System.out.println("\n===== SCORE QUIZ ACTION =====");
             
             // 1. Lấy userAnswers từ request (JSON)
-            HttpSession session = request.getSession();
             String userAnswersJson = request.getParameter("userAnswers");
 
             if (userAnswersJson == null || userAnswersJson.isEmpty()) {
@@ -301,7 +312,6 @@ public class QuizHandleController extends HttpServlet {
             }
 
             // Sử dụng user ID cứng là 10
-            Integer userId = 10;
             Integer quizId = (Integer) session.getAttribute("quizId");
             if (quizId == null) {
                 // Thử lấy từ parameter nếu không có trong session
@@ -518,13 +528,7 @@ public class QuizHandleController extends HttpServlet {
             // 9. Xóa dữ liệu từ session để tránh việc retake quiz sẽ hiển thị dữ liệu cũ
             session.removeAttribute("userAnswers");
 
-            // Khi vào quiz (doGet), nếu có packageId trên request thì lưu vào session
-            String packageIdParam = request.getParameter("packageId");
-            if (packageIdParam == null || packageIdParam.isEmpty()) {
-                Object sessionPackageId = session.getAttribute("packageId");
-                if (sessionPackageId != null) packageIdParam = sessionPackageId.toString();
-            }
-            // 10. Redirect về /quiz-handle-menu?packageId=... nếu có packageId
+            // Lấy packageId từ session nếu không có trên request
             String packageId = request.getParameter("packageId");
             if (packageId == null || packageId.isEmpty()) {
                 Object sessionPackageId = session.getAttribute("packageId");

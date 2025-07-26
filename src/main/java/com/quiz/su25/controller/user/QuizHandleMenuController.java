@@ -40,13 +40,46 @@ public class QuizHandleMenuController extends HttpServlet {
             throws ServletException, IOException {
         try {
             System.out.println("=== Starting QuizHandleMenuController ===");
-            
-            HttpSession session = request.getSession(true);
-            int userId = 10; // Hardcoded user id for testing
+            HttpSession session = request.getSession(false);
+            com.quiz.su25.entity.User user = (session != null) ? (com.quiz.su25.entity.User) session.getAttribute(com.quiz.su25.config.GlobalConfig.SESSION_ACCOUNT) : null;
+            if (user == null || user.getRole_id() != com.quiz.su25.config.GlobalConfig.ROLE_STUDENT) {
+                response.sendRedirect(request.getContextPath() + "/home");
+                return;
+            }
+            int userId = user.getId();
+            // Check package access if packageId is present
+            String packageIdParam = request.getParameter("packageId");
+            if (packageIdParam != null && !packageIdParam.isEmpty()) {
+                try {
+                    int packageId = Integer.parseInt(packageIdParam);
+                    // Check registration for this user and package
+                    com.quiz.su25.dal.impl.RegistrationDAO registrationDAO = new com.quiz.su25.dal.impl.RegistrationDAO();
+                    java.util.List<com.quiz.su25.entity.Registration> regs = registrationDAO.findByUserId(userId);
+                    java.sql.Date now = new java.sql.Date(System.currentTimeMillis());
+                    boolean hasValid = false;
+                    for (com.quiz.su25.entity.Registration reg : regs) {
+                        System.out.println("Check reg: user=" + reg.getUser_id() + ", package=" + reg.getPackage_id() + ", status=" + reg.getStatus() + ", valid_to=" + reg.getValid_to());
+                        if (reg.getPackage_id() != null && reg.getPackage_id().equals(packageId) &&
+                            ("paid".equalsIgnoreCase(reg.getStatus()) || "active".equalsIgnoreCase(reg.getStatus()) || "approved".equalsIgnoreCase(reg.getStatus())) &&
+                            reg.getValid_to() != null && reg.getValid_to().after(now)) {
+                            hasValid = true;
+                            break;
+                        }
+                    }
+                    if (!hasValid) {
+                        // No valid registration, redirect to price-package-menu with error
+                        request.getSession().setAttribute("toastMessage", "You do not have access to this package. Please purchase it first.");
+                        request.getSession().setAttribute("toastType", "error");
+                        response.sendRedirect(request.getContextPath() + "/price-package-menu");
+                        return;
+                    }
+                } catch (NumberFormatException e) {
+                    // Invalid packageId, fallback to normal flow
+                }
+            }
             session.setAttribute("user", userId);
             System.out.println("Set session with user id = " + userId);
 
-            String packageIdParam = request.getParameter("packageId");
             List<Quizzes> quizzesList;
 
             if (packageIdParam != null && !packageIdParam.isEmpty()) {

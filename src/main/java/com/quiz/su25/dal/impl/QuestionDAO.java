@@ -184,7 +184,7 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
      * @return Danh sách câu hỏi thuộc quiz
      */
     public List<Question> findByQuizId(Integer quizId) {
-        String sql = "SELECT * FROM Question WHERE quiz_id = ?";
+        String sql = "SELECT * FROM Question WHERE quiz_id = ? AND status = 'active'";
         List<Question> list = new ArrayList<>();
         try {
             connection = getConnection();
@@ -488,7 +488,7 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
      * @return Tổng số câu hỏi trong quiz.
      */
     public int countQuestionsByQuizId(Integer quizId) {
-        String sql = "SELECT COUNT(*) as total FROM Question WHERE quiz_id = ?";
+        String sql = "SELECT COUNT(*) as total FROM Question WHERE quiz_id = ? AND status = 'active'";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);

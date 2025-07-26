@@ -30,6 +30,8 @@
                     background: #fff;
                     transition: box-shadow 0.2s;
                     height: 100%;
+                    display: flex;
+                    flex-direction: column;
                 }
                 .package-card:hover {
                     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
@@ -56,6 +58,7 @@
                 .package-description {
                     margin: 12px 0;
                     color: #666;
+                    flex-grow: 1;
                 }
                 .buy-btn {
                     background: #5751e1;
@@ -193,12 +196,23 @@
                                                 <div class="package-card h-100">
                                                     <div class="package-title">${pkg.name}</div>
                                                     <div>
-                                                        <span class="package-list-price">
-                                                            <fmt:formatNumber value="${pkg.list_price}" type="currency" currencySymbol="₫"/>
-                                                        </span>
-                                                        <span class="package-price">
-                                                            <fmt:formatNumber value="${pkg.sale_price}" type="currency" currencySymbol="₫"/>
-                                                        </span>
+                                                        <c:choose>
+                                                            <c:when test="${pkg.sale_price < pkg.list_price}">
+                                                                <!-- Có giảm giá: hiển thị cả list price (gạch ngang) và sale price -->
+                                                                <span class="package-list-price">
+                                                                    <fmt:formatNumber value="${pkg.list_price}" type="currency" currencySymbol="₫"/>
+                                                                </span>
+                                                                <span class="package-price">
+                                                                    <fmt:formatNumber value="${pkg.sale_price}" type="currency" currencySymbol="₫"/>
+                                                                </span>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <!-- Không giảm giá: chỉ hiển thị sale price (không gạch ngang) -->
+                                                                <span class="package-price">
+                                                                    <fmt:formatNumber value="${pkg.sale_price}" type="currency" currencySymbol="₫"/>
+                                                                </span>
+                                                            </c:otherwise>
+                                                        </c:choose>
                                                     </div>
                                                     <div class="package-duration">
                                                         Access Duration: ${pkg.access_duration_months} months
@@ -237,7 +251,7 @@
                                                     
                                                     
                                                     
-                                                    <div class="mt-3">
+                                                    <div class="mt-auto pt-3">
                                                         <c:choose>
                                                             <c:when test="${not empty userPurchases[pkg.id]}">
                                                                 <!-- User has purchased this package -->
