@@ -1148,6 +1148,12 @@
                     <c:if test="${not empty question.media_url}">
                         <div class="media-content mt-3">
                             <c:choose>
+                                <c:when test="${fn:contains(question.media_url, '<') && (fn:contains(question.media_url, 'video') || fn:contains(question.media_url, 'img') || fn:contains(question.media_url, '<p>'))}">
+                                    <!-- HTML Content - render directly -->
+                                    <div class="html-media-content">
+                                        ${question.media_url}
+                                    </div>
+                                </c:when>
                                 <c:when test="${fn:contains(question.media_url, 'youtube.com') || fn:contains(question.media_url, 'youtu.be')}">
                                     <!-- YouTube Video Embed -->
                                     <div class="youtube-embed-container" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; border-radius: 8px;">
@@ -1457,9 +1463,39 @@
                 border-bottom: 1px solid #eee;
             }
             
-            .media-content{
-                width: 40%;
-            }
+                            .media-content{
+                    width: 40%;
+                }
+                
+                /* HTML Media Content Styles */
+                .html-media-content {
+                    max-width: 100%;
+                    overflow: hidden;
+                }
+                
+                .html-media-content video {
+                    max-width: 100%;
+                    height: auto;
+                    border-radius: 8px;
+                }
+                
+                .html-media-content img {
+                    max-width: 100%;
+                    height: auto;
+                    border-radius: 8px;
+                    display: block;
+                    margin: 10px 0;
+                }
+                
+                .html-media-content p {
+                    margin: 10px 0;
+                    line-height: 1.6;
+                    color: #1A1B3D;
+                }
+                
+                .html-media-content div {
+                    margin: 10px 0;
+                }
             
             /* Container cho số câu hỏi và ID */
             .question-info {
@@ -2327,6 +2363,32 @@
                     essayAnswer.addEventListener('input', updateWordCount);
                     // Initial count
                     updateWordCount();
+                }
+                
+                // Fix relative paths in HTML media content
+                const htmlMediaContent = document.querySelector('.html-media-content');
+                if (htmlMediaContent) {
+                    // Fix video sources
+                    const videos = htmlMediaContent.querySelectorAll('video source');
+                    videos.forEach(source => {
+                        const src = source.getAttribute('src');
+                        if (src && src.startsWith('/SWP391_QUIZ_PRACTICE_SU25/uploads/')) {
+                            source.setAttribute('src', '${pageContext.request.contextPath}' + src);
+                        } else if (src && src.startsWith('../uploads/')) {
+                            source.setAttribute('src', '${pageContext.request.contextPath}/' + src.substring(3));
+                        }
+                    });
+                    
+                    // Fix image sources
+                    const images = htmlMediaContent.querySelectorAll('img');
+                    images.forEach(img => {
+                        const src = img.getAttribute('src');
+                        if (src && src.startsWith('/SWP391_QUIZ_PRACTICE_SU25/uploads/')) {
+                            img.setAttribute('src', '${pageContext.request.contextPath}' + src);
+                        } else if (src && src.startsWith('../uploads/')) {
+                            img.setAttribute('src', '${pageContext.request.contextPath}/' + src.substring(3));
+                        }
+                    });
                 }
             });
         </script>

@@ -5,6 +5,7 @@
 
 package com.quiz.su25.controller.Manage;
 
+import com.quiz.su25.config.GlobalConfig;
 import com.quiz.su25.dal.impl.SubjectCategoriesDAO;
 import com.quiz.su25.dal.impl.SubjectDAO;
 import com.quiz.su25.dal.impl.UserDAO;
@@ -26,6 +27,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import java.io.File;
 import java.io.IOException;
@@ -43,9 +45,9 @@ import java.util.stream.Collectors;
 
 @WebServlet(name = "ManageController", urlPatterns = {"/manage-subjects/*"})
 @MultipartConfig(
-    fileSizeThreshold = 1024 * 1024, // 1 MB
-    maxFileSize = 1024 * 1024 * 10,  // 10 MB
-    maxRequestSize = 1024 * 1024 * 15 // 15 MB
+    fileSizeThreshold = 1024 * 1024 * 2, // 1 MB
+    maxFileSize = 1024 * 1024 * 1024,  // 10 MB
+    maxRequestSize = 1024 * 1024 * 1024 // 15 MB
 )
 public class ManageController extends HttpServlet {
     private static final int DEFAULT_PAGE_SIZE = 8;
@@ -96,7 +98,7 @@ public class ManageController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
-        
+
         if (pathInfo.equals("/update-quiz")) {
             updateQuiz(request, response);
         } else if (pathInfo.equals("/upload-media")) {
@@ -189,34 +191,87 @@ public class ManageController extends HttpServlet {
             Subject subject = subjectDAO.findById(subjectId);
 
             if (subject != null) {
+                // Get filter parameters
+                String lessonNameFilter = request.getParameter("lessonName");
+                String quizNameFilter = request.getParameter("quizName");
+                
+                // Get pagination parameters
+                int page = getIntParameter(request, "page", 1);
+                int pageSize = getIntParameter(request, "pageSize", 10);
+                
+                // Validate pagination parameters
+                if (page < 1) page = 1;
+                if (pageSize < 5) pageSize = 5;
+                if (pageSize > 50) pageSize = 50;
+                
                 // Get the subject's category
                 SubjectCategories category = categoryDAO.findById(subject.getCategory_id());
                 
-                // Get all lessons for this subject
-                List<Lesson> lessons = lessonDAO.findBySubjectId(subjectId);
+                // Get filtered lessons with pagination
+                List<Lesson> allLessons = lessonDAO.findBySubjectId(subjectId);
+                List<Lesson> filteredLessons = new ArrayList<>();
                 
-                // Get all quizzes for the lessons
-                List<Quizzes> quizzes = new ArrayList<>();
-                for (Lesson lesson : lessons) {
-                    // Assuming you have a method in QuizzesDAO to find quizzes by lesson_id
+                // Apply lesson name filter
+                for (Lesson lesson : allLessons) {
+                    if (lessonNameFilter == null || lessonNameFilter.trim().isEmpty() || 
+                        lesson.getTitle().toLowerCase().contains(lessonNameFilter.toLowerCase().trim())) {
+                        filteredLessons.add(lesson);
+                    }
+                }
+                
+                // Calculate pagination for lessons
+                int totalLessons = filteredLessons.size();
+                int totalPages = (int) Math.ceil((double) totalLessons / pageSize);
+                int startIndex = (page - 1) * pageSize;
+                int endIndex = Math.min(startIndex + pageSize, totalLessons);
+                
+                List<Lesson> paginatedLessons = new ArrayList<>();
+                if (startIndex < totalLessons) {
+                    paginatedLessons = filteredLessons.subList(startIndex, endIndex);
+                }
+                
+                // Get quizzes for displayed lessons and apply quiz name filter
+                List<Quizzes> allQuizzes = new ArrayList<>();
+                for (Lesson lesson : paginatedLessons) {
                     List<Quizzes> lessonQuizzes = quizzesDAO.findQuizzesWithFilters(null, null, lesson.getId(), null, 1, 100);
-                    quizzes.addAll(lessonQuizzes);
+                    allQuizzes.addAll(lessonQuizzes);
+                }
+                
+                // Apply quiz name filter
+                List<Quizzes> filteredQuizzes = new ArrayList<>();
+                for (Quizzes quiz : allQuizzes) {
+                    if (quizNameFilter == null || quizNameFilter.trim().isEmpty() || 
+                        quiz.getName().toLowerCase().contains(quizNameFilter.toLowerCase().trim())) {
+                        filteredQuizzes.add(quiz);
+                    }
                 }
 
                 // Set attributes for the view
                 request.setAttribute("subject", subject);
                 request.setAttribute("category", category);
-                request.setAttribute("lessons", lessons);
-                request.setAttribute("quizzes", quizzes);
+                request.setAttribute("lessons", paginatedLessons);
+                request.setAttribute("quizzes", filteredQuizzes);
                 request.setAttribute("questionDAO", questionDAO);
+                
+                // Pagination attributes
+                request.setAttribute("currentPage", page);
+                request.setAttribute("totalPages", totalPages);
+                request.setAttribute("pageSize", pageSize);
+                request.setAttribute("totalLessons", totalLessons);
+                request.setAttribute("startRecord", totalLessons > 0 ? startIndex + 1 : 0);
+                request.setAttribute("endRecord", endIndex);
+                
+                // Filter attributes
+                request.setAttribute("lessonNameFilter", lessonNameFilter);
+                request.setAttribute("quizNameFilter", quizNameFilter);
 
                 // Forward to the lesson management page
                 request.getRequestDispatcher("/view/admin/Manage/manage-lesson.jsp").forward(request, response);
             } else {
-                response.sendRedirect(request.getContextPath() + "/manage/subjects?error=subjectNotFound");
+                response.sendRedirect(request.getContextPath() + "/manage-subjects?error=subjectNotFound");
             }
         } else {
-            response.sendRedirect(request.getContextPath() + "/manage/subjects?error=invalidId");
+            response.sendRedirect(request.getContextPath() + "/manage-subjects?error=invalidId");
         }
     }
 
@@ -307,8 +362,10 @@ public class ManageController extends HttpServlet {
                     String mediaUrl = request.getParameter("questions[" + index + "].media_url");
                     String questionType = request.getParameter("questions[" + index + "].type");
                     String questionLevel = request.getParameter("questions[" + index + "].level");
+                    String questionStatus = request.getParameter("questions[" + index + "].status");
                     String explanation = request.getParameter("questions[" + index + "].explanation");
                     String questionIdStr = request.getParameter("questions[" + index + "].id");
+                    
                     
                     Question question;
                     int questionId = 0;
@@ -348,20 +405,25 @@ public class ManageController extends HttpServlet {
                     question.setType(questionType);
                     question.setLevel(questionLevel);
                     question.setExplanation(explanation);
-                    question.setStatus("active");
+                    question.setStatus(questionStatus != null && !questionStatus.isEmpty() ? questionStatus : "active");
                     
                     if (questionIdStr != null && !questionIdStr.isEmpty()) {
+                        System.out.println("  Updating existing question with ID: " + questionIdStr);
                         boolean questionUpdated = questionDAO.update(question);
                         if (!questionUpdated) {
                             throw new Exception("Failed to update question: " + questionId);
                         }
                         questionId = question.getId();
+                        System.out.println("  Question updated successfully");
                     } else {
+                        System.out.println("  Creating new question...");
                         questionId = questionDAO.insert(question);
+                        System.out.println("  QuestionDAO.insert() returned: " + questionId);
                         if (questionId <= 0) {
                             throw new Exception("Failed to create new question");
                         }
                         question.setId(questionId);
+                        System.out.println("  New question created with ID: " + questionId);
                     }
 
                     // Process options - only if they exist in the form
@@ -484,13 +546,24 @@ public class ManageController extends HttpServlet {
             // Set success message and reload the quiz data
             request.setAttribute("successMessage", "Quiz updated successfully!");
             
+            // Set the id parameter for viewQuiz method
+            request.setAttribute("id", String.valueOf(quizId));
+            
             // Reload quiz data and forward back to the same page
-            viewQuiz(request, response);
+            viewQuizWithId(request, response, quizId);
 
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", e.getMessage());
-            viewQuiz(request, response);
+            
+            // Set the id parameter for viewQuiz method in case of error
+            try {
+                int quizId = Integer.parseInt(request.getParameter("quizId"));
+                request.setAttribute("id", String.valueOf(quizId));
+                viewQuizWithId(request, response, quizId);
+            } catch (Exception ex) {
+                response.sendRedirect(request.getContextPath() + "/manage-subjects?error=invalidQuizId");
+            }
         }
     }
 
@@ -542,7 +615,17 @@ public class ManageController extends HttpServlet {
     private void viewQuiz(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             int quizId = Integer.parseInt(request.getParameter("id"));
-            
+            viewQuizWithId(request, response, quizId);
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/manage-subjects?error=invalidQuizId");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect(request.getContextPath() + "/manage-subjects?error=" + e.getMessage());
+        }
+    }
+    
+    private void viewQuizWithId(HttpServletRequest request, HttpServletResponse response, int quizId) throws ServletException, IOException {
+        try {
             // Get quiz information
             Quizzes quiz = quizzesDAO.findById(quizId);
             if (quiz != null) {
@@ -575,8 +658,6 @@ public class ManageController extends HttpServlet {
             } else {
                 response.sendRedirect(request.getContextPath() + "/manage-subjects?error=quizNotFound");
             }
-        } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/manage-subjects?error=invalidQuizId");
         } catch (Exception e) {
             e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/manage-subjects?error=" + e.getMessage());
@@ -877,11 +958,37 @@ public class ManageController extends HttpServlet {
             
             // Delete the lesson
             boolean success = lessonDAO.delete(lesson);
-            if (success) {
-                response.sendRedirect(request.getContextPath() + "/manage-subjects/view?id=" + subjectId + "&success=lesson_deleted");
-            } else {
-                response.sendRedirect(request.getContextPath() + "/manage-subjects/view?id=" + subjectId + "&error=delete_failed");
+            
+            // Build redirect URL with preserved filter parameters
+            StringBuilder redirectUrl = new StringBuilder();
+            redirectUrl.append(request.getContextPath()).append("/manage-subjects/view?id=").append(subjectId);
+            
+            // Add return parameters if they exist
+            String returnPage = request.getParameter("returnPage");
+            String returnPageSize = request.getParameter("returnPageSize");
+            String returnLessonName = request.getParameter("returnLessonName");
+            String returnQuizName = request.getParameter("returnQuizName");
+            
+            if (returnPage != null && !returnPage.equals("null")) {
+                redirectUrl.append("&page=").append(returnPage);
             }
+            if (returnPageSize != null && !returnPageSize.equals("null")) {
+                redirectUrl.append("&pageSize=").append(returnPageSize);
+            }
+            if (returnLessonName != null && !returnLessonName.equals("null") && !returnLessonName.isEmpty()) {
+                redirectUrl.append("&lessonName=").append(java.net.URLEncoder.encode(returnLessonName, "UTF-8"));
+            }
+            if (returnQuizName != null && !returnQuizName.equals("null") && !returnQuizName.isEmpty()) {
+                redirectUrl.append("&quizName=").append(java.net.URLEncoder.encode(returnQuizName, "UTF-8"));
+            }
+            
+            if (success) {
+                redirectUrl.append("&success=lesson_deleted");
+            } else {
+                redirectUrl.append("&error=delete_failed");
+            }
+            
+            response.sendRedirect(redirectUrl.toString());
             
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/manage-subjects?error=invalidLessonId");
@@ -914,11 +1021,37 @@ public class ManageController extends HttpServlet {
             
             // Delete the quiz
             boolean success = quizzesDAO.delete(quiz);
-            if (success) {
-                response.sendRedirect(request.getContextPath() + "/manage-subjects/view?id=" + subjectId + "&success=quiz_deleted");
-            } else {
-                response.sendRedirect(request.getContextPath() + "/manage-subjects/view?id=" + subjectId + "&error=delete_failed");
+            
+            // Build redirect URL with preserved filter parameters
+            StringBuilder redirectUrl = new StringBuilder();
+            redirectUrl.append(request.getContextPath()).append("/manage-subjects/view?id=").append(subjectId);
+            
+            // Add return parameters if they exist
+            String returnPage = request.getParameter("returnPage");
+            String returnPageSize = request.getParameter("returnPageSize");
+            String returnLessonName = request.getParameter("returnLessonName");
+            String returnQuizName = request.getParameter("returnQuizName");
+            
+            if (returnPage != null && !returnPage.equals("null")) {
+                redirectUrl.append("&page=").append(returnPage);
             }
+            if (returnPageSize != null && !returnPageSize.equals("null")) {
+                redirectUrl.append("&pageSize=").append(returnPageSize);
+            }
+            if (returnLessonName != null && !returnLessonName.equals("null") && !returnLessonName.isEmpty()) {
+                redirectUrl.append("&lessonName=").append(java.net.URLEncoder.encode(returnLessonName, "UTF-8"));
+            }
+            if (returnQuizName != null && !returnQuizName.equals("null") && !returnQuizName.isEmpty()) {
+                redirectUrl.append("&quizName=").append(java.net.URLEncoder.encode(returnQuizName, "UTF-8"));
+            }
+            
+            if (success) {
+                redirectUrl.append("&success=quiz_deleted");
+            } else {
+                redirectUrl.append("&error=delete_failed");
+            }
+            
+            response.sendRedirect(redirectUrl.toString());
             
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/manage-subjects?error=invalidQuizId");

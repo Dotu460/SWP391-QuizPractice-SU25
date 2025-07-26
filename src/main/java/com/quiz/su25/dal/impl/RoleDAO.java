@@ -27,8 +27,13 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
         String sql = "SELECT id, name FROM role";
         List<Role> listRole = new ArrayList<>();
         try {
+            //tao connection
             connection = getConnection();
+            //chuan bi cho statmenet
             statement = connection.prepareStatement(sql);
+            //set parameter (optional)
+
+            //thuc thi cau lenh
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 Role role = getFromResultSet(resultSet);

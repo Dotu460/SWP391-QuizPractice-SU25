@@ -63,9 +63,11 @@
                                     <c:if test="${sessionScope.account.role_id == 4}"> 
                                     <li><a href="${pageContext.request.contextPath}/slider-list">Slide List</a></li>
                                     </c:if>
+                                    <c:if test="${sessionScope.account.role_id == 4 ||sessionScope.account.role_id == 1 || sessionScope.account.role_id == 3 }"> 
                                     <li class="menu-item-has-children"><a href="#">Dashboard</a>
                                         <ul class="sub-menu">
                                             <li class="menu-item-has-children">
+                                                <c:if test="${sessionScope.account.role_id == 1}"> 
                                                 <a href="instructor-dashboard.html">Admin Dashboard</a>
                                                 <ul class="sub-menu">
                                                     <li><a href="${pageContext.request.contextPath}/admin/users">Manage users</a></li>
@@ -73,8 +75,11 @@
                                                     <li><a href="${pageContext.request.contextPath}/admin/price-package-list">Price Package</a></li>
                                                     <li><a href="${pageContext.request.contextPath}/setting">Settings</a></li>
                                                 </ul>
+                                                 </c:if>
                                             </li>
-                                            <li class="menu-item-has-children"><a href="student-dashboard.html">Expert Dashboard</a>
+                                            <li class="menu-item-has-children">
+                                                <c:if test="${sessionScope.account.role_id == 1 || sessionScope.account.role_id == 3}"> 
+                                                <a href="student-dashboard.html">Expert Dashboard</a>
                                                 <ul class="sub-menu">
                                                     <li><a href="${pageContext.request.contextPath}/manage-subjects">Manage Subject</a></li>
                                                     <li><a href="${pageContext.request.contextPath}/admin/subjects">Subject</a></li>
@@ -82,9 +87,21 @@
                                                     <li><a href="${pageContext.request.contextPath}/questions-list">Question</a></li>
                                                     <li><a href="${pageContext.request.contextPath}/expert/essay-grading">Essay grading</a></li>
                                                 </ul>
+                                                </c:if>
+                                            </li>
+                                            <li class="menu-item-has-children">
+                                                <c:if test="${sessionScope.account.role_id == 4}">
+                                                <a href="student-dashboard.html">Marketing Dashboard</a>
+                                                <ul class="sub-menu">
+                                                    <li><a href="${pageContext.request.contextPath}/slider-list">Slider list</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/blog">Blog list</a></li>
+                                                    <li><a href="${pageContext.request.contextPath}/post-details">Blog details</a></li>
+                                                </ul>
+                                                </c:if>
                                             </li>
                                         </ul>
                                     </li>
+                                    </c:if>
                                 </ul>
                             </div>
                             <div class="tgmenu__action">

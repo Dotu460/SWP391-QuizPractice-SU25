@@ -438,7 +438,7 @@
                             </c:if>
                             
                             <c:if test="${not empty successMessage}">
-                                <div class="alert alert-success alert-dismissible fade show" style="margin-bottom: 20px;">
+                                <div class="alert alert-success alert-dismissible fade show" id="successAlert" style="margin-bottom: 20px;">
                                     <i class="fa fa-check-circle"></i> <strong>Success:</strong> ${successMessage}
                                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                 </div>
@@ -504,6 +504,10 @@
 
                                                 <div class="form-group">
                                                     <label class="form-label">Media (Images/Video)</label>
+                                                    <small class="form-text text-muted mb-2">
+                                                        <i class="fa fa-info-circle"></i> 
+                                                        Maximum file size: <strong>Images: 1024MB</strong> | <strong>Videos: 1024MB</strong>
+                                                    </small>
                                                     <textarea id="media_url_${status.index}" name="questions[${status.index}].media_url" 
                                                               class="form-control media-editor"><c:out value="${question.media_url}" escapeXml="false"/></textarea>
                                                 </div>
@@ -522,6 +526,14 @@
                                                         <option value="easy" ${question.level == 'easy' ? 'selected' : ''}>Easy</option>
                                                         <option value="medium" ${question.level == 'medium' ? 'selected' : ''}>Medium</option>
                                                         <option value="hard" ${question.level == 'hard' ? 'selected' : ''}>Hard</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="form-label">Question Status</label>
+                                                    <select class="form-control" name="questions[${status.index}].status" required>
+                                                        <option value="active" ${question.status == 'active' ? 'selected' : ''}>Active</option>
+                                                        <option value="hidden" ${question.status == 'hidden' ? 'selected' : ''}>Hidden</option>
                                                     </select>
                                                 </div>
 
@@ -668,6 +680,27 @@
                 if (!validateForm()) {
                     return false;
                 }
+
+                // Debug: Log form data before submit
+                console.log('Submitting form with data:');
+                var formData = new FormData(this);
+                for (var pair of formData.entries()) {
+                    if (pair[0].includes('questions')) {
+                        console.log(pair[0] + ': ' + pair[1]);
+                    }
+                }
+
+                // Show loading message
+                iziToast.info({
+                    title: 'Processing...',
+                    message: 'Saving quiz and questions. Please wait...',
+                    position: 'topRight',
+                    timeout: false,
+                    close: false
+                });
+
+                // Disable submit button to prevent double submission
+                $(this).find('button[type="submit"]').prop('disabled', true).text('Saving...');
 
                 // Submit form normally instead of using AJAX
                 this.submit();
@@ -1116,11 +1149,15 @@
                 '<div class="form-group">' +
                     '<label class="form-label">Question Content</label>' +
                     '<input type="text" class="form-control" name="questions[' + questionIndex + '].content" required>' +
-                    '<input type="hidden" name="questions[' + questionIndex + '].quiz_id" value="${quiz.id}">' +
+                    '<input type="hidden" name="questions[' + questionIndex + '].id" value="">' +
                 '</div>' +
 
                 '<div class="form-group">' +
                     '<label class="form-label">Media (Images/Video)</label>' +
+                    '<small class="form-text text-muted mb-2">' +
+                        '<i class="fa fa-info-circle"></i> ' +
+                        'Maximum file size: <strong>Images: 10MB</strong> | <strong>Videos: 100MB</strong>' +
+                    '</small>' +
                     '<textarea id="media_url_' + questionIndex + '" name="questions[' + questionIndex + '].media_url" ' +
                               'class="form-control media-editor"></textarea>' +
                 '</div>' +
@@ -1143,6 +1180,38 @@
                 '</div>' +
 
                 '<div class="form-group">' +
+                    '<label class="form-label">Question Status</label>' +
+                    '<select class="form-control" name="questions[' + questionIndex + '].status" required>' +
+                        '<option value="active" selected>Active</option>' +
+                        '<option value="hidden">Hidden</option>' +
+                    '</select>' +
+                '</div>' +
+
+                '<div class="form-group">' +
+                    '<label class="form-label">Answer Type</label>' +
+                    '<select class="form-control answer-type-select" name="questions[' + questionIndex + '].answer_type" required onchange="toggleAnswerType(\'' + questionIndex + '\')">' +
+                        '<option value="option_text" selected>Option Text</option>' +
+                        '<option value="answer_text">Answer Text</option>' +
+                    '</select>' +
+                    '<small class="form-text">Option Text: Simple text answers | Answer Text: Rich text answers with formatting</small>' +
+                '</div>' +
+
+                '<div class="form-group">' +
+                    '<div class="answers-container">' +
+                        '<div class="answers-header">' +
+                            '<h6 class="answers-title">Answer Options</h6>' +
+                        '</div>' +
+                        '<div class="options-list" data-question="' + questionIndex + '">' +
+                            '<small class="form-text">Tick multiple checkboxes to select multiple correct answers</small>' +
+                            '<p class="text-muted"><em>No answer options yet. Click "Add Answer Option" to create answers for this question.</em></p>' +
+                        '</div>' +
+                        '<button type="button" class="btn btn-primary mt-2 add-option-btn" data-question="' + questionIndex + '">' +
+                            '<i class="fas fa-plus"></i> Add Answer Option' +
+                        '</button>' +
+                    '</div>' +
+                '</div>' +
+
+                '<div class="form-group">' +
                     '<label class="form-label">Explanation</label>' +
                     '<textarea class="form-control" name="questions[' + questionIndex + '].explanation" rows="3"></textarea>' +
                 '</div>' +
@@ -1153,6 +1222,14 @@
             $('.questions-list').append(newQuestion);
             initTinyMCE('#media_url_' + questionIndex);
             fixOldMediaUrls('#media_url_' + questionIndex);
+            
+            // Automatically add 2 default options for the new question
+            setTimeout(function() {
+                addOption(questionIndex);
+                addOption(questionIndex);
+                // Auto-check the first option as correct
+                $('.options-list[data-question="' + questionIndex + '"] .answer-option:first input[type="checkbox"]').prop('checked', true);
+            }, 100);
         }
 
         function validateForm() {
@@ -1243,6 +1320,7 @@
                         return false;
                     }
                 }
+                // Note: Questions without answer options are allowed (will be saved but may need options added later)
             });
             
             return valid;
