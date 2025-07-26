@@ -211,7 +211,7 @@ public class UserDAO extends DBContext implements I_DAO<User> {
             System.out.println("Available roles:");
             roles.forEach(role -> 
                 System.out.println("Role ID: " + role.getId() + 
-                                 ", Name: " + role.getRole_name() )
+                                 ", Name: " + role.getName() )
             );
         }
 

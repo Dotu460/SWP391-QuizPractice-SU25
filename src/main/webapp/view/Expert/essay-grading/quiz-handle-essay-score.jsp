@@ -211,6 +211,18 @@
                 border-radius: 8px;
             }
             
+            .alert {
+                padding: 15px;
+                margin-bottom: 20px;
+                border-radius: 8px;
+            }
+            
+            .alert-success {
+                background-color: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+            
             @media (max-width: 768px) {
                 .grading-container {
                     margin: 20px;
@@ -250,6 +262,13 @@
             </div>
             
             <div class="grading-body">
+                <!-- Hiển thị thông báo thành công nếu có -->
+                <c:if test="${not empty successMessage}">
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> ${successMessage}
+                    </div>
+                </c:if>
+                
                 <div class="student-info">
                     <div>
                         <label>Student:</label>
@@ -349,6 +368,9 @@
                         <button type="submit" name="action" value="save" class="btn-primary">
                             <i class="fas fa-save"></i> Save Grading
                         </button>
+                        <a href="${pageContext.request.contextPath}/expert/essay-grading" class="btn-secondary" style="margin-left: 10px;">
+                            <i class="fas fa-list"></i> Back to List
+                        </a>
                     </div>
                     
                     <div class="navigation">

@@ -40,7 +40,7 @@ public class EssayScoreController extends HttpServlet {
         String questionNumberStr = request.getParameter("questionNumber");
         
         if (attemptIdStr == null) {
-            response.sendRedirect(request.getContextPath() + "/home");
+            response.sendRedirect(request.getContextPath() + "/expert/essay-grading");
             return;
         }
         
@@ -52,7 +52,7 @@ public class EssayScoreController extends HttpServlet {
             UserQuizAttempts attempt = attemptsDAO.findById(attemptId);
             if (attempt == null) {
                 request.setAttribute("errorMessage", "Attempt không tồn tại");
-                response.sendRedirect(request.getContextPath() + "/home");
+                response.sendRedirect(request.getContextPath() + "/expert/essay-grading");
                 return;
             }
             
@@ -74,7 +74,7 @@ public class EssayScoreController extends HttpServlet {
             
             if (essayQuestions.isEmpty()) {
                 request.setAttribute("errorMessage", "Không có câu hỏi tự luận trong bài thi này");
-                response.sendRedirect(request.getContextPath() + "/home");
+                response.sendRedirect(request.getContextPath() + "/expert/essay-grading");
                 return;
             }
             
@@ -98,6 +98,12 @@ public class EssayScoreController extends HttpServlet {
                 }
             }
             
+            // Kiểm tra thông báo thành công
+            String success = request.getParameter("success");
+            if ("true".equals(success)) {
+                request.setAttribute("successMessage", "Saved successfully!");
+            }
+            
             // Set attributes cho JSP
             request.setAttribute("attempt", attempt);
             request.setAttribute("quiz", quiz);
@@ -114,12 +120,12 @@ public class EssayScoreController extends HttpServlet {
             
         } catch (NumberFormatException e) {
             request.setAttribute("errorMessage", "Tham số không hợp lệ");
-            response.sendRedirect(request.getContextPath() + "/home");
+            response.sendRedirect(request.getContextPath() + "/expert/essay-grading");
         } catch (Exception e) {
             System.out.println("Lỗi trong EssayScoreController: " + e.getMessage());
             e.printStackTrace(); // In ra stack trace để debug
             request.setAttribute("errorMessage", "Lỗi: " + e.getMessage());
-            response.sendRedirect(request.getContextPath() + "/home");
+            response.sendRedirect(request.getContextPath() + "/expert/essay-grading");
         }
     }
 
@@ -139,7 +145,7 @@ public class EssayScoreController extends HttpServlet {
         
         if (attemptIdStr == null || questionIdStr == null || scoreStr == null) {
             System.out.println("Missing required parameters, redirecting to home");
-            response.sendRedirect(request.getContextPath() + "/home");
+            response.sendRedirect(request.getContextPath() + "/expert/essay-grading");
             return;
         }
         
@@ -157,7 +163,7 @@ public class EssayScoreController extends HttpServlet {
             if (attempt == null) {
                 System.out.println("Attempt not found: " + attemptId);
                 request.setAttribute("errorMessage", "Attempt không tồn tại");
-                response.sendRedirect(request.getContextPath() + "/home");
+                response.sendRedirect(request.getContextPath() + "/expert/essay-grading");
                 return;
             }
             
@@ -168,7 +174,7 @@ public class EssayScoreController extends HttpServlet {
             if (!success) {
                 System.out.println("Failed to save essay score");
                 request.setAttribute("errorMessage", "Không thể lưu điểm");
-                response.sendRedirect(request.getContextPath() + "/home");
+                response.sendRedirect(request.getContextPath() + "/expert/essay-grading");
                 return;
             }
             
@@ -203,10 +209,13 @@ public class EssayScoreController extends HttpServlet {
                 System.out.println("Attempt updated with final score " + totalScore + ": " + updated);
             }
             
-            // Nếu action là "save", luôn chuyển về trang danh sách chấm điểm
+            // Nếu action là "save", hiển thị thông báo thành công và ở lại trang hiện tại
             if ("save".equals(action)) {
-                System.out.println("Redirecting to essay grading list page");
-                response.sendRedirect(request.getContextPath() + "/admin/essay-grading");
+                System.out.println("Staying on same page with success message");
+                String questionNumberStr = request.getParameter("questionNumber");
+                int currentNumber = questionNumberStr != null ? Integer.parseInt(questionNumberStr) : 1;
+                response.sendRedirect(request.getContextPath() + "/essay-score?attemptId=" + attemptId + 
+                                    "&questionNumber=" + currentNumber + "&success=true");
                 return;
             }
             
@@ -221,12 +230,12 @@ public class EssayScoreController extends HttpServlet {
             System.out.println("NumberFormatException in EssayScoreController: " + e.getMessage());
             e.printStackTrace();
             request.setAttribute("errorMessage", "Tham số không hợp lệ");
-            response.sendRedirect(request.getContextPath() + "/admin/essay-grading");
+            response.sendRedirect(request.getContextPath() + "/expert/essay-grading");
         } catch (Exception e) {
             System.out.println("Exception in EssayScoreController: " + e.getMessage());
             e.printStackTrace();
             request.setAttribute("errorMessage", "Lỗi: " + e.getMessage());
-            response.sendRedirect(request.getContextPath() + "/admin/essay-grading");
+            response.sendRedirect(request.getContextPath() + "/expert/essay-grading");
         }
     }
     

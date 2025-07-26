@@ -14,6 +14,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
+import java.io.PrintWriter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
@@ -24,15 +25,16 @@ import java.nio.file.Paths;
 import java.sql.Date;
 import java.util.UUID;
 
-@WebServlet(name = "PostDetailsController", urlPatterns = {"/post-details"})
+@WebServlet(name = "PostDetailsController", urlPatterns = {"/post-details","/upload-medias"})
 @MultipartConfig(
     fileSizeThreshold = 1024 * 1024 * 2, // 2MB
-    maxFileSize = 1024 * 1024 * 50,      // 50MB
-    maxRequestSize = 1024 * 1024 * 100   // 100MB
+    maxFileSize = 1024 * 1024 * 1024,      // 1024MB
+    maxRequestSize = 1024 * 1024 * 1024   // 1024MB
 )
 public class PostDetailsController extends HttpServlet {
 
     private PostDAO postDAO;
+    private static final String UPLOAD_DIRECTORY = "uploads/medias";
 
     @Override
     public void init() throws ServletException {
@@ -77,12 +79,20 @@ public class PostDetailsController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-                
+            
+        String path = request.getServletPath();  // ✅ THÊM
+        
+        //Xử lý upload media
+        if ("/upload-medias".equals(path)) {
+            handleMediaUpload(request, response);
+            return;
+        }
         try {
             // Get form parameters
             String postIdParam = request.getParameter("postId");
             String title = request.getParameter("title");
             String category = request.getParameter("category");
+            String author = request.getParameter("author");
             String briefInfo = request.getParameter("briefInfo");
             String description = request.getParameter("description");
             String status = request.getParameter("status");
@@ -104,6 +114,21 @@ public class PostDetailsController extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/post-details" + 
                     (postIdParam != null && !postIdParam.isEmpty() ? "?id=" + postIdParam : "") + 
                     "&error=category_required");
+                return;
+            }
+            if (author == null || author.trim().isEmpty()) {
+                System.out.println("ERROR: Author is required!");
+                response.sendRedirect(request.getContextPath() + "/post-details" + 
+                    (postIdParam != null && !postIdParam.isEmpty() ? "?id=" + postIdParam : "") + 
+                    "&error=author_required");
+                return;
+            }
+            // THÊM VALIDATION CHO AUTHOR LENGTH
+            if (author.trim().length() > 100) {
+                System.out.println("ERROR: Author name too long!");
+                response.sendRedirect(request.getContextPath() + "/post-details"
+                        + (postIdParam != null && !postIdParam.isEmpty() ? "?id=" + postIdParam : "")
+                        + "&error=author_too_long");
                 return;
             }
 
@@ -135,8 +160,8 @@ public class PostDetailsController extends HttpServlet {
                 post.setCategory_id(1); 
                 // TODO: Set author from session when authentication is implemented
                 // For now, set a default author (you should change this)
-                post.setAuthor("Admin");
-                System.out.println("Default values set: category_id=1, author=Admin");
+                post.setAuthor(author.trim());
+                System.out.println("Author set from form: " + author.trim());
                 
             } else {
                 System.out.println("Updating existing post...");
@@ -156,6 +181,10 @@ public class PostDetailsController extends HttpServlet {
                 // Update category_id if category changed
                 // Option 1: Set default category_id
                 post.setCategory_id(1);
+                
+                //Set author cho update
+                post.setAuthor(author.trim());  
+                System.out.println("Author updated from form: " + author.trim());
             }
 
             // Handle thumbnail upload
@@ -177,6 +206,7 @@ public class PostDetailsController extends HttpServlet {
             // Update post object with form data
             post.setTitle(title.trim());
             post.setCategory(category.trim());
+            post.setAuthor(author.trim());
             post.setBrief_info(briefInfo != null ? briefInfo.trim() : "");
             post.setContent(processedDescription);
             post.setStatus(status);
@@ -232,6 +262,92 @@ public class PostDetailsController extends HttpServlet {
         
         System.out.println("=== POST DETAILS CONTROLLER DEBUG END ===");
         }
+    
+    private void handleMediaUpload(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("application/json");
+        PrintWriter out = response.getWriter();
+        StringBuilder jsonResponse = new StringBuilder();
+        jsonResponse.append("{");
+
+        try {
+            Part filePart = request.getPart("file");
+
+            if (filePart == null) {
+                jsonResponse.append("\"success\": false,");
+                jsonResponse.append("\"message\": \"No file found in the request\"");
+                jsonResponse.append("}");
+                out.print(jsonResponse.toString());
+                return;
+            }
+
+            String fileName = getFileName(filePart);
+            if (fileName == null || fileName.isEmpty()) {
+                jsonResponse.append("\"success\": false,");
+                jsonResponse.append("\"message\": \"Invalid file name\"");
+                jsonResponse.append("}");
+                out.print(jsonResponse.toString());
+                return;
+            }
+
+            // Validate file type
+            String fileType = filePart.getContentType();
+            if (!fileType.startsWith("image/") && !fileType.startsWith("video/")) {
+                jsonResponse.append("\"success\": false,");
+                jsonResponse.append("\"message\": \"Only image and video files are allowed\"");
+                jsonResponse.append("}");
+                out.print(jsonResponse.toString());
+                return;
+            }
+             // Create year/month based subdirectories
+            String timestamp = String.valueOf(System.currentTimeMillis());
+            String uniqueFileName = timestamp + "_" + fileName;
+
+            // Create upload directory if it doesn't exist
+            String uploadPath = getServletContext().getRealPath("/" + UPLOAD_DIRECTORY);
+            File uploadDir = new File(uploadPath);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs();
+            }
+
+            String filePath = uploadPath + File.separator + uniqueFileName;
+            filePart.write(filePath);
+
+            String fileUrl = "/SWP391_QUIZ_PRACTICE_SU25/" + UPLOAD_DIRECTORY + "/" + uniqueFileName;
+
+            // Return response based on TinyMCE requirements
+            if (fileType.startsWith("image/")) {
+                jsonResponse.append("\"location\": \"").append(fileUrl).append("\"");
+            } else {
+                // For video, return both location and additional info
+                jsonResponse.append("\"location\": \"").append(fileUrl).append("\",");
+                jsonResponse.append("\"title\": \"").append(fileName).append("\",");
+                jsonResponse.append("\"success\": true");
+            }
+
+        } catch (Exception e) {
+            jsonResponse.append("\"success\": false,");
+            jsonResponse.append("\"message\": \"Error uploading file: ").append(e.getMessage()).append("\"");
+            e.printStackTrace();
+        }
+
+        jsonResponse.append("}");
+        out.print(jsonResponse.toString());
+    }
+
+    // ✅ THÊM: Method getFileName (copy từ QuestionListController)
+    private String getFileName(Part part) {
+        String contentDisposition = part.getHeader("content-disposition");
+        String[] elements = contentDisposition.split(";");
+
+        for (String element : elements) {
+            if (element.trim().startsWith("filename")) {
+                return element.substring(element.indexOf('=') + 1).trim().replace("\"", "");
+            }
+        }
+
+        return null;
+    }
 
     private String handleFileUpload(Part filePart, String subfolder, HttpServletRequest request) {
         try {

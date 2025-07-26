@@ -26,3 +26,4 @@ target/
 nb-configuration.xml
 .idea/
 
+/nbproject/

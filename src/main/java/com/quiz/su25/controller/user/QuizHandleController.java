@@ -208,6 +208,13 @@ public class QuizHandleController extends HttpServlet {
             System.out.println("Forwarding to: " + forwardPath);
             request.getRequestDispatcher(forwardPath).forward(request, response);
 
+            // Trong doGet: lưu packageId vào session nếu có trên request
+            String packageIdParam = request.getParameter("packageId");
+            if (packageIdParam != null && !packageIdParam.isEmpty()) {
+                session.setAttribute("packageId", packageIdParam);
+                System.out.println("[DEBUG] Saved packageId to session: " + packageIdParam);
+            }
+
         } catch (Exception e) {
             System.out.println("=== Error in QuizHandleController ===");
             System.out.println("Error message: " + e.getMessage());
@@ -510,9 +517,25 @@ public class QuizHandleController extends HttpServlet {
             
             // 9. Xóa dữ liệu từ session để tránh việc retake quiz sẽ hiển thị dữ liệu cũ
             session.removeAttribute("userAnswers");
-            
-            // 10. Redirect về /quiz-handle-menu
-            response.sendRedirect(request.getContextPath() + "/quiz-handle-menu");
+
+            // Khi vào quiz (doGet), nếu có packageId trên request thì lưu vào session
+            String packageIdParam = request.getParameter("packageId");
+            if (packageIdParam == null || packageIdParam.isEmpty()) {
+                Object sessionPackageId = session.getAttribute("packageId");
+                if (sessionPackageId != null) packageIdParam = sessionPackageId.toString();
+            }
+            // 10. Redirect về /quiz-handle-menu?packageId=... nếu có packageId
+            String packageId = request.getParameter("packageId");
+            if (packageId == null || packageId.isEmpty()) {
+                Object sessionPackageId = session.getAttribute("packageId");
+                if (sessionPackageId != null) packageId = sessionPackageId.toString();
+            }
+            System.out.println("[DEBUG] Redirecting to quiz-handle-menu with packageId: " + packageId);
+            if (packageId != null && !packageId.isEmpty()) {
+                response.sendRedirect(request.getContextPath() + "/quiz-handle-menu?packageId=" + packageId);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/quiz-handle-menu");
+            }
 
         } catch (Exception e) {
             handleError(response, e);

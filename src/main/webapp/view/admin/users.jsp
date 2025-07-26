@@ -310,7 +310,7 @@
                                         <select name="role" id="role" class="form-select">
                                             <option value="">All Roles</option>
                                             <c:forEach items="${roles}" var="role">
-                                                <option value="${role.id}" ${roleFilter eq role.id.toString() ? 'selected' : ''}>${role.role_name}</option>
+                                                <option value="${role.id}" ${roleFilter eq role.id.toString() ? 'selected' : ''}>${role.name}</option>
                                             </c:forEach>
                                         </select>
                                     </div>
@@ -411,7 +411,7 @@
                                             <td>${user.mobile}</td>
                                             <td>
                                                 <c:forEach items="${roles}" var="role">
-                                                    <c:if test="${role.id == user.role_id}">${role.role_name}</c:if>
+                                                    <c:if test="${role.id == user.role_id}">${role.name}</c:if>
                                                 </c:forEach>
                                             </td>
                                             <td>

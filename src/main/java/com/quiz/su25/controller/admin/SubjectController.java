@@ -296,6 +296,7 @@ public class SubjectController extends HttpServlet {
             String featuredFlag = request.getParameter("featured_flag");
             int categoryId = getIntParameter(request, "category_id", 0);
             String owner = request.getParameter("owner");
+            int pricePackageId = getIntParameter(request, "price_package_id", 0); // Lấy thêm trường này
 
             // Validate required fields
             if (title == null || title.trim().isEmpty() || categoryId == 0) {
@@ -321,6 +322,7 @@ public class SubjectController extends HttpServlet {
 
             // Create new subject
             Subject newSubject = Subject.builder()
+                    .price_package_id(pricePackageId) // Bổ sung trường này
                     .title(title.trim())
                     .tag_line(tagLine != null ? tagLine.trim() : null)
                     .brief_info(briefInfo != null ? briefInfo.trim() : null)

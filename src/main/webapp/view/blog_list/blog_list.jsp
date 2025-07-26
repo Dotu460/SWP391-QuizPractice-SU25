@@ -169,6 +169,9 @@
     <body>
         <!-- Header -->
         <jsp:include page="../common/user/header.jsp"></jsp:include>
+        <button class="scroll__top scroll-to-target" data-target="html">
+                <i class="tg-flaticon-arrowhead-up"></i>
+            </button>
 
 
             <!-- Blog Content -->
@@ -179,9 +182,14 @@
                         <div class="col-lg-8">
                             <!-- Action Buttons -->
                             <div class="d-flex justify-content-between align-items-center mb-4">
-                                <a href="${pageContext.request.contextPath}/post-details" class="btn btn-success">
-                                    <i class="fas fa-plus"></i> Create New Post
-                                </a>
+                                <!-- Chỉ hiển thị nút Create New Post cho Marketing -->
+                                <div>
+                                    <c:if test="${sessionScope.account.role_id == 4}">
+                                        <a href="${pageContext.request.contextPath}/post-details" class="btn btn-success">
+                                        <i class="fas fa-plus"></i> Create New Post
+                                        </a>
+                                    </c:if>
+                                </div>
                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#displaySettingsModal">
                                     <i class="fas fa-cog"></i> Display Settings
                                 </button>

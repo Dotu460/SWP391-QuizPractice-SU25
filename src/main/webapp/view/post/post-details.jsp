@@ -7,7 +7,41 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-
+<%-- THÊM VÀO ĐÂY - Kiểm tra quyền admin --%>
+<c:choose>
+    <c:when test="${sessionScope.account.role_id != 4}">
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Access Denied - SkillGro</title>
+            <jsp:include page="../common/user/link_css_common.jsp"></jsp:include>
+        </head>
+        <body>
+            <jsp:include page="../common/user/header.jsp"></jsp:include>
+            
+            <div class="container" style="padding: 100px 0; text-align: center;">
+                <div class="alert alert-danger" style="max-width: 600px; margin: 0 auto;">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Access Denied</h3>
+                    <p>You don't have permission to access this page. Only administrators can edit posts.</p>
+                    <a href="${pageContext.request.contextPath}/blog" class="btn btn-primary">
+                        <i class="fas fa-arrow-left"></i> Back to Blog
+                    </a>
+                </div>
+            </div>
+            
+            <jsp:include page="../common/user/footer.jsp"></jsp:include>
+        </body>
+        </html>
+    </c:when>
+    <c:otherwise>
+        <%-- Nội dung trang bình thường cho admin --%>
+        <!DOCTYPE html>
+        <html lang="en">
+        <%-- Phần còn lại của post-details.jsp --%>
+    </c:otherwise>
+</c:choose>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -137,6 +171,9 @@
     <body>
         <!-- Header -->
         <jsp:include page="../common/user/header.jsp"></jsp:include>
+        <button class="scroll__top scroll-to-target" data-target="html">
+                <i class="tg-flaticon-arrowhead-up"></i>
+        </button>
         
         <!-- Main Content -->
         <main class="post-details-main">
@@ -212,6 +249,15 @@
                                        value="${post.title}" required maxlength="255">
                             </div>
 
+                            <!-- Author -->
+                            <div class="mb-3">
+                                <label for="author" class="form-label">Author <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="author" name="author" 
+                                       value="${post.author}" required maxlength="100" 
+                                       placeholder="Enter author name">
+                                <div class="form-text">Enter the author name for this post (can be any name)</div>
+                            </div>
+
                             <!-- Category -->
                             <div class="mb-3">
                                 <label for="category" class="form-label">Category <span class="text-danger">*</span></label>
@@ -222,6 +268,8 @@
                                     <option value="Listening" ${post.category == 'Listening' ? 'selected' : ''}>Listening</option>
                                 </select>
                             </div>
+                            
+                                
 
                             <!-- Brief Information -->
                             <div class="mb-3">
@@ -337,6 +385,24 @@
         
         <script>
             // Initialize TinyMCE with image upload functionality
+            function normalizeUploadUrl(url) {
+    if (!url) return url;
+    
+    // Remove any leading relative paths and normalize
+    url = url.replace(/^\.\.\//, '').replace(/^\.\//, '');
+    
+    // Handle different URL formats
+    if (url.startsWith('uploads/medias/')) {
+        return '/SWP391_QUIZ_PRACTICE_SU25/' + url;
+    } else if (url.startsWith('/uploads/medias/')) {
+        return '/SWP391_QUIZ_PRACTICE_SU25' + url;
+    } else if (url.startsWith('/SWP391_QUIZ_PRACTICE_SU25/')) {
+        return url; // Already has correct prefix
+    } else {
+        // Default case: add prefix and clean up any leading slashes
+        return '/SWP391_QUIZ_PRACTICE_SU25/' + url.replace(/^\/+/, '');
+    }
+}
             function initTinyMCE(selector = '#media_url') {
                 tinymce.init({
                     selector: selector,
@@ -357,32 +423,98 @@
                     image_advtab: true,
                     image_title: true,
                     image_description: true,
+                    // Thêm các dòng này vào trong tinymce.init config
+paste_data_images: true,
+paste_as_text: false,
+paste_enable_default_filters: true,
+paste_word_valid_elements: "b,strong,i,em,h1,h2,h3,p,br,img[src],video,source",
+paste_retain_style_properties: "all",
+extended_valid_elements: 'img[class|src|alt|title|width|height|style],video[*],source[*]',
+
+paste_postprocess: function (plugin, args) {
+    args.node.querySelectorAll('img').forEach(function (img) {
+        if (img.src.startsWith('data:')) {
+            // Upload directly instead of using blobCache
+            var base64Data = img.src.split(',')[1];
+            var filename = 'pasted-image-' + (new Date()).getTime() + '.png';
+            
+            // Convert base64 to blob
+            var byteCharacters = atob(base64Data);
+            var byteNumbers = new Array(byteCharacters.length);
+            for (var i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            var byteArray = new Uint8Array(byteNumbers);
+            var blob = new Blob([byteArray], {type: 'image/png'});
+            
+            // Upload blob directly
+            var formData = new FormData();
+            formData.append('file', blob, filename);
+            
+            fetch('/SWP391_QUIZ_PRACTICE_SU25/upload-medias', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.location) {
+                    var url = normalizeUploadUrl(result.location);
+                    img.src = url;
+                }
+            })
+            .catch(error => {
+                console.error('Error uploading pasted image:', error);
+            });
+        }
+        // Thêm class và style cho ảnh
+        img.className = 'img-fluid';
+        img.style.maxWidth = '100%';
+        img.style.height = 'auto';
+    });
+},
                     
                     // File picker callback for browsing local files
                     file_picker_callback: function (callback, value, meta) {
                         // Create file input element
                         const input = document.createElement('input');
                         input.setAttribute('type', 'file');
-                        input.setAttribute('accept', 'image/*');
+                        if (meta.filetype === 'image') {
+                            input.setAttribute('accept', 'image/*');
+                        }else if (meta.filetype === 'medias') {
+                            input.setAttribute('accept', 'video/*');
+                        }
                         
                         input.addEventListener('change', function (e) {
                             const file = e.target.files[0];
-                            if (file) {
-                                const reader = new FileReader();
-                                reader.onload = function () {
-                                    // Create a blob URL for immediate preview
-                                    const id = 'blobid' + (new Date()).getTime();
-                                    const blobCache = tinymce.activeEditor.editorUpload.blobCache;
-                                    const base64 = reader.result.split(',')[1];
-                                    const blobInfo = blobCache.create(id, file, base64);
-                                    blobCache.add(blobInfo);
-                                    
-                                    // Call the callback with the blob URL
-                                    callback(blobInfo.blobUri(), { title: file.name });
-                                };
-                                reader.readAsDataURL(file);
-                            }
-                        });
+        if (file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            fetch('/SWP391_QUIZ_PRACTICE_SU25/upload-medias', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.location) {
+                    var url = normalizeUploadUrl(result.location);
+                    
+                    if (meta.filetype === 'image') {
+                        callback(url, { title: file.name });
+                    } else {
+                        var videoHtml = '<video controls width="100%"><source src="' + url + '" type="' + file.type + '"></video>';
+                        tinymce.activeEditor.insertContent(videoHtml);
+                    }
+                } else {
+                    throw new Error(result.message || 'Upload failed');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Upload failed: ' + error.message);
+            });
+        }
+    });
                         
                         input.click();
                     },
@@ -396,16 +528,17 @@
                         formData.append('file', blobInfo.blob(), blobInfo.filename());
                         
                         // Upload to server
-                        fetch('${pageContext.request.contextPath}/upload-image', {
+                        fetch('/SWP391_QUIZ_PRACTICE_SU25/upload-medias', {
                             method: 'POST',
                             body: formData
                         })
                         .then(response => response.json())
                         .then(result => {
-                            if (result.success) {
-                                success(result.location);
+                            if (result.location) {
+                                var url = normalizeUploadUrl(result.location);
+                                success(url);
                             } else {
-                                failure('Image upload failed: ' + (result.error || 'Unknown error'));
+                                failure('Image upload failed: ' + (result.message || 'Unknown error'));
                             }
                         })
                         .catch(error => {
@@ -414,7 +547,7 @@
                     },
                     
                     // Basic media handling
-                    media_live_embeds: true,
+                    medias_live_embeds: true,
                     
                     setup: function (editor) {
                         editor.on('change', function () {

@@ -24,7 +24,7 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
 
     @Override
     public List<Role> findAll() {
-        String sql = "select * from role";
+        String sql = "SELECT id, name FROM role";
         List<Role> listRole = new ArrayList<>();
         try {
             //tao connection
@@ -53,9 +53,10 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setString(1, t.getRole_name());
+            statement.setString(1, t.getName());
             statement.setInt(2, t.getId());
-            statement.executeUpdate();
+            int rowsAffected = statement.executeUpdate();
+            return rowsAffected > 0;
         } catch (SQLException e) {
             System.out.println("Error update at class RoleDAO: " + e.getMessage());
         } finally {
@@ -88,8 +89,9 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setString(1, t.getRole_name());
-            statement.executeUpdate();
+            statement.setString(1, t.getName());
+            int rowsAffected = statement.executeUpdate();
+            return rowsAffected;
         } catch (SQLException e) {
             System.out.println("Error insert at class RoleDAO: " + e.getMessage());
         } finally {
@@ -103,7 +105,7 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
         Role role = Role
                 .builder()
                 .id(resultSet.getInt("id"))
-                .role_name(resultSet.getString("name"))
+                .name(resultSet.getString("name"))
                 .build();
         return role;
     }
@@ -120,7 +122,7 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
             if (resultSet.next()) {
                 role = new Role();
                 role.setId(resultSet.getInt("id"));
-                role.setRole_name(resultSet.getString("name"));
+                role.setName(resultSet.getString("name"));
             }
         } catch (SQLException e) {
             System.out.println("Error findById at class RoleDAO: " + e.getMessage());
@@ -132,7 +134,7 @@ public class RoleDAO extends DBContext implements I_DAO<Role> {
 
     public String getRoleNameById(Integer roleId) {
         Role role = findById(roleId);
-        return role != null ? role.getRole_name() : "Unknown";
+        return role != null ? role.getName() : "Unknown";
     }
 
 //    @Override

@@ -10,28 +10,10 @@
 
 <div class="dashboard__sidebar-wrap">
     <div class="dashboard__sidebar-title mb-20">
-        <h6 class="title">Welcome, ${sessionScope.user.full_name != null ? sessionScope.user.full_name : 'Admin'}</h6>
+        <h6 class="title">${sessionScope.user.full_name != null ? sessionScope.user.full_name : 'Admin'}</h6>
     </div>
     <nav class="dashboard__sidebar-menu">
         <ul class="list-wrap">
-            <li class="${param.active == 'dashboard' ? 'active' : ''}">
-                <a href="${pageContext.request.contextPath}/admin/dashboard">
-                    <i class="fas fa-home"></i>
-                    Dashboard
-                </a>
-            </li>
-            <li class="${param.active == 'profile' ? 'active' : ''}">
-                <a href="${pageContext.request.contextPath}/admin/profile">
-                    <i class="skillgro-avatar"></i>
-                    My Profile
-                </a>
-            </li>
-            <li class="${param.active == 'subjects' ? 'active' : ''}">
-                <a href="${pageContext.request.contextPath}/admin/subjects">
-                    <i class="skillgro-book"></i>
-                    Subjects
-                </a>
-            </li>
             <li class="${param.active == 'users' ? 'active' : ''}">
                 <a href="${pageContext.request.contextPath}/admin/users">
                     <i class="fas fa-users"></i>
@@ -44,51 +26,71 @@
                     Registrations
                 </a>
             </li>
-            <li class="${param.active == 'courses' ? 'active' : ''}">
-                <a href="${pageContext.request.contextPath}/admin/courses">
+             <li class="${param.active == 'price-package' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/admin/price-package-list">
+                    <i class="skillgro-book-2"></i>
+                    Price Package
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="dashboard__sidebar-title mt-40 mb-20">
+        <h6 class="title">Admin, Expert</h6>
+    </div>
+    <nav class="dashboard__sidebar-menu">
+        <ul class="list-wrap">
+            <li class="${param.active == 'subjects' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/admin/subjects">
+                    <i class="skillgro-book"></i>
+                    Subjects
+                </a>
+            </li>
+            <li class="${param.active == 'questions-list' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/questions-list">
+                    <i class="skillgro-avatar"></i>
+                    Questions
+                </a>
+            </li>
+            <li class="${param.active == 'quizzes-lists' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/quizzes-list">
+                    <i class="skillgro-avatar"></i>
+                    Quiz
+                </a>
+            </li>
+            <li class="${param.active == 'manage-subjects' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/manage-subjects">
                     <i class="skillgro-video-tutorial"></i>
-                    Courses
-                </a>
-            </li>
-
-
-            <li class="${param.active == 'announcements' ? 'active' : ''}">
-                <a href="${pageContext.request.contextPath}/admin/announcements">
-                    <i class="skillgro-marketing"></i>
-                    Announcements
-                </a>
-            </li>
-            <li class="${param.active == 'quiz' ? 'active' : ''}">
-                <a href="${pageContext.request.contextPath}/admin/quiz">
-                    <i class="skillgro-chat"></i>
-                    Quiz Attempts
-                </a>
-            </li>
-            <li class="sidebar-item">
-                <a href="${pageContext.request.contextPath}/admin/essay-grading" class="sidebar-link">
-                    <i class="fas fa-pen-alt"></i>
-                    <span>Essay Grading</span>
+                    Manage Subject
                 </a>
             </li>
         </ul>
     </nav>
     <div class="dashboard__sidebar-title mt-40 mb-20">
-        <h6 class="title">USER</h6>
+        <h6 class="title">Grading</h6>
     </div>
     <nav class="dashboard__sidebar-menu">
         <ul class="list-wrap">
-            <li class="${param.active == 'settings' ? 'active' : ''}">
-                <a href="${pageContext.request.contextPath}/admin/settings">
-                    <i class="skillgro-settings"></i>
-                    Settings
-                </a>
-            </li>
-            <li>
-                <a href="${pageContext.request.contextPath}/logout">
-                    <i class="skillgro-logout"></i>
-                    Logout
+            <li class="${param.active == 'grading' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/expert/essay-grading">
+                    <i class="skillgro-video-tutorial"></i>
+                    essay grading
                 </a>
             </li>
         </ul>
     </nav>
+    <div class="dashboard__sidebar-title mt-40 mb-20">
+        <h6 class="title">Setting</h6>
+    </div>
+    <nav class="dashboard__sidebar-menu">
+        <ul class="list-wrap">
+            <li class="${param.active == 'setting' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/setting">
+                    <i class="skillgro-video-tutorial"></i>
+                    Setting
+                </a>
+            </li>
+        </ul>
+    </nav>
+
 </div>

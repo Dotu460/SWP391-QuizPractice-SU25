@@ -14,7 +14,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${post.title} - SkillGro</title>
+        <title>SkillGro - Blog Details</title>
 
         <!-- Include common CSS -->
         <jsp:include page="../common/user/link_css_common.jsp"></jsp:include>
@@ -179,6 +179,9 @@
     <body>
         <!-- Header -->
         <jsp:include page="../common/user/header.jsp"></jsp:include>
+        <button class="scroll__top scroll-to-target" data-target="html">
+                <i class="tg-flaticon-arrowhead-up"></i>
+        </button>
 
         <!-- Main Content -->
         <div class="container">
@@ -211,11 +214,13 @@
                                 </div>
                                 
                                 <!-- Edit Button (for authorized users) -->
-                                <div class="post-actions">
-                                    <a href="${pageContext.request.contextPath}/post-details?id=${post.id}" class="btn btn-outline-primary btn-sm">
-                                        <i class="fas fa-edit"></i> Edit Post
-                                    </a>
-                                </div>
+                                <c:if test="${sessionScope.account.role_id == 4}">
+                                    <div class="post-actions">
+                                        <a href="${pageContext.request.contextPath}/post-details?id=${post.id}" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-edit"></i> Edit Post
+                                        </a>
+                                    </div>
+                                </c:if>
                             </div>
                         </div>
 

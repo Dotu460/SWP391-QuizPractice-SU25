@@ -187,7 +187,9 @@
                     </div>
 
                     <form action="register" method="post" onsubmit="return validateForm()">
-                    <c:if test="${message != null}">
+                        <input type="hidden" name="roleId" value="2">
+                        <input type="hidden" name="status" value="active">
+                        <c:if test="${message != null}">
                         <div class="alert alert-${type}">
                             ${message}
                         </div>
@@ -237,6 +239,9 @@
         <script>
             function validateForm() {
                 let isValid = true;
+                let roleInput = document.querySelector('input[name="roleId"]');
+                let statusInput = document.querySelector('input[name="status"]');
+                
 
                 // ===== EMAIL =====
                 const emailInput = document.getElementById('email');
@@ -298,7 +303,23 @@
                 } else {
                     mobileError.textContent = "";
                 }
-
+                if (!roleInput) {
+                    let form = document.querySelector('form');
+                    roleInput = document.createElement('input');
+                    roleInput.type = 'hidden';
+                    roleInput.name = 'roleId';
+                    roleInput.value = '2';
+                    form.appendChild(roleInput);
+                }
+    
+                if (!statusInput) {
+                    let form = document.querySelector('form');
+                    statusInput = document.createElement('input');
+                    statusInput.type = 'hidden';
+                    statusInput.name = 'status';
+                    statusInput.value = 'active';
+                    form.appendChild(statusInput);
+                }
                 return isValid;
             }
 
