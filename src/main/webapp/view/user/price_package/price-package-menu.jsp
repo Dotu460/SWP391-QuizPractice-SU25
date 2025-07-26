@@ -68,10 +68,25 @@
                     border-radius: 4px;
                     font-weight: 500;
                     cursor: pointer;
-                    transition: background 0.2s;
+                    transition: all 0.2s ease;
+                    text-decoration: none;
+                    display: inline-block;
                 }
+                .buy-btn:hover,
                 .buy-btn:hover:enabled {
-                    background: #3d38a1;
+                    background: #ffd700;
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+                    color: #000;
+                    text-decoration: none;
+                }
+                
+                /* Override Bootstrap btn-primary to remove box-shadow */
+                .btn-primary {
+                    box-shadow: none !important;
+                }
+                .btn-primary:hover {
+                    box-shadow: none !important;
                 }
                 .access-btn {
                     background: linear-gradient(90deg, #28a745 0%, #218838 100%) !important;
@@ -147,27 +162,32 @@
                                 <div class="col-xl-9">
                                     <div class="dashboard__content-area">
                                         
-                                        <!-- Search bar giống quiz-handle-menu -->
+                                        <!-- Search and Sort Controls -->
                                         <div class="mb-4 d-flex align-items-center gap-3">
-                                            <input id="packageSearchInput" type="text" class="form-control" style="max-width: 350px; border: 2px solid #8B7FD2; border-radius: 8px; font-size: 1.08rem; padding: 10px 18px; color: #3d38a1; background: #f6f7fb; transition: border-color 0.2s; box-shadow: 0 2px 8px rgba(87,81,225,0.04);" placeholder="Search package by name..." oninput="filterAndSortPackages()">
-                                            <select id="packageSortMode" class="form-select" style="min-width: 180px; max-width: 260px; font-size: 0.98rem;" onchange="filterAndSortPackages()">
+                                            <input id="packageSearchInput" type="text" class="form-control" style="max-width: 350px; border: 2px solid #8B7FD2; border-radius: 8px; font-size: 1.08rem; padding: 10px 18px; color: #3d38a1; background: #f6f7fb; transition: border-color 0.2s; box-shadow: 0 2px 8px rgba(87,81,225,0.04);" placeholder="Search package by name...">
+                                            <select id="packageSortMode" class="form-select" style="min-width: 180px; max-width: 260px; font-size: 0.98rem;">
                                                 <option value="name-asc">Sort by Name A-Z</option>
                                                 <option value="name-desc">Sort by Name Z-A</option>
                                                 <option value="price-asc">Sort by Price Low-High</option>
                                                 <option value="price-desc">Sort by Price High-Low</option>
                                             </select>
+                                            <button type="button" class="btn btn-primary btn-sm" onclick="applySearchAndSort()" style="height: 38px; display: flex; align-items: center; justify-content: center;">
+                                                Apply
+                                            </button>
                                         </div>
                                         <script>
-                                            function filterAndSortPackages() {
+                                            function applySearchAndSort() {
                                                 const search = document.getElementById('packageSearchInput').value.trim().toLowerCase();
                                                 const sortMode = document.getElementById('packageSortMode').value;
                                                 const packageList = document.querySelector('.row.row-cols-1.row-cols-md-2.row-cols-lg-3.g-4');
                                                 const packageCards = Array.from(document.querySelectorAll('.package-card-wrapper'));
+                                                
                                                 // Filter by name
                                                 let filtered = packageCards.filter(card => {
                                                     const name = card.getAttribute('data-package-name') || '';
                                                     return name.includes(search);
                                                 });
+                                                
                                                 // Sort
                                                 filtered.sort((a, b) => {
                                                     if (sortMode === 'name-asc') {
@@ -181,15 +201,74 @@
                                                     }
                                                     return 0;
                                                 });
+                                                
                                                 // Remove all
                                                 packageCards.forEach(card => card.style.display = 'none');
+                                                
                                                 // Append filtered & sorted
                                                 filtered.forEach(card => {
                                                     card.style.display = '';
                                                     packageList.appendChild(card);
                                                 });
                                             }
+                                            
+                                            // Handle Enter key on search input
+                                            document.getElementById('packageSearchInput').addEventListener('keypress', function (e) {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    applySearchAndSort();
+                                                }
+                                            });
                                         </script>
+                                        <!-- Pagination and page size controls -->
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <div>
+                                                Showing <span class="fw-bold">${fn:length(pricePackages)}</span> of <span class="fw-bold">${totalPackages}</span> price packages
+                                            </div>
+                                            <div class="d-flex align-items-center">
+                                                <form id="paginationForm" method="get" action="${pageContext.request.contextPath}/price-package-menu" class="d-flex align-items-center gap-2 mb-0">
+                                                    <input type="number" id="customPageSize" name="pageSize" class="form-control form-control-sm" min="1" max="100" value="${showAll ? '' : pageSize}" style="width: 80px; height: 38px;" ${showAll ? 'disabled placeholder="-"' : ''} />
+                                                    <button type="button" class="btn btn-primary btn-sm" onclick="applyCustomPageSize()">Apply</button>
+                                                    <span class="ms-2">items per page</span>
+                                                    <div class="form-check ms-3">
+                                                        <input class="form-check-input" type="checkbox" id="showAllCheckbox" name="showAll" value="true" ${showAll ? 'checked' : ''}>
+                                                        <label class="form-check-label" for="showAllCheckbox">Show all</label>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <script>
+                                            function applyCustomPageSize() {
+                                                const showAllCheckbox = document.getElementById('showAllCheckbox');
+                                                if (showAllCheckbox.checked) {
+                                                    document.getElementById('customPageSize').disabled = true;
+                                                    document.getElementById('customPageSize').value = '';
+                                                } else {
+                                                    document.getElementById('customPageSize').disabled = false;
+                                                }
+                                                document.getElementById('paginationForm').submit();
+                                            }
+                                            
+                                            // Handle Enter key on pageSize input
+                                            document.getElementById('customPageSize').addEventListener('keypress', function (e) {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    applyCustomPageSize();
+                                                }
+                                            });
+                                            
+                                            // Handle Show All checkbox change - only disable/enable, don't auto submit
+                                            document.getElementById('showAllCheckbox').addEventListener('change', function () {
+                                                const customPageSize = document.getElementById('customPageSize');
+                                                if (this.checked) {
+                                                    customPageSize.disabled = true;
+                                                    customPageSize.value = '';
+                                                } else {
+                                                    customPageSize.disabled = false;
+                                                }
+                                            });
+                                        </script>
+                                        <!-- End Pagination/PageSize Controls -->
                                         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                                         <c:forEach items="${pricePackages}" var="pkg">
                                             <div class="col package-card-wrapper" data-package-name="${fn:toLowerCase(pkg.name)}" data-package-price="${pkg.sale_price}">
@@ -290,6 +369,29 @@
                                             </div>
                                         </c:forEach>
                                     </div>
+                                    <!-- Pagination controls -->
+                                    <div class="d-flex justify-content-center mt-4">
+                                        <nav aria-label="Page navigation">
+                                            <ul class="pagination">
+                                                <c:if test="${currentPage > 1}">
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="${pageContext.request.contextPath}/price-package-menu?page=${currentPage - 1}&pageSize=${pageSize}&showAll=${showAll}">&laquo;</a>
+                                                    </li>
+                                                </c:if>
+                                                <c:forEach begin="1" end="${totalPages}" var="i">
+                                                    <li class="page-item ${currentPage == i ? 'active' : ''}">
+                                                        <a class="page-link" href="${pageContext.request.contextPath}/price-package-menu?page=${i}&pageSize=${pageSize}&showAll=${showAll}">${i}</a>
+                                                    </li>
+                                                </c:forEach>
+                                                <c:if test="${currentPage < totalPages}">
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="${pageContext.request.contextPath}/price-package-menu?page=${currentPage + 1}&pageSize=${pageSize}&showAll=${showAll}">&raquo;</a>
+                                                    </li>
+                                                </c:if>
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                    <!-- End Pagination controls -->
                                 </div>
                             </div>
                         </div>

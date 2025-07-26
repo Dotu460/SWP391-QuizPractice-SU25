@@ -521,18 +521,21 @@
                                             <option value="quiz" title="Quiz name">Quiz name</option>
                                             <option value="subject" title="Subject name">Subject name</option>
                                         </select>
-                                        <input id="quizSearchInput" type="text" class="form-control" style="max-width: 350px;" placeholder="Search..." oninput="filterQuizzesByName()">
-                                        <select id="levelSort" class="form-select" style="min-width: 100px; max-width: 145px; font-size: 0.98rem;" onchange="applyAllFilters()">
+                                        <input id="quizSearchInput" type="text" class="form-control" style="max-width: 350px;" placeholder="Search...">
+                                        <select id="levelSort" class="form-select" style="min-width: 100px; max-width: 145px; font-size: 0.98rem;">
                                             <option value="all">All Levels</option>
                                             <option value="easy">Easy</option>
                                             <option value="medium">Medium</option>
                                             <option value="hard">Hard</option>
                                         </select>
-                                        <select id="doneFilter" class="form-select" style="min-width: 100px; max-width: 145px; font-size: 0.98rem;" onchange="applyAllFilters()">
+                                        <select id="doneFilter" class="form-select" style="min-width: 100px; max-width: 145px; font-size: 0.98rem;">
                                             <option value="all">All Status</option>
                                             <option value="done">Done</option>
                                             <option value="notdone">Not done</option>
                                         </select>
+                                        <button type="button" class="btn btn-primary btn-sm" onclick="applyAllFilters()" style="height: 38px; display: flex; align-items: center; justify-content: center;">
+                                            Apply
+                                        </button>
                                     </div>
                                     <script>
                                         function applyAllFilters() {
@@ -605,10 +608,14 @@
                                                 }
                                             });
                                         }
-                                        // Gọi applyAllFilters khi search input thay đổi
-                                        document.getElementById('quizSearchInput').oninput = applyAllFilters;
-                                        // Gọi applyAllFilters khi searchMode thay đổi
-                                        document.getElementById('searchMode').onchange = applyAllFilters;
+                                        
+                                        // Handle Enter key on search input
+                                        document.getElementById('quizSearchInput').addEventListener('keypress', function (e) {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                applyAllFilters();
+                                            }
+                                        });
                                     </script>
 
                                     <!-- Quiz List as Accordion -->
