@@ -4,6 +4,11 @@ import com.quiz.su25.dal.impl.RoleDAO;
 import com.quiz.su25.dal.impl.UserDAO;
 import com.quiz.su25.entity.Role;
 import com.quiz.su25.entity.User;
+import com.quiz.su25.utils.EmailUtils;
+import com.quiz.su25.utils.PasswordUtils;
+import com.quiz.su25.utils.PasswordHasher;
+import com.quiz.su25.validation.UserValidation;
+import java.util.Map;
 
 
 import jakarta.servlet.ServletException;
@@ -153,22 +158,85 @@ public class AdminController extends HttpServlet {
     }
 
     private void addUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        User user = getUserFromRequest(request);
+        // Get form data
+        String fullName = request.getParameter("fullName");
+        String email = request.getParameter("email");
+        String mobile = request.getParameter("mobile");
+        Integer gender = "male".equals(request.getParameter("gender")) ? 1 : 0;
+        Integer roleId = null;
+        try {
+            roleId = Integer.parseInt(request.getParameter("roleId"));
+        } catch (NumberFormatException e) {
+            // Will be handled by validation
+        }
+        String status = request.getParameter("status");
 
-        if (user != null) {
-            int userId = userDAO.insert(user);
+        // Validate input data
+        Map<String, String> errors = UserValidation.validateUser(fullName, email, mobile, gender, roleId, status);
 
-            if (userId > 0) {
-                response.sendRedirect(request.getContextPath() + "/admin/users?success=userAdded");
-            } else {
-                request.setAttribute("error", "Failed to add user");
-                request.setAttribute("user", user);
-                request.setAttribute("action", "add");
-                request.setAttribute("roles", roleDAO.findAll());
-                request.getRequestDispatcher("/view/admin/user-form.jsp").forward(request, response);
+        if (!errors.isEmpty()) {
+            // Store error messages in request
+            for (Map.Entry<String, String> error : errors.entrySet()) {
+                request.setAttribute(error.getKey() + "Error", error.getValue());
+            }
+            
+            // Store form data for repopulating form
+            request.setAttribute("user", createUserFromFormData(fullName, email, mobile, gender, roleId, status));
+            request.setAttribute("action", "add");
+            request.setAttribute("roles", roleDAO.findAll());
+            request.getRequestDispatcher("/view/admin/user-form.jsp").forward(request, response);
+            return;
+        }
+
+        // Create user object
+        User user = new User();
+        user.setFull_name(fullName);
+        user.setEmail(email);
+        user.setMobile(mobile);
+        user.setGender(gender);
+        user.setRole_id(roleId);
+        user.setStatus(status);
+
+        // Generate password for new user
+        String generatedPassword = PasswordUtils.generateRandomPassword();
+        String hashedPassword = PasswordHasher.hashPassword(generatedPassword);
+        user.setPassword(hashedPassword);
+
+        // Insert user
+        int userId = userDAO.insert(user);
+
+        if (userId > 0) {
+            // Send welcome email with login credentials
+            try {
+                EmailUtils.sendRegistrationEmail(
+                    user.getEmail(),
+                    user.getFull_name(),
+                    generatedPassword,
+                    "Quiz Practice System", // Subject title
+                    new java.util.Date().toString(), // Valid from
+                    "Unlimited access", // Valid to
+                    "Welcome to Quiz Practice System! Your account has been created by an administrator. Please change your password after your first login for security."
+                );
+                
+                // Store password note in session for admin to see
+                request.getSession().setAttribute("passwordNote", 
+                    String.format("User account created successfully!\n\nLogin Credentials:\nEmail: %s\nPassword: %s\n\nAn email with login instructions has been sent to the user.", 
+                    user.getEmail(), generatedPassword));
+                
+                response.sendRedirect(request.getContextPath() + "/admin/users?success=userAddedWithEmail");
+            } catch (Exception e) {
+                System.err.println("Failed to send welcome email: " + e.getMessage());
+                
+                // Store password note even if email failed
+                request.getSession().setAttribute("passwordNote", 
+                    String.format("User account created successfully!\n\nIMPORTANT - Email sending failed!\nPlease manually provide these credentials to the user:\n\nEmail: %s\nPassword: %s", 
+                    user.getEmail(), generatedPassword));
+                
+                response.sendRedirect(request.getContextPath() + "/admin/users?success=userAddedNoEmail");
             }
         } else {
-            request.setAttribute("error", "Invalid user data");
+            request.setAttribute("error", "Failed to add user");
+            request.setAttribute("user", user);
             request.setAttribute("action", "add");
             request.setAttribute("roles", roleDAO.findAll());
             request.getRequestDispatcher("/view/admin/user-form.jsp").forward(request, response);
@@ -221,48 +289,15 @@ public class AdminController extends HttpServlet {
         }
     }
 
-    private User getUserFromRequest(HttpServletRequest request) {
-        try {
-            User user = new User();
-
-            // Get user ID for updates
-            String userIdParam = request.getParameter("userId");
-            if (userIdParam != null && !userIdParam.isEmpty()) {
-                user.setId(Integer.parseInt(userIdParam));
-            }
-
-            user.setFull_name(request.getParameter("fullName"));
-            user.setEmail(request.getParameter("email"));
-
-            // Password handling
-            String password = request.getParameter("password");
-            if (password != null && !password.isEmpty()) {
-                // In a real application, you should hash the password
-                user.setPassword(password);
-            } else if (user.getId() != null) {
-                // If updating and no password provided, keep existing password
-                User existingUser = userDAO.findById(user.getId());
-                user.setPassword(existingUser.getPassword());
-            }
-
-            user.setGender("male".equals(request.getParameter("gender")) ? 1 : 0);
-            user.setMobile(request.getParameter("mobile"));
-            user.setAvatar_url(request.getParameter("avatarUrl"));
-            user.setStatus(request.getParameter("status"));
-
-            // Set role
-            int roleId = Integer.parseInt(request.getParameter("roleId"));
-            // Validate role ID - only allow existing roles (2 or 3)
-            if (roleId != 2 && roleId != 3) {
-                roleId = 2; // Default to role 2 if invalid role ID provided
-            }
-            user.setRole_id(roleId);
-
-            return user;
-        } catch (Exception e) {
-            System.out.println("Error parsing user data: " + e.getMessage());
-            return null;
-        }
+    private User createUserFromFormData(String fullName, String email, String mobile, Integer gender, Integer roleId, String status) {
+        User user = new User();
+        user.setFull_name(fullName);
+        user.setEmail(email);
+        user.setMobile(mobile);
+        user.setGender(gender);
+        user.setRole_id(roleId);
+        user.setStatus(status);
+        return user;
     }
 
     private int getIntParameter(HttpServletRequest request, String paramName, int defaultValue) {

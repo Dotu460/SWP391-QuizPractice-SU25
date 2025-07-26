@@ -204,6 +204,32 @@
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+
+        /* Alert styling */
+        .alert-custom {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border-left: 4px solid;
+        }
+
+        .alert-success-custom {
+            background-color: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+
+        .alert-danger-custom {
+            background-color: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+
+        .alert-info-custom {
+            background-color: #e3f2fd;
+            border-left-color: #2196f3;
+            color: #0d47a1;
+        }
     </style>
 </head>
 <body>
@@ -242,10 +268,28 @@
                                 <div class="alert-custom alert-success-custom">
                                     <c:choose>
                                         <c:when test="${param.success eq 'userAdded'}">User added successfully!</c:when>
+                                        <c:when test="${param.success eq 'userAddedWithEmail'}">
+                                            User added successfully! Welcome email with login credentials has been sent.
+                                        </c:when>
+                                        <c:when test="${param.success eq 'userAddedNoEmail'}">
+                                            User added successfully! However, email sending failed. Please check the password note below.
+                                        </c:when>
                                         <c:when test="${param.success eq 'userUpdated'}">User updated successfully!</c:when>
                                         <c:otherwise>Operation completed successfully!</c:otherwise>
                                     </c:choose>
                                 </div>
+                            </c:if>
+
+                            <!-- Password Note Alert -->
+                            <c:if test="${not empty sessionScope.passwordNote}">
+                                <div class="alert-custom alert-info-custom" style="background-color: #e3f2fd; border-left: 4px solid #2196f3; color: #0d47a1;">
+                                    <h6 style="margin-bottom: 10px; font-weight: bold;">📧 Login Credentials Generated</h6>
+                                    <pre style="white-space: pre-wrap; font-size: 13px; margin: 0; background: #f5f5f5; padding: 10px; border-radius: 4px;">${sessionScope.passwordNote}</pre>
+                                    <small style="display: block; margin-top: 8px; color: #666;">
+                                        <strong>Security Note:</strong> These credentials will not be shown again. Please save them securely.
+                                    </small>
+                                </div>
+                                <c:remove var="passwordNote" scope="session"/>
                             </c:if>
 
                             <c:if test="${param.error != null}">
