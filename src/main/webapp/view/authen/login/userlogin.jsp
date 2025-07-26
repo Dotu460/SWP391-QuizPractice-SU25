@@ -245,15 +245,16 @@
                         <p>Please sign in to continue</p>
                     </div>
 
-                    <form action="login" method="post" onsubmit="return validateForm()">
-                    <c:if test="${message != null}">
-                        <div class="alert alert-${type}">
-                            ${message}
+                    <form id="loginForm" method="POST" action="login">
+                        <!-- Thêm id cho alert -->
+                    <c:if test="${not empty error}">
+                        <div id="server-error" class="alert alert-danger">
+                            ${error}
                         </div>
                     </c:if>
 
                     <div class="form-group">
-                        <label for="password">Email</label>
+                        <label for="email">Email</label>
                         <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" >
                         <span id="email-error" style="color:red;"></span>
 
@@ -283,6 +284,17 @@
                 // EMAIL realtime
                 const emailInput = document.getElementById('email');
                 const emailError = document.getElementById('email-error');
+                const serverError = document.getElementById('server-error');
+    if (serverError) {
+        setTimeout(function () {
+            serverError.style.transition = 'opacity 0.5s ease';
+            serverError.style.opacity = '0';
+            // Xóa hẳn phần tử sau khi hiệu ứng mờ kết thúc
+            setTimeout(function () {
+                serverError.remove();
+            }, 500);
+        }, 3000);
+    }
                 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
                 emailInput.addEventListener("input", function () {
