@@ -522,76 +522,47 @@ public class AuthenController extends HttpServlet {
         String newPassword = request.getParameter("new_password");
         String confirmPassword = request.getParameter("confirm_password");
 
-        // Get the current user from session
         HttpSession session = request.getSession();
         User currentUser = (User) session.getAttribute(GlobalConfig.SESSION_ACCOUNT);
 
-        try {
-            // Check if user is logged in
-            if (currentUser == null) {
-                response.sendRedirect(request.getContextPath() + "/login");
-                return;
-            }
+        // 1. Kiểm tra các trường không được trống
+        if (currentPassword == null || currentPassword.trim().isEmpty()
+                || newPassword == null || newPassword.trim().isEmpty()
+                || confirmPassword == null || confirmPassword.trim().isEmpty()) {
+            request.setAttribute("error", "All password fields are required.");
+            request.getRequestDispatcher("view/authen/login/changepassword.jsp").forward(request, response);
+            return;
+        }
 
-            // Validate all fields are provided
-            List<String> errors = new ArrayList<>();
+        // 2. Kiểm tra current password có đúng không (so với database)
+        if (!PasswordHasher.verifyPassword(currentPassword, currentUser.getPassword())) {
+            request.setAttribute("error", "Current password is incorrect.");
+            request.getRequestDispatcher("view/authen/login/changepassword.jsp").forward(request, response);
+            return;
+        }
 
-            if (currentPassword == null || currentPassword.trim().isEmpty()) {
-                errors.add("Current password is required.");
-            }
+        // 3. Kiểm tra new = confirm
+        if (!newPassword.equals(confirmPassword)) {
+            request.setAttribute("error", "New passwords do not match.");
+            request.getRequestDispatcher("view/authen/login/changepassword.jsp").forward(request, response);
+            return;
+        }
 
-            if (newPassword == null || newPassword.trim().isEmpty()) {
-                errors.add("New password is required.");
-            }
+        // 4. Kiểm tra new ≠ current
+        if (currentPassword.equals(newPassword)) {
+            request.setAttribute("error", "New password must be different from current password.");
+            request.getRequestDispatcher("view/authen/login/changepassword.jsp").forward(request, response);
+            return;
+        }
 
-            if (confirmPassword == null || confirmPassword.trim().isEmpty()) {
-                errors.add("Confirm password is required.");
-            }
-
-            if (newPassword != null && confirmPassword != null && !newPassword.equals(confirmPassword)) {
-                errors.add("New passwords do not match.");
-            }
-
-            if (currentPassword != null && newPassword != null && currentPassword.equals(newPassword)) {
-                errors.add("New password must be different from current password.");
-            }
-
-            // Nếu có lỗi → forward về lại trang changepassword.jsp
-            if (!errors.isEmpty()) {
-                request.setAttribute("errors", errors);
-                request.getRequestDispatcher("view/authen/login/changepassword.jsp").forward(request, response);
-                return;
-            }
-
-            // Verify current password matches the one in database
-            if (!PasswordHasher.verifyPassword(currentPassword, currentUser.getPassword())) {
-                request.setAttribute("error", "Current password is incorrect.");
-                request.getRequestDispatcher("view/authen/login/changepassword.jsp").forward(request, response);
-                return;
-            }
-
-            // Update password in database
-            boolean success = userDAO.updatePassword(currentUser.getEmail(), newPassword);
-
-            if (success) {
-                // Password updated successfully
-                request.setAttribute("message", "Password changed successfully! Please login with your new password.");
-                request.setAttribute("type", "success");
-
-                // Invalidate the current session to force re-login with new password
-                session.invalidate();
-
-                // Redirect to login page
-                request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
-            } else {
-                request.setAttribute("error", "Failed to update password. Please try again.");
-                request.getRequestDispatcher("view/authen/login/changepassword.jsp").forward(request, response);
-            }
-
-        } catch (Exception e) {
-            System.out.println("Error in changePassword: " + e.getMessage());
-            e.printStackTrace();
-            request.setAttribute("error", "An error occurred while changing password: " + e.getMessage());
+        // 5. Nếu hợp lệ thì update password
+        boolean success = userDAO.updatePassword(currentUser.getEmail(), newPassword);
+        if (success) {
+            request.setAttribute("message", "Password changed successfully! Please login with your new password.");
+            session.invalidate();
+            request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
+        } else {
+            request.setAttribute("error", "Failed to update password. Please try again.");
             request.getRequestDispatcher("view/authen/login/changepassword.jsp").forward(request, response);
         }
     }
