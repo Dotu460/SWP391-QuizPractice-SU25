@@ -218,7 +218,7 @@
                                                     <div class="form-group">
                                                         <label for="search">Search</label>
                                                         <input type="text" class="form-control" id="search" name="search" 
-                                                               placeholder="Search by title or backlink..." value="${param.search}">
+                                                               placeholder="Search by title..." value="${param.search}">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
@@ -650,6 +650,85 @@
                 
                 // Run on page load
                 initializeView();
+            });
+
+            // --- Show All Functionality ---
+            function updateShowAllField() {
+                const showAllCheckbox = document.getElementById('showAllCheckbox');
+                const showAllField = document.getElementById('showAllField');
+                
+                if (showAllCheckbox.checked) {
+                    showAllField.value = 'true';
+                } else {
+                    showAllField.value = '';
+                }
+            }
+
+            function applyCustomPageSize() {
+                const customSizeInput = document.getElementById('customPageSize');
+                const showAllCheckbox = document.getElementById('showAllCheckbox');
+                
+                if (showAllCheckbox.checked) {
+                    // If show all is checked, redirect with showAll=true
+                    const currentUrl = new URL(window.location);
+                    currentUrl.searchParams.set('showAll', 'true');
+                    currentUrl.searchParams.set('page', '1');
+                    currentUrl.searchParams.delete('pageSize');
+                    window.location.href = currentUrl.toString();
+                } else {
+                    // Apply custom page size
+                    const newSize = customSizeInput.value;
+                    if (newSize && newSize > 0) {
+                        const currentUrl = new URL(window.location);
+                        currentUrl.searchParams.set('pageSize', newSize);
+                        currentUrl.searchParams.set('page', '1');
+                        currentUrl.searchParams.delete('showAll');
+                        window.location.href = currentUrl.toString();
+                    }
+                }
+            }
+
+            function resetForm() {
+                window.location.href = '${pageContext.request.contextPath}/slider-list';
+            }
+
+            // Initialize checkbox state
+            document.addEventListener('DOMContentLoaded', function() {
+                const showAllCheckbox = document.getElementById('showAllCheckbox');
+                const customSizeInput = document.getElementById('customPageSize');
+                
+                // Set initial state based on URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                const showAll = urlParams.get('showAll');
+                
+                if (showAll === 'true') {
+                    showAllCheckbox.checked = true;
+                    customSizeInput.disabled = true;
+                    customSizeInput.value = '';
+                } else {
+                    showAllCheckbox.checked = false;
+                    customSizeInput.disabled = false;
+                }
+
+                // Add event listener for checkbox
+                showAllCheckbox.addEventListener('change', function() {
+                    const customSizeInput = document.getElementById('customPageSize');
+                    const showAllField = document.getElementById('showAllField');
+                    
+                    if (this.checked) {
+                        customSizeInput.disabled = true;
+                        customSizeInput.value = '';
+                        showAllField.value = 'true';
+                    } else {
+                        customSizeInput.disabled = false;
+                        showAllField.value = '';
+                    }
+                });
+
+                // Add form submit event listener to ensure showAll state is preserved
+                document.getElementById('filterForm').addEventListener('submit', function(e) {
+                    updateShowAllField();
+                });
             });
         </script>
     </body>

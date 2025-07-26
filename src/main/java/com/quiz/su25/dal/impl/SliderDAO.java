@@ -175,7 +175,7 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
             sql.append(" AND status = ?");
         }
         if (search != null && !search.isEmpty()) {
-            sql.append(" AND (title LIKE ? OR backlink_url LIKE ?)");
+            sql.append(" AND (title LIKE ?)");
         }
         
         sql.append(" ORDER BY id LIMIT ? OFFSET ?");
@@ -189,7 +189,6 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
                 statement.setBoolean(paramIndex++, "active".equalsIgnoreCase(status));
             }
             if (search != null && !search.isEmpty()) {
-                statement.setString(paramIndex++, "%" + search + "%");
                 statement.setString(paramIndex++, "%" + search + "%");
             }
             
@@ -216,7 +215,7 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
             sql.append(" AND status = ?");
         }
         if (search != null && !search.isEmpty()) {
-            sql.append(" AND (title LIKE ? OR backlink_url LIKE ?)");
+            sql.append(" AND (title LIKE ?)");
         }
 
         try {
@@ -228,7 +227,6 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
                 statement.setBoolean(paramIndex++, "active".equalsIgnoreCase(status));
             }
             if (search != null && !search.isEmpty()) {
-                statement.setString(paramIndex++, "%" + search + "%");
                 statement.setString(paramIndex++, "%" + search + "%");
             }
 
