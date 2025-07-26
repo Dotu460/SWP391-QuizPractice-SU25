@@ -78,9 +78,10 @@ public class UserDAO extends DBContext implements I_DAO<User> {
             statement.setString(3, user.getPassword());
             statement.setObject(4, user.getGender());        // Can be NULL
             statement.setString(5, user.getMobile());        // NOT NULL
-            statement.setObject(6, user.getAvatar_url());    // Can be NULL       // Can be NULL
-            statement.setInt(7, user.getRole_id());
-            statement.setString(8, user.getStatus());
+            statement.setObject(6, user.getAvatar_url());    // Can be NULL
+            statement.setObject(7, user.getRole_id());       // Can be NULL
+            statement.setObject(8, user.getStatus());        // Can be NULL
+
             statement.executeUpdate();
             resultSet = statement.getGeneratedKeys();
             if (resultSet.next()) {
@@ -176,15 +177,14 @@ public class UserDAO extends DBContext implements I_DAO<User> {
     public User login(String email, String password) {
         DBContext db = new DBContext();
         Connection conn = db.getConnection();
-        String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
+        String sql = "SELECT * FROM users WHERE email = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, email);
-            ps.setString(2, password);
 
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return User.builder()
+                User user = User.builder()
                         .id(rs.getInt("id"))
                         .full_name(rs.getString("full_name"))
                         .email(rs.getString("email"))
@@ -195,6 +195,11 @@ public class UserDAO extends DBContext implements I_DAO<User> {
                         .role_id(rs.getInt("role_id"))
                         .status(rs.getString("status"))
                         .build();
+                
+                // Verify password using PasswordHasher
+                if (PasswordHasher.verifyPassword(password, user.getPassword())) {
+                    return user;
+                }
             }
 
         } catch (Exception e) {
@@ -216,8 +221,7 @@ public class UserDAO extends DBContext implements I_DAO<User> {
             System.out.println("Available roles:");
             roles.forEach(role -> 
                 System.out.println("Role ID: " + role.getId() + 
-                                 ", Name: " + role.getRole_name() + 
-                                 ", Description: " + role.getDescription())
+                                 ", Name: " + role.getName() )
             );
         }
 
@@ -283,22 +287,25 @@ public class UserDAO extends DBContext implements I_DAO<User> {
     }
 
     public User findByEmailAndPassword(String email, String password) {
-        String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
+        String sql = "SELECT * FROM users WHERE email = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setString(1, email);
-            statement.setString(2, PasswordHasher.hashPassword(password));
 
             resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                return getFromResultSet(resultSet);
+                User user = getFromResultSet(resultSet);
+                // Verify password using PasswordHasher
+                if (PasswordHasher.verifyPassword(password, user.getPassword())) {
+                    return user;
+                }
             }
             
         } catch (SQLException e) {
             System.out.println("Error findByEmailAndPassword at class UserDAO: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Error hashing password in findByEmailAndPassword: " + e.getMessage());
+            System.out.println("Error verifying password in findByEmailAndPassword: " + e.getMessage());
         } finally {
             closeResources();
         }

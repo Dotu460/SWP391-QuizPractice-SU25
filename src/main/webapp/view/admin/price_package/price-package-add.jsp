@@ -200,9 +200,9 @@
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
-                                                                    <label for="sale_price" class="form-label">Sale Price <span class="required">*</span></label>
+                                                                    <label for="sale_price" class="form-label">Sale Price</label>
                                                                     <input type="number" class="form-control" id="sale_price" name="sale_price" 
-                                                                           value="${param.sale_price != null ? param.sale_price : ''}" min="1" required>
+                                                                           value="${param.sale_price != null ? param.sale_price : ''}" min="1">
                                                                 </div>
                                                             </div>
                                                         </div>

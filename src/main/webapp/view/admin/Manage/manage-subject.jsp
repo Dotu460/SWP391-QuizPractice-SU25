@@ -1,3 +1,10 @@
+<%-- 
+    Document   : manage-subject
+    Created on : 24 thg 6, 2025, 09:46:26
+    Author     : FPT
+--%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!doctype html>
 <html class="no-js" lang="en">
@@ -5,7 +12,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <title>Subject Management - SkillGro Dashboard</title>
+  <title>Subject Management - SkillGro</title>
   <meta name="description" content="SkillGro - Online Courses & Education Platform">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -16,10 +23,6 @@
 
   <!-- Custom CSS for this page -->
   <style>
-    .dashboard__content-title {
-      padding: 20px 0;
-    }
-
     .dashboard__subjects-filter {
       padding: 25px;
       background-color: #f8f9fa;
@@ -77,49 +80,6 @@
       align-items: center;
     }
 
-    .add-subject-btn {
-      padding: 12px 25px;
-      background-color: #4CAF50;
-      color: white;
-      border-radius: 5px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 500;
-      transition: all 0.3s ease;
-    }
-
-    .add-subject-btn:hover {
-      background-color: #3d9640;
-      color: white;
-    }
-
-    .pagination {
-      display: flex;
-      justify-content: center;
-      margin-top: 30px;
-      gap: 10px;
-    }
-
-    .pagination a {
-      padding: 8px 15px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      color: #3f78e0;
-      transition: all 0.3s ease;
-    }
-
-    .pagination a:hover {
-      background-color: #3f78e0;
-      color: white;
-    }
-
-    .pagination span {
-      padding: 8px 15px;
-      background-color: #f8f9fa;
-      border-radius: 5px;
-    }
-
     .subject-action-link {
       padding: 5px 10px;
       border-radius: 4px;
@@ -130,12 +90,12 @@
       font-size: 14px;
     }
 
-    .edit-link {
+    .view-link {
       background-color: #3f78e0;
     }
 
-    .view-link {
-      background-color: #6c757d;
+    .delete-link {
+      background-color: #dc3545;
     }
 
     .status-badge {
@@ -162,26 +122,14 @@
       color: #6c757d;
     }
 
-    /* Responsive design */
-    @media (max-width: 768px) {
-      .dashboard__content-wrap {
-        padding: 0 10px;
-      }
-      
-      .dashboard__subjects-filter form {
-        flex-direction: column;
-        gap: 15px;
-      }
-      
-      .dashboard__subjects-filter .form-group {
-        min-width: 100%;
-      }
-      
-      .dashboard__actions {
-        flex-direction: column;
-        gap: 15px;
-        align-items: stretch;
-      }
+    .delete-link:hover {
+      background-color: #c82333;
+      color: white;
+    }
+
+    .view-link:hover {
+      background-color: #2c5ec1;
+      color: white;
     }
   </style>
 </head>
@@ -202,13 +150,13 @@
 <main class="main-area">
   <!-- dashboard-area -->
   <section class="dashboard__area section-pb-120">
-    <div class="dashboard__bg"><img src="${pageContext.request.contextPath}/assets/img/bg/dashboard_bg.jpg" alt=""></div>
-    <div class="container-fluid" style="padding: 0 20px;">
+    <div class="dashboard__bg"><img src="assets/img/bg/dashboard_bg.jpg" alt=""></div>
+    <div class="container">
       <div class="dashboard__inner-wrap">
         <div class="row">
           <div class="col-lg-3">
             <jsp:include page="../adminSidebar.jsp">
-              <jsp:param name="active" value="subjects"/>
+              <jsp:param name="active" value="manage-subjects"/>
             </jsp:include>
           </div>
           <div class="col-lg-9">
@@ -217,24 +165,9 @@
                 <h4 class="title">Subject Management</h4>
               </div>
 
-              <!-- Success/Error Messages -->
-              <c:if test="${not empty sessionScope.successMessage}">
-                <div class="alert alert-success" style="margin-bottom: 20px; padding: 15px; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 5px;">
-                  <i class="fas fa-check-circle"></i> ${sessionScope.successMessage}
-                </div>
-                <c:remove var="successMessage" scope="session"/>
-              </c:if>
-
-              <c:if test="${not empty sessionScope.errorMessage}">
-                <div class="alert alert-danger" style="margin-bottom: 20px; padding: 15px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 5px;">
-                  <i class="fas fa-exclamation-circle"></i> ${sessionScope.errorMessage}
-                </div>
-                <c:remove var="errorMessage" scope="session"/>
-              </c:if>
-
               <!-- Filters Section -->
               <div class="dashboard__subjects-filter">
-                <form method="get" action="${pageContext.request.contextPath}/admin/subjects">
+                <form method="get" action="${pageContext.request.contextPath}/manage-subjects">
                   <div class="form-group">
                     <label for="category">Category:</label>
                     <select name="category" id="category" class="form-select">
@@ -264,20 +197,12 @@
                 </form>
               </div>
 
-              <!-- Add Subject Button -->
-              <div class="dashboard__actions">
-                <h5>Numbers of Subject display: <span class="text-primary">${subjects.size()}</span></h5>
-                <a href="${pageContext.request.contextPath}/admin/subject/new" class="add-subject-btn">
-                  <i class="fas fa-plus"></i> Add New Subject
-                </a>
-              </div>
-
               <!-- Subjects Table -->
               <div class="dashboard__review-table">
                 <table class="table table-borderless">
                   <thead>
                   <tr>
-                    <th>ID</th>
+                    <th>No.</th>
                     <th>Subject Name</th>
                     <th>Category</th>
                     <th>Number of Lessons</th>
@@ -323,18 +248,16 @@
                       </td>
                       <td>
                         <div class="dashboard__review-action">
-                          <a href="${pageContext.request.contextPath}/admin/subject/view?id=${subject.id}" class="subject-action-link view-link" title="View">
-                            <i class="skillgro-book-2"></i> View
+                          <a href="${pageContext.request.contextPath}/manage-subjects/view?id=${subject.id}" 
+                             class="subject-action-link view-link" title="View Lessons">
+                             <i class="skillgro-book-2"></i>
                           </a>
-                          <a href="${pageContext.request.contextPath}/admin/subject/edit?id=${subject.id}" class="subject-action-link edit-link" title="Edit">
-                            <i class="skillgro-edit"></i> Edit
+                          <a href="${pageContext.request.contextPath}/manage-subjects/delete?id=${subject.id}" 
+                             class="subject-action-link delete-link" 
+                             onclick="return confirm('Are you sure you want to delete this subject?')" 
+                             title="Delete">
+                             <i class="fas fa-trash"></i>
                           </a>
-                          <form method="post" style="display: inline;" onsubmit="return confirmDelete('${subject.title}', '${subject.id}');">
-                            <input type="hidden" name="id" value="${subject.id}">
-                            <button type="submit" formaction="${pageContext.request.contextPath}/admin/subject/delete" class="subject-action-link delete-link" title="Delete">
-                              <i class="fas fa-trash"></i> Delete
-                            </button>
-                          </form>
                         </div>
                       </td>
                     </tr>
@@ -344,21 +267,35 @@
               </div>
 
               <!-- Pagination -->
-              <div class="pagination">
-                <c:if test="${page > 1}">
-                  <a href="${pageContext.request.contextPath}/admin/subjects?page=${page - 1}&pageSize=${pageSize}&category=${categoryFilter}&status=${statusFilter}&search=${searchTerm}">
-                    <i class="fas fa-chevron-left"></i> Previous
-                  </a>
-                </c:if>
+              <nav aria-label="Page navigation">
+                  <ul class="pagination mb-0">
+                      <li class="page-item ${page == 1 ? 'disabled' : ''}">
+                          <a class="page-link" 
+                             href="${pageContext.request.contextPath}/manage-subjects?page=${page - 1}&pageSize=${pageSize}&category=${categoryFilter}&status=${statusFilter}&search=${searchTerm}"
+                             ${page == 1 ? 'tabindex="-1" aria-disabled="true"' : ''}>
+                               &laquo;
+                          </a>
+                      </li>
 
-                <span>Page ${page} of ${totalPages}</span>
+                      <c:forEach begin="1" end="${totalPages}" var="i">
+                          <li class="page-item ${i == page ? 'active' : ''}">
+                              <a class="page-link" 
+                                 href="${pageContext.request.contextPath}/manage-subjects?page=${i}&pageSize=${pageSize}&category=${categoryFilter}&status=${statusFilter}&search=${searchTerm}">
+                                   ${i}
+                              </a>
+                          </li>
+                      </c:forEach>
 
-                <c:if test="${page < totalPages}">
-                  <a href="${pageContext.request.contextPath}/admin/subjects?page=${page + 1}&pageSize=${pageSize}&category=${categoryFilter}&status=${statusFilter}&search=${searchTerm}">
-                    Next <i class="fas fa-chevron-right"></i>
-                  </a>
-                </c:if>
-              </div>
+                      <li class="page-item ${page == totalPages ? 'disabled' : ''}">
+                          <a class="page-link" 
+                             href="${pageContext.request.contextPath}/manage-subjects?page=${page + 1}&pageSize=${pageSize}&category=${categoryFilter}&status=${statusFilter}&search=${searchTerm}"
+                             ${page == totalPages ? 'tabindex="-1" aria-disabled="true"' : ''}>
+                               &raquo;
+                          </a>
+                      </li>
+                  </ul>
+              </nav>
+              <!-- End Pagination -->
             </div>
           </div>
         </div>
@@ -382,156 +319,6 @@
   $(document).ready(function() {
     $('#category, #status').select2();
   });
-
-  // Confirmation dialog for deleting subjects
-  function confirmDelete(subjectTitle, subjectId) {
-    var message = 'Are you sure you want to delete the course "' + subjectTitle + '"?\n\nThis action cannot be undone. If this course has active registrations, the deletion will be blocked.';
-    return confirm(message);
-  }
-
-
 </script>
-
-<style>
-  /* Action buttons styling */
-  .dashboard__review-action {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-  }
-
-  .subject-action-link {
-    padding: 6px 10px;
-    border-radius: 4px;
-    text-decoration: none;
-    font-size: 11px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    border: none;
-    cursor: pointer;
-    white-space: nowrap;
-    min-width: 60px;
-    height: 28px;
-  }
-
-  .subject-action-link.view-link {
-    background-color: #007bff;
-    color: white;
-  }
-
-  .subject-action-link.view-link:hover {
-    background-color: #0056b3;
-    transform: translateY(-1px);
-  }
-
-  .subject-action-link.edit-link {
-    background-color: #28a745;
-    color: white;
-  }
-
-  .subject-action-link.edit-link:hover {
-    background-color: #1e7e34;
-    transform: translateY(-1px);
-  }
-
-  .subject-action-link.delete-link {
-    background-color: #dc3545;
-    color: white;
-  }
-
-  .subject-action-link.delete-link:hover {
-    background-color: #c82333;
-    transform: translateY(-1px);
-  }
-
-  /* Table styling */
-  .dashboard__review-table {
-    overflow-x: auto;
-  }
-
-  .dashboard__review-table table {
-    width: 100%;
-    min-width: 800px;
-  }
-
-  .dashboard__review-table th {
-    white-space: nowrap;
-    padding: 12px 8px;
-    vertical-align: middle;
-  }
-
-  .dashboard__review-table td {
-    padding: 12px 8px;
-    vertical-align: middle;
-  }
-
-  /* Status badges */
-  .status-badge {
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-  }
-
-  .status-badge.status-active {
-    background-color: #d4edda;
-    color: #155724;
-  }
-
-  .status-badge.status-inactive {
-    background-color: #f8d7da;
-    color: #721c24;
-  }
-
-  .status-badge.status-draft {
-    background-color: #fff3cd;
-    color: #856404;
-  }
-
-  /* Full width layout adjustments */
-  @media (min-width: 1200px) {
-    .container-fluid {
-      padding-left: 30px !important;
-      padding-right: 30px !important;
-    }
-  }
-
-  @media (min-width: 1400px) {
-    .container-fluid {
-      padding-left: 40px !important;
-      padding-right: 40px !important;
-    }
-  }
-
-  /* Mobile responsive for action buttons */
-  @media (max-width: 768px) {
-    .dashboard__review-action {
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .subject-action-link {
-      width: 100%;
-      justify-content: center;
-      min-width: auto;
-    }
-
-    .dashboard__review-table {
-      font-size: 12px;
-    }
-
-    .dashboard__review-table th,
-    .dashboard__review-table td {
-      padding: 8px 4px;
-    }
-  }
-</style>
 </body>
 </html>

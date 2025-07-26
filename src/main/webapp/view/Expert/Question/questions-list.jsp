@@ -317,7 +317,7 @@
                                             <table class="table table-hover mb-0">
                                                 <thead class="thead-light">
                                                     <tr>
-                                                        <th>ID</th>
+                                                        <th>No.</th>
                                                         <th>Content</th>
                                                         <th>Subject</th>
                                                         <th>Lesson</th>
@@ -328,9 +328,9 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <c:forEach items="${questionsList}" var="question">
+                                                    <c:forEach items="${questionsList}" var="question" varStatus="status">
                                                         <tr>
-                                                            <td>${question.id}</td>
+                                                            <td>${(currentPage - 1) * recordsPerPage + status.index + 1}</td>
                                                             <td>${question.content}</td>
                                                             <td>
                                                                 <c:set var="quiz" value="${quizDAO.findById(question.quiz_id)}" />
@@ -462,39 +462,65 @@
                     <div class="modal-content">
                         <form action="${pageContext.request.contextPath}/questions-list" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="action" value="import">
-                        <div class="modal-header bg-warning text-dark">
-                            <h5 class="modal-title" id="importQuestionLabel">Import Questions from Excel</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title" id="importQuestionLabel">
+                                <i class="fa fa-upload me-2"></i>Import Questions from Excel Template
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label for="excelFile" class="form-label">Select Excel file:</label>
+                                <label for="excelFile" class="form-label">
+                                    <i class="fa fa-file-excel me-1"></i>Select Excel Template File:
+                                </label>
                                 <input type="file" class="form-control" id="excelFile" name="excelFile" 
                                        accept=".xlsx,.xls" required>
                                 <div class="form-text">
-                                    Only .xlsx or .xls files are accepted. Maximum size: 10MB.
+                                    <i class="fa fa-info-circle me-1"></i>
+                                    Only .xlsx or .xls files are accepted. Maximum size: 10MB.<br>
+                                    <strong>Note:</strong> Use the downloaded template which contains 2 sheets: "Instructions" and "Questions"
                                 </div>
                             </div>
                             <div class="alert alert-info">
-                                <strong>Excel file format:</strong><br>
-                                <small>
-                                    Column A: Quiz ID<br>
-                                    Column B: Question Type<br>
-                                    Column C: Content<br>
-                                    Column D: Media URL (optional)<br>
-                                    Column E: Level<br>
-                                    Column F: Status<br>
-                                    Column G: Explanation<br>
-                                </small>
-                                <br>
-                                <a href="${pageContext.request.contextPath}/questions-list?action=downloadTemplate" class="btn btn-sm btn-outline-primary mt-2">
-                                    📥 Download Template
-                                </a>
+                                <strong>📋 Excel File Format Instructions:</strong><br>
+                                <div class="row mt-2">
+                                    <div class="col-md-6">
+                                        <small>
+                                            <strong>Required Columns:</strong><br>
+                                            • <strong>Quiz ID:</strong> Numeric ID of the quiz<br>
+                                            • <strong>Question Type:</strong> "multiple" or "essay"<br>
+                                            • <strong>Content:</strong> Question text<br>
+                                            • <strong>Level:</strong> "easy", "medium", "hard"<br>
+                                            • <strong>Status:</strong> "active" or "hidden"<br>
+                                            • <strong>Explanation:</strong> Answer explanation
+                                        </small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small>
+                                            <strong>Optional Columns:</strong><br>
+                                            • <strong>Media URL:</strong> Image/video link<br><br>
+                                            <strong>📝 Template Features:</strong><br>
+                                            • Complete instructions sheet<br>
+                                            • Available Quiz IDs list<br>
+                                            • Sample data examples<br>
+                                            • Field value explanations
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <a href="${pageContext.request.contextPath}/questions-list?action=downloadTemplate" class="btn btn-primary">
+                                        📥 Download Template with Instructions
+                                    </a>
+                                </div>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-warning">Import</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="fa fa-times me-1"></i>Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-upload me-1"></i>Import Questions
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -546,12 +572,22 @@
                                                                                         this.form.submit();
                                                                                     });
 
-                                                                                    // Add event listener for import button
-                                                                                    document.querySelector('a[href*="action=add"]').addEventListener('click', function (e) {
-                                                                                        e.preventDefault();
-                                                                                        const importModal = new bootstrap.Modal(document.getElementById('importQuestionModal'));
-                                                                                        importModal.show();
-                                                                                    });
+                                                                                                                        // Add event listener for import button
+                                    document.querySelector('a[href*="action=add"]').addEventListener('click', function (e) {
+                                        e.preventDefault();
+                                        
+                                        // Show informational toast
+                                        iziToast.info({
+                                            title: 'Import Questions',
+                                            message: 'Please download the template first if you haven\'t already. It contains detailed instructions and available Quiz IDs.',
+                                            position: 'topRight',
+                                            timeout: 5000,
+                                            closeOnClick: true
+                                        });
+                                        
+                                        const importModal = new bootstrap.Modal(document.getElementById('importQuestionModal'));
+                                        importModal.show();
+                                    });
 
                                                                                     // Toast message display
                                                                                     var toastMessage = "${sessionScope.toastMessage}";

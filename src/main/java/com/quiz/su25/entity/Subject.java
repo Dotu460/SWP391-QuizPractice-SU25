@@ -19,6 +19,7 @@ import lombok.ToString;
 
 public class Subject {
     private Integer id;
+    private Integer price_package_id;
     private String title;
     private String thumbnail_url;
 //    private String video_url;

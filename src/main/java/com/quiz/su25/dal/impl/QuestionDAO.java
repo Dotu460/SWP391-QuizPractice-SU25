@@ -88,7 +88,7 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
         String sql = "INSERT INTO Question (quiz_id, type, content, media_url, level, status, explanation, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             connection = getConnection();
-            statement = connection.prepareStatement(sql);
+            statement = connection.prepareStatement(sql, statement.RETURN_GENERATED_KEYS);
             statement.setInt(1, t.getQuiz_id());
             statement.setString(2, t.getType());
             statement.setString(3, t.getContent());
@@ -96,9 +96,17 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
             statement.setString(5, t.getLevel());
             statement.setString(6, t.getStatus());
             statement.setString(7, t.getExplanation());
-            statement.setInt(8, t.getCreated_by());
+            statement.setInt(8, t.getCreated_by() != null ? t.getCreated_by() : 0);
             
-            return statement.executeUpdate();
+            int result = statement.executeUpdate();
+            if (result > 0) {
+                // Get the generated ID
+                ResultSet generatedKeys = statement.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                }
+            }
+            return 0;
         } catch (Exception e) {
             System.out.println("Error insert at class QuestionDAO: " + e.getMessage());
             return 0;
@@ -176,7 +184,7 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
      * @return Danh sách câu hỏi thuộc quiz
      */
     public List<Question> findByQuizId(Integer quizId) {
-        String sql = "SELECT * FROM Question WHERE quiz_id = ?";
+        String sql = "SELECT * FROM Question WHERE quiz_id = ? AND status = 'active'";
         List<Question> list = new ArrayList<>();
         try {
             connection = getConnection();
@@ -480,7 +488,7 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
      * @return Tổng số câu hỏi trong quiz.
      */
     public int countQuestionsByQuizId(Integer quizId) {
-        String sql = "SELECT COUNT(*) as total FROM Question WHERE quiz_id = ?";
+        String sql = "SELECT COUNT(*) as total FROM Question WHERE quiz_id = ? AND status = 'active'";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -549,6 +557,51 @@ public class QuestionDAO extends DBContext implements I_DAO<Question> {
         }
         
         return questions;
+    }
+
+    /**
+     * Check if question content exists within the same quiz
+     */
+    public boolean isContentExistsInQuiz(String content, Integer quizId) {
+        String sql = "SELECT COUNT(*) FROM Question WHERE content = ? AND quiz_id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, content);
+            statement.setInt(2, quizId);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            System.out.println("Error isContentExistsInQuiz at class QuestionDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return false;
+    }
+    
+    /**
+     * Check if question content exists within the same quiz excluding a specific question
+     */
+    public boolean isContentExistsInQuizExcluding(String content, Integer quizId, Integer excludeQuestionId) {
+        String sql = "SELECT COUNT(*) FROM Question WHERE content = ? AND quiz_id = ? AND id != ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, content);
+            statement.setInt(2, quizId);
+            statement.setInt(3, excludeQuestionId);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            System.out.println("Error isContentExistsInQuizExcluding at class QuestionDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return false;
     }
 
     public static void main(String[] args) {

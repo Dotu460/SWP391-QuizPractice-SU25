@@ -436,11 +436,15 @@
                 }
 
                 .question-text {
-                    font-size: 18px;
-                    color: #1A1B3D;
+                    font-size: 22px;
+                    color: #5751e1;
                     line-height: 1.6;
                     margin-bottom: 30px;
-                    font-weight: 500;
+                    font-weight: 700;
+                    background: #f6f7fb;
+                    border-radius: 8px;
+                    padding: 18px 24px;
+                    border-bottom: 2.5px solid #8B7FD2;
                 }
 
                 .answers-container {
@@ -991,6 +995,59 @@
                 .btn-peek:hover {
                     background: #f0f0f0;
                 }
+
+                .settings-menu {
+                    position: relative !important;
+                }
+                .settings-dropdown {
+                    left: 50% !important;
+                    right: auto !important;
+                    transform: translateX(-50%) !important;
+                    top: 120% !important;
+                    min-width: 180px;
+                }
+
+                .question-header {
+                    background: #f6f7fb;
+                    border-radius: 16px 16px 0 0;
+                    box-shadow: 0 2px 8px rgba(87,81,225,0.04);
+                    margin-bottom: 0;
+                    padding: 24px 0 18px 0;
+                    width: 100vw;
+                    max-width: 100vw;
+                    position: relative;
+                    left: 50%;
+                    right: 50%;
+                    margin-left: -50vw;
+                    margin-right: -50vw;
+                }
+
+                .settings-icon {
+                    background: #8B7FD2;
+                    color: #fff;
+                    border-radius: 50%;
+                    width: 40px;
+                    height: 40px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 20px;
+                    box-shadow: 0 2px 8px rgba(87,81,225,0.10);
+                    transition: background 0.2s;
+                }
+
+                .settings-icon:hover {
+                    background: #5751e1;
+                }
+
+                .question-header .question-info {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 16px;
+                    padding: 0 32px;
+                    box-sizing: border-box;
+                }
             </style>
     </head>
 
@@ -1003,364 +1060,7 @@
 
             <!-- header-area -->
             <header>
-                <!-- header-top -->
-                <div class="header-top-wrap">
-                    <div class="container">
-                        <div class="header-top">
-                            <div class="logo header-logo">
-                                <a href="home"><img src="${pageContext.request.contextPath}/view/common/img/logo/logo.svg" alt="Logo"></a>
-                        </div>
-                            <div class="header-right">
-                                <div class="settings-menu">
-                                    <div class="settings-icon" onclick="toggleSettingsDropdown()">
-                                        <i class="fas fa-cog"></i>
-                                    </div>
-                                    <div class="settings-dropdown">
-                                        <a href="#" class="dropdown-item" onclick="exitQuiz()">
-                                            <i class="fas fa-sign-out-alt"></i>
-                                            <span>Exit Quiz</span>
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="user-menu">
-                                    <div class="user-icon" onclick="toggleDropdown()">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                    <div class="dropdown-menu">
-                                        <div class="dropdown-header">
-                                            <c:choose>
-                                                <c:when test="${not empty sessionScope.account}">
-                                                    <div class="user-info">
-                                                        <div class="user-avatar">
-                                                            <img src="${pageContext.request.contextPath}/media/user-avatar.png" alt="User Avatar">
-                                                        </div>
-                                                        <div class="user-details">
-                                                            <span class="user-name">${sessionScope.account.full_name}</span>
-                                                            <span class="user-email">${sessionScope.account.email}</span>
-                                                        </div>
-                                                    </div>
-                                                </c:when>
-                                            </c:choose>
-                                        </div>
-                                        <div class="dropdown-body">
-                                            <c:choose>
-                                                <c:when test="${not empty sessionScope.account}">
-                                                    <a href="my-profile" class="dropdown-item">
-                                                        <i class="fas fa-user-circle"></i>
-                                                        <span>My Profile</span>
-                                                    </a>
-                                                    <a href="my-courses" class="dropdown-item">
-                                                        <i class="fas fa-graduation-cap"></i>
-                                                        <span>My Courses</span>
-                                                    </a>
-                                                    <div class="dropdown-divider"></div>
-                                                    <a href="login?action=logout" class="dropdown-item text-danger">
-                                                        <i class="fas fa-sign-out-alt"></i>
-                                                        <span>Log out</span>
-                                                    </a>
-                                                </c:when>
-                                            </c:choose>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="header-fixed-height"></div>
-                <!-- header-top-end -->
-                
-            <!-- header-area-end -->
-
-            <style>
-                .header-top-wrap {
-                    background: #1A1B3D;
-                    padding: 8px 0;
-                    color: #fff;
-                    position: relative;
-                }
-                
-                /* Logo styles */
-                .header-logo {
-                    position: relative;
-                    z-index: 2;
-                    display: flex;
-                    align-items: center;
-                }
-                
-                .header-logo a {
-                    display: block;
-                    width: auto;
-                    height: 100%;
-                }
-                
-                .header-logo img {
-                    max-height: 50px;
-                    width: auto;
-                    height: auto;
-                    display: block;
-                    object-fit: contain;
-                    filter: brightness(0) invert(1);
-                }
-                
-                /* Header top styles */
-                .header-top {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    min-height: 60px;
-                }
-                
-                .header-right {
-                    display: flex;
-                    align-items: center;
-                }
-                
-                /* Button styles */
-                .button-style {
-                    background-color: #8B7FD2;
-                    color: white !important;
-                    border: none;
-                    border-radius: 8px;
-                    padding: 8px 20px;
-                    font-size: 14px;
-                    font-weight: 500;
-                    text-decoration: none;
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    transition: all 0.3s ease;
-                }
-                
-                .button-style:hover {
-                    background-color: #7A6DC0;
-                    transform: translateY(-1px);
-                    box-shadow: 0 2px 5px rgba(139, 127, 210, 0.3);
-                }
-                
-                /* Responsive adjustments */
-                @media (max-width: 991px) {
-                    .header-logo img {
-                        max-height: 40px;
-                    }
-                    
-                    .header-top {
-                        min-height: 50px;
-                    }
-                    
-                    .header-top-wrap {
-                        padding: 5px 0;
-                    }
-                    
-                    .button-style {
-                        padding: 6px 16px;
-                        font-size: 13px;
-                    }
-                }
-                
-                @media (max-width: 576px) {
-                    .header-logo img {
-                        max-height: 35px;
-                    }
-                    
-                    .button-style {
-                        padding: 5px 12px;
-                        font-size: 12px;
-                    }
-                }
-                .header-top-left ul {
-                    margin: 0;
-                    padding: 0;
-                    list-style: none;
-                }
-                .header-top-left ul li {
-                    display: inline-block;
-                    margin-right: 20px;
-                    font-size: 14px;
-                    vertical-align: middle;
-                }
-                .header-top-left ul li:last-child {
-                    margin-right: 0;
-                }
-                .header-top-left ul li img.icon {
-                    width: 14px;
-                    height: 14px;
-                    margin-right: 8px;
-                    filter: brightness(0) invert(1);
-                    vertical-align: middle;
-                    display: inline-block;
-                }
-                .header-top-left ul li a {
-                    color: #fff;
-                    text-decoration: none;
-                    vertical-align: middle;
-                }
-                .header-social ul {
-                    margin: 0;
-                    padding: 0;
-                    list-style: none;
-                }
-                .header-social ul li {
-                    display: inline-block;
-                    margin-left: 15px;
-                }
-                .header-social ul li a {
-                    color: #fff;
-                    font-size: 14px;
-                }
-                .header-social ul li a:hover {
-                    color: #4A90E2;
-                }
-                .header-area {
-                    padding: 0;
-                    background: #fff;
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                }
-                .header-area .container {
-                    padding: 5px 0;
-                }
-                .logo img {
-                    max-height: 40px;
-                }
-                .header-menu {
-                    margin-top: -10px;
-                }
-                .navbar {
-                    padding: 0;
-                }
-                .navbar-nav .nav-link {
-                    color: #2D3748;
-                    font-weight: 500;
-                    padding: 6px 15px;
-                    transition: color 0.3s ease;
-                    display: flex;
-                    align-items: center;
-                }
-                .navbar-nav .nav-link:hover {
-                    color: #4A90E2;
-                }
-                .navbar-nav .login-btn {
-                    background-color: #8B7FD2;
-                    color: white !important;
-                    border: none;
-                    border-radius: 8px;
-                    padding: 2px 10px;
-                    height: 22px;
-                    line-height: 22px;
-                    font-size: 13px;
-                    font-weight: 300;
-                    text-decoration: none;
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin-left: 15px;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    box-shadow: 0 1px 3px rgba(139, 127, 210, 0.2);
-                    position: relative;
-                    overflow: hidden;
-                }
-                .navbar-nav .login-btn:hover {
-                    background-color: #7A6DC0;
-                    transform: translateY(-1px);
-                    box-shadow: 0 2px 5px rgba(139, 127, 210, 0.3);
-                }
-                .navbar-nav .login-btn::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: -100%;
-                    width: 100%;
-                    height: 100%;
-                    background: linear-gradient(
-                        120deg,
-                        transparent,
-                        rgba(255, 255, 255, 0.2),
-                        transparent
-                        );
-                    transition: 0.5s;
-                }
-                .navbar-nav .login-btn:hover::before {
-                    left: 100%;
-                }
-                .navbar-nav {
-                    display: flex;
-                    align-items: center;
-                    margin: 0;
-                    padding: 0;
-                }
-                .navigation {
-                    display: flex;
-                    align-items: center;
-                    margin: 0;
-                    padding: 0;
-                    list-style: none;
-                    gap: 15px;
-                }
-                .navigation > li {
-                    display: flex;
-                    align-items: center;
-                }
-                .navigation > li > a {
-                    color: #2D3748;
-                    font-weight: 500;
-                    text-decoration: none;
-                    padding: 6px 0;
-                    display: flex;
-                    align-items: center;
-                }
-                .tgmenu__navbar-wrap {
-                    margin-top: -5px;
-                }
-                .tgmenu__navbar-wrap .navigation .nav-item .nav-link.login-btn {
-                    background-color: #8B7FD2;
-                    color: white !important;
-                    border: none;
-                    border-radius: 8px;
-                    padding: 4px 16px;
-                    height: 28px;
-                    line-height: 28px;
-                    font-size: 15px;
-                    font-weight: 400;
-                    text-decoration: none;
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin: 0;
-                    margin-left: 15px;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    box-shadow: 0 1px 3px rgba(139, 127, 210, 0.2);
-                    position: relative;
-                    overflow: hidden;
-                    min-height: unset;
-                    max-height: 28px;
-                }
-                .tgmenu__navbar-wrap .navigation .nav-item .nav-link.login-btn:hover {
-                    background-color: #7A6DC0;
-                    transform: translateY(-1px);
-                    box-shadow: 0 2px 5px rgba(139, 127, 210, 0.3);
-                }
-                .tgmenu__navbar-wrap .navigation .nav-item .nav-link.login-btn::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: -100%;
-                    width: 100%;
-                    height: 100%;
-                    background: linear-gradient(
-                        120deg,
-                        transparent,
-                        rgba(255, 255, 255, 0.2),
-                        transparent
-                        );
-                    transition: 0.5s;
-                }
-                .tgmenu__navbar-wrap .navigation .nav-item .nav-link.login-btn:hover::before {
-                    left: 100%;
-                }
-            </style>
+                <!-- Header removed. -->
         </header>
 
         <!-- Login Modal -->
@@ -1421,8 +1121,19 @@
             <div class="container">
                 <!-- Question Header Section: Hiển thị số thứ tự câu hỏi và ID -->
                 <div class="question-header">
-                    <div class="question-info">
+                    <div class="question-info" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
                         <div class="question-number">Question ${currentNumber}/${totalQuestions}</div>
+                        <div class="settings-menu" style="display: flex; align-items: center; justify-content: center; flex: 1;">
+                            <div class="settings-icon" onclick="toggleSettingsDropdown()" style="margin: 0 auto;">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <div class="settings-dropdown">
+                                <a href="#" class="dropdown-item" onclick="exitQuiz()">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Exit Quiz</span>
+                                </a>
+                            </div>
+                        </div>
                         <div class="question-id">Question ID: ${question.id}</div>
                     </div>
                 </div>
@@ -1437,6 +1148,12 @@
                     <c:if test="${not empty question.media_url}">
                         <div class="media-content mt-3">
                             <c:choose>
+                                <c:when test="${fn:contains(question.media_url, '<') && (fn:contains(question.media_url, 'video') || fn:contains(question.media_url, 'img') || fn:contains(question.media_url, '<p>'))}">
+                                    <!-- HTML Content - render directly -->
+                                    <div class="html-media-content">
+                                        ${question.media_url}
+                                    </div>
+                                </c:when>
                                 <c:when test="${fn:contains(question.media_url, 'youtube.com') || fn:contains(question.media_url, 'youtu.be')}">
                                     <!-- YouTube Video Embed -->
                                     <div class="youtube-embed-container" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; border-radius: 8px;">
@@ -1746,9 +1463,39 @@
                 border-bottom: 1px solid #eee;
             }
             
-            .media-content{
-                width: 40%;
-            }
+                            .media-content{
+                    width: 40%;
+                }
+                
+                /* HTML Media Content Styles */
+                .html-media-content {
+                    max-width: 100%;
+                    overflow: hidden;
+                }
+                
+                .html-media-content video {
+                    max-width: 100%;
+                    height: auto;
+                    border-radius: 8px;
+                }
+                
+                .html-media-content img {
+                    max-width: 100%;
+                    height: auto;
+                    border-radius: 8px;
+                    display: block;
+                    margin: 10px 0;
+                }
+                
+                .html-media-content p {
+                    margin: 10px 0;
+                    line-height: 1.6;
+                    color: #1A1B3D;
+                }
+                
+                .html-media-content div {
+                    margin: 10px 0;
+                }
             
             /* Container cho số câu hỏi và ID */
             .question-info {
@@ -2003,12 +1750,66 @@
                     padding: 8px;
                 }
             }
+
+            .settings-menu {
+                position: relative !important;
+            }
+            .settings-dropdown {
+                left: 50% !important;
+                right: auto !important;
+                transform: translateX(-50%) !important;
+                top: 120% !important;
+                min-width: 180px;
+            }
+
+            .question-header {
+                background: #f6f7fb;
+                border-radius: 16px 16px 0 0;
+                box-shadow: 0 2px 8px rgba(87,81,225,0.04);
+                margin-bottom: 0;
+                padding: 24px 0 18px 0;
+                width: 100vw;
+                max-width: 100vw;
+                position: relative;
+                left: 50%;
+                right: 50%;
+                margin-left: -50vw;
+                margin-right: -50vw;
+            }
+
+            .settings-icon {
+                background: #8B7FD2;
+                color: #fff;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                box-shadow: 0 2px 8px rgba(87,81,225,0.10);
+                transition: background 0.2s;
+            }
+
+            .settings-icon:hover {
+                background: #5751e1;
+            }
+
+            .question-header .question-info {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+                padding: 0 32px;
+                box-sizing: border-box;
+            }
         </style>
         <!-- main-area-end -->
 
-        <!-- footer-area -->
-        <jsp:include page="../../common/user/footer.jsp"></jsp:include>
-            <!-- footer-area-end -->
+        <!-- Simple footer: hidden or minimal -->
+        <footer style="text-align:center; font-size:12px; color:#aaa; padding:10px 0; background:none; border:none;">
+            <!-- Footer intentionally left blank -->
+        </footer>
 
             <!-- JS here -->
         <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
@@ -2073,30 +1874,16 @@
         </script>
 
         <script>
-            function toggleSettingsDropdown() {
-                const settingsIcon = document.querySelector('.settings-icon');
-                const dropdown = document.querySelector('.settings-dropdown');
-                const iconElement = settingsIcon.querySelector('i');
-                
-                // Toggle rotation class
-                settingsIcon.classList.toggle('rotating');
-                
-                // Toggle dropdown
-                dropdown.classList.toggle('show');
-                
-                // Remove rotation and close dropdown when clicking outside
-                document.addEventListener('click', function(event) {
-                    const settingsMenu = document.querySelector('.settings-menu');
-                    if (!settingsMenu.contains(event.target)) {
-                        settingsIcon.classList.remove('rotating');
-                        dropdown.classList.remove('show');
-                    }
-                });
-            }
-            
             function exitQuiz() {
-                if(confirm('Are you sure you want to exit the quiz?')) {
-                    window.location.href = 'your-exit-url';
+                // Lấy packageId từ URL hiện tại
+                const urlParams = new URLSearchParams(window.location.search);
+                const packageId = urlParams.get('packageId');
+                let redirectUrl = '${pageContext.request.contextPath}/quiz-handle-menu';
+                if (packageId) {
+                    redirectUrl += '?packageId=' + encodeURIComponent(packageId);
+                }
+                if (confirm('Are you sure you want to exit the quiz? Your progress will not be saved.')) {
+                    window.location.href = redirectUrl;
                 }
             }
         </script>
@@ -2577,6 +2364,32 @@
                     // Initial count
                     updateWordCount();
                 }
+                
+                // Fix relative paths in HTML media content
+                const htmlMediaContent = document.querySelector('.html-media-content');
+                if (htmlMediaContent) {
+                    // Fix video sources
+                    const videos = htmlMediaContent.querySelectorAll('video source');
+                    videos.forEach(source => {
+                        const src = source.getAttribute('src');
+                        if (src && src.startsWith('/SWP391_QUIZ_PRACTICE_SU25/uploads/')) {
+                            source.setAttribute('src', '${pageContext.request.contextPath}' + src);
+                        } else if (src && src.startsWith('../uploads/')) {
+                            source.setAttribute('src', '${pageContext.request.contextPath}/' + src.substring(3));
+                        }
+                    });
+                    
+                    // Fix image sources
+                    const images = htmlMediaContent.querySelectorAll('img');
+                    images.forEach(img => {
+                        const src = img.getAttribute('src');
+                        if (src && src.startsWith('/SWP391_QUIZ_PRACTICE_SU25/uploads/')) {
+                            img.setAttribute('src', '${pageContext.request.contextPath}' + src);
+                        } else if (src && src.startsWith('../uploads/')) {
+                            img.setAttribute('src', '${pageContext.request.contextPath}/' + src.substring(3));
+                        }
+                    });
+                }
             });
         </script>
 
@@ -2792,6 +2605,23 @@
             }
         </script>
         
+        <script>
+        function toggleSettingsDropdown() {
+            const settingsMenu = document.querySelector('.settings-menu');
+            const dropdown = settingsMenu.querySelector('.settings-dropdown');
+            dropdown.classList.toggle('show');
+            // Đóng dropdown khi click ra ngoài
+            function handleClickOutside(event) {
+                if (!settingsMenu.contains(event.target)) {
+                    dropdown.classList.remove('show');
+                    document.removeEventListener('click', handleClickOutside);
+                }
+            }
+            setTimeout(() => {
+                document.addEventListener('click', handleClickOutside);
+            }, 0);
+        }
+        </script>
 
     </body>
 </html>

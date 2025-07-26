@@ -17,132 +17,136 @@
 
         <!-- CSS here -->
         <jsp:include page="../../common/user/link_css_common.jsp"></jsp:include>
-        <style>
-            .package-status {
-                display: inline-block;
-                padding: 4px 8px;
-                border-radius: 4px;
-                font-size: 12px;
-                font-weight: 500;
-            }
-            
-            .status-active {
-                background-color: #e6f7e6;
-                color: #28a745;
-            }
-            
-            .status-inactive {
-                background-color: #f8d7da;
-                color: #dc3545;
-            }
-            
-            .table-actions {
-                display: flex;
-                gap: 8px;
-            }
-            
-            .table-actions a,button {
-                padding: 4px 8px;
-                border-radius: 4px;
-                border: none;
-                color: white;
-                font-size: 12px;
-                cursor: pointer;
-            }
-            
-            .action-edit {
-                background-color: #17a2b8;
-            }
-            
-            .action-details {
-                background-color: #5751e1;
-            }
-            
-            .action-delete {
-                background-color: #dc3545;
-            }
-            
-            .filter-form {
-                background-color: #f8f9fa;
-                padding: 15px;
-                border-radius: 8px;
-                margin-bottom: 20px;
-            }
-            
-            .settings-btn {
-                background-color: #6c757d;
-                color: white;
-                border: none;
-                padding: 5px 10px;
-                border-radius: 4px;
-                cursor: pointer;
-            }
-            
-            .add-btn {
-                background-color: #28a745;
-                color: white;
-                border: none;
-                padding: 8px 15px;
-                border-radius: 4px;
-                cursor: pointer;
-            }
-            
-            .modal-header {
-                background-color: #f8f9fa;
-                border-bottom: 1px solid #dee2e6;
-            }
-            
-            .column-option {
-                margin-bottom: 10px;
-            }
-            
-            .dashboard__content-area {
-                background: white;
-                padding: 25px;
-                border-radius: 8px;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            }
-            
-            .column-hidden {
-                display: none;
-            }
-            
-            .column-checkbox {
-                margin-bottom: 10px;
-                display: flex;
-                align-items: center;
-            }
-            
-            .column-checkbox input[type="checkbox"] {
-                margin-right: 8px;
-            }
-            
-            .column-checkbox label {
-                margin-bottom: 0;
-                user-select: none;
-                cursor: pointer;
-            }
-        </style>
-    </head>
+            <style>
+                .package-status {
+                    display: inline-block;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    font-weight: 500;
+                }
 
-    <body>
-        <!-- Scroll-top -->
-        <button class="scroll__top scroll-to-target" data-target="html">
-            <i class="tg-flaticon-arrowhead-up"></i>
-        </button>
-        <!-- Scroll-top-end-->
+                .status-active {
+                    background-color: #e6f7e6;
+                    color: #28a745;
+                }
 
-        <!-- header-area -->
+                .status-inactive {
+                    background-color: #f8d7da;
+                    color: #dc3545;
+                }
+
+                .table-actions {
+                    display: flex;
+                    gap: 8px;
+                }
+
+                .table-actions a,button {
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    border: none;
+                    color: white;
+                    font-size: 12px;
+                    cursor: pointer;
+                }
+
+                .action-edit {
+                    background-color: #17a2b8;
+                }
+
+                .action-details {
+                    background-color: #5751e1;
+                }
+
+                .action-delete {
+                    background-color: #dc3545;
+                }
+
+                .filter-form {
+                    background-color: #f8f9fa;
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin-bottom: 20px;
+                }
+
+                .settings-btn {
+                    background-color: #6c757d;
+                    color: white;
+                    border: none;
+                    padding: 5px 10px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                }
+
+                .add-btn {
+                    background-color: #28a745;
+                    color: white;
+                    border: none;
+                    padding: 8px 15px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                }
+
+                .modal-header {
+                    background-color: #f8f9fa;
+                    border-bottom: 1px solid #dee2e6;
+                }
+
+                .column-option {
+                    margin-bottom: 10px;
+                }
+
+                .dashboard__content-area {
+                    background: white;
+                    padding: 25px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                }
+
+                .column-hidden {
+                    display: none;
+                }
+
+                .column-checkbox {
+                    margin-bottom: 10px;
+                    display: flex;
+                    align-items: center;
+                }
+
+                .column-checkbox input[type="checkbox"] {
+                    margin-right: 8px;
+                }
+
+                .column-checkbox label {
+                    margin-bottom: 0;
+                    user-select: none;
+                    cursor: pointer;
+                }
+            </style>
+        </head>
+
+        <body>
+            <!-- Scroll-top -->
+            <button class="scroll__top scroll-to-target" data-target="html">
+                <i class="tg-flaticon-arrowhead-up"></i>
+            </button>
+            <!-- Scroll-top-end-->
+
+            <!-- header-area -->
         <jsp:include page="../../common/user/header.jsp"></jsp:include>
-        <!-- header-area-end -->
+            <!-- header-area-end -->
 
-        <!-- main-area -->
-        <main class="main-area">
-            <section class="dashboard__area section-pb-120">
-                <div class="container-fluid">
-                    <div class="dashboard__inner-wrap">
-                        <div class="row">
-                            <jsp:include page="../../common/user/sidebarCustomer.jsp"></jsp:include>
+            <!-- main-area -->
+            <main class="main-area">
+                <section class="dashboard__area section-pb-120">
+                    <div class="container-fluid">
+                        <div class="dashboard__inner-wrap">
+                            <div class="row">
+                                <div class="col-lg-3">
+                                <jsp:include page="../adminSidebar.jsp">
+                                    <jsp:param name="active" value="price-package"/>
+                                </jsp:include>
+                            </div>
 
                             <c:url value="/admin/price-package-list" var="paginationUrl">
                                 <c:if test="${not empty param.status}">
@@ -159,6 +163,9 @@
                                 </c:if>
                                 <c:if test="${not empty param.pageSize}">
                                     <c:param name="pageSize" value="${param.pageSize}" />
+                                </c:if>
+                                <c:if test="${not empty param.showAll}">
+                                    <c:param name="showAll" value="${param.showAll}" />
                                 </c:if>
                             </c:url>
 
@@ -194,6 +201,14 @@
                                     <div class="filter-form">
                                         <form action="${pageContext.request.contextPath}/admin/price-package-list" method="get" id="filterForm">
                                             <div class="row">
+
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="search">Search</label>
+                                                        <input type="text" class="form-control" id="search" name="search" 
+                                                               placeholder="Search by name, description..." value="${param.search}">
+                                                    </div>
+                                                </div>
                                                 <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label for="status">Status</label>
@@ -202,13 +217,6 @@
                                                             <option value="active" ${param.status == 'active' ? 'selected' : ''}>Active</option>
                                                             <option value="inactive" ${param.status == 'inactive' ? 'selected' : ''}>Inactive</option>
                                                         </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <div class="form-group">
-                                                        <label for="search">Search</label>
-                                                        <input type="text" class="form-control" id="search" name="search" 
-                                                               placeholder="Search by name, description..." value="${param.search}">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-3">
@@ -226,14 +234,14 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            
+
                                             <!-- Hidden field to preserve showAll parameter -->
                                             <input type="hidden" id="showAllField" name="showAll" value="${param.showAll}" />
-                                            
+
                                             <div class="row mt-2">
                                                 <div class="col-md-12 d-flex justify-content-end">
-                                                    <button type="submit" class="btn btn-primary" style="padding: 6px 15px; font-size: 15px;">Filter</button>
-                                                    <a href="${pageContext.request.contextPath}/admin/price-package-list" class="btn btn-secondary ml-2" style="padding: 6px 15px; font-size: 15px; margin-left: 8px;">Reset</a>
+                                                    <button type="submit" class="btn btn-primary" style="padding: 6px 15px; font-size: 15px;" onclick="updateShowAllField()">Filter</button>
+                                                    <a href="${pageContext.request.contextPath}/admin/price-package-list" class="btn btn-secondary ml-2" style="padding: 6px 15px; font-size: 15px; margin-left: 8px;" onclick="resetForm()">Reset</a>
                                                 </div>
                                             </div>    
                                         </form>
@@ -264,7 +272,7 @@
                                         <table class="table table-striped table-hover" id="pricePackageTable">
                                             <thead>
                                                 <tr>
-                                                    <th class="column-id">ID</th>
+                                                    <th class="column-id">No.</th>
                                                     <th class="column-name">Name</th>
                                                     <th class="column-duration">Duration (Months)</th>
                                                     <th class="column-list-price">List Price</th>
@@ -277,11 +285,20 @@
                                             <tbody>
                                                 <c:forEach items="${pricePackages}" var="pkg" varStatus="loop">
                                                     <tr>
-                                                        <td class="column-id">${pkg.id}</td>
+                                                        <td class="column-id">
+                                                            <c:choose>
+                                                                <c:when test="${showAll}">
+                                                                    ${loop.index + 1}
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    ${(currentPage - 1) * pageSize + loop.index + 1}
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </td>
                                                         <td class="column-name"><strong>${pkg.name}</strong></td>
                                                         <td class="column-duration">${pkg.access_duration_months}</td>
-                                                        <td class="column-list-price"><fmt:formatNumber value="${pkg.list_price}" type="currency" currencySymbol="$" /></td>
-                                                        <td class="column-sale-price"><fmt:formatNumber value="${pkg.sale_price}" type="currency" currencySymbol="$" /></td>
+                                                        <td class="column-list-price"><fmt:formatNumber value="${pkg.list_price}" type="currency" currencySymbol="₫" /></td>
+                                                        <td class="column-sale-price"><fmt:formatNumber value="${pkg.sale_price}" type="currency" currencySymbol="₫" /></td>
                                                         <td class="column-status">
                                                             <span class="package-status ${pkg.status == 'active' ? 'status-active' : 'status-inactive'}">
                                                                 ${pkg.status}
@@ -327,8 +344,8 @@
                                                 <c:if test="${currentPage > 1}">
                                                     <li class="page-item">
                                                         <a class="page-link"
-                                                            href="${paginationUrl}&page=${currentPage - 1}"
-                                                            aria-label="Previous">
+                                                           href="${paginationUrl}&page=${currentPage - 1}"
+                                                           aria-label="Previous">
                                                             <span aria-hidden="true">&laquo;</span>
                                                         </a>
                                                     </li>
@@ -337,15 +354,15 @@
                                                 <c:forEach begin="1" end="${totalPages}" var="i">
                                                     <li class="page-item ${currentPage == i ? 'active' : ''}">
                                                         <a class="page-link"
-                                                            href="${paginationUrl}&page=${i}">${i}</a>
+                                                           href="${paginationUrl}&page=${i}">${i}</a>
                                                     </li>
                                                 </c:forEach>
 
                                                 <c:if test="${currentPage < totalPages}">
                                                     <li class="page-item">
                                                         <a class="page-link"
-                                                            href="${paginationUrl}&page=${currentPage + 1}"
-                                                            aria-label="Next">
+                                                           href="${paginationUrl}&page=${currentPage + 1}"
+                                                           aria-label="Next">
                                                             <span aria-hidden="true">&raquo;</span>
                                                         </a>
                                                     </li>
@@ -374,7 +391,7 @@
                         <form id="columnSettingsForm">
                             <div class="column-checkbox">
                                 <input type="checkbox" id="col-id" value="id" checked>
-                                <label for="col-id">ID</label>
+                                <label for="col-id">No.</label>
                             </div>
                             <div class="column-checkbox">
                                 <input type="checkbox" id="col-name" value="name" checked>
@@ -417,250 +434,300 @@
 
         <!-- footer-area -->
         <jsp:include page="../../common/user/footer.jsp"></jsp:include>
-        <!-- footer-area-end -->
+            <!-- footer-area-end -->
 
-        <!-- JS here -->
+            <!-- JS here -->
         <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
-        
-        <!-- iziToast CSS and JS -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/css/iziToast.min.css">
-        <script src="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/js/iziToast.min.js"></script>
-        
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // Toast message display
-                var toastMessage = "${sessionScope.toastMessage}";
-                var toastType = "${sessionScope.toastType}";
-                if (toastMessage) {
-                    iziToast.show({
-                        title: toastType === 'success' ? 'Success' : 'Error',
-                        message: toastMessage,
-                        position: 'topRight',
-                        color: toastType === 'success' ? 'green' : 'red',
-                        timeout: 5000,
-                        onClosing: function () {
-                            // Remove toast attributes from the session after displaying
-                            fetch('${pageContext.request.contextPath}/remove-toast', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/x-www-form-urlencoded',
-                                },
-                            }).then(response => {
-                                if (!response.ok) {
-                                    console.error('Failed to remove toast attributes');
-                                }
-                            }).catch(error => {
-                                console.error('Error:', error);
-                            });
-                        }
-                    });
-                }
-                
-                // Function to change page size
-                window.changePageSize = function(newSize, showAll) {
-                    // Set a flag to indicate navigation is due to pagination
-                    sessionStorage.setItem('isPricePackagePaginating', 'true');
-                    const url = new URL(window.location);
-                    
-                    if (showAll) {
-                        url.searchParams.set('showAll', 'true');
-                        url.searchParams.delete('pageSize');
-                    } else {
-                        url.searchParams.delete('showAll');
-                        url.searchParams.set('pageSize', newSize);
-                    }
-                    
-                    url.searchParams.set('page', '1'); // Reset to first page
-                    window.location.href = url.toString();
-                };
-                
-                // Function to apply custom page size from input
-                window.applyCustomPageSize = function() {
-                    const showAllCheckbox = document.getElementById('showAllCheckbox');
-                    
-                    if (showAllCheckbox.checked) {
-                        // Show all items
-                        changePageSize(null, true);
-                    } else {
-                        // Apply custom page size
-                        const customSizeInput = document.getElementById('customPageSize');
-                        let newSize = parseInt(customSizeInput.value);
-                        
-                        // Validate input
-                        if (isNaN(newSize) || newSize < 1) {
-                            newSize = 10; // Default value if invalid
-                            customSizeInput.value = newSize;
-                        } else if (newSize > 100) {
-                            newSize = 100; // Max limit
-                            customSizeInput.value = newSize;
-                        }
-                        
-                        // Apply the new page size
-                        changePageSize(newSize, false);
-                    }
-                };
-                
-                // Add event listener for Enter key on the input
-                document.getElementById('customPageSize').addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        applyCustomPageSize();
-                    }
-                });
-                
-                // Add event listener for checkbox
-                document.getElementById('showAllCheckbox').addEventListener('change', function() {
-                    const customSizeInput = document.getElementById('customPageSize');
-                    const showAllField = document.getElementById('showAllField');
-                    
-                    if (this.checked) {
-                        customSizeInput.disabled = true;
-                        customSizeInput.value = '';
-                        customSizeInput.placeholder = '-';
-                        showAllField.value = 'true';
-                    } else {
-                        customSizeInput.disabled = false;
-                        customSizeInput.value = '${pageSize == 2147483647 ? 10 : pageSize}';
-                        customSizeInput.placeholder = '';
-                        showAllField.value = '';
-                    }
-                });
-            });
-            
-            $(document).ready(function() {
-                const storageKey = 'pricePackageColumnPrefs';
-                const navigationFlag = 'isPricePackagePaginating';
 
-                // --- Main Event Handlers ---
-                $('#columnSettingsBtn').click(function() {
-                    syncModal();
-                    $('#columnSettingsModal').modal('show');
-                });
+            <!-- iziToast CSS and JS -->
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/css/iziToast.min.css">
+            <script src="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/js/iziToast.min.js"></script>
 
-                $('#applySettingsBtn').click(function() {
-                    saveAndApplySettings();
-                });
+            <script>
+                                                                    document.addEventListener('DOMContentLoaded', function () {
+                                                                        // Toast message display
+                                                                        var toastMessage = "${sessionScope.toastMessage}";
+                                                                        var toastType = "${sessionScope.toastType}";
+                                                                        if (toastMessage) {
+                                                                            iziToast.show({
+                                                                                title: toastType === 'success' ? 'Success' : 'Error',
+                                                                                message: toastMessage,
+                                                                                position: 'topRight',
+                                                                                color: toastType === 'success' ? 'green' : 'red',
+                                                                                timeout: 5000,
+                                                                                onClosing: function () {
+                                                                                    // Remove toast attributes from the session after displaying
+                                                                                    fetch('${pageContext.request.contextPath}/remove-toast', {
+                                                                                        method: 'POST',
+                                                                                        headers: {
+                                                                                            'Content-Type': 'application/x-www-form-urlencoded',
+                                                                                        },
+                                                                                    }).then(response => {
+                                                                                        if (!response.ok) {
+                                                                                            console.error('Failed to remove toast attributes');
+                                                                                        }
+                                                                                    }).catch(error => {
+                                                                                        console.error('Error:', error);
+                                                                                    });
+                                                                                }
+                                                                            });
+                                                                        }
 
-                $('#selectAllBtn').click(function() {
-                    $('#columnSettingsForm input[type="checkbox"]').prop('checked', true);
-                });
+                                                                        // Function to change page size
+                                                                        window.changePageSize = function (newSize, showAll) {
+                                                                            // Set a flag to indicate navigation is due to pagination
+                                                                            sessionStorage.setItem('isPricePackagePaginating', 'true');
+                                                                            const url = new URL(window.location);
 
-                $('#deselectAllBtn').click(function() {
-                    // Uncheck all checkboxes except the name column
-                    $('#columnSettingsForm input[type="checkbox"]').not('#col-name').prop('checked', false);
-                    // Ensure name column stays checked
-                    $('#col-name').prop('checked', true);
-                });
+                                                                            if (showAll) {
+                                                                                url.searchParams.set('showAll', 'true');
+                                                                                url.searchParams.delete('pageSize');
+                                                                            } else {
+                                                                                url.searchParams.delete('showAll');
+                                                                                url.searchParams.set('pageSize', newSize);
+                                                                            }
 
-                // Make sure name column checkbox is always checked and disabled
-                $('#col-name').prop('disabled', true).prop('checked', true);
+                                                                            url.searchParams.set('page', '1'); // Reset to first page
+                                                                            window.location.href = url.toString();
+                                                                        };
 
-                // Add listener for pagination link clicks
-                $('.pagination a').on('click', function(e) {
-                    if (!$(this).parent().hasClass('disabled')) {
-                        sessionStorage.setItem(navigationFlag, 'true');
-                    }
-                });
+                                                                        // Function to apply custom page size from input
+                                                                        window.applyCustomPageSize = function () {
+                                                                            const showAllCheckbox = document.getElementById('showAllCheckbox');
 
-                // --- Helper Functions ---
-                function getPrefsFromSession() {
-                    const savedPrefs = sessionStorage.getItem(storageKey);
-                    if (savedPrefs) {
-                        return JSON.parse(savedPrefs);
-                    }
-                    // Default: show all columns
-                    return { 
-                        id: true, 
-                        name: true, 
-                        duration: true, 
-                        'list-price': true, 
-                        'sale-price': true, 
-                        status: true, 
-                        description: true 
-                    };
-                }
+                                                                            if (showAllCheckbox.checked) {
+                                                                                // Show all items
+                                                                                changePageSize(null, true);
+                                                                            } else {
+                                                                                // Apply custom page size
+                                                                                const customSizeInput = document.getElementById('customPageSize');
+                                                                                let newSize = parseInt(customSizeInput.value);
 
-                function savePrefsToSession() {
-                    const prefs = {};
-                    $('#columnSettingsForm input[type="checkbox"]').each(function() {
-                        prefs[this.value] = this.checked;
-                    });
-                    // Always ensure name is true before saving
-                    prefs.name = true;
-                    sessionStorage.setItem(storageKey, JSON.stringify(prefs));
-                    return prefs;
-                }
+                                                                                // Validate input
+                                                                                if (isNaN(newSize) || newSize < 1) {
+                                                                                    newSize = 10; // Default value if invalid
+                                                                                    customSizeInput.value = newSize;
+                                                                                } else if (newSize > 100) {
+                                                                                    newSize = 100; // Max limit
+                                                                                    customSizeInput.value = newSize;
+                                                                                }
 
-                function applyColumnVisibility(prefs) {
-                    prefs = prefs || { 
-                        id: true, 
-                        name: true, 
-                        duration: true, 
-                        'list-price': true, 
-                        'sale-price': true, 
-                        status: true, 
-                        description: true 
-                    };
-                    
-                    // Always ensure name is visible regardless of preferences
-                    prefs.name = true;
-                    
-                    $('#pricePackageTable .column-id').toggle(!!prefs.id);
-                    $('#pricePackageTable .column-name').toggle(true); // Always show name column
-                    $('#pricePackageTable .column-duration').toggle(!!prefs.duration);
-                    $('#pricePackageTable .column-list-price').toggle(!!prefs['list-price']);
-                    $('#pricePackageTable .column-sale-price').toggle(!!prefs['sale-price']);
-                    $('#pricePackageTable .column-status').toggle(!!prefs.status);
-                    $('#pricePackageTable .column-description').toggle(!!prefs.description);
-                }
-                
-                function syncModal() {
-                    const prefs = getPrefsFromSession();
-                    $('#columnSettingsForm input[type="checkbox"]').each(function() {
-                        this.checked = prefs[this.value] !== false;
-                    });
-                }
+                                                                                // Apply the new page size
+                                                                                changePageSize(newSize, false);
+                                                                            }
+                                                                        };
 
-                function saveAndApplySettings() {
-                    const prefs = savePrefsToSession();
-                    applyColumnVisibility(prefs);
-                    $('#columnSettingsModal').modal('hide');
-                    iziToast.success({
-                        title: 'Success',
-                        message: 'Display settings updated successfully!',
-                        position: 'topRight'
-                    });
-                }
+                                                                        // Add event listener for Enter key on the input
+                                                                        document.getElementById('customPageSize').addEventListener('keypress', function (e) {
+                                                                            if (e.key === 'Enter') {
+                                                                                e.preventDefault();
+                                                                                applyCustomPageSize();
+                                                                            }
+                                                                        });
 
-                function resetToDefault() {
-                    const defaultPrefs = { 
-                        id: true, 
-                        name: true, 
-                        duration: true, 
-                        'list-price': true, 
-                        'sale-price': true, 
-                        status: true, 
-                        description: true 
-                    };
-                    applyColumnVisibility(defaultPrefs);
-                    $('#columnSettingsForm input[type="checkbox"]').prop('checked', true);
-                    sessionStorage.setItem(storageKey, JSON.stringify(defaultPrefs));
-                }
-                
-                // --- Initial Load Logic ---
-                function initializeView() {
-                    if (sessionStorage.getItem(navigationFlag) === 'true') {
-                        const prefs = getPrefsFromSession();
-                        applyColumnVisibility(prefs);
-                        sessionStorage.removeItem(navigationFlag); // Consume the flag
-                    } else {
-                        resetToDefault();
-                    }
-                }
-                
-                // Run on page load
-                initializeView();
-            });
+                                                                        // Add event listener for checkbox
+                                                                        document.getElementById('showAllCheckbox').addEventListener('change', function () {
+                                                                            const customSizeInput = document.getElementById('customPageSize');
+                                                                            const showAllField = document.getElementById('showAllField');
+
+                                                                            if (this.checked) {
+                                                                                customSizeInput.disabled = true;
+                                                                                customSizeInput.value = '';
+                                                                                customSizeInput.placeholder = '-';
+                                                                                showAllField.value = 'true';
+                                                                            } else {
+                                                                                customSizeInput.disabled = false;
+                                                                                customSizeInput.value = '${pageSize == 2147483647 ? 10 : pageSize}';
+                                                                                customSizeInput.placeholder = '';
+                                                                                showAllField.value = '';
+                                                                            }
+                                                                        });
+
+                                                                        // Function to update showAll field before form submission
+                                                                        window.updateShowAllField = function () {
+                                                                            const showAllCheckbox = document.getElementById('showAllCheckbox');
+                                                                            const showAllField = document.getElementById('showAllField');
+
+                                                                            if (showAllCheckbox.checked) {
+                                                                                showAllField.value = 'true';
+                                                                            } else {
+                                                                                showAllField.value = '';
+                                                                            }
+                                                                        };
+
+                                                                        // Add form submit event listener to ensure showAll state is preserved
+                                                                        document.getElementById('filterForm').addEventListener('submit', function (e) {
+                                                                            updateShowAllField();
+                                                                        });
+
+                                                                        // Initialize checkbox state based on URL parameters
+                                                                        function initializeCheckboxState() {
+                                                                            const showAllCheckbox = document.getElementById('showAllCheckbox');
+                                                                            const customSizeInput = document.getElementById('customPageSize');
+                                                                            const showAllField = document.getElementById('showAllField');
+
+                                                                            // Check if showAll parameter is in URL
+                                                                            const urlParams = new URLSearchParams(window.location.search);
+                                                                            const showAllParam = urlParams.get('showAll');
+
+                                                                            if (showAllParam === 'true') {
+                                                                                showAllCheckbox.checked = true;
+                                                                                customSizeInput.disabled = true;
+                                                                                customSizeInput.value = '';
+                                                                                customSizeInput.placeholder = '-';
+                                                                                showAllField.value = 'true';
+                                                                            } else {
+                                                                                showAllCheckbox.checked = false;
+                                                                                customSizeInput.disabled = false;
+                                                                                customSizeInput.value = '${pageSize == 2147483647 ? 10 : pageSize}';
+                                                                                customSizeInput.placeholder = '';
+                                                                                showAllField.value = '';
+                                                                            }
+                                                                        }
+
+                                                                        // Call initialization function
+                                                                        initializeCheckboxState();
+
+                                                                        // Function to reset form and redirect to base URL
+                                                                        window.resetForm = function () {
+                                                                            window.location.href = '${pageContext.request.contextPath}/admin/price-package-list';
+                                                                        };
+                                                                    });
+
+                                                                    $(document).ready(function () {
+                                                                        const storageKey = 'pricePackageColumnPrefs';
+                                                                        const navigationFlag = 'isPricePackagePaginating';
+
+                                                                        // --- Main Event Handlers ---
+                                                                        $('#columnSettingsBtn').click(function () {
+                                                                            syncModal();
+                                                                            $('#columnSettingsModal').modal('show');
+                                                                        });
+
+                                                                        $('#applySettingsBtn').click(function () {
+                                                                            saveAndApplySettings();
+                                                                        });
+
+                                                                        $('#selectAllBtn').click(function () {
+                                                                            $('#columnSettingsForm input[type="checkbox"]').prop('checked', true);
+                                                                        });
+
+                                                                        $('#deselectAllBtn').click(function () {
+                                                                            // Uncheck all checkboxes except the name column
+                                                                            $('#columnSettingsForm input[type="checkbox"]').not('#col-name').prop('checked', false);
+                                                                            // Ensure name column stays checked
+                                                                            $('#col-name').prop('checked', true);
+                                                                        });
+
+                                                                        // Make sure name column checkbox is always checked and disabled
+                                                                        $('#col-name').prop('disabled', true).prop('checked', true);
+
+                                                                        // Add listener for pagination link clicks
+                                                                        $('.pagination a').on('click', function (e) {
+                                                                            if (!$(this).parent().hasClass('disabled')) {
+                                                                                sessionStorage.setItem(navigationFlag, 'true');
+                                                                            }
+                                                                        });
+
+                                                                        // --- Helper Functions ---
+                                                                        function getPrefsFromSession() {
+                                                                            const savedPrefs = sessionStorage.getItem(storageKey);
+                                                                            if (savedPrefs) {
+                                                                                return JSON.parse(savedPrefs);
+                                                                            }
+                                                                            // Default: show all columns
+                                                                            return {
+                                                                                id: true,
+                                                                                name: true,
+                                                                                duration: true,
+                                                                                'list-price': true,
+                                                                                'sale-price': true,
+                                                                                status: true,
+                                                                                description: true
+                                                                            };
+                                                                        }
+
+                                                                        function savePrefsToSession() {
+                                                                            const prefs = {};
+                                                                            $('#columnSettingsForm input[type="checkbox"]').each(function () {
+                                                                                prefs[this.value] = this.checked;
+                                                                            });
+                                                                            // Always ensure name is true before saving
+                                                                            prefs.name = true;
+                                                                            sessionStorage.setItem(storageKey, JSON.stringify(prefs));
+                                                                            return prefs;
+                                                                        }
+
+                                                                        function applyColumnVisibility(prefs) {
+                                                                            prefs = prefs || {
+                                                                                id: true,
+                                                                                name: true,
+                                                                                duration: true,
+                                                                                'list-price': true,
+                                                                                'sale-price': true,
+                                                                                status: true,
+                                                                                description: true
+                                                                            };
+
+                                                                            // Always ensure name is visible regardless of preferences
+                                                                            prefs.name = true;
+
+                                                                            $('#pricePackageTable .column-id').toggle(!!prefs.id);
+                                                                            $('#pricePackageTable .column-name').toggle(true); // Always show name column
+                                                                            $('#pricePackageTable .column-duration').toggle(!!prefs.duration);
+                                                                            $('#pricePackageTable .column-list-price').toggle(!!prefs['list-price']);
+                                                                            $('#pricePackageTable .column-sale-price').toggle(!!prefs['sale-price']);
+                                                                            $('#pricePackageTable .column-status').toggle(!!prefs.status);
+                                                                            $('#pricePackageTable .column-description').toggle(!!prefs.description);
+                                                                        }
+
+                                                                        function syncModal() {
+                                                                            const prefs = getPrefsFromSession();
+                                                                            $('#columnSettingsForm input[type="checkbox"]').each(function () {
+                                                                                this.checked = prefs[this.value] !== false;
+                                                                            });
+                                                                        }
+
+                                                                        function saveAndApplySettings() {
+                                                                            const prefs = savePrefsToSession();
+                                                                            applyColumnVisibility(prefs);
+                                                                            $('#columnSettingsModal').modal('hide');
+                                                                            iziToast.success({
+                                                                                title: 'Success',
+                                                                                message: 'Display settings updated successfully!',
+                                                                                position: 'topRight'
+                                                                            });
+                                                                        }
+
+                                                                        function resetToDefault() {
+                                                                            const defaultPrefs = {
+                                                                                id: true,
+                                                                                name: true,
+                                                                                duration: true,
+                                                                                'list-price': true,
+                                                                                'sale-price': true,
+                                                                                status: true,
+                                                                                description: true
+                                                                            };
+                                                                            applyColumnVisibility(defaultPrefs);
+                                                                            $('#columnSettingsForm input[type="checkbox"]').prop('checked', true);
+                                                                            sessionStorage.setItem(storageKey, JSON.stringify(defaultPrefs));
+                                                                        }
+
+                                                                        // --- Initial Load Logic ---
+                                                                        function initializeView() {
+                                                                            if (sessionStorage.getItem(navigationFlag) === 'true') {
+                                                                                const prefs = getPrefsFromSession();
+                                                                                applyColumnVisibility(prefs);
+                                                                                sessionStorage.removeItem(navigationFlag); // Consume the flag
+                                                                            } else {
+                                                                                resetToDefault();
+                                                                            }
+                                                                        }
+
+                                                                        // Run on page load
+                                                                        initializeView();
+                                                                    });
         </script>
     </body>
 

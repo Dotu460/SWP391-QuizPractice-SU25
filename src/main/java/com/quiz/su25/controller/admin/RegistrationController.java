@@ -22,6 +22,7 @@ import java.util.*;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
 import jakarta.servlet.http.HttpSession;
+import com.quiz.su25.utils.PasswordHasher;
 
 /**
  * Controller class for handling registration management in the admin panel.
@@ -442,7 +443,8 @@ public class RegistrationController extends HttpServlet {
 
             // Generate random password
             String password = PasswordUtils.generateRandomPassword();
-            user.setPassword(password);
+            String hashedPassword = PasswordHasher.hashPassword(password);
+            user.setPassword(hashedPassword);
 
             // Insert user
             int userId = userDAO.insert(user);

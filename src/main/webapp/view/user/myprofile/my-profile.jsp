@@ -158,13 +158,13 @@
                                                 <form method="POST" action="<c:url value='/my-profile'/>">
                                                     <input type="hidden" name="action" value="updateProfile">
                                                     
-                                                    <div class="form-group mb-3">
-                                                        <label for="profileRole">Role</label>
-                                                        <input type="text" class="form-control" id="profileRole" name="role" 
-                                                               value="${roleName}" 
-                                                               readonly style="background-color: #f8f9fa; cursor: not-allowed;">
-                                                        <small class="form-text text-muted">Role cannot be changed</small>
-                                                    </div>
+                                                                                        <div class="form-group mb-3">
+                                        <label for="profileRole">Role</label>
+                                        <input type="text" class="form-control" id="profileRole" name="role" 
+                                               value="${roleDAO.getRoleNameById(sessionScope.user.role_id)}" 
+                                               readonly style="background-color: #f8f9fa; cursor: not-allowed;">
+                                        <small class="form-text text-muted">Role cannot be changed</small>
+                                    </div>
                                                     
                                                     <div class="form-group mb-3">
                                                         <label for="profileFullName">Full Name</label>

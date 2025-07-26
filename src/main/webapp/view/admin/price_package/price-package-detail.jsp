@@ -235,7 +235,7 @@
                                                                 <div class="info-label">List Price</div>
                                                                 <div class="info-value">
                                                                     <span class="price-original">
-                                                                        <fmt:formatNumber value="${pricePackage.list_price}" type="currency" currencySymbol="$" />
+                                                                        <fmt:formatNumber value="${pricePackage.list_price}" type="currency" currencySymbol="₫" />
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -245,7 +245,7 @@
                                                                 <div class="info-label">Sale Price</div>
                                                                 <div class="info-value">
                                                                     <span class="price-highlight">
-                                                                        <fmt:formatNumber value="${pricePackage.sale_price}" type="currency" currencySymbol="$" />
+                                                                        <fmt:formatNumber value="${pricePackage.sale_price}" type="currency" currencySymbol="₫" />
                                                                     </span>
                                                                     <c:if test="${pricePackage.sale_price < pricePackage.list_price}">
                                                                         <span class="discount-badge">
@@ -264,7 +264,7 @@
                                                                     <c:choose>
                                                                         <c:when test="${pricePackage.sale_price < pricePackage.list_price}">
                                                                             <span class="text-success">
-                                                                                <fmt:formatNumber value="${pricePackage.list_price - pricePackage.sale_price}" type="currency" currencySymbol="$" />
+                                                                                <fmt:formatNumber value="${pricePackage.list_price - pricePackage.sale_price}" type="currency" currencySymbol="₫" />
                                                                             </span>
                                                                         </c:when>
                                                                         <c:otherwise>
@@ -278,7 +278,7 @@
                                                             <div class="info-row">
                                                                 <div class="info-label">Price per Month</div>
                                                                 <div class="info-value">
-                                                                    <fmt:formatNumber value="${pricePackage.sale_price / pricePackage.access_duration_months}" type="currency" currencySymbol="$" />
+                                                                    <fmt:formatNumber value="${pricePackage.sale_price / pricePackage.access_duration_months}" type="currency" currencySymbol="₫" />
                                                                 </div>
                                                             </div>
                                                         </div>
