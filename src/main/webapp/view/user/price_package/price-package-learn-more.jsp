@@ -234,31 +234,47 @@
                                                 <div class="details-section">
                                                     <h5>Pricing Information</h5>
                                                     <div class="row">
-                                                        <div class="col-md-6">
-                                                            <div class="info-row">
-                                                                <div class="info-label">List Price</div>
-                                                                <div class="info-value">
-                                                                    <span class="price-original">
-                                                                        <fmt:formatNumber value="${pricePackage.list_price}" type="currency" currencySymbol="₫" />
-                                                                    </span>
+                                                        <c:choose>
+                                                            <c:when test="${pricePackage.sale_price < pricePackage.list_price}">
+                                                                <!-- Có giảm giá: hiển thị cả list price và sale price -->
+                                                                <div class="col-md-6">
+                                                                    <div class="info-row">
+                                                                        <div class="info-label">List Price</div>
+                                                                        <div class="info-value">
+                                                                            <span class="price-original">
+                                                                                <fmt:formatNumber value="${pricePackage.list_price}" type="currency" currencySymbol="₫" />
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <div class="info-row">
-                                                                <div class="info-label">Sale Price</div>
-                                                                <div class="info-value">
-                                                                    <span class="price-highlight">
-                                                                        <fmt:formatNumber value="${pricePackage.sale_price}" type="currency" currencySymbol="₫" />
-                                                                    </span>
-                                                                    <c:if test="${pricePackage.sale_price < pricePackage.list_price}">
-                                                                        <span class="discount-badge">
-                                                                            <fmt:formatNumber value="${((pricePackage.list_price - pricePackage.sale_price) / pricePackage.list_price) * 100}" maxFractionDigits="0" />% OFF
-                                                                        </span>
-                                                                    </c:if>
+                                                                <div class="col-md-6">
+                                                                    <div class="info-row">
+                                                                        <div class="info-label">Sale Price</div>
+                                                                        <div class="info-value">
+                                                                            <span class="price-highlight">
+                                                                                <fmt:formatNumber value="${pricePackage.sale_price}" type="currency" currencySymbol="₫" />
+                                                                            </span>
+                                                                            <span class="discount-badge">
+                                                                                <fmt:formatNumber value="${((pricePackage.list_price - pricePackage.sale_price) / pricePackage.list_price) * 100}" maxFractionDigits="0" />% OFF
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                        </div>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <!-- Không giảm giá: chỉ hiển thị sale price -->
+                                                                <div class="col-md-12">
+                                                                    <div class="info-row">
+                                                                        <div class="info-label">Price</div>
+                                                                        <div class="info-value">
+                                                                            <span class="price-highlight">
+                                                                                <fmt:formatNumber value="${pricePackage.sale_price}" type="currency" currencySymbol="₫" />
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </c:otherwise>
+                                                        </c:choose>
                                                     </div>
                                                     <div class="row">
                                                         <div class="col-md-6">
