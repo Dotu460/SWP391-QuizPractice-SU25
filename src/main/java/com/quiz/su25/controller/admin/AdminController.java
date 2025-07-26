@@ -336,7 +336,7 @@ public class AdminController extends HttpServlet {
         errorMessage.append("  - Full name cannot be null or empty\n");
         errorMessage.append("  - Email cannot be null or empty\n");
         errorMessage.append("  - Role ID must be valid (2 for Student, 3 for Expert)\n");
-        errorMessage.append("  - Status must be valid (active, inactive, pending)\n");
+        errorMessage.append("  - Status must be valid (active, inactive)\n");
         errorMessage.append("  - Gender must be 0 (Female) or 1 (Male)\n\n");
 
         // Check for null or invalid values

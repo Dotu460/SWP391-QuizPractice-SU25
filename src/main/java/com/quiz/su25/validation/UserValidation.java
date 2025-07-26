@@ -62,7 +62,7 @@ public class UserValidation {
         // Validate status
         if (status == null || status.trim().isEmpty()) {
             errors.put("status", "Status is required");
-        } else if (!status.matches("^(active|inactive|pending)$")) {
+        } else if (!status.matches("^(active|inactive)$")) {
             errors.put("status", "Please select a valid status");
         }
         

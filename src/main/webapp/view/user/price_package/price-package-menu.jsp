@@ -118,7 +118,7 @@
                     letter-spacing: 0.2px;
                     box-shadow: 0 2px 8px rgba(87,81,225,0.07);
                 }
-                .status-pending {
+                .status-unavailable {
                     display: inline-block;
                     background: #f3f4f6;
                     color: #888;
@@ -322,8 +322,8 @@
                                                         <a href="javascript:void(0);" class="see-less-link" data-id="${pkg.id}">See less</a>
                                                     </div>
                                                     <div>
-                                                        <span class="status-${pkg.status == 'active' ? 'available' : 'pending'}">
-                                                            ${pkg.status == 'active' ? 'Available' : 'Pending'}
+                                                        <span class="status-${pkg.status == 'active' ? 'available' : 'unavailable'}">
+                                                            ${pkg.status == 'active' ? 'Available' : 'Unavailable'}
                                                         </span>
                                                     </div>
                                                     
