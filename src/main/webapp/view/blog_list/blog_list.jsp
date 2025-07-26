@@ -264,9 +264,7 @@
                                             <c:if test="${not empty searchQuery}">
                                                 <input type="hidden" name="search" value="${searchQuery}">
                                             </c:if>
-                                            <c:if test="${not empty param.page}">
-                                                <input type="hidden" name="page" value="${param.page}">
-                                            </c:if>
+                                            <input type="hidden" name="page" value="1">
                                         </form>
                                     </div>
                                     <div class="modal-footer">
@@ -283,11 +281,9 @@
                                 <c:when test="${not empty searchQuery}">
                                     <p class="text-muted">
                                         <i class="fas fa-search"></i>
-                                        Found ${totalCount} results for "<strong>${searchQuery}</strong>"
                                         <c:if test="${not empty categoryName}">
                                             in category "<strong>${param.categoryName}</strong>"
                                         </c:if>
-                                        (Showing ${(currentPage-1)*pageSize + 1} - ${currentPage*pageSize > totalCount ? totalCount : currentPage*pageSize} of ${totalCount})
                                     </p>
                                 </c:when>
                                 <c:when test="${not empty categoryName}">
@@ -375,9 +371,7 @@
                                     <c:if test="${not empty searchQuery}">
                                         <c:set var="queryParams" value="${queryParams}&search=${searchQuery}" />
                                     </c:if>
-                                    <c:if test="${not empty param.page}">
-                                        <c:set var="queryParams" value="${queryParams}&page=${param.page}" />
-                                    </c:if>
+                                   
                                     <c:forEach items="${displayOptions}" var="option">
                                         <c:set var="queryParams" value="${queryParams}&display=${option}" />
                                     </c:forEach>
@@ -425,7 +419,7 @@
 
                                     <!-- Next Page -->
                                     <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
-                                        <a class="page-link" href="${pageContext.request.contextPath}/blog?page=${currentPage + 1}&${queryParams}" aria-label="Next">
+                                        <a class="page-link" href="${pageContext.request.contextPath}/blog?${queryParams}&page=${currentPage + 1}" aria-label="Next">
                                             <span aria-hidden="true">&raquo;</span>
                                         </a>
                                     </li>

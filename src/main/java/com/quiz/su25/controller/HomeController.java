@@ -13,6 +13,7 @@ import com.quiz.su25.dal.impl.SubjectDAO;
 import com.quiz.su25.entity.Subject;
 import com.quiz.su25.entity.Post;
 import com.quiz.su25.entity.Slider;
+import com.quiz.su25.entity.User;
 import jakarta.servlet.annotation.WebServlet;
 import java.util.List;
 
@@ -50,16 +51,22 @@ public class HomeController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
         try {
+            // Check if user is manager (role_id = 4)
+        boolean isManager = false;
+        if (request.getSession().getAttribute("account") != null) {
+            User account = (User) request.getSession().getAttribute("account");
+            isManager = (account.getRole_id() == 4);
+        }
             // Get active sliders
             List<Slider> sliders = sliderDAO.getActiveSliders();
             request.setAttribute("sliders", sliders);
 
             // Get hot posts (top 2)
-            List<Post> hotPosts = postDAO.getHotPosts();
+            List<Post> hotPosts = postDAO.getHotPosts(isManager);
             request.setAttribute("hotPosts", hotPosts);
 
             // Get latest posts (top 4)
-            List<Post> latestPosts = postDAO.getLatestPosts(4);
+            List<Post> latestPosts = postDAO.getLatestPosts(4,isManager);
             request.setAttribute("latestPosts", latestPosts);
 
             // Get featured subjects

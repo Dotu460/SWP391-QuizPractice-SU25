@@ -137,7 +137,7 @@
 
                     <form action="${pageContext.request.contextPath}/forgot-password" method="post" onsubmit="return validateForm()">
                     <c:if test="${error != null}">
-                        <div class="alert alert-danger" role="alert">
+                        <div id="server-error" class="alert alert-danger" role="alert">
                             ${error}
                         </div>
                     </c:if>
@@ -189,6 +189,18 @@
                 const emailInput = document.getElementById('email');
                 const errorSpan = document.getElementById('email-error');
                 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                const serverError = document.getElementById('server-error');
+                if (serverError) {
+                    // Tự động ẩn thông báo sau 3 giây
+                    setTimeout(function () {
+                        serverError.style.transition = 'opacity 0.5s ease';
+                        serverError.style.opacity = '0';
+                        // Xóa hẳn phần tử sau khi hiệu ứng mờ kết thúc
+                        setTimeout(function () {
+                            serverError.remove();
+                        }, 500); // 0.5 giây, khớp với thời gian transition
+                    }, 3000); // 3 giây
+                }
 
                 emailInput.addEventListener("input", function () {
                     const emailValue = emailInput.value.trim();

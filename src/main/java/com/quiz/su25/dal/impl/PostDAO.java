@@ -204,9 +204,14 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
                 .build();
     }
 
-    public List<Post> getHotPosts() {
+    public List<Post> getHotPosts(boolean isManager) {
         List<Post> list = new ArrayList<>();
-        String sql = "SELECT * FROM post WHERE featured_flag = true ORDER BY published_at DESC LIMIT 5";
+        String sql;
+        if (isManager) {
+            sql = "SELECT * FROM post WHERE featured_flag = true ORDER BY published_at DESC LIMIT 5";
+        }else {
+            sql = "SELECT * FROM post WHERE featured_flag = true AND status = 'published' ORDER BY published_at DESC LIMIT 5";
+        }
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -222,9 +227,14 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
         return list;
     }
 
-    public List<Post> getLatestPosts(int limit) {
+    public List<Post> getLatestPosts(int limit, boolean isManager) {
         List<Post> list = new ArrayList<>();
-        String sql = "SELECT * FROM post WHERE status = 'published' ORDER BY published_at DESC LIMIT 2";
+        String sql;
+        if (isManager) {
+            sql = "SELECT * FROM post ORDER BY updated_at DESC LIMIT ?";
+        } else {
+            sql = "SELECT * FROM post WHERE status = 'published' ORDER BY updated_at DESC LIMIT 2";
+        }
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -248,9 +258,14 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
      * @param pageSize Number of posts per page
      * @return List of posts for the requested page
      */
-    public List<Post> getPostsPaginated(int pageNumber, int pageSize) {
+    public List<Post> getPostsPaginated(int pageNumber, int pageSize, boolean isManager) {
         List<Post> list = new ArrayList<>();
-        String sql = "SELECT * FROM post ORDER BY updated_at DESC LIMIT ? OFFSET ?";
+        String sql;
+        if (isManager) {
+            sql = "SELECT * FROM post ORDER BY updated_at DESC LIMIT ? OFFSET ?";
+        } else {
+        sql = "SELECT * FROM post WHERE status = 'published' ORDER BY updated_at DESC LIMIT ? OFFSET ?";
+        }
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -273,8 +288,13 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
      *
      * @return Total number of posts
      */
-    public int countTotalPosts() {
-        String sql = "SELECT COUNT(*) FROM post";
+    public int countTotalPosts(boolean isManager) {
+        String sql;
+        if (isManager) {
+            sql = "SELECT COUNT(*) FROM post";
+        } else {
+            sql = "SELECT COUNT(*) FROM post WHERE status = 'published'";
+        }
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -325,8 +345,13 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
      * @param categoryId The category ID
      * @return Total number of posts in the category
      */
-    public int countPostsByCategoryName(String category) {
-        String sql = "SELECT COUNT(*) FROM post WHERE category = ?";
+    public int countPostsByCategoryName(String category, boolean isManager) {
+        String sql;
+        if (isManager) {
+            sql = "SELECT COUNT(*) FROM post WHERE category = ?";
+        } else {
+            sql = "SELECT COUNT(*) FROM post WHERE category = ? AND status = 'published'";
+        }
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -359,14 +384,17 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
      */
     public List<Post> searchPosts(String keyword, boolean searchTitle, boolean searchCategory,
             boolean searchBriefInfo, boolean searchDate, Date startDate, Date endDate,
-            int pageNumber, int pageSize) {
+            int pageNumber, int pageSize, boolean isManager) {
 
         List<Post> list = new ArrayList<>();
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT DISTINCT p.* FROM quiz_practice_su25.post p WHERE 1=1 ");
 
         List<Object> params = new ArrayList<>();
-
+        
+        if (!isManager) {
+        sqlBuilder.append("AND p.status = 'published' ");
+        }
         // Add search conditions based on parameters
         if (keyword != null && !keyword.trim().isEmpty()) {
             sqlBuilder.append("AND (");
@@ -454,7 +482,7 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
      * @return Total number of posts matching the search criteria
      */
     public int countSearchResults(String keyword, boolean searchTitle, boolean searchCategory,
-            boolean searchBriefInfo, boolean searchDate, Date startDate, Date endDate) {
+            boolean searchBriefInfo, boolean searchDate, Date startDate, Date endDate, boolean isManager) {
 
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT COUNT(DISTINCT p.id) FROM post p ");
@@ -462,7 +490,11 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
         sqlBuilder.append("WHERE 1=1 ");
 
         List<Object> params = new ArrayList<>();
-
+        
+        // Add manager filter
+        if (!isManager) {
+        sqlBuilder.append("AND p.status = 'published' ");
+        }
         // Add search conditions based on parameters
         if (keyword != null && !keyword.trim().isEmpty()) {
             sqlBuilder.append("AND (");
@@ -534,9 +566,14 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
      * @param limit Number of posts to retrieve
      * @return List of latest posts
      */
-    public List<Post> getLatestPostsForSidebar(int limit) {
+    public List<Post> getLatestPostsForSidebar(int limit, boolean isManager) {
         List<Post> list = new ArrayList<>();
-        String sql = "SELECT * FROM post ORDER BY updated_at DESC LIMIT ?";
+        String sql;
+        if (isManager) {
+            sql = "SELECT * FROM post ORDER BY updated_at DESC LIMIT ?";
+        } else {
+            sql = "SELECT * FROM post WHERE status = 'published' ORDER BY updated_at DESC LIMIT ?";
+        }
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
@@ -604,9 +641,14 @@ public class PostDAO extends DBContext implements I_DAO<Post> {
      * @param limit Number of related posts to retrieve
      * @return List of related posts
      */
-    public List<Post> getPostsByCategoryName(String category, int pageNumber, int pageSize) {
+    public List<Post> getPostsByCategoryName(String category, int pageNumber, int pageSize,boolean isManager) {
         List<Post> list = new ArrayList<>();
-        String sql = "SELECT * FROM post WHERE category = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?";
+        String sql;
+        if (isManager) {
+            sql = "SELECT * FROM post WHERE category = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?";
+        }else {
+            sql = "SELECT * FROM post WHERE category = ? AND status = 'published' ORDER BY updated_at DESC LIMIT ? OFFSET ?";
+        }
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
