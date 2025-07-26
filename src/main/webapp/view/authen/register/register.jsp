@@ -190,7 +190,7 @@
                         <input type="hidden" name="roleId" value="2">
                         <input type="hidden" name="status" value="active">
                         <c:if test="${message != null}">
-                        <div class="alert alert-${type}">
+                        <div id="server-message" class="alert alert-${type}">
                             ${message}
                         </div>
                     </c:if>
@@ -329,6 +329,17 @@
                 const emailInput = document.getElementById('email');
                 const emailError = document.getElementById('email-error');
                 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                const serverMessage = document.getElementById('server-message');
+                if(serverMessage){
+                    setTimeout(function(){
+                        serverMessage.style.transition = 'opacity 0.5s ease';
+                        serverMessage.style.opacity = '0';
+                        //Xóa hẳn phần tử sau khi hiệu ứng mở kết thúc
+                        setTimeout(function(){
+                            serverMessage.remove();
+                        }, 500);
+                    },3000);
+                }
 
                 emailInput.addEventListener("input", function () {
                     const emailValue = emailInput.value.trim();

@@ -6,6 +6,7 @@ package com.quiz.su25.controller;
 
 import com.quiz.su25.dal.impl.PostDAO;
 import com.quiz.su25.entity.Post;
+import com.quiz.su25.entity.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -36,7 +37,18 @@ public class PostController extends HttpServlet {
 //            System.out.println("Received post ID: " + postId);
 
             Post post = postDAO.findById(Integer.parseInt(postId));
-            List<Post> latestPosts = postDAO.getLatestPostsForSidebar(5);
+            // Check if user is manager (role_id = 4)
+            boolean isManager = false;
+            if (request.getSession().getAttribute("account") != null) {
+                User account = (User) request.getSession().getAttribute("account");
+                isManager = (account.getRole_id() == 4);
+            }
+            // Check if post is draft and user is not manager
+            if (post != null && "draft".equals(post.getStatus()) && !isManager) {
+                response.sendRedirect(request.getContextPath() + "/blog?error=post_not_found");
+                return;
+            }
+            List<Post> latestPosts = postDAO.getLatestPostsForSidebar(5, isManager);
 //            String contentUrl = post.getContent();
 //            response.sendRedirect(contentUrl);
             request.setAttribute("post", post);

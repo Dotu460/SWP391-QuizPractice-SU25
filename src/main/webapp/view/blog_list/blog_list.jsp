@@ -281,11 +281,9 @@
                                 <c:when test="${not empty searchQuery}">
                                     <p class="text-muted">
                                         <i class="fas fa-search"></i>
-                                        Found ${totalCount} results for "<strong>${searchQuery}</strong>"
                                         <c:if test="${not empty categoryName}">
                                             in category "<strong>${param.categoryName}</strong>"
                                         </c:if>
-                                        (Showing ${(currentPage-1)*pageSize + 1} - ${currentPage*pageSize > totalCount ? totalCount : currentPage*pageSize} of ${totalCount})
                                     </p>
                                 </c:when>
                                 <c:when test="${not empty categoryName}">

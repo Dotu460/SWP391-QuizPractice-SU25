@@ -12,6 +12,8 @@ import jakarta.servlet.http.HttpSession;
 import com.quiz.su25.config.GlobalConfig;
 import com.quiz.su25.listener.AppContextListener;
 import com.quiz.su25.utils.EmailUtils;
+import java.util.ArrayList;
+import java.util.List;
 @WebServlet(name="AuthenController", urlPatterns={"/login","/logout","/register","/verifyOTP","/forgot-password","/reset-password","/resendOTP","/newpassword","/registerverifyOTP","/change-password"})
 public class AuthenController extends HttpServlet {
     private UserDAO userDAO = new UserDAO();
@@ -170,6 +172,7 @@ public class AuthenController extends HttpServlet {
         long otpTimeoutMillis = otpTimeoutSeconds * 1000L;
         if(otpCreationTime == null || currentTime - otpCreationTime > otpTimeoutMillis){
             request.setAttribute("error", "Mã OTP đã hết hạn. vui lòng yêu cầu mã mới");
+            request.setAttribute("otpExpired","true");
             request.setAttribute("otpTimeoutSeconds", otpTimeoutSeconds);            
             request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
             return;
@@ -180,8 +183,11 @@ public class AuthenController extends HttpServlet {
             session.removeAttribute("OTPCreationTime");
             request.getRequestDispatcher("view/authen/register/newpassword.jsp").forward(request, response);
         } else {
+            long remainingTimeMillis = otpTimeoutMillis - (currentTime - otpCreationTime);
+            int remainingSeconds = (int) (remainingTimeMillis / 1000L);
+            remainingSeconds = Math.max(remainingSeconds, 0); // không để âm
             request.setAttribute("error", "Mã OTP không đúng. Vui lòng thử lại.");
-            request.setAttribute("otpTimeoutSeconds", otpTimeoutSeconds);
+            request.setAttribute("otpTimeoutSeconds", remainingSeconds);
             request.getRequestDispatcher("view/authen/register/register_otp.jsp").forward(request, response);
         }
     }
@@ -191,11 +197,13 @@ public class AuthenController extends HttpServlet {
         HttpSession session = request.getSession();
         String OTPInSession = (String) session.getAttribute("OTP");
         Long otpCreationTime = (Long) session.getAttribute("OTPCreationTime");
+        
 
         // Check OTP
         long currentTime = System.currentTimeMillis();
         int otpTimeoutSeconds = AppContextListener.getIntSetting(request, "otp_timeout", 60);        
         long otpTimeoutMillis = otpTimeoutSeconds * 1000L;
+        
         if(otpCreationTime == null || currentTime - otpCreationTime > otpTimeoutMillis){
             request.setAttribute("error", "Mã OTP đã hết hạn. vui lòng yêu cầu mã mới");
             request.setAttribute("otpTimeoutSeconds", otpTimeoutSeconds);
@@ -207,7 +215,13 @@ public class AuthenController extends HttpServlet {
             session.removeAttribute("OTPCreationTime");
             request.getRequestDispatcher("view/authen/login/reset-password.jsp").forward(request, response);
         } else {
+            int fullOtpTimeout = AppContextListener.getIntSetting(request, "otp_timeout", 60);
+            long remainingTimeMillis = otpTimeoutMillis - (currentTime - otpCreationTime);
+            int remainingSeconds = (int) (remainingTimeMillis / 1000L);
+            remainingSeconds = Math.max(remainingSeconds, 0); // không để âm
             request.setAttribute("error", "Mã OTP không đúng. Vui lòng thử lại.");
+            request.setAttribute("otpTimeoutSeconds", remainingSeconds);
+            request.setAttribute("fullOtpTimeout", fullOtpTimeout);
             request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
         }
     }
@@ -285,6 +299,7 @@ public class AuthenController extends HttpServlet {
                 // Chuyển đến trang nhập OTP
                 int otpTimeoutSeconds = AppContextListener.getIntSetting(request, "otp_timeout", 60);                
                 request.setAttribute("otpTimeoutSeconds", otpTimeoutSeconds);
+                request.setAttribute("fullOtpTimeout", otpTimeoutSeconds);
                 request.getRequestDispatcher("view/authen/login/otp.jsp").forward(request, response);
             } else {
                 // Email không tồn tại
@@ -324,9 +339,11 @@ public class AuthenController extends HttpServlet {
                     String newOTP = EmailUtils.sendOTPMail(email);
                     session.setAttribute("OTP", newOTP);
                     session.setAttribute("OTPCreationTime", System.currentTimeMillis());
+                    int otpTimeoutSeconds = AppContextListener.getIntSetting(request, "otp_timeout", 60);
+                    String responseText = String.format("success/%d", otpTimeoutSeconds);
                     
                     System.out.println("ResendOTP - Registration flow - New OTP sent to: " + email);
-                    response.getWriter().write("success");
+                    response.getWriter().write(responseText);
                     return;
                 }
                 
@@ -336,9 +353,10 @@ public class AuthenController extends HttpServlet {
                     String newOTP = EmailUtils.sendOTPMail(email);
                     session.setAttribute("OTP", newOTP);
                     session.setAttribute("OTPCreationTime", System.currentTimeMillis());
-                    
+                    int otpTimeoutSeconds = AppContextListener.getIntSetting(request, "otp_timeout", 60);
+                    String responseText = String.format("success/%d", otpTimeoutSeconds);
                     System.out.println("ResendOTP - Password reset flow - New OTP sent to: " + email);
-                    response.getWriter().write("success");
+                    response.getWriter().write(responseText);
                     return;
                 }
                 
@@ -349,8 +367,10 @@ public class AuthenController extends HttpServlet {
                     session.setAttribute("OTP", newOTP);
                     session.setAttribute("OTPCreationTime", System.currentTimeMillis());
                     
+                    int otpTimeoutSeconds = AppContextListener.getIntSetting(request, "otp_timeout", 60);
+                    String responseText = String.format("success/%d", otpTimeoutSeconds);
                     System.out.println("ResendOTP - Other flow - New OTP sent to: " + email);
-                    response.getWriter().write("success");
+                    response.getWriter().write(responseText);
                 } else {
                     System.out.println("ResendOTP - Email not found in database: " + email);
                     response.getWriter().write("error");
@@ -367,50 +387,63 @@ public class AuthenController extends HttpServlet {
     }
 
     private void resetPassword(HttpServletRequest request, HttpServletResponse response) 
-    throws ServletException, IOException {
-        String password = request.getParameter("password");
-        String confirmPassword = request.getParameter("confirm_password");
-        HttpSession session = request.getSession();
-        String email = (String) session.getAttribute("email");
-        Boolean isPasswordReset = (Boolean) session.getAttribute("isPasswordReset");
+throws ServletException, IOException {
+    String password = request.getParameter("password");
+    String confirmPassword = request.getParameter("confirm_password");
+    HttpSession session = request.getSession();
+    String email = (String) session.getAttribute("email");
+    Boolean isPasswordReset = (Boolean) session.getAttribute("isPasswordReset");
+    
+    try {
+        // Kiểm tra xem có phải đang trong quá trình reset password không
+        if (isPasswordReset == null || !isPasswordReset) {
+            request.setAttribute("error", "Invalid password reset request!");
+            request.getRequestDispatcher("${pageContext.request.contextPath}/login").forward(request, response);
+            return;
+        }
         
-        try {
-            // Kiểm tra xem có phải đang trong quá trình reset password không
-            if (isPasswordReset == null || !isPasswordReset) {
-                request.setAttribute("error", "Invalid password reset request!");
-                request.getRequestDispatcher("${pageContext.request.contextPath}/login").forward(request, response);
-                return;
-            }
+        // THÊM VALIDATION CHO PASSWORD TRỐNG
+        if (password == null || password.trim().isEmpty()) {
+            request.setAttribute("error", "New password is required!");
+            request.getRequestDispatcher("view/authen/login/reset-password.jsp").forward(request, response);
+            return;
+        }
+        
+        if (confirmPassword == null || confirmPassword.trim().isEmpty()) {
+            request.setAttribute("error", "Confirm password is required!");
+            request.getRequestDispatcher("view/authen/login/reset-password.jsp").forward(request, response);
+            return;
+        }
+        
+        // Kiểm tra password và confirm password có khớp không
+        if (!password.equals(confirmPassword)) {
+            request.setAttribute("error", "Passwords do not match!");
+            request.getRequestDispatcher("view/authen/login/reset-password.jsp").forward(request, response);
+            return;
+        }
+        
+        // Cập nhật password mới
+        boolean success = userDAO.updatePassword(email, password);
+        
+        if (success) {
+            // Xóa các session attributes
+            session.removeAttribute("email");
+            session.removeAttribute("isPasswordReset");
+            session.removeAttribute("OTP");
             
-            // Kiểm tra password và confirm password có khớp không
-            if (!password.equals(confirmPassword)) {
-                request.setAttribute("error", "Passwords do not match!");
-                request.getRequestDispatcher("view/authen/login/reset-password.jsp").forward(request, response);
-                return;
-            }
-            
-            // Cập nhật password mới
-            boolean success = userDAO.updatePassword(email, password);
-            
-            if (success) {
-                // Xóa các session attributes
-                session.removeAttribute("email");
-                session.removeAttribute("isPasswordReset");
-                session.removeAttribute("OTP");
-                
-                // Thông báo thành công và chuyển về trang login
-                request.setAttribute("message", "Password has been reset successfully!");
-                request.setAttribute("type", "success");
-                request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
-            } else {
-                request.setAttribute("error", "Failed to reset password. Please try again.");
-                request.getRequestDispatcher("view/authen/login/reset-password.jsp").forward(request, response);
-            }
-        } catch (Exception e) {
-            request.setAttribute("error", "An error occurred: " + e.getMessage());
+            // Thông báo thành công và chuyển về trang login
+            request.setAttribute("message", "Password has been reset successfully!");
+            request.setAttribute("type", "success");
+            request.getRequestDispatcher("view/authen/login/userlogin.jsp").forward(request, response);
+        } else {
+            request.setAttribute("error", "Failed to reset password. Please try again.");
             request.getRequestDispatcher("view/authen/login/reset-password.jsp").forward(request, response);
         }
+    } catch (Exception e) {
+        request.setAttribute("error", "An error occurred: " + e.getMessage());
+        request.getRequestDispatcher("view/authen/login/reset-password.jsp").forward(request, response);
     }
+}
     private void newPassword(HttpServletRequest request, HttpServletResponse response) 
     throws ServletException, IOException {
         String password = request.getParameter("password");
@@ -498,23 +531,31 @@ public class AuthenController extends HttpServlet {
             }
             
             // Validate all fields are provided
-            if (currentPassword == null || newPassword == null || confirmPassword == null ||
-                currentPassword.trim().isEmpty() || newPassword.trim().isEmpty() || confirmPassword.trim().isEmpty()) {
-                request.setAttribute("error", "All password fields are required.");
-                request.getRequestDispatcher("view/authen/login/changepassword.jsp").forward(request, response);
-                return;
+            List<String> errors = new ArrayList<>();
+
+            if (currentPassword == null || currentPassword.trim().isEmpty()) {
+                errors.add("Current password is required.");
             }
-            
-            // Check if new password matches confirm password
-            if (!newPassword.equals(confirmPassword)) {
-                request.setAttribute("error", "New passwords do not match.");
-                request.getRequestDispatcher("view/authen/login/changepassword.jsp").forward(request, response);
-                return;
+
+            if (newPassword == null || newPassword.trim().isEmpty()) {
+                errors.add("New password is required.");
             }
-            
-            // Check if new password is different from current password
-            if (currentPassword.equals(newPassword)) {
-                request.setAttribute("error", "New password must be different from current password.");
+
+            if (confirmPassword == null || confirmPassword.trim().isEmpty()) {
+                errors.add("Confirm password is required.");
+            }
+
+            if (newPassword != null && confirmPassword != null && !newPassword.equals(confirmPassword)) {
+                errors.add("New passwords do not match.");
+            }
+
+            if (currentPassword != null && newPassword != null && currentPassword.equals(newPassword)) {
+                errors.add("New password must be different from current password.");
+            }
+
+            // Nếu có lỗi → forward về lại trang changepassword.jsp
+            if (!errors.isEmpty()) {
+                request.setAttribute("errors", errors);
                 request.getRequestDispatcher("view/authen/login/changepassword.jsp").forward(request, response);
                 return;
             }

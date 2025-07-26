@@ -115,7 +115,7 @@
             font-weight: 600;
             color: #667eea;
         }
-        
+
         .resend-section {
             margin-bottom: 32px;
         }
@@ -287,12 +287,10 @@
                 <input type="hidden" name="isRegistration" value="true">
             </div>
             
-            <c:if test="${error != null}">
-                <div class="error-message">
-                    <i class="fas fa-exclamation-circle"></i>
-                    ${error}
-                </div>
-            </c:if>
+            <div class="error-message" id="errorMessage" style="${error != null ? '' : 'display:none;'}">
+    <i class="fas fa-exclamation-circle"></i>
+    ${error}
+</div>
             
             <div id="messageContainer"></div>
             
@@ -335,11 +333,22 @@
             const verifyButton = document.getElementById('verifyButton');
             const countdownEl = document.getElementById('countdown');
             const messageContainer = document.getElementById('messageContainer');
+            const errorDiv = document.getElementById("errorMessage");
+        if (errorDiv && errorDiv.innerText.trim() !== '') {
+            setTimeout(function () {
+                errorDiv.style.transition = "opacity 1s ease";
+                errorDiv.style.opacity = 0;
+                setTimeout(() => {
+                    errorDiv.remove(); // hoặc errorDiv.style.display = "none";
+                }, 1000);
+            }, 3000); // 3 giây sau khi hiển thị
+        }
             
             // Get timeout from server (passed via request attribute)
-            let otpTimeoutSeconds = ${not empty otpTimeoutSeconds ? otpTimeoutSeconds : 60};
+            let otpTimeoutSeconds = ${otpTimeoutSeconds};
             let timeLeft = otpTimeoutSeconds;
             let timerInterval;
+            let isExpired =false;
             
             // Auto focus first input
             inputs[0].focus();
@@ -412,6 +421,11 @@
             
             // Handle form submission
             form.addEventListener('submit', function(e) {
+                if(isExpired){
+                    e.preventDefault();
+                    showMessage('error','Otp code has expired','fas-fa-exclamation-circle');
+                    return;
+                }
                 e.preventDefault();
                 const otp = Array.from(inputs).map(input => input.value).join('');
                 
@@ -424,6 +438,7 @@
             // Timer functionality
             function startTimer() {
                 resendButton.disabled = true;
+                isExpired = false;
                 timeLeft = otpTimeoutSeconds;
                 
                 
@@ -437,6 +452,7 @@
                         clearInterval(timerInterval);
                         resendButton.disabled = false;
                         countdownEl.textContent = '00:00';
+                        isExpired = true;
                     }
                 }, 1000);
             }
@@ -506,5 +522,5 @@
             updateVerifyButton();
         });
     </script>
-</body>
+    </body>
 </html>

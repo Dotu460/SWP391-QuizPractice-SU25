@@ -148,14 +148,16 @@
                     </div>
 
                     <form action="change-password" method="post" id="changePasswordForm" onsubmit="return validateForm()">
-                    <c:if test="${error != null}">
-                        <div class="alert alert-danger">
-                            <i class="fas fa-exclamation-circle"></i>
-                            ${error}
-                        </div>
+                    <c:if test="${not empty errors}">
+                        <c:forEach var="err" items="${errors}">
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle"></i>
+                                ${err}
+                            </div>
+                        </c:forEach>
                     </c:if>
-                    
-                    <c:if test="${message != null}">
+
+                    <c:if test="${not empty message}">
                         <div class="alert alert-success">
                             <i class="fas fa-check-circle"></i>
                             ${message}

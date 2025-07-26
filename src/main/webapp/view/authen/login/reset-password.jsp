@@ -72,6 +72,16 @@
                 .form-control::placeholder {
                     color: #A0AEC0;
                 }
+                .form-control.is-invalid {
+                    border-color: #dc3545;
+                    background-color: #fff5f5;
+                    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+                }
+
+                .form-control.is-invalid:focus {
+                    border-color: #dc3545;
+                    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+                }
                 .reset-btn {
                     width: 100%;
                     padding: 16px;
@@ -110,6 +120,8 @@
                     color: #000DFF;
                     text-decoration: none;
                 }
+
+                /* Override tất cả CSS khác với độ ưu tiên cao nhất */
                 .alert {
                     padding: 16px;
                     border-radius: 12px;
@@ -118,11 +130,80 @@
                     display: flex;
                     align-items: center;
                     gap: 12px;
+                    opacity: 1;
+                    transition: opacity 0.5s ease;
+                    color: #721c24 !important;
+                    --bs-alert-color: #721c24 !important;
                 }
-                .alert-danger {
-                    background-color: #FEF2F2;
-                    border: 1px solid #FCA5A5;
-                    color: #DC2626;
+
+                .alert.alert-danger,
+                .alert.alert-danger *,
+                .alert.alert-danger span,
+                .alert.alert-danger i {
+                    color: #721c24 !important;
+                    --bs-alert-color: #721c24 !important;
+                }
+
+                .alert.alert-danger {
+                    background-color: #f8d7da !important;
+                    border: 1px solid #f5c6cb !important;
+                    --bs-alert-bg: #f8d7da !important;
+                    --bs-alert-border-color: #f5c6cb !important;
+                }
+               
+                /* Thêm vào phần CSS, trước #unified-error-container */
+
+                #password-match-error {
+                    display: none;
+                    align-items: center;
+                    padding: 16px;
+                    border-radius: 12px;
+                    margin-bottom: 24px;
+                    font-size: 15px;
+                    background-color: #FEF2F2 !important; /* Thêm !important */
+                    border: 1px solid #FCA5A5 !important; /* Thêm !important */
+                    color: #DC2626 !important; /* Thêm !important */
+                }
+
+                #password-match-error i {
+                    margin-right: 12px;
+                    color: #DC2626 !important; /* Thêm !important */
+                }
+
+                #password-match-error span {
+                    color: #DC2626 !important; /* Thêm !important */
+                }
+                /* Gộp 3 khai báo input:invalid */
+                input:invalid {
+                    box-shadow: none !important;
+                    -moz-box-shadow: none !important;
+                    -ms-box-shadow: none !important;
+                }
+
+                input:invalid:focus {
+                    box-shadow: none !important;
+                }
+
+                /* Ẩn validation bubble của browser */
+                input::-webkit-validation-bubble-message {
+                    display: none;
+                }
+
+                input::-webkit-validation-bubble-arrow {
+                    display: none;
+                }
+
+                /* Ẩn tất cả validation messages */
+                input:invalid::before,
+                input:invalid::after {
+                    display: none !important;
+                }
+
+
+
+                #unified-error-container {
+                    margin-bottom: 20px;
+                    width: 100%;
                 }
             </style>
         </head>
@@ -134,30 +215,34 @@
                         <p>Please enter your new password</p>
                     </div>
 
-                    <form action="${pageContext.request.contextPath}/reset-password" method="post" id="resetForm" onsubmit="return validateForm()">
-                    <c:if test="${error != null}">
-                        <div class="alert alert-danger">
-                            <i class="fas fa-exclamation-circle"></i>
-                            ${error}
-                        </div>
-                    </c:if>
-                    
-                    <div id="form-errors"></div>
+                    <form action="${pageContext.request.contextPath}/reset-password" method="post" id="resetForm" novalidate>
+                    <!-- Sửa HTML -->
+                    <div id="unified-error-container">
+                        <c:if test="${error != null}">
+                            <div class="alert alert-danger" style="color: #721c24 !important;">
+                                <i class="fas fa-exclamation-circle" style="color: #721c24 !important;"></i>
+                                <span style="color: #721c24 !important;"><c:out value="${error}"/></span>
+                            </div>
+                        </c:if>
+                    </div>
+
                     <div class="form-group">
                         <label for="password">New Password</label>
                         <input type="password" class="form-control" id="password" name="password" 
-                               placeholder="Enter your new password" >
-                        <span id="password-error" class="error-text"></span>
+                               placeholder="Enter your new password">
                     </div>
 
                     <div class="form-group">
                         <label for="confirm_password">Confirm Password</label>
                         <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
-                               placeholder="Confirm your new password" >
-                        <span id="confirm-password-error" class="error-text"></span>
+                               placeholder="Confirm your new password">
+                    </div>
+                    <div id="password-match-error" class="alert alert-danger" style="display: none;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Passwords do not match!</span>
                     </div>
 
-                    <button type="submit" class="reset-btn" id="resetBtn" onclick="resetPassword()">
+                    <button type="submit" class="reset-btn" id="resetBtn" >
                         <i class="fas fa-key me-2"></i>Reset Password
                     </button>
 
@@ -175,66 +260,144 @@
                 const password = document.getElementById('password');
                 const confirmPassword = document.getElementById('confirm_password');
                 const resetBtn = document.getElementById('resetBtn');
-                const requirements = {
-                    length: document.getElementById('length'),
-                    uppercase: document.getElementById('uppercase'),
-                    lowercase: document.getElementById('lowercase'),
-                    number: document.getElementById('number'),
-                    special: document.getElementById('special')
-                };
+                const resetForm = document.getElementById('resetForm');
+                const errorContainer = document.getElementById('unified-error-container');
+                const passwordMatchError = document.getElementById('password-match-error');
 
-                function validatePassword() {
-                    const value = password.value;
-                    const checks = {
-                        length: value.length >= 8,
-                        uppercase: /[A-Z]/.test(value),
-                        lowercase: /[a-z]/.test(value),
-                        number: /[0-9]/.test(value),
-                        special: /[!@#$%^&*(),.?":{}|<>]/.test(value)
-                    };
+                function showError(message) {
+                    console.log('Showing error:', message); // Debug log
+                    errorContainer.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>${message}</span>
+                        </div>`;
+                    }
+                    // Force set color bằng JavaScript
+                    const errorDiv = errorContainer.querySelector('.alert');
+                    if (errorDiv) {
+                        errorDiv.style.setProperty('color', '#721c24', 'important');
+                        errorDiv.style.setProperty('--bs-alert-color', '#721c24', 'important');
 
-                    // Update requirement list styles
-                    Object.keys(checks).forEach(check => {
-                        if (checks[check]) {
-                            requirements[check].classList.remove('invalid');
-                            requirements[check].classList.add('valid');
-                        } else {
-                            requirements[check].classList.remove('valid');
-                            requirements[check].classList.add('invalid');
+                        const span = errorDiv.querySelector('span');
+                        if (span) {
+                            span.style.setProperty('color', '#721c24', 'important');
                         }
-                    });
 
-                    // Enable/disable submit button
-                    const allValid = Object.values(checks).every(Boolean);
-                    const passwordsMatch = password.value === confirmPassword.value;
-                    const notEmpty = password.value.trim() !== "" && confirmPassword.value.trim() !== "";
-                    resetBtn.disabled = !(allValid && passwordsMatch && notEmpty);
+                        const icon = errorDiv.querySelector('i');
+                        if (icon) {
+                            icon.style.setProperty('color', '#721c24', 'important');
+                        }
+                    }
+
+                    setTimeout(() => {
+                        errorDiv.style.opacity = '0';
+                        setTimeout(() => {
+                            errorContainer.innerHTML = '';
+                        }, 500);
+                    }, 3000);
                 }
 
-                password.addEventListener('input', validatePassword);
-                confirmPassword.addEventListener('input', validatePassword);
+function checkPasswordMatch() {
+    console.log('checkPasswordMatch called'); // Debug log
+    console.log('password length:', password.value.length); // Debug log
+    console.log('confirmPassword length:', confirmPassword.value.length); // Debug log
+    console.log('passwordMatchError element:', passwordMatchError); // Debug log
 
-                // Form submission
-                document.getElementById('resetForm').addEventListener('submit', function (e) {
-                    const errorContainer = document.getElementById('form-errors');
-                    errorContainer.innerHTML = ""; // Clear previous errors
+    // Chỉ check và hiển thị khi confirm password đã được nhập (từ ký tự đầu tiên)
+    if (confirmPassword.value.length > 0) {
+        if (password.value !== confirmPassword.value) {
+            console.log('Passwords do not match, showing error'); // Debug log
+            passwordMatchError.style.setProperty('display', 'flex', 'important'); // Force display
+            resetBtn.disabled = true;
+        } else {
+            console.log('Passwords match, hiding error'); // Debug log
+            passwordMatchError.style.setProperty('display', 'none', 'important'); // Force hide
+            resetBtn.disabled = false;
+        }
+    } else {
+        // Nếu confirm password chưa được nhập thì ẩn thông báo
+        console.log('Confirm password empty, hiding error'); // Debug log
+        passwordMatchError.style.setProperty('display', 'none', 'important'); // Force hide
+        resetBtn.disabled = false;
+    }
+}
 
-                    if (password.value.trim() === "" || confirmPassword.value.trim() === "") {
-                        e.preventDefault();
-                        const errorDiv = document.createElement('div');
-                        errorDiv.className = 'alert alert-danger';
-                        errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i>Passwords is required.';
-                        this.insertBefore(errorDiv, this.firstChild);
-                        return;
+                // Thêm event listeners cho password match
+                password.addEventListener('input', checkPasswordMatch);
+                confirmPassword.addEventListener('input', checkPasswordMatch);
+
+                resetForm.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+
+                    console.log('Form submitted'); // Debug log
+                    console.log('Password:', password.value); // Debug log
+                    console.log('Confirm password:', confirmPassword.value); // Debug log
+
+                    // Clear previous errors
+                    errorContainer.innerHTML = '';
+                    passwordMatchError.style.display = 'none';
+
+                    // Remove any invalid classes
+                    password.classList.remove('is-invalid');
+                    confirmPassword.classList.remove('is-invalid');
+
+                    // Check if fields are empty
+                    if (password.value.trim() === "") {
+                        console.log('Password is empty, showing error'); // Debug log
+                        showError('New password is required.');
+                        password.classList.add('is-invalid');
+                        return false;
                     }
+
+                    if (confirmPassword.value.trim() === "") {
+                        console.log('Confirm password is empty, showing error'); // Debug log
+                        showError('Confirm password is required.');
+                        confirmPassword.classList.add('is-invalid');
+                        return false;
+                    }
+
+                    // Check if passwords match
                     if (password.value !== confirmPassword.value) {
-                        e.preventDefault();
-                        const errorDiv = document.createElement('div');
-                        errorDiv.className = 'alert alert-danger';
-                        errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i>Passwords do not match';
-                        this.insertBefore(errorDiv, this.firstChild);
+                        console.log('Passwords do not match, showing error'); // Debug log
+                        showError('Passwords do not match.');
+                        confirmPassword.classList.add('is-invalid');
+                        return false;
+                    }
+
+                    console.log('All validations passed, submitting form'); // Debug log
+
+                    // If all validations pass, proceed with form submission
+                    try {
+                        const response = await fetch(this.action, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: new URLSearchParams({
+                                'password': password.value,
+                                'confirm_password': confirmPassword.value
+                            })
+                        });
+
+                        const data = await response.text();
+                        console.log('Server response:', data); // Debug log
+
+                        if (data.includes('success')) {
+                            window.location.href = '${pageContext.request.contextPath}/login';
+                        } else {
+                            showError(data || 'Failed to reset password. Please try again.');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        showError('An error occurred. Please try again.');
                     }
                 });
+
+                const serverErrorData = document.getElementById('server-error-data');
+                if (serverErrorData && serverErrorData.textContent.trim()) {
+                    showError(serverErrorData.textContent.trim());
+                }
+
             });
         </script>
     </body>

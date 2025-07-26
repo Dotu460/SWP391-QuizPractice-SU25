@@ -10,6 +10,7 @@ package com.quiz.su25.controller;
  */
 import com.quiz.su25.dal.impl.PostDAO;
 import com.quiz.su25.entity.Post;
+import com.quiz.su25.entity.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -80,8 +81,13 @@ public class PostDetailsController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
             
-        String path = request.getServletPath();  // ✅ THÊM
-        
+        String path = request.getServletPath();  
+        // Handle delete action
+        String action = request.getParameter("action");
+        if ("delete".equals(action)) {
+            handleDeletePost(request, response);
+            return;
+        }
         //Xử lý upload media
         if ("/upload-medias".equals(path)) {
             handleMediaUpload(request, response);
@@ -372,6 +378,35 @@ public class PostDetailsController extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+        // Add new method to handle delete
+    private void handleDeletePost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        // Check if user is manager (role_id = 4)
+        User account = (User) request.getSession().getAttribute("account");
+        if (account == null || account.getRole_id() != 4) {
+            response.sendRedirect(request.getContextPath() + "/blog?error=delete_unauthorized");
+            return;
+        }
+
+        String postIdParam = request.getParameter("postId");
+
+        try {
+            int postId = Integer.parseInt(postIdParam);
+            boolean success = postDAO.deleteById(postId);
+
+            if (success) {
+                response.sendRedirect(request.getContextPath() + "/blog?success=post_deleted");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/blog?error=delete_failed");
+            }
+
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/blog?error=invalid_id");
+        } catch (Exception e) {
+            System.out.println("Error deleting post: " + e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/blog?error=system_error");
         }
     }
 }

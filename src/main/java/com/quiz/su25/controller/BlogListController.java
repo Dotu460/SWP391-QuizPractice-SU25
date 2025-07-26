@@ -3,6 +3,7 @@ package com.quiz.su25.controller;
 import com.quiz.su25.dal.impl.CategoryDAO;
 import com.quiz.su25.dal.impl.PostDAO;
 import com.quiz.su25.entity.Post;
+import com.quiz.su25.entity.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -46,6 +47,12 @@ public class BlogListController extends HttpServlet {
             // Nếu không có option nào được chọn, mặc định hiển thị tất cả
             displayOptions = Arrays.asList("title", "category", "brief_info", "date");
         }
+        // Check if user is manager (role_id = 4)
+        boolean isManager = false;
+        if (request.getSession().getAttribute("account") != null) {
+            User account = (User) request.getSession().getAttribute("account");
+            isManager = (account.getRole_id() != null && account.getRole_id() == 4);
+        }
         
         // Get posts based on search criteria
         List<Post> posts;
@@ -54,16 +61,16 @@ public class BlogListController extends HttpServlet {
         
         if (searchQuery != null && !searchQuery.trim().isEmpty()) {
             // Đúng: Gọi searchPosts để tìm theo từ khóa
-            posts = postDAO.searchPosts(searchQuery.trim(), true, true, true, false, null, null, page, pageSize);
-            totalCount = postDAO.countSearchResults(searchQuery.trim(), true, true, true, false, null, null);
+            posts = postDAO.searchPosts(searchQuery.trim(), true, true, true, false, null, null, page, pageSize, isManager);
+            totalCount = postDAO.countSearchResults(searchQuery.trim(), true, true, true, false, null, null, isManager);
         } else if (categoryName != null) {
             // Filter by category
-            posts = postDAO.getPostsByCategoryName(categoryName, page, pageSize);
-            totalCount = postDAO.countPostsByCategoryName(categoryName);
+            posts = postDAO.getPostsByCategoryName(categoryName, page, pageSize, isManager);
+            totalCount = postDAO.countPostsByCategoryName(categoryName, isManager);
         } else {
             // Get all posts with pagination
-            posts = postDAO.getPostsPaginated(page, pageSize);
-            totalCount = postDAO.countTotalPosts();
+            posts = postDAO.getPostsPaginated(page, pageSize, isManager);
+            totalCount = postDAO.countTotalPosts(isManager);
         }
         
         // Get additional details for each post
@@ -80,7 +87,7 @@ public class BlogListController extends HttpServlet {
         int totalPages = (int) Math.ceil((double) totalCount / pageSize);
         
         // Get latest posts for sidebar
-        List<Post> latestPosts = postDAO.getLatestPostsForSidebar(5);
+        List<Post> latestPosts = postDAO.getLatestPostsForSidebar(5, isManager);
         
         // Set attributes for JSP
         request.setAttribute("posts", postsWithDetails);
