@@ -30,6 +30,8 @@
                     background: #fff;
                     transition: box-shadow 0.2s;
                     height: 100%;
+                    display: flex;
+                    flex-direction: column;
                 }
                 .package-card:hover {
                     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
@@ -56,6 +58,7 @@
                 .package-description {
                     margin: 12px 0;
                     color: #666;
+                    flex-grow: 1;
                 }
                 .buy-btn {
                     background: #5751e1;
@@ -69,6 +72,25 @@
                 }
                 .buy-btn:hover:enabled {
                     background: #3d38a1;
+                }
+                .access-btn {
+                    background: linear-gradient(90deg, #28a745 0%, #218838 100%) !important;
+                    color: #fff !important;
+                    border: none;
+                    padding: 8px 20px;
+                    border-radius: 4px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                    font-size: 1rem;
+                    display: inline-block;
+                    text-align: center;
+                    box-shadow: 0 2px 8px rgba(40,167,69,0.07);
+                }
+                .access-btn:hover {
+                    background: linear-gradient(90deg, #218838 0%, #28a745 100%) !important;
+                    text-decoration: none;
+                    color: #fff !important;
                 }
                 .status-available {
                     display: inline-block;
@@ -94,6 +116,10 @@
                 }
                 .d-none {
                     display: none !important;
+                }
+                .dashboard__area.section-pb-120 {
+                    padding-top: 18px !important;
+                    padding-bottom: 24px !important;
                 }
             </style>
         </head>
@@ -121,18 +147,72 @@
                                 <div class="col-xl-9">
                                     <div class="dashboard__content-area">
                                         
+                                        <!-- Search bar giống quiz-handle-menu -->
+                                        <div class="mb-4 d-flex align-items-center gap-3">
+                                            <input id="packageSearchInput" type="text" class="form-control" style="max-width: 350px; border: 2px solid #8B7FD2; border-radius: 8px; font-size: 1.08rem; padding: 10px 18px; color: #3d38a1; background: #f6f7fb; transition: border-color 0.2s; box-shadow: 0 2px 8px rgba(87,81,225,0.04);" placeholder="Search package by name..." oninput="filterAndSortPackages()">
+                                            <select id="packageSortMode" class="form-select" style="min-width: 180px; max-width: 260px; font-size: 0.98rem;" onchange="filterAndSortPackages()">
+                                                <option value="name-asc">Sort by Name A-Z</option>
+                                                <option value="name-desc">Sort by Name Z-A</option>
+                                                <option value="price-asc">Sort by Price Low-High</option>
+                                                <option value="price-desc">Sort by Price High-Low</option>
+                                            </select>
+                                        </div>
+                                        <script>
+                                            function filterAndSortPackages() {
+                                                const search = document.getElementById('packageSearchInput').value.trim().toLowerCase();
+                                                const sortMode = document.getElementById('packageSortMode').value;
+                                                const packageList = document.querySelector('.row.row-cols-1.row-cols-md-2.row-cols-lg-3.g-4');
+                                                const packageCards = Array.from(document.querySelectorAll('.package-card-wrapper'));
+                                                // Filter by name
+                                                let filtered = packageCards.filter(card => {
+                                                    const name = card.getAttribute('data-package-name') || '';
+                                                    return name.includes(search);
+                                                });
+                                                // Sort
+                                                filtered.sort((a, b) => {
+                                                    if (sortMode === 'name-asc') {
+                                                        return a.getAttribute('data-package-name').localeCompare(b.getAttribute('data-package-name'));
+                                                    } else if (sortMode === 'name-desc') {
+                                                        return b.getAttribute('data-package-name').localeCompare(a.getAttribute('data-package-name'));
+                                                    } else if (sortMode === 'price-asc') {
+                                                        return parseFloat(a.getAttribute('data-package-price')) - parseFloat(b.getAttribute('data-package-price'));
+                                                    } else if (sortMode === 'price-desc') {
+                                                        return parseFloat(b.getAttribute('data-package-price')) - parseFloat(a.getAttribute('data-package-price'));
+                                                    }
+                                                    return 0;
+                                                });
+                                                // Remove all
+                                                packageCards.forEach(card => card.style.display = 'none');
+                                                // Append filtered & sorted
+                                                filtered.forEach(card => {
+                                                    card.style.display = '';
+                                                    packageList.appendChild(card);
+                                                });
+                                            }
+                                        </script>
                                         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                                         <c:forEach items="${pricePackages}" var="pkg">
-                                            <div class="col">
+                                            <div class="col package-card-wrapper" data-package-name="${fn:toLowerCase(pkg.name)}" data-package-price="${pkg.sale_price}">
                                                 <div class="package-card h-100">
                                                     <div class="package-title">${pkg.name}</div>
                                                     <div>
-                                                        <span class="package-list-price">
-                                                            <fmt:formatNumber value="${pkg.list_price}" type="currency" currencySymbol="₫"/>
-                                                        </span>
-                                                        <span class="package-price">
-                                                            <fmt:formatNumber value="${pkg.sale_price}" type="currency" currencySymbol="₫"/>
-                                                        </span>
+                                                        <c:choose>
+                                                            <c:when test="${pkg.sale_price < pkg.list_price}">
+                                                                <!-- Có giảm giá: hiển thị cả list price (gạch ngang) và sale price -->
+                                                                <span class="package-list-price">
+                                                                    <fmt:formatNumber value="${pkg.list_price}" type="currency" currencySymbol="₫"/>
+                                                                </span>
+                                                                <span class="package-price">
+                                                                    <fmt:formatNumber value="${pkg.sale_price}" type="currency" currencySymbol="₫"/>
+                                                                </span>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <!-- Không giảm giá: chỉ hiển thị sale price (không gạch ngang) -->
+                                                                <span class="package-price">
+                                                                    <fmt:formatNumber value="${pkg.sale_price}" type="currency" currencySymbol="₫"/>
+                                                                </span>
+                                                            </c:otherwise>
+                                                        </c:choose>
                                                     </div>
                                                     <div class="package-duration">
                                                         Access Duration: ${pkg.access_duration_months} months
@@ -171,20 +251,20 @@
                                                     
                                                     
                                                     
-                                                    <div class="mt-3">
+                                                    <div class="mt-auto pt-3">
                                                         <c:choose>
                                                             <c:when test="${not empty userPurchases[pkg.id]}">
                                                                 <!-- User has purchased this package -->
-                                                                <button class="buy-btn" style="background:#28a745; cursor:default;" disabled>
-                                                                    ✓ Đã thanh toán
-                                                                </button>
+                                                                <a href="${pageContext.request.contextPath}/quiz-handle-menu?packageId=${pkg.id}" class="buy-btn access-btn" style="margin-right:8px;">
+                                                                    Access
+                                                                </a>
                                                             </c:when>
                                                             <c:otherwise>
                                                                 <!-- User hasn't purchased this package -->
                                                                 <c:choose>
                                                                     <c:when test="${empty currentUser}">
                                                                         <!-- User not logged in -->
-                                                                        <a href="${pageContext.request.contextPath}/login" class="buy-btn" style="text-decoration:none; display:inline-block;">
+                                                                        <a href="${pageContext.request.contextPath}/login?redirect=${pageContext.request.contextPath}/price-package-menu${not empty param.id ? ('?id=' + param.id) : ''}" class="buy-btn" style="text-decoration:none; display:inline-block;">
                                                                            Purchase 
                                                                         </a>
                                                                     </c:when>

@@ -9,17 +9,20 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.quiz.su25.config.GlobalConfig;
 import com.quiz.su25.dal.impl.PricePackageDAO;
 import com.quiz.su25.dal.impl.RegistrationDAO;
 import com.quiz.su25.dal.impl.SubjectDAO;
 import com.quiz.su25.entity.Registration;
 import com.quiz.su25.entity.Subject;
+import com.quiz.su25.entity.User;
 
 import jakarta.servlet.ServletException; // For encoding URL parameters
 import jakarta.servlet.annotation.WebServlet; // Import java.sql.Date
 import jakarta.servlet.http.HttpServlet; // Import for date parsing
 import jakarta.servlet.http.HttpServletRequest; // Import for date parsing exception
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @WebServlet("/my-registration")
 public class MyRegistrationController extends HttpServlet {
@@ -84,23 +87,20 @@ public class MyRegistrationController extends HttpServlet {
             throws ServletException, IOException {
         // Thiết lập kiểu nội dung trả về là HTML và mã hóa UTF-8
         response.setContentType("text/html;charset=UTF-8");   
-        // Lấy thông tin user từ session (comment lại để test)
-        // com.quiz.su25.entity.User currentUser = (com.quiz.su25.entity.User) request.getSession().getAttribute("user");
-        // if (currentUser == null) {
-        //     // Nếu user chưa đăng nhập, chuyển hướng về trang login
-        //     response.sendRedirect(request.getContextPath() + "/login");
-        //     return;
-        // }        
-        // Lấy user ID từ user hiện tại (comment lại để test)
-        // Integer userId = currentUser.getId();
-        // request.setAttribute("currentUser", currentUser);      
-        // Tạm thời dùng ID cố định để test
-        Integer userId = 10; // Thay đổi ID này tùy theo user ID có trong database của bạn
-        // Tạo một user object tạm để hiển thị
-        com.quiz.su25.entity.User tempUser = new com.quiz.su25.entity.User();
-        // tempUser.setId(userId);
-        // tempUser.setFull_name("Test User");
-        request.setAttribute("currentUser", tempUser);
+        
+        // Lấy thông tin user từ session
+        HttpSession session = request.getSession();
+        User currentUser = (User) session.getAttribute(GlobalConfig.SESSION_ACCOUNT);
+        
+        if (currentUser == null) {
+            // Nếu user chưa đăng nhập, chuyển hướng về trang login
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }        
+        
+        // Lấy user ID từ user hiện tại
+        Integer userId = currentUser.getId();
+        request.setAttribute("currentUser", currentUser);      
 
         // Lấy số trang hiện tại từ request, mặc định là 1
         int currentPage = 1;

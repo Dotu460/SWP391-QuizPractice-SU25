@@ -196,8 +196,8 @@
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
-                                                                    <label for="sale_price" class="form-label">Sale Price <span class="required">*</span></label>
-                                                                    <input type="number" class="form-control" id="sale_price" name="sale_price" value="${pricePackage.sale_price}" min="1" required>
+                                                                    <label for="sale_price" class="form-label">Sale Price</label>
+                                                                    <input type="number" class="form-control" id="sale_price" name="sale_price" value="${pricePackage.sale_price}" min="1">
                                                                 </div>
                                                             </div>
                                                         </div>

@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -291,6 +292,51 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
         int total = quizzesDAO.getTotalFilteredQuizzes(null, null, null, null);
         System.out.println(total);
     }
+    
+    /**
+     * Check if quiz name exists within the same lesson
+     */
+    public boolean isNameExistsInLesson(String name, Integer lessonId) {
+        String sql = "SELECT COUNT(*) FROM Quizzes WHERE name = ? AND lesson_id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, name);
+            statement.setInt(2, lessonId);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            System.out.println("Error isNameExistsInLesson at class QuizzesDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return false;
+    }
+    
+    /**
+     * Check if quiz name exists within the same lesson excluding a specific quiz
+     */
+    public boolean isNameExistsInLessonExcluding(String name, Integer lessonId, Integer excludeQuizId) {
+        String sql = "SELECT COUNT(*) FROM Quizzes WHERE name = ? AND lesson_id = ? AND id != ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, name);
+            statement.setInt(2, lessonId);
+            statement.setInt(3, excludeQuizId);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            System.out.println("Error isNameExistsInLessonExcluding at class QuizzesDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return false;
+    }
 
     public boolean hasEssayQuestions(Quizzes quiz) {
         // Implementation of hasEssayQuestions method
@@ -314,6 +360,56 @@ public class QuizzesDAO extends DBContext implements I_DAO<Quizzes>{
         }
         // Default to false if there's an error
         return false;
+    }
+
+    public List<Quizzes> findByPricePackageId(int packageId) {
+        List<Quizzes> quizzes = new ArrayList<>();
+        String sql = "SELECT q.* FROM Quizzes q " +
+                     "JOIN Lessons l ON q.lesson_id = l.id " +
+                     "JOIN subject s ON l.subject_id = s.id " +
+                     "WHERE s.price_package_id = ?";
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, packageId);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                quizzes.add(getFromResultSet(resultSet));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error findByPricePackageId at class QuizzesDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return quizzes;
+    }
+
+    public List<Quizzes> findBySubjectIds(List<Integer> subjectIds) {
+        List<Quizzes> quizzes = new ArrayList<>();
+        if (subjectIds == null || subjectIds.isEmpty()) {
+            return quizzes;
+        }
+
+        String placeholders = subjectIds.stream().map(id -> "?").collect(Collectors.joining(","));
+        String sql = "SELECT q.* FROM quizzes q JOIN lessons l ON q.lesson_id = l.id WHERE l.subject_id IN (" + placeholders + ")";
+        
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            int i = 1;
+            for (Integer id : subjectIds) {
+                statement.setInt(i++, id);
+            }
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                quizzes.add(getFromResultSet(resultSet));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error findBySubjectIds at class QuizzesDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return quizzes;
     }
 
 }

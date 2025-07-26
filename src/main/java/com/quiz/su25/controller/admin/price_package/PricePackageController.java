@@ -171,10 +171,17 @@ public class PricePackageController extends HttpServlet {
             if (name == null || name.trim().isEmpty() ||
                 accessDurationStr == null || accessDurationStr.trim().isEmpty() ||
                 listPriceStr == null || listPriceStr.trim().isEmpty() ||
-                salePriceStr == null || salePriceStr.trim().isEmpty() ||
                 status == null || status.trim().isEmpty()) {
                 
-                request.setAttribute("error", "All required fields must be filled");
+                // Debug: Log which fields are missing
+                StringBuilder missingFields = new StringBuilder("Missing required fields: ");
+                if (name == null || name.trim().isEmpty()) missingFields.append("name, ");
+                if (accessDurationStr == null || accessDurationStr.trim().isEmpty()) missingFields.append("access_duration_months, ");
+                if (listPriceStr == null || listPriceStr.trim().isEmpty()) missingFields.append("list_price, ");
+                if (status == null || status.trim().isEmpty()) missingFields.append("status, ");
+                
+                String errorMsg = missingFields.toString().replaceAll(", $", "");
+                request.setAttribute("error", errorMsg);
                 request.getRequestDispatcher("/view/admin/price_package/price-package-add.jsp").forward(request, response);
                 return;
             }
@@ -182,7 +189,6 @@ public class PricePackageController extends HttpServlet {
             // Parse numeric values
             int accessDuration = Integer.parseInt(accessDurationStr);
             double listPrice = Double.parseDouble(listPriceStr);
-            double salePrice = Double.parseDouble(salePriceStr);
             
             // Validate business rules
             if (accessDuration <= 0) {
@@ -191,16 +197,32 @@ public class PricePackageController extends HttpServlet {
                 return;
             }
             
-            if (listPrice <= 0 || salePrice <= 0) {
-                request.setAttribute("error", "Prices must be greater than 0");
+            if (listPrice < 1) {
+                request.setAttribute("error", "List price must be greater than or equal to 1");
                 request.getRequestDispatcher("/view/admin/price_package/price-package-add.jsp").forward(request, response);
                 return;
             }
             
-            if (salePrice > listPrice) {
-                request.setAttribute("error", "Sale price cannot be greater than list price");
-                request.getRequestDispatcher("/view/admin/price_package/price-package-add.jsp").forward(request, response);
-                return;
+            // Handle sale price (optional)
+            double salePrice = listPrice; // Default to list price if not provided
+            if (salePriceStr != null && !salePriceStr.trim().isEmpty()) {
+                try {
+                    salePrice = Double.parseDouble(salePriceStr);
+                    if (salePrice < 1) {
+                        request.setAttribute("error", "Sale price must be greater than or equal to 1 if provided");
+                        request.getRequestDispatcher("/view/admin/price_package/price-package-add.jsp").forward(request, response);
+                        return;
+                    }
+                    if (salePrice > listPrice) {
+                        request.setAttribute("error", "Sale price cannot be greater than list price");
+                        request.getRequestDispatcher("/view/admin/price_package/price-package-add.jsp").forward(request, response);
+                        return;
+                    }
+                } catch (NumberFormatException e) {
+                    request.setAttribute("error", "Invalid sale price format");
+                    request.getRequestDispatcher("/view/admin/price_package/price-package-add.jsp").forward(request, response);
+                    return;
+                }
             }
             
             // Create PricePackage object
@@ -258,7 +280,6 @@ public class PricePackageController extends HttpServlet {
             if (name == null || name.trim().isEmpty() ||
                 accessDurationStr == null || accessDurationStr.trim().isEmpty() ||
                 listPriceStr == null || listPriceStr.trim().isEmpty() ||
-                salePriceStr == null || salePriceStr.trim().isEmpty() ||
                 status == null || status.trim().isEmpty()) {
                 
                 // Get the package for redisplaying the form
@@ -272,7 +293,6 @@ public class PricePackageController extends HttpServlet {
             // Parse numeric values
             int accessDuration = Integer.parseInt(accessDurationStr);
             double listPrice = Double.parseDouble(listPriceStr);
-            double salePrice = Double.parseDouble(salePriceStr);
             
             // Validate business rules
             if (accessDuration <= 0) {
@@ -283,20 +303,40 @@ public class PricePackageController extends HttpServlet {
                 return;
             }
             
-            if (listPrice <= 0 || salePrice <= 0) {
+            if (listPrice < 1) {
                 PricePackage pricePackage = pricePackageDAO.findById(id);
                 request.setAttribute("pricePackage", pricePackage);
-                request.setAttribute("error", "Prices must be greater than 0");
+                request.setAttribute("error", "List price must be greater than or equal to 1");
                 request.getRequestDispatcher("/view/admin/price_package/price-package-edit.jsp").forward(request, response);
                 return;
             }
             
-            if (salePrice > listPrice) {
-                PricePackage pricePackage = pricePackageDAO.findById(id);
-                request.setAttribute("pricePackage", pricePackage);
-                request.setAttribute("error", "Sale price cannot be greater than list price");
-                request.getRequestDispatcher("/view/admin/price_package/price-package-edit.jsp").forward(request, response);
-                return;
+            // Handle sale price (optional)
+            double salePrice = listPrice; // Default to list price if not provided
+            if (salePriceStr != null && !salePriceStr.trim().isEmpty()) {
+                try {
+                    salePrice = Double.parseDouble(salePriceStr);
+                    if (salePrice < 1) {
+                        PricePackage pricePackage = pricePackageDAO.findById(id);
+                        request.setAttribute("pricePackage", pricePackage);
+                        request.setAttribute("error", "Sale price must be greater than or equal to 1 if provided");
+                        request.getRequestDispatcher("/view/admin/price_package/price-package-edit.jsp").forward(request, response);
+                        return;
+                    }
+                    if (salePrice > listPrice) {
+                        PricePackage pricePackage = pricePackageDAO.findById(id);
+                        request.setAttribute("pricePackage", pricePackage);
+                        request.setAttribute("error", "Sale price cannot be greater than list price");
+                        request.getRequestDispatcher("/view/admin/price_package/price-package-edit.jsp").forward(request, response);
+                        return;
+                    }
+                } catch (NumberFormatException e) {
+                    PricePackage pricePackage = pricePackageDAO.findById(id);
+                    request.setAttribute("pricePackage", pricePackage);
+                    request.setAttribute("error", "Invalid sale price format");
+                    request.getRequestDispatcher("/view/admin/price_package/price-package-edit.jsp").forward(request, response);
+                    return;
+                }
             }
             
             // Create PricePackage object with ID

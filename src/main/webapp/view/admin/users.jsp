@@ -204,6 +204,32 @@
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+
+        /* Alert styling */
+        .alert-custom {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border-left: 4px solid;
+        }
+
+        .alert-success-custom {
+            background-color: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+
+        .alert-danger-custom {
+            background-color: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+
+        .alert-info-custom {
+            background-color: #e3f2fd;
+            border-left-color: #2196f3;
+            color: #0d47a1;
+        }
     </style>
 </head>
 <body>
@@ -223,7 +249,7 @@
     <!-- dashboard-area -->
     <section class="dashboard__area section-pb-120">
         <div class="dashboard__bg"><img src="../common/assets/img/bg/dashboard_bg.jpg" alt=""></div>
-        <div class="container-fluid">
+        <div class="container-fluid" style="padding: 0 20px;">
             <div class="dashboard__inner-wrap">
                 <div class="row">
                     <div class="col-lg-2">
@@ -242,11 +268,19 @@
                                 <div class="alert-custom alert-success-custom">
                                     <c:choose>
                                         <c:when test="${param.success eq 'userAdded'}">User added successfully!</c:when>
+                                        <c:when test="${param.success eq 'userAddedWithEmail'}">
+                                            User added successfully! Welcome email with login credentials has been sent.
+                                        </c:when>
+                                        <c:when test="${param.success eq 'userAddedNoEmail'}">
+                                            User added successfully! However, email sending failed. Please contact the user directly.
+                                        </c:when>
                                         <c:when test="${param.success eq 'userUpdated'}">User updated successfully!</c:when>
                                         <c:otherwise>Operation completed successfully!</c:otherwise>
                                     </c:choose>
                                 </div>
                             </c:if>
+
+
 
                             <c:if test="${param.error != null}">
                                 <div class="alert-custom alert-danger-custom">
@@ -276,7 +310,7 @@
                                         <select name="role" id="role" class="form-select">
                                             <option value="">All Roles</option>
                                             <c:forEach items="${roles}" var="role">
-                                                <option value="${role.id}" ${roleFilter eq role.id.toString() ? 'selected' : ''}>${role.role_name}</option>
+                                                <option value="${role.id}" ${roleFilter eq role.id.toString() ? 'selected' : ''}>${role.name}</option>
                                             </c:forEach>
                                         </select>
                                     </div>
@@ -377,7 +411,7 @@
                                             <td>${user.mobile}</td>
                                             <td>
                                                 <c:forEach items="${roles}" var="role">
-                                                    <c:if test="${role.id == user.role_id}">${role.role_name}</c:if>
+                                                    <c:if test="${role.id == user.role_id}">${role.name}</c:if>
                                                 </c:forEach>
                                             </td>
                                             <td>
@@ -518,5 +552,122 @@
         }
     });
 </script>
+
+<style>
+  /* Action buttons styling */
+  .dashboard__review-action {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .user-action-link {
+    padding: 6px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    min-width: 60px;
+    height: 28px;
+  }
+
+  .user-action-link.view-link {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .user-action-link.view-link:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+  }
+
+  .user-action-link.edit-link {
+    background-color: #28a745;
+    color: white;
+  }
+
+  .user-action-link.edit-link:hover {
+    background-color: #1e7e34;
+    transform: translateY(-1px);
+  }
+
+  /* Table styling */
+  .dashboard__review-table {
+    overflow-x: auto;
+  }
+
+  .dashboard__review-table table {
+    width: 100%;
+    min-width: 800px;
+  }
+
+  .dashboard__review-table th {
+    white-space: nowrap;
+    padding: 12px 8px;
+    vertical-align: middle;
+  }
+
+  .dashboard__review-table td {
+    padding: 12px 8px;
+    vertical-align: middle;
+  }
+
+  /* Status badges */
+  .status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .status-badge.status-active {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  .status-badge.status-inactive {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+
+  .status-badge.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+
+  /* Mobile responsive for action buttons */
+  @media (max-width: 768px) {
+    .dashboard__review-action {
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .user-action-link {
+      width: 100%;
+      justify-content: center;
+      min-width: auto;
+    }
+
+    .dashboard__review-table {
+      font-size: 12px;
+    }
+
+    .dashboard__review-table th,
+    .dashboard__review-table td {
+      padding: 8px 4px;
+    }
+  }
+</style>
 </body>
 </html>

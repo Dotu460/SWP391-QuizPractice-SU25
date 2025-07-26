@@ -77,19 +77,10 @@ public class UserDAO extends DBContext implements I_DAO<User> {
             statement.setString(3, user.getPassword());      // NOT NULL
             statement.setObject(4, user.getGender());        // Can be NULL
             statement.setString(5, user.getMobile());        // NOT NULL
-            statement.setObject(6, user.getAvatar_url());    // Can be NULL       // Can be NULL
-            // Ensure defaults
-            Integer roleId = user.getRole_id();
-            if (roleId == null || roleId == 0) {
-                roleId = 2; // Default student role
-            }
-            statement.setInt(7, roleId);
+            statement.setObject(6, user.getAvatar_url());    // Can be NULL
+            statement.setObject(7, user.getRole_id());       // Can be NULL
+            statement.setObject(8, user.getStatus());        // Can be NULL
 
-            String status = user.getStatus();
-            if (status == null || status.isEmpty()) {
-                status = "active"; // Default active status
-            }
-            statement.setString(8, status);
             statement.executeUpdate();
             resultSet = statement.getGeneratedKeys();
             if (resultSet.next()) {
@@ -122,8 +113,8 @@ public class UserDAO extends DBContext implements I_DAO<User> {
             statement.setInt(4, user.getGender());
             statement.setString(5, user.getMobile());
             statement.setString(6, user.getAvatar_url());
-            statement.setInt(7, user.getRole_id() != null ? user.getRole_id() : 2);
-            statement.setString(8, user.getStatus() != null ? user.getStatus() : "active");
+            statement.setInt(7, user.getRole_id());
+            statement.setString(8, user.getStatus());
             statement.setInt(9, user.getId());
 
             int rowsAffected = statement.executeUpdate();
@@ -220,8 +211,7 @@ public class UserDAO extends DBContext implements I_DAO<User> {
             System.out.println("Available roles:");
             roles.forEach(role -> 
                 System.out.println("Role ID: " + role.getId() + 
-                                 ", Name: " + role.getRole_name() + 
-                                 ", Description: " + role.getDescription())
+                                 ", Name: " + role.getName() )
             );
         }
 

@@ -5,6 +5,8 @@ import com.quiz.su25.dal.impl.SubjectDAO;
 import com.quiz.su25.dal.impl.UserDAO;
 import com.quiz.su25.dal.impl.PricePackageDAO;
 import com.quiz.su25.dal.impl.MediaDAO;
+import com.quiz.su25.dal.impl.LessonDAO;
+import com.quiz.su25.dal.impl.RegistrationDAO;
 import com.quiz.su25.entity.PricePackage;
 import com.quiz.su25.entity.Subject;
 import com.quiz.su25.entity.SubjectCategories;
@@ -39,6 +41,8 @@ public class SubjectController extends HttpServlet {
     private final PricePackageDAO packageDAO = new PricePackageDAO();
     private final UserDAO userDAO = new UserDAO();
     private final MediaDAO mediaDAO = new MediaDAO();
+    private final LessonDAO lessonDAO = new LessonDAO();
+    private final RegistrationDAO registrationDAO = new RegistrationDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -54,6 +58,8 @@ public class SubjectController extends HttpServlet {
                 showRegistrationForm(request, response);
             } else if (pathInfo != null && pathInfo.equals("/new")) {
                 showNewSubjectForm(request, response);
+            } else if (pathInfo != null && pathInfo.equals("/edit")) {
+                showEditSubjectForm(request, response);
             } else if (pathInfo != null && pathInfo.equals("/view")) {
                 viewSubject(request, response);
             }
@@ -69,6 +75,12 @@ public class SubjectController extends HttpServlet {
             registerForSubject(request, response);
         } else if (path.equals("/admin/subject") && pathInfo != null && pathInfo.equals("/create")) {
             createSubject(request, response);
+        } else if (path.equals("/admin/subject") && pathInfo != null && pathInfo.equals("/update")) {
+            updateSubject(request, response);
+        } else if (path.equals("/admin/subject") && pathInfo != null && pathInfo.equals("/delete")) {
+            deleteSubject(request, response);
+        } else if (path.equals("/admin/subject") && pathInfo != null && pathInfo.equals("/deleteMedia")) {
+            deleteMedia(request, response);
         }
     }
 
@@ -81,7 +93,7 @@ public class SubjectController extends HttpServlet {
         String categoryFilter = request.getParameter("category");
         String statusFilter = request.getParameter("status");
         if (statusFilter == null || statusFilter.isEmpty()) {
-            statusFilter = "active"; // Default to active subjects if not specified
+//            statusFilter = "active"; // Default to active subjects if not specified
         }
         String searchTerm = request.getParameter("search");
 
@@ -92,6 +104,13 @@ public class SubjectController extends HttpServlet {
         // Get paginated subjects using the filters
         List<Subject> subjects = subjectDAO.getPaginatedSubjects(
                 page, pageSize, categoryFilter, statusFilter, searchTerm, sortBy, sortOrder);
+
+        // Get lesson counts for each subject
+        Map<Integer, Integer> lessonCounts = new HashMap<>();
+        for (Subject subject : subjects) {
+            int count = lessonDAO.countLessonsBySubjectId(subject.getId());
+            lessonCounts.put(subject.getId(), count);
+        }
 
         // Get owner names for the subjects
         Map<Integer, String> ownerNames = new HashMap<>();
@@ -104,6 +123,7 @@ public class SubjectController extends HttpServlet {
             }
         }
         request.setAttribute("ownerNames", ownerNames);
+        request.setAttribute("lessonCounts", lessonCounts);
 
         // Get total count for pagination
         int totalSubjects = subjectDAO.countTotalSubjects(categoryFilter, statusFilter, searchTerm);
@@ -152,7 +172,10 @@ public class SubjectController extends HttpServlet {
             Subject subject = subjectDAO.findById(subjectId);
 
             if (subject != null) {
-                // Get the lowest price package from all available packages
+                // Get all price packages for this subject
+                List<PricePackage> subjectPricePackages = packageDAO.findBySubjectId(subjectId);
+                
+                // Get the lowest price package from all available packages (for backward compatibility)
                 PricePackage lowestPricePackage = packageDAO.findLowestPricePackage();
 
                 // Get the subject's category
@@ -177,6 +200,7 @@ public class SubjectController extends HttpServlet {
                 String searchTerm = request.getParameter("search");
 
                 request.setAttribute("subject", subject);
+                request.setAttribute("subjectPricePackages", subjectPricePackages);
                 request.setAttribute("lowestPricePackage", lowestPricePackage);
                 request.setAttribute("category", category);
                 request.setAttribute("categories", categories);
@@ -272,10 +296,18 @@ public class SubjectController extends HttpServlet {
             String featuredFlag = request.getParameter("featured_flag");
             int categoryId = getIntParameter(request, "category_id", 0);
             String owner = request.getParameter("owner");
+            int pricePackageId = getIntParameter(request, "price_package_id", 0); // Lấy thêm trường này
 
             // Validate required fields
             if (title == null || title.trim().isEmpty() || categoryId == 0) {
                 request.getSession().setAttribute("errorMessage", "Course name and category are required!");
+                response.sendRedirect(request.getContextPath() + "/admin/subject/new");
+                return;
+            }
+
+            // Kiểm tra trùng tên course (không phân biệt hoa thường)
+            if (subjectDAO.existsByTitle(title.trim())) {
+                request.getSession().setAttribute("errorMessage", "Course name already exists! Please choose another name.");
                 response.sendRedirect(request.getContextPath() + "/admin/subject/new");
                 return;
             }
@@ -290,6 +322,7 @@ public class SubjectController extends HttpServlet {
 
             // Create new subject
             Subject newSubject = Subject.builder()
+                    .price_package_id(pricePackageId) // Bổ sung trường này
                     .title(title.trim())
                     .tag_line(tagLine != null ? tagLine.trim() : null)
                     .brief_info(briefInfo != null ? briefInfo.trim() : null)
@@ -511,6 +544,251 @@ public class SubjectController extends HttpServlet {
             }
         }
         return null;
+    }
+
+    private void showEditSubjectForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        int subjectId = getIntParameter(request, "id", 0);
+
+        if (subjectId > 0) {
+            Subject subject = subjectDAO.findById(subjectId);
+
+            if (subject != null) {
+                // Get all categories for the form
+                List<SubjectCategories> categories = categoryDAO.findAll();
+                
+                // Get existing media for the subject
+                List<Media> subjectMedia = mediaDAO.findBySubjectId(subjectId);
+                List<Media> subjectImages = mediaDAO.findImagesBySubjectId(subjectId);
+                List<Media> subjectVideos = mediaDAO.findVideosBySubjectId(subjectId);
+
+                request.setAttribute("subject", subject);
+                request.setAttribute("categories", categories);
+                request.setAttribute("subjectMedia", subjectMedia);
+                request.setAttribute("subjectImages", subjectImages);
+                request.setAttribute("subjectVideos", subjectVideos);
+
+                request.getRequestDispatcher("/view/admin/subject/edit.jsp").forward(request, response);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/admin/subjects?error=subjectNotFound");
+            }
+        } else {
+            response.sendRedirect(request.getContextPath() + "/admin/subjects?error=invalidId");
+        }
+    }
+
+    private void updateSubject(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            int subjectId = getIntParameter(request, "id", 0);
+            
+            if (subjectId <= 0) {
+                request.getSession().setAttribute("errorMessage", "Invalid subject ID!");
+                response.sendRedirect(request.getContextPath() + "/admin/subjects");
+                return;
+            }
+
+            // Get the existing subject
+            Subject existingSubject = subjectDAO.findById(subjectId);
+            if (existingSubject == null) {
+                request.getSession().setAttribute("errorMessage", "Subject not found!");
+                response.sendRedirect(request.getContextPath() + "/admin/subjects");
+                return;
+            }
+
+            // Get form parameters
+            String title = request.getParameter("title");
+            String tagLine = request.getParameter("tag_line");
+            String briefInfo = request.getParameter("brief_info");
+            String description = request.getParameter("description");
+            String status = request.getParameter("status");
+            String featuredFlag = request.getParameter("featured_flag");
+            int categoryId = getIntParameter(request, "category_id", 0);
+
+            // Validate required fields
+            if (title == null || title.trim().isEmpty() || categoryId == 0) {
+                request.getSession().setAttribute("errorMessage", "Course name and category are required!");
+                response.sendRedirect(request.getContextPath() + "/admin/subject/edit?id=" + subjectId);
+                return;
+            }
+
+            // Check if title already exists for another subject
+            if (!title.trim().equalsIgnoreCase(existingSubject.getTitle()) && subjectDAO.existsByTitle(title.trim())) {
+                request.getSession().setAttribute("errorMessage", "Course name already exists! Please choose another name.");
+                response.sendRedirect(request.getContextPath() + "/admin/subject/edit?id=" + subjectId);
+                return;
+            }
+
+            // Update the subject
+            Subject updatedSubject = Subject.builder()
+                    .id(subjectId)
+                    .title(title.trim())
+                    .tag_line(tagLine != null ? tagLine.trim() : null)
+                    .brief_info(briefInfo != null ? briefInfo.trim() : null)
+                    .description(description != null ? description.trim() : null)
+                    .thumbnail_url(existingSubject.getThumbnail_url()) // Keep existing thumbnail_url
+                    .status(status != null ? status : "draft")
+                    .featured_flag("on".equals(featuredFlag))
+                    .category_id(categoryId)
+                    .owner_id(existingSubject.getOwner_id()) // Keep existing owner
+                    .created_at(existingSubject.getCreated_at()) // Keep original creation date
+                    .updated_at(new java.util.Date()) // Update modification date
+                    .created_by(existingSubject.getCreated_by()) // Keep original creator
+                    .updated_by(1) // TODO: Get from session
+                    .build();
+
+            // Update the subject
+            boolean success = subjectDAO.update(updatedSubject);
+
+            if (success) {
+                // Clear existing media for this subject before adding new ones
+                // This prevents accumulation of old/invalid media
+                System.out.println("Clearing existing media for subject ID: " + subjectId);
+                boolean deleted = mediaDAO.deleteBySubjectId(subjectId);
+                System.out.println("Media deletion result: " + deleted);
+                
+                // Handle media uploads if files were provided
+                handleMediaUploads(request, subjectId);
+                
+                request.getSession().setAttribute("successMessage", 
+                    "Course '" + title + "' updated successfully!");
+                response.sendRedirect(request.getContextPath() + "/admin/subjects?success=updated&id=" + subjectId);
+            } else {
+                request.getSession().setAttribute("errorMessage", "Failed to update course. Please try again.");
+                response.sendRedirect(request.getContextPath() + "/admin/subject/edit?id=" + subjectId);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.getSession().setAttribute("errorMessage", "System error: " + e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/admin/subjects");
+        }
+    }
+
+    private void deleteSubject(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            int subjectId = getIntParameter(request, "id", 0);
+            
+            if (subjectId <= 0) {
+                request.getSession().setAttribute("errorMessage", "Invalid subject ID!");
+                response.sendRedirect(request.getContextPath() + "/admin/subjects");
+                return;
+            }
+
+            // Get the subject to delete
+            Subject subject = subjectDAO.findById(subjectId);
+            if (subject == null) {
+                request.getSession().setAttribute("errorMessage", "Subject not found!");
+                response.sendRedirect(request.getContextPath() + "/admin/subjects");
+                return;
+            }
+
+            // Check for active registrations
+            int activeRegistrations = registrationDAO.countActiveRegistrationsBySubjectId(subjectId);
+            if (activeRegistrations > 0) {
+                request.getSession().setAttribute("errorMessage", 
+                    "Cannot delete course '" + subject.getTitle() + "' because it has " + 
+                    activeRegistrations + " active registration(s). Please deactivate or transfer these registrations first.");
+                response.sendRedirect(request.getContextPath() + "/admin/subjects?error=hasActiveRegistrations");
+                return;
+            }
+
+            // Delete associated media first
+            boolean mediaDeleted = mediaDAO.deleteBySubjectId(subjectId);
+            if (!mediaDeleted) {
+                System.out.println("Failed to delete media for subject ID: " + subjectId);
+                request.getSession().setAttribute("errorMessage", "Failed to delete associated media files. Course deletion aborted.");
+                response.sendRedirect(request.getContextPath() + "/admin/subjects");
+                return;
+            } else {
+                System.out.println("Successfully deleted all media for subject ID: " + subjectId);
+            }
+
+            // Proceed with deletion
+            boolean success = subjectDAO.delete(subject);
+
+            if (success) {
+                request.getSession().setAttribute("successMessage", 
+                    "Course '" + subject.getTitle() + "' deleted successfully!");
+                response.sendRedirect(request.getContextPath() + "/admin/subjects?success=deleted");
+            } else {
+                request.getSession().setAttribute("errorMessage", "Failed to delete course. Please try again.");
+                response.sendRedirect(request.getContextPath() + "/admin/subjects");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.getSession().setAttribute("errorMessage", "System error: " + e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/admin/subjects");
+        }
+    }
+
+    private void deleteMedia(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            String mediaIdStr = request.getParameter("mediaId");
+            if (mediaIdStr == null || mediaIdStr.trim().isEmpty()) {
+                response.getWriter().write("error");
+                return;
+            }
+
+            int mediaId = Integer.parseInt(mediaIdStr);
+            
+            // Get the media record first
+            Media media = mediaDAO.findById(mediaId);
+            if (media == null) {
+                response.getWriter().write("error");
+                return;
+            }
+
+            // Delete the media record from database
+            boolean deleted = mediaDAO.delete(media);
+            
+            if (deleted) {
+                // Optionally delete the physical file if it's a local file
+                String link = media.getLink();
+                if (link != null && link.contains("/media/")) {
+                    try {
+                        String fileName = link.substring(link.lastIndexOf("/") + 1);
+                        String filePath = request.getServletContext().getRealPath("/media/" + fileName);
+                        java.io.File file = new java.io.File(filePath);
+                        if (file.exists()) {
+                            file.delete();
+                            System.out.println("Deleted physical file: " + filePath);
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Could not delete physical file: " + e.getMessage());
+                        // Continue anyway, database record is deleted
+                    }
+                }
+                
+                response.getWriter().write("success");
+                System.out.println("Successfully deleted media ID: " + mediaId);
+            } else {
+                response.getWriter().write("error");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.getWriter().write("error");
+        }
+    }
+
+    /**
+     * Clean up invalid media records for a subject
+     * Removes media records where the linked file doesn't exist
+     */
+    private void cleanupInvalidMedia(int subjectId) {
+        try {
+            List<Media> allMedia = mediaDAO.findBySubjectId(subjectId);
+            for (Media media : allMedia) {
+                String link = media.getLink();
+                if (link != null && link.startsWith("/")) {
+                    // This is a local file, check if it exists
+                    String realPath = link.replace("/media/", "");
+                    // Could add file existence check here if needed
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error cleaning up invalid media: " + e.getMessage());
+        }
     }
 
     // In SubjectController

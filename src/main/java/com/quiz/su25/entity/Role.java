@@ -19,8 +19,6 @@ import lombok.ToString;
 
 public class Role {
     private Integer id;
-    private String role_name;
-    private String description;
-    private Date created_at;
+    private String name;  // Đổi từ role_name thành name để khớp với database
     
 }
