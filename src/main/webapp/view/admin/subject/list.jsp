@@ -203,7 +203,7 @@
   <!-- dashboard-area -->
   <section class="dashboard__area section-pb-120">
     <div class="dashboard__bg"><img src="${pageContext.request.contextPath}/assets/img/bg/dashboard_bg.jpg" alt=""></div>
-    <div class="container">
+    <div class="container-fluid" style="padding: 0 20px;">
       <div class="dashboard__inner-wrap">
         <div class="row">
           <div class="col-lg-3">
@@ -287,9 +287,9 @@
                   </tr>
                   </thead>
                   <tbody>
-                  <c:forEach var="subject" items="${subjects}">
+                  <c:forEach var="subject" items="${subjects}" varStatus="status">
                     <tr>
-                      <td>${subject.id}</td>
+                      <td>${(page - 1) * pageSize + status.index + 1}</td>
                       <td>
                         <div class="dashboard__quiz-info">
                           <h6 class="title">${subject.title}</h6>
@@ -396,22 +396,28 @@
   /* Action buttons styling */
   .dashboard__review-action {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-start;
   }
 
   .subject-action-link {
-    padding: 6px 12px;
+    padding: 6px 10px;
     border-radius: 4px;
     text-decoration: none;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
     transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
     border: none;
     cursor: pointer;
+    white-space: nowrap;
+    min-width: 60px;
+    height: 28px;
   }
 
   .subject-action-link.view-link {
@@ -444,6 +450,27 @@
     transform: translateY(-1px);
   }
 
+  /* Table styling */
+  .dashboard__review-table {
+    overflow-x: auto;
+  }
+
+  .dashboard__review-table table {
+    width: 100%;
+    min-width: 800px;
+  }
+
+  .dashboard__review-table th {
+    white-space: nowrap;
+    padding: 12px 8px;
+    vertical-align: middle;
+  }
+
+  .dashboard__review-table td {
+    padding: 12px 8px;
+    vertical-align: middle;
+  }
+
   /* Status badges */
   .status-badge {
     padding: 4px 8px;
@@ -466,6 +493,44 @@
   .status-badge.status-draft {
     background-color: #fff3cd;
     color: #856404;
+  }
+
+  /* Full width layout adjustments */
+  @media (min-width: 1200px) {
+    .container-fluid {
+      padding-left: 30px !important;
+      padding-right: 30px !important;
+    }
+  }
+
+  @media (min-width: 1400px) {
+    .container-fluid {
+      padding-left: 40px !important;
+      padding-right: 40px !important;
+    }
+  }
+
+  /* Mobile responsive for action buttons */
+  @media (max-width: 768px) {
+    .dashboard__review-action {
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .subject-action-link {
+      width: 100%;
+      justify-content: center;
+      min-width: auto;
+    }
+
+    .dashboard__review-table {
+      font-size: 12px;
+    }
+
+    .dashboard__review-table th,
+    .dashboard__review-table td {
+      padding: 8px 4px;
+    }
   }
 </style>
 </body>

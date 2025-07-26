@@ -24,6 +24,8 @@
       box-shadow: 0 5px 20px rgba(0,0,0,0.1);
       overflow: hidden;
       margin-bottom: 30px;
+      margin-left: 0;
+      margin-right: 0;
     }
 
     .subject-hero {
@@ -77,6 +79,27 @@
       font-weight: 600;
     }
 
+    .subject-description-full {
+      background: #f8f9fa;
+      padding: 30px;
+      border-radius: 10px;
+      border-left: 4px solid #3f78e0;
+      margin-bottom: 30px;
+      width: 100%;
+    }
+
+    .subject-description-full h3 {
+      color: #3f78e0;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .subject-description-full p {
+      line-height: 1.6;
+      color: #333;
+      margin: 0;
+    }
+
     .price-packages {
       background: #fff;
       border: 2px solid #e9ecef;
@@ -94,8 +117,8 @@
     .package-card {
       background: #f8f9fa;
       border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 15px;
+      padding: 15px;
+      margin-bottom: 12px;
       border: 1px solid #e9ecef;
       transition: all 0.3s ease;
     }
@@ -146,17 +169,18 @@
     }
 
     .package-name {
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 600;
       color: #333;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .package-price {
       display: flex;
       align-items: center;
-      gap: 15px;
-      margin-bottom: 15px;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
     }
 
     .original-price {
@@ -166,7 +190,7 @@
     }
 
     .sale-price {
-      font-size: 1.5rem;
+      font-size: 1.3rem;
       font-weight: 700;
       color: #28a745;
     }
@@ -174,17 +198,17 @@
     .savings-badge {
       background: #dc3545;
       color: white;
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 0.8rem;
+      padding: 3px 6px;
+      border-radius: 10px;
+      font-size: 0.75rem;
       font-weight: 600;
-      margin-left: 10px;
+      margin-left: 8px;
     }
 
     .package-duration {
       color: #6c757d;
-      font-size: 0.9rem;
-      margin-bottom: 15px;
+      font-size: 0.85rem;
+      margin-bottom: 0;
     }
 
     .register-btn {
@@ -403,6 +427,8 @@
       box-shadow: 0 5px 20px rgba(0,0,0,0.1);
       padding: 25px;
       margin-bottom: 30px;
+      margin-left: 0;
+      margin-right: 0;
     }
 
     .sidebar-section {
@@ -662,6 +688,21 @@
         justify-content: center;
       }
     }
+
+    /* Full width layout adjustments */
+    @media (min-width: 1200px) {
+      .container-fluid {
+        padding-left: 30px !important;
+        padding-right: 30px !important;
+      }
+    }
+
+    @media (min-width: 1400px) {
+      .container-fluid {
+        padding-left: 40px !important;
+        padding-right: 40px !important;
+      }
+    }
   </style>
 </head>
 
@@ -682,7 +723,7 @@
   <!-- dashboard-area -->
   <section class="dashboard__area section-pb-120">
     <div class="dashboard__bg"><img src="${pageContext.request.contextPath}/view/common/img/bg/dashboard_bg.jpg" alt=""></div>
-    <div class="container">
+    <div class="container-fluid" style="padding: 0 20px;">
       <div class="dashboard__inner-wrap">
         <div class="row">
           <!-- Sidebar -->
@@ -767,7 +808,7 @@
           </div>
 
           <!-- Main Content -->
-          <div class="col-lg-9">
+          <div class="col-lg-6">
             <!-- Back Button -->
             <a href="${pageContext.request.contextPath}/admin/subjects" class="back-btn">
               <i class="fas fa-arrow-left"></i> Back to Subjects
@@ -784,61 +825,6 @@
 
               <!-- Content Section -->
               <div class="subject-content">
-                <div class="subject-info-grid">
-                  <!-- Description -->
-                  <div class="subject-description">
-                    <h3><i class="fas fa-info-circle"></i> Description</h3>
-                    <p>${subject.description != null ? subject.description : 'No description available for this subject.'}</p>
-                  </div>
-
-                  <!-- Price Packages -->
-                  <div class="price-packages">
-                    <h3><i class="fas fa-tags"></i> Best Value Package</h3>
-                    <c:choose>
-                      <c:when test="${lowestPricePackage != null}">
-                        <div class="package-card featured-package">
-                          <div class="package-badge">
-                            <i class="fas fa-star"></i> Best Deal
-                          </div>
-                          <div class="package-name">${lowestPricePackage.name}</div>
-                          <div class="package-price">
-                            <span class="original-price">
-                              <fmt:formatNumber value="${lowestPricePackage.list_price}" type="currency" currencySymbol="$" />
-                            </span>
-                            <span class="sale-price">
-                              <fmt:formatNumber value="${lowestPricePackage.sale_price}" type="currency" currencySymbol="$" />
-                            </span>
-                            <c:set var="savings" value="${lowestPricePackage.list_price - lowestPricePackage.sale_price}" />
-                            <c:if test="${savings > 0}">
-                              <span class="savings-badge">
-                                Save <fmt:formatNumber value="${savings}" type="currency" currencySymbol="$" />
-                              </span>
-                            </c:if>
-                          </div>
-                          <div class="package-duration">
-                            <i class="fas fa-clock"></i> ${lowestPricePackage.access_duration_months} months access
-                          </div>
-                          <c:if test="${lowestPricePackage.description != null}">
-                            <div class="package-description">
-                              <p>${lowestPricePackage.description}</p>
-                            </div>
-                          </c:if>
-                          <a href="${pageContext.request.contextPath}/admin/subject/register?id=${subject.id}&packageId=${lowestPricePackage.id}" 
-                             class="register-btn">
-                            <i class="fas fa-user-plus"></i> Register Now
-                          </a>
-                        </div>
-                      </c:when>
-                      <c:otherwise>
-                        <div class="package-card">
-                          <div class="package-name">No packages available</div>
-                          <p style="color: #6c757d; text-align: center;">No price packages are currently available.</p>
-                        </div>
-                      </c:otherwise>
-                    </c:choose>
-                  </div>
-                </div>
-
                 <!-- Media Gallery -->
                 <div class="media-gallery">
                   <!-- Images Section -->
@@ -925,9 +911,62 @@
                     </c:choose>
                   </div>
                 </div>
+
+                <!-- Description Section - Full Width -->
+                <div class="subject-description-full">
+                  <h3><i class="fas fa-info-circle"></i> Description</h3>
+                  <p>${subject.description != null ? subject.description : 'No description available for this subject.'}</p>
+                </div>
               </div>
             </div>
           </div>
+
+                        <!-- Right Sidebar - Price Packages -->
+              <div class="col-lg-3">
+                <div class="subject-sidebar">
+                  <!-- Price Packages Section -->
+                  <div class="sidebar-section">
+                    <h4><i class="fas fa-tags"></i> Price Packages</h4>
+                    <c:choose>
+                      <c:when test="${not empty subjectPricePackages}">
+                        <c:forEach var="pkg" items="${subjectPricePackages}" varStatus="status">
+                          <div class="package-card ${status.index == 0 ? 'featured-package' : ''}">
+                            <c:if test="${status.index == 0}">
+                              <div class="package-badge">
+                                <i class="fas fa-star"></i> Best Deal
+                              </div>
+                            </c:if>
+                            <div class="package-name">${pkg.name}</div>
+                            <div class="package-price">
+                              <span class="original-price">
+                                <fmt:formatNumber value="${pkg.list_price}" type="currency" currencySymbol="$" />
+                              </span>
+                              <span class="sale-price">
+                                <fmt:formatNumber value="${pkg.sale_price}" type="currency" currencySymbol="$" />
+                              </span>
+                              <c:set var="savings" value="${pkg.list_price - pkg.sale_price}" />
+                              <c:if test="${savings > 0}">
+                                <span class="savings-badge">
+                                  Save <fmt:formatNumber value="${savings}" type="currency" currencySymbol="$" />
+                                </span>
+                              </c:if>
+                            </div>
+                            <div class="package-duration">
+                              <i class="fas fa-clock"></i> ${pkg.access_duration_months} months access
+                            </div>
+                          </div>
+                        </c:forEach>
+                      </c:when>
+                      <c:otherwise>
+                        <div class="package-card">
+                          <div class="package-name">No packages available</div>
+                          <p style="color: #6c757d; text-align: center;">No price packages are currently available for this course.</p>
+                        </div>
+                      </c:otherwise>
+                    </c:choose>
+                  </div>
+                </div>
+              </div>
         </div>
       </div>
     </div>

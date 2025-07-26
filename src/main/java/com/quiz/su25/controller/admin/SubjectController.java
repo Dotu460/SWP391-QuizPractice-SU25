@@ -172,7 +172,10 @@ public class SubjectController extends HttpServlet {
             Subject subject = subjectDAO.findById(subjectId);
 
             if (subject != null) {
-                // Get the lowest price package from all available packages
+                // Get all price packages for this subject
+                List<PricePackage> subjectPricePackages = packageDAO.findBySubjectId(subjectId);
+                
+                // Get the lowest price package from all available packages (for backward compatibility)
                 PricePackage lowestPricePackage = packageDAO.findLowestPricePackage();
 
                 // Get the subject's category
@@ -197,6 +200,7 @@ public class SubjectController extends HttpServlet {
                 String searchTerm = request.getParameter("search");
 
                 request.setAttribute("subject", subject);
+                request.setAttribute("subjectPricePackages", subjectPricePackages);
                 request.setAttribute("lowestPricePackage", lowestPricePackage);
                 request.setAttribute("category", category);
                 request.setAttribute("categories", categories);
