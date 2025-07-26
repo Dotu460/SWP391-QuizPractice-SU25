@@ -16,38 +16,7 @@
 
   <!-- Custom CSS for this page -->
   <style>
-    /* Đảm bảo container chiếm full width */
-    .container {
-      max-width: 100%;
-      width: 100%;
-      padding: 0;
-      margin: 0;
-    }
-
-    .dashboard__inner-wrap {
-      width: 100%;
-      padding: 0;
-    }
-
-    .dashboard__content-wrap {
-      width: 100%;
-      padding: 0 15px;
-      background: none !important;
-      border: none !important;
-      box-shadow: none !important;
-      border-radius: 0 !important;
-    }
-
-    /* Xóa bỏ viền của các phần tử con nếu có */
-    .dashboard__content-wrap > * {
-      border: none;
-      box-shadow: none;
-    }
-
     .dashboard__content-title {
-      background: none;
-      border: none;
-      box-shadow: none;
       padding: 20px 0;
     }
 
@@ -233,7 +202,7 @@
 <main class="main-area">
   <!-- dashboard-area -->
   <section class="dashboard__area section-pb-120">
-    <div class="dashboard__bg"><img src="assets/img/bg/dashboard_bg.jpg" alt=""></div>
+    <div class="dashboard__bg"><img src="${pageContext.request.contextPath}/assets/img/bg/dashboard_bg.jpg" alt=""></div>
     <div class="container">
       <div class="dashboard__inner-wrap">
         <div class="row">
@@ -247,6 +216,21 @@
               <div class="dashboard__content-title">
                 <h4 class="title">Subject Management</h4>
               </div>
+
+              <!-- Success/Error Messages -->
+              <c:if test="${not empty sessionScope.successMessage}">
+                <div class="alert alert-success" style="margin-bottom: 20px; padding: 15px; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 5px;">
+                  <i class="fas fa-check-circle"></i> ${sessionScope.successMessage}
+                </div>
+                <c:remove var="successMessage" scope="session"/>
+              </c:if>
+
+              <c:if test="${not empty sessionScope.errorMessage}">
+                <div class="alert alert-danger" style="margin-bottom: 20px; padding: 15px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 5px;">
+                  <i class="fas fa-exclamation-circle"></i> ${sessionScope.errorMessage}
+                </div>
+                <c:remove var="errorMessage" scope="session"/>
+              </c:if>
 
               <!-- Filters Section -->
               <div class="dashboard__subjects-filter">
@@ -339,8 +323,18 @@
                       </td>
                       <td>
                         <div class="dashboard__review-action">
-<%--                          <a href="${pageContext.request.contextPath}/admin/subject/details?id=${subject.id}" class="subject-action-link edit-link" title="Edit"><i class="skillgro-edit"></i> Edit</a>--%>
-                          <a href="${pageContext.request.contextPath}/admin/subject/view?id=${subject.id}" class="subject-action-link view-link" title="View"><i class="skillgro-book-2"></i> View</a>
+                          <a href="${pageContext.request.contextPath}/admin/subject/view?id=${subject.id}" class="subject-action-link view-link" title="View">
+                            <i class="skillgro-book-2"></i> View
+                          </a>
+                          <a href="${pageContext.request.contextPath}/admin/subject/edit?id=${subject.id}" class="subject-action-link edit-link" title="Edit">
+                            <i class="skillgro-edit"></i> Edit
+                          </a>
+                          <form method="post" style="display: inline;" onsubmit="return confirmDelete('${subject.title}', '${subject.id}');">
+                            <input type="hidden" name="id" value="${subject.id}">
+                            <button type="submit" formaction="${pageContext.request.contextPath}/admin/subject/delete" class="subject-action-link delete-link" title="Delete">
+                              <i class="fas fa-trash"></i> Delete
+                            </button>
+                          </form>
                         </div>
                       </td>
                     </tr>
@@ -388,6 +382,91 @@
   $(document).ready(function() {
     $('#category, #status').select2();
   });
+
+  // Confirmation dialog for deleting subjects
+  function confirmDelete(subjectTitle, subjectId) {
+    var message = 'Are you sure you want to delete the course "' + subjectTitle + '"?\n\nThis action cannot be undone. If this course has active registrations, the deletion will be blocked.';
+    return confirm(message);
+  }
+
+
 </script>
+
+<style>
+  /* Action buttons styling */
+  .dashboard__review-action {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .subject-action-link {
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .subject-action-link.view-link {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .subject-action-link.view-link:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+  }
+
+  .subject-action-link.edit-link {
+    background-color: #28a745;
+    color: white;
+  }
+
+  .subject-action-link.edit-link:hover {
+    background-color: #1e7e34;
+    transform: translateY(-1px);
+  }
+
+  .subject-action-link.delete-link {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  .subject-action-link.delete-link:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+  }
+
+  /* Status badges */
+  .status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .status-badge.status-active {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  .status-badge.status-inactive {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+
+  .status-badge.status-draft {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+</style>
 </body>
 </html>

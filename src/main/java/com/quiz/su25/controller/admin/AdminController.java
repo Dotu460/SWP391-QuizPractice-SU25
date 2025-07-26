@@ -98,7 +98,14 @@ public class AdminController extends HttpServlet {
             User user = userDAO.findById(userId);
 
             if (user != null) {
+                // Fetch role information
+                Role role = null;
+                if (user.getRole_id() != null) {
+                    role = roleDAO.findById(user.getRole_id());
+                }
+                
                 request.setAttribute("user", user);
+                request.setAttribute("userRole", role);
                 request.getRequestDispatcher("/view/admin/user-view.jsp").forward(request, response);
             } else {
                 response.sendRedirect(request.getContextPath() + "/admin/users?error=userNotFound");
@@ -122,9 +129,17 @@ public class AdminController extends HttpServlet {
                 User user = userDAO.findById(userId);
 
                 if (user != null) {
+                    // Fetch role information for display
+                    Role userRole = null;
+                    if (user.getRole_id() != null) {
+                        userRole = roleDAO.findById(user.getRole_id());
+                    }
+                    
                     request.setAttribute("user", user);
+                    request.setAttribute("userRole", userRole);
                     request.setAttribute("action", "update");
-                    request.getRequestDispatcher("/view/admin/user-form.jsp").forward(request, response);
+                    // Use admin-specific form that only allows role and status editing
+                    request.getRequestDispatcher("/view/admin/user-admin-edit.jsp").forward(request, response);
                 } else {
                     response.sendRedirect(request.getContextPath() + "/admin/users?error=userNotFound");
                 }
@@ -161,22 +176,48 @@ public class AdminController extends HttpServlet {
     }
 
     private void updateUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        User user = getUserFromRequest(request);
-
-        if (user != null && user.getId() != null) {
-            boolean success = userDAO.update(user);
-
-            if (success) {
-                response.sendRedirect(request.getContextPath() + "/admin/users?success=userUpdated");
+        int userId = getIntParameter(request, "userId", 0);
+        
+        if (userId > 0) {
+            User existingUser = userDAO.findById(userId);
+            
+            if (existingUser != null) {
+                // Admin can only update role and status
+                String newRoleIdStr = request.getParameter("roleId");
+                String newStatus = request.getParameter("status");
+                
+                if (newRoleIdStr != null && !newRoleIdStr.isEmpty()) {
+                    try {
+                        int newRoleId = Integer.parseInt(newRoleIdStr);
+                        // Validate role ID - only allow existing roles (2 or 3)
+                        if (newRoleId == 2 || newRoleId == 3) {
+                            existingUser.setRole_id(newRoleId);
+                        }
+                    } catch (NumberFormatException e) {
+                        // Keep existing role if invalid input
+                    }
+                }
+                
+                if (newStatus != null && !newStatus.isEmpty()) {
+                    existingUser.setStatus(newStatus);
+                }
+                
+                boolean success = userDAO.update(existingUser);
+                
+                if (success) {
+                    response.sendRedirect(request.getContextPath() + "/admin/users?success=userUpdated");
+                } else {
+                    request.setAttribute("error", "Failed to update user");
+                    request.setAttribute("user", existingUser);
+                    request.setAttribute("action", "update");
+                    request.setAttribute("roles", roleDAO.findAll());
+                    request.getRequestDispatcher("/view/admin/user-admin-edit.jsp").forward(request, response);
+                }
             } else {
-                request.setAttribute("error", "Failed to update user");
-                request.setAttribute("user", user);
-                request.setAttribute("action", "update");
-                request.setAttribute("roles", roleDAO.findAll());
-                request.getRequestDispatcher("/view/admin/user-form.jsp").forward(request, response);
+                response.sendRedirect(request.getContextPath() + "/admin/users?error=userNotFound");
             }
         } else {
-            response.sendRedirect(request.getContextPath() + "/admin/users?error=invalidData");
+            response.sendRedirect(request.getContextPath() + "/admin/users?error=invalidId");
         }
     }
 

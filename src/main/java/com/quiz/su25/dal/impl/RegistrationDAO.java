@@ -934,4 +934,28 @@ public class RegistrationDAO extends DBContext implements I_DAO<Registration> {
         }
     }
 
+    /**
+     * Counts the number of active registrations for a specific subject
+     * @param subjectId ID of the subject to check
+     * @return Number of active registrations for the subject
+     */
+    public int countActiveRegistrationsBySubjectId(Integer subjectId) {
+        String sql = "SELECT COUNT(*) FROM registrations WHERE subject_id = ? AND status = 'active'";
+        int count = 0;
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, subjectId);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                count = resultSet.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error countActiveRegistrationsBySubjectId at class RegistrationDAO: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+        return count;
+    }
+
 }
