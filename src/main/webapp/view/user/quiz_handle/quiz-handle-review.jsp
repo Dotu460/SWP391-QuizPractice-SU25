@@ -22,20 +22,181 @@
         
         <!-- All styles from quiz-handle.jsp -->
         <style>
-            .header-top-wrap{background:#1A1B3D;padding:8px 0;color:#fff;position:relative}.header-logo{position:relative;z-index:2;display:flex;align-items:center}.header-logo a{display:block;width:auto;height:100%}.header-logo img{max-height:50px;width:auto;height:auto;display:block;object-fit:contain;filter:brightness(0) invert(1)}.header-top{display:flex;align-items:center;justify-content:space-between;min-height:60px}.header-right{display:flex;align-items:center}.user-menu{position:relative}.user-icon{width:40px;height:40px;border-radius:50%;background:#5751E1;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s ease}.user-icon i{color:#fff;font-size:18px}.user-icon:hover{background:#7A6DC0;transform:translateY(-1px)}.dropdown-menu{position:absolute;top:120%;right:0;width:280px;background:#fff;border-radius:8px;box-shadow:0 5px 15px rgba(0,0,0,.15);opacity:0;visibility:hidden;transform:translateY(10px);transition:all .3s ease;z-index:1000}.dropdown-menu.show{opacity:1;visibility:visible;transform:translateY(0)}.dropdown-header{padding:16px;border-bottom:1px solid #eee}.user-info{display:flex;align-items:center;gap:12px}.user-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden}.user-avatar img{width:100%;height:100%;object-fit:cover}.user-details{display:flex;flex-direction:column}.user-name{font-weight:600;color:#1A1B3D;font-size:14px}.user-email{color:#666;font-size:12px}.guest-info{padding:8px 0;color:#666;font-size:14px}.dropdown-body{padding:8px 0}.dropdown-item{display:flex;align-items:center;padding:10px 16px;color:#1A1B3D;text-decoration:none;transition:background-color .3s ease}.dropdown-item:hover{background-color:#f8f9fa}.dropdown-item i{width:20px;margin-right:12px;font-size:16px}.dropdown-item span{font-size:14px}.text-danger{color:#dc3545!important}.dropdown-divider{height:1px;background-color:#eee;margin:8px 0}
-            .question-header{padding:20px 0;border-bottom:1px solid #eee}.question-info{display:flex;justify-content:space-between;align-items:center;font-size:16px;color:#1A1B3D}.question-number{font-weight:500}.question-id{color:#1A1B3D}.navigation-footer{display:flex;justify-content:space-between;align-items:center;padding:20px 0;margin-top:30px;border-top:1px solid #eee}.btn-review-back{background:#5751E1;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .3s ease; text-decoration: none;}.btn-review-back:hover{background:#7A6DC0;transform:translateY(-1px)}.navigation-buttons{display:flex;flex-direction:column;align-items:flex-end;gap:10px;margin-left:auto;width:auto}.action-buttons{display:flex;gap:8px}.nav-buttons{display:flex;justify-content:flex-end;width:100%}.nav-group{display:flex;gap:8px;width:fit-content}.btn-action,.btn-nav{background:#fff;border:2px solid #5751E1;border-radius:8px;padding:8px 16px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all .3s ease;color:#1A1B3D;width:100px;justify-content:center}.btn-peek:hover{background:#f0f0f0}.btn-prev{justify-content:flex-start}.btn-next{justify-content:flex-end}.btn-nav:hover{background:#8B7FD2;color:#fff}.peek-popup{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1000;justify-content:center;align-items:center}.peek-popup.show{display:flex}.peek-popup .popup-content{background:#fff;border-radius:12px;width:90%;max-width:500px;padding:24px;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.15)}.peek-popup .popup-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid #eee}.peek-popup .popup-header h3{font-size:20px;font-weight:600;color:#1A1B3D;margin:0}.peek-popup .close-btn{background:0 0;border:none;font-size:20px;color:#666;cursor:pointer;padding:4px;transition:color .3s ease}.peek-popup .close-btn:hover{color:#1A1B3D}.peek-popup .explanation-text{font-size:16px;line-height:1.6;color:#4B5563;padding:16px;background:#f8f9fa;border-radius:8px}
-            .question-content{margin:40px 0;padding:30px;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}.question-text{font-size:18px;color:#1A1B3D;line-height:1.6;margin-bottom:30px;font-weight:500}.answers-container{display:flex;flex-direction:column;gap:16px}.answer-option{position:relative}
-            
-            /* Media content styles */
-            .media-content {
-                margin-top: 20px;
+            .package-status {
+                display: inline-block;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: 500;
+            }
+
+            .status-active {
+                background-color: #e6f7e6;
+                color: #28a745;
+            }
+
+            .status-inactive {
+                background-color: #f8d7da;
+                color: #dc3545;
+            }
+
+            .table-actions {
+                display: flex;
+                gap: 8px;
+            }
+
+            .table-actions a,button {
+                padding: 4px 8px;
+                border-radius: 4px;
+                border: none;
+                color: white;
+                font-size: 12px;
+                cursor: pointer;
+            }
+
+            .action-edit {
+                background-color: #17a2b8;
+            }
+
+            .action-delete {
+                background-color: #dc3545;
+            }
+
+            .filter-form {
+                background-color: #f8f9fa;
+                padding: 15px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+            }
+
+            .settings-btn {
+                display: none;
+            }
+
+            .add-btn {
+                background-color: #28a745;
+                color: white;
+                border: none;
+                padding: 8px 15px;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+
+            .modal-header {
+                background-color: #f8f9fa;
+                border-bottom: 1px solid #dee2e6;
+            }
+
+            .column-option {
+                display: none;
+            }
+
+            .dashboard__content-area {
+                background: white;
+                padding: 25px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            }
+
+            /* User Menu Styles */
+            .user-menu {
+                position: relative;
             }
             
-            .media-content img,
-            .media-content video {
-                max-width: 100%;
-                height: auto;
+            .user-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: #5751E1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            
+            .user-icon i {
+                color: white;
+                font-size: 18px;
+            }
+            
+            .user-icon:hover {
+                background: #7A6DC0;
+                transform: translateY(-1px);
+            }
+            
+            /* Dropdown Menu */
+            .dropdown-menu {
+                position: absolute;
+                top: 120%;
+                right: 0;
+                width: 280px;
+                background: white;
                 border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+                opacity: 0;
+                visibility: hidden;
+                transform: translateY(10px);
+                transition: all 0.3s ease;
+                z-index: 1000;
+            }
+            
+            .dropdown-menu.show {
+                opacity: 1;
+                visibility: visible;
+                transform: translateY(0);
+            }
+            
+            /* Dropdown Header */
+            .dropdown-header {
+                padding: 16px;
+                border-bottom: 1px solid #eee;
+            }
+            
+            .user-info {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            
+            .user-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                overflow: hidden;
+            }
+            
+            .user-avatar img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            
+            .user-details {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .user-name {
+                font-weight: 600;
+                color: #1A1B3D;
+                font-size: 14px;
+            }
+            
+            .user-email {
+                color: #666;
+                font-size: 12px;
+            }
+            
+            .guest-info {
+                padding: 8px 0;
+                color: #666;
+                font-size: 14px;
+            }
+            
+            /* Dropdown Body */
+            .dropdown-body {
+                padding: 8px 0;
             }
             
             /* --- Improved Review Mode Styles --- */
@@ -146,6 +307,108 @@
                 color: #6c757d;
                 font-style: italic;
             }
+
+            /* Question Content Styles */
+            .question-content {
+                margin: 40px 0;
+                padding: 30px;
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            }
+
+            .question-text {
+                font-size: 22px;
+                color: #5751e1;
+                line-height: 1.6;
+                margin-bottom: 30px;
+                font-weight: 700;
+                background: #f6f7fb;
+                border-radius: 8px;
+                padding: 18px 24px;
+                border-bottom: 2.5px solid #8B7FD2;
+            }
+
+            .answers-container {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .answer-option {
+                position: relative;
+            }
+
+            .answer-radio {
+                position: absolute;
+                opacity: 0;
+                cursor: pointer;
+            }
+
+            .answer-label {
+                display: flex;
+                align-items: center;
+                padding: 16px 20px;
+                background: #f8f9fa;
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .answer-text {
+                font-size: 16px;
+                color: #1A1B3D;
+            }
+
+            /* Radio button custom style */
+            .answer-label:before {
+                content: '';
+                width: 20px;
+                height: 20px;
+                border: 2px solid #8B7FD2;
+                border-radius: 50%;
+                margin-right: 12px;
+                transition: all 0.3s ease;
+            }
+
+            /* Selected state */
+            .answer-radio:checked + .answer-label {
+                border-color: #8B7FD2;
+                background: #f8f7ff;
+            }
+
+            .answer-radio:checked + .answer-label:before {
+                background: #8B7FD2;
+                box-shadow: inset 0 0 0 4px #fff;
+            }
+
+            /* Hover state */
+            .answer-label:hover {
+                border-color: #8B7FD2;
+                background: #f8f7ff;
+                transform: translateY(-1px);
+            }
+
+            @media (max-width: 768px) {
+                .question-content {
+                    padding: 20px;
+                    margin: 20px 0;
+                }
+
+                .question-text {
+                    font-size: 16px;
+                    margin-bottom: 20px;
+                }
+
+                .answer-text {
+                    font-size: 14px;
+                }
+
+                .answer-label {
+                    padding: 12px 16px;
+                }
+            }
             
             /* HTML Media Content Styles */
             .html-media-content {
@@ -182,8 +445,129 @@
                 max-width: 100%;
                 height: auto;
             }
+
+            /* Question Header Styles */
+            .question-header {
+                background: #f6f7fb;
+                border-radius: 16px 16px 0 0;
+                box-shadow: 0 2px 8px rgba(87,81,225,0.04);
+                margin-bottom: 0;
+                padding: 24px 0 18px 0;
+                width: 100vw;
+                max-width: 100vw;
+                position: relative;
+                left: 50%;
+                right: 50%;
+                margin-left: -50vw;
+                margin-right: -50vw;
+            }
+
+            .settings-icon {
+                background: #8B7FD2;
+                color: #fff;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                box-shadow: 0 2px 8px rgba(87,81,225,0.10);
+                transition: background 0.2s;
+            }
+
+            .settings-icon:hover {
+                background: #5751e1;
+            }
+
+            .question-header .question-info {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+                padding: 0 32px;
+                box-sizing: border-box;
+            }
             
             /* Review Popup Styles */
+            .peek-popup {
+                display: none !important;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1000;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .peek-popup.show {
+                display: flex !important;
+            }
+
+            .peek-popup .popup-content {
+                background: white;
+                border-radius: 12px;
+                width: 90%;
+                max-width: 500px;
+                padding: 24px;
+                position: relative;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            }
+
+            .peek-popup .popup-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+                padding-bottom: 12px;
+                border-bottom: 1px solid #eee;
+            }
+
+            .peek-popup .popup-header h3 {
+                font-size: 20px;
+                font-weight: 600;
+                color: #1A1B3D;
+                margin: 0;
+            }
+
+            .peek-popup .close-btn {
+                background: none;
+                border: none;
+                font-size: 20px;
+                color: #666;
+                cursor: pointer;
+                padding: 4px;
+                transition: color 0.3s ease;
+            }
+
+            .peek-popup .close-btn:hover {
+                color: #1A1B3D;
+            }
+
+            .peek-popup .explanation-text {
+                font-size: 16px;
+                line-height: 1.6;
+                color: #4B5563;
+                padding: 16px;
+                background: #f8f9fa;
+                border-radius: 8px;
+            }
+
+            @media (max-width: 576px) {
+                .peek-popup .popup-content {
+                    width: 95%;
+                    padding: 16px;
+                }
+
+                .peek-popup .explanation-text {
+                    font-size: 14px;
+                    padding: 12px;
+                }
+            }
+
             .review-popup {
                 display: none;
                 position: fixed;
@@ -395,34 +779,140 @@
                 }
             }
 
-            /* Left buttons container styles */
+            /* Style cho footer chứa các nút điều hướng */
+            .navigation-footer {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 20px 0;
+                margin-top: 30px;
+                border-top: 1px solid #eee;
+            }
+            
+            /* Style cho nút Back to Quizzes */
+            .btn-review-back {
+                background: #5751E1;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                padding: 12px 24px;
+                font-size: 14px;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-decoration: none;
+            }
+            
+            .btn-review-back:hover {
+                background: #7A6DC0;
+                transform: translateY(-1px);
+            }
+            
+            /* Style cho nút Review Progress */
+            .btn-review {
+                background: #5751E1;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                padding: 12px 24px;
+                font-size: 14px;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            
+            .btn-review:hover {
+                background: #7A6DC0;
+                transform: translateY(-1px);
+            }
+            
+            /* Style cho container của các nút */
+            .navigation-buttons {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 10px;
+                margin-left: auto;
+                width: auto;
+            }
+            
+            /* Style cho left buttons container */
             .left-buttons {
                 display: flex;
                 align-items: center;
                 gap: 16px;
             }
             
-            /* Media queries for responsive design */
-            @media (max-width: 768px) {
-                .navigation-footer {
-                    flex-direction: column;
-                    align-items: stretch;
-                    gap: 20px;
-                }
-                
-                .left-buttons {
-                    flex-direction: column;
-                    gap: 12px;
-                    width: 100%;
-                }
-                
-                .btn-review-back, .btn-review {
-                    width: 100%;
-                    justify-content: center;
-                }
-                
+            /* Style cho nhóm nút action */
+            .action-buttons {
+                display: flex;
+                gap: 8px;
+            }
+            
+            /* Style cho nhóm nút navigation */
+            .nav-buttons {
+                display: flex;
+                justify-content: flex-end;
+                width: 100%;
+            }
+
+            .nav-group {
+                display: flex;
+                gap: 8px;
+                width: fit-content;
+            }
+            
+            /* Style chung cho các nút */
+            .btn-action, .btn-nav {
+                background: #fff;
+                border: 2px solid #5751E1;
+                border-radius: 8px;
+                padding: 8px 16px;
+                font-size: 14px;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                color: #1A1B3D;
+                width: 100px; /* Fixed width cho tất cả các nút */
+                justify-content: center;
+            }
+            
+            /* Style cho nút Peek */
+            .btn-peek:hover {
+                background: #f0f0f0;
+            }
+            
+            /* Style cho nút Previous và Next */
+            .btn-prev {
+                justify-content: flex-start;
+            }
+            
+            .btn-next {
+                justify-content: flex-end;
+            }
+            
+            .btn-nav:hover {
+                background: #8B7FD2;
+                color: white;
+            }
+            
+            /* Responsive styles */
+            @media (max-width: 576px) {
                 .navigation-buttons {
                     width: 100%;
+                }
+                
+                .action-buttons, .nav-buttons {
+                    justify-content: flex-end;
                 }
             }
         </style>
@@ -432,27 +922,17 @@
         <c:set var="currentNumber" value="${not empty param.questionNumber ? param.questionNumber : 1}" />
         <c:set var="question" value="${questions[currentNumber - 1]}" />
 
+        <!-- header-area -->
         <header>
-            <div class="header-top-wrap">
-                <div class="container">
-                    <div class="header-top">
-                        <div class="logo header-logo">
-                            <a href="${pageContext.request.contextPath}/home"><img src="${pageContext.request.contextPath}/view/common/img/logo/logo.svg" alt="Logo"></a>
-                        </div>
-                        <div class="header-right">
-                            <!-- User menu can be added here if needed -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="header-fixed-height"></div>
+            <!-- Header removed. -->
         </header>
 
         <main>
             <div class="container">
+                <!-- Question Header Section: Hiển thị số thứ tự câu hỏi và ID -->
                 <div class="question-header">
-                    <div class="question-info">
-                        <div class="question-number">Reviewing Question ${currentNumber}/${fn:length(questions)}</div>
+                    <div class="question-info" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                        <div class="question-number">Question ${currentNumber}/${fn:length(questions)}</div>
                         <div class="question-id">Question ID: ${question.id}</div>
                     </div>
                 </div>
@@ -587,6 +1067,8 @@
                                             </label>
                                         </div>
                                     </c:forEach>
+                                    
+
                                 </c:when>
                                 <c:otherwise>
                                      <!-- Essay Review not fully implemented, showing readonly textarea -->
@@ -634,10 +1116,6 @@
                                                 </div>
                                             </div>
                                         </c:if>
-                                    </c:if>
-                                    
-                                    <c:if test="${not empty question.explanation}">
-                                       <div class="explanation mt-3"><strong>Explanation: </strong> ${question.explanation}</div>
                                     </c:if>
                                 </c:otherwise>
                             </c:choose>
@@ -759,15 +1237,28 @@
             </div>
         </main>
         
-        <jsp:include page="../../common/user/footer.jsp"></jsp:include>
         <jsp:include page="../../common/user/link_js_common.jsp"></jsp:include>
 
         <script>
             function openPeekPopup() {
-                document.getElementById('peekPopup').classList.add('show');
+                console.log('Opening peek popup...');
+                const popup = document.getElementById('peekPopup');
+                if (popup) {
+                    popup.classList.add('show');
+                    console.log('Popup should be visible now');
+                } else {
+                    console.error('Peek popup element not found!');
+                }
             }
             function closePeekPopup() {
-                document.getElementById('peekPopup').classList.remove('show');
+                console.log('Closing peek popup...');
+                const popup = document.getElementById('peekPopup');
+                if (popup) {
+                    popup.classList.remove('show');
+                    console.log('Popup should be hidden now');
+                } else {
+                    console.error('Peek popup element not found!');
+                }
             }
             document.addEventListener('click', function(event) {
                 const peekPopup = document.getElementById('peekPopup');
@@ -826,8 +1317,23 @@
                 });
             }
             
-            // Fix relative paths in HTML media content
+            // Navigate to question
+            function navigateToQuestion(questionNumber) {
+                window.location.href = 'quiz-review?quizId=${quiz.id}&questionNumber=' + questionNumber;
+            }
+            
+            // Initialize: set all questions button as active initially
             document.addEventListener('DOMContentLoaded', function() {
+                // Ensure popup is hidden on page load
+                const popup = document.getElementById('peekPopup');
+                if (popup) {
+                    popup.classList.remove('show');
+                    console.log('Ensuring popup is hidden on page load');
+                }
+                
+                document.querySelector('.btn-all').classList.add('active');
+                
+                // Fix relative paths in HTML media content
                 const htmlMediaContent = document.querySelector('.html-media-content');
                 if (htmlMediaContent) {
                     // Fix video sources
@@ -854,14 +1360,26 @@
                 }
             });
             
-            // Navigate to question
-            function navigateToQuestion(questionNumber) {
-                window.location.href = 'quiz-review?quizId=${quiz.id}&questionNumber=' + questionNumber;
+            // Settings dropdown functionality
+            function toggleSettingsDropdown() {
+                const dropdown = document.querySelector('.settings-dropdown');
+                dropdown.classList.toggle('show');
             }
             
-            // Initialize: set all questions button as active initially
-            document.addEventListener('DOMContentLoaded', function() {
-                document.querySelector('.btn-all').classList.add('active');
+            function exitQuiz() {
+                if (confirm('Are you sure you want to exit the quiz? Your progress will be saved.')) {
+                    window.location.href = '${pageContext.request.contextPath}/quiz-handle-menu';
+                }
+            }
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                const settingsMenu = document.querySelector('.settings-menu');
+                const dropdown = document.querySelector('.settings-dropdown');
+                
+                if (settingsMenu && dropdown && !settingsMenu.contains(event.target)) {
+                    dropdown.classList.remove('show');
+                }
             });
         </script>
     </body>
