@@ -177,15 +177,14 @@ public class UserDAO extends DBContext implements I_DAO<User> {
     public User login(String email, String password) {
         DBContext db = new DBContext();
         Connection conn = db.getConnection();
-        String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
+        String sql = "SELECT * FROM users WHERE email = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, email);
-            ps.setString(2, password);
 
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return User.builder()
+                User user = User.builder()
                         .id(rs.getInt("id"))
                         .full_name(rs.getString("full_name"))
                         .email(rs.getString("email"))
@@ -196,6 +195,11 @@ public class UserDAO extends DBContext implements I_DAO<User> {
                         .role_id(rs.getInt("role_id"))
                         .status(rs.getString("status"))
                         .build();
+                
+                // Verify password using PasswordHasher
+                if (PasswordHasher.verifyPassword(password, user.getPassword())) {
+                    return user;
+                }
             }
 
         } catch (Exception e) {
@@ -283,22 +287,25 @@ public class UserDAO extends DBContext implements I_DAO<User> {
     }
 
     public User findByEmailAndPassword(String email, String password) {
-        String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
+        String sql = "SELECT * FROM users WHERE email = ?";
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setString(1, email);
-            statement.setString(2, PasswordHasher.hashPassword(password));
 
             resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                return getFromResultSet(resultSet);
+                User user = getFromResultSet(resultSet);
+                // Verify password using PasswordHasher
+                if (PasswordHasher.verifyPassword(password, user.getPassword())) {
+                    return user;
+                }
             }
             
         } catch (SQLException e) {
             System.out.println("Error findByEmailAndPassword at class UserDAO: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Error hashing password in findByEmailAndPassword: " + e.getMessage());
+            System.out.println("Error verifying password in findByEmailAndPassword: " + e.getMessage());
         } finally {
             closeResources();
         }

@@ -5,6 +5,7 @@ import com.quiz.su25.dal.impl.UserDAO;
 import com.quiz.su25.entity.Role;
 import com.quiz.su25.entity.User;
 import com.quiz.su25.utils.EmailUtils;
+import com.quiz.su25.utils.PasswordHasher;
 import com.quiz.su25.utils.PasswordUtils;
 import com.quiz.su25.validation.UserValidation;
 
@@ -213,9 +214,10 @@ public class AdminController extends HttpServlet {
         user.setRole_id(roleId);
         user.setStatus(status);
 
-        // Generate password for new user (no encryption needed)
+        // Generate password for new user and hash it for storage
         String generatedPassword = PasswordUtils.generateRandomPassword();
-        user.setPassword(generatedPassword);
+        String hashedPassword = PasswordHasher.hashPassword(generatedPassword);
+        user.setPassword(hashedPassword);
 
         // Insert user
         int userId = userDAO.insert(user);
