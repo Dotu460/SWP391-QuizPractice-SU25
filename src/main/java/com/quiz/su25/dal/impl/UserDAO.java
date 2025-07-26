@@ -9,6 +9,7 @@ package com.quiz.su25.dal.impl;
  * @author FPT
  */
 import com.quiz.su25.dal.DBContext;
+import com.quiz.su25.utils.PasswordHasher;
 import com.quiz.su25.dal.I_DAO;
 import com.quiz.su25.entity.User;
 import java.sql.Connection;
@@ -74,7 +75,7 @@ public class UserDAO extends DBContext implements I_DAO<User> {
             statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             statement.setObject(1, user.getFull_name());     // Can be NULL
             statement.setString(2, user.getEmail());         // NOT NULL
-            statement.setString(3, user.getPassword());      // NOT NULL
+            statement.setString(3, user.getPassword());
             statement.setObject(4, user.getGender());        // Can be NULL
             statement.setString(5, user.getMobile());        // NOT NULL
             statement.setObject(6, user.getAvatar_url());    // Can be NULL
@@ -89,6 +90,9 @@ public class UserDAO extends DBContext implements I_DAO<User> {
         } catch (SQLException e) {
             System.out.println("Error insert at class UserDAO: " + e.getMessage());
             e.printStackTrace(); // Print full stack trace for debugging
+        } catch (Exception e) {
+            System.out.println("Error hashing password: " + e.getMessage());
+            e.printStackTrace();
         } finally {
             closeResources();
         }
@@ -113,14 +117,16 @@ public class UserDAO extends DBContext implements I_DAO<User> {
             statement.setInt(4, user.getGender());
             statement.setString(5, user.getMobile());
             statement.setString(6, user.getAvatar_url());
-            statement.setInt(7, user.getRole_id());
-            statement.setString(8, user.getStatus());
+            statement.setInt(7, user.getRole_id() != null ? user.getRole_id() : 2);
+            statement.setString(8, user.getStatus() != null ? user.getStatus() : "active");
             statement.setInt(9, user.getId());
 
             int rowsAffected = statement.executeUpdate();
             success = rowsAffected > 0;
         } catch (SQLException e) {
             System.out.println("Error update at class UserDAO: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error hashing password in update: " + e.getMessage());
         } finally {
             closeResources();
         }
@@ -282,7 +288,7 @@ public class UserDAO extends DBContext implements I_DAO<User> {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
             statement.setString(1, email);
-            statement.setString(2, password);
+            statement.setString(2, PasswordHasher.hashPassword(password));
 
             resultSet = statement.executeQuery();
             if (resultSet.next()) {
@@ -291,6 +297,8 @@ public class UserDAO extends DBContext implements I_DAO<User> {
             
         } catch (SQLException e) {
             System.out.println("Error findByEmailAndPassword at class UserDAO: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error hashing password in findByEmailAndPassword: " + e.getMessage());
         } finally {
             closeResources();
         }
@@ -332,13 +340,15 @@ public class UserDAO extends DBContext implements I_DAO<User> {
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sql);
-            statement.setString(1, newPassword);
+            statement.setString(1, PasswordHasher.hashPassword(newPassword));
             statement.setString(2, email);
             
             int rowsAffected = statement.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
             System.out.println("Error updating password: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error hashing password in updatePassword: " + e.getMessage());
         } finally {
             closeResources();
         }
