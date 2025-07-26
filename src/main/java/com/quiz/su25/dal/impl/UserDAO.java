@@ -77,19 +77,10 @@ public class UserDAO extends DBContext implements I_DAO<User> {
             statement.setString(3, user.getPassword());      // NOT NULL
             statement.setObject(4, user.getGender());        // Can be NULL
             statement.setString(5, user.getMobile());        // NOT NULL
-            statement.setObject(6, user.getAvatar_url());    // Can be NULL       // Can be NULL
-            // Ensure defaults
-            Integer roleId = user.getRole_id();
-            if (roleId == null || roleId == 0) {
-                roleId = 2; // Default student role
-            }
-            statement.setInt(7, roleId);
+            statement.setObject(6, user.getAvatar_url());    // Can be NULL
+            statement.setObject(7, user.getRole_id());       // Can be NULL
+            statement.setObject(8, user.getStatus());        // Can be NULL
 
-            String status = user.getStatus();
-            if (status == null || status.isEmpty()) {
-                status = "active"; // Default active status
-            }
-            statement.setString(8, status);
             statement.executeUpdate();
             resultSet = statement.getGeneratedKeys();
             if (resultSet.next()) {
@@ -122,8 +113,8 @@ public class UserDAO extends DBContext implements I_DAO<User> {
             statement.setInt(4, user.getGender());
             statement.setString(5, user.getMobile());
             statement.setString(6, user.getAvatar_url());
-            statement.setInt(7, user.getRole_id() != null ? user.getRole_id() : 2);
-            statement.setString(8, user.getStatus() != null ? user.getStatus() : "active");
+            statement.setInt(7, user.getRole_id());
+            statement.setString(8, user.getStatus());
             statement.setInt(9, user.getId());
 
             int rowsAffected = statement.executeUpdate();
@@ -207,6 +198,83 @@ public class UserDAO extends DBContext implements I_DAO<User> {
         return null;
     }
 
+    public static void main(String[] args) {
+        UserDAO userDAO = new UserDAO();
+        RoleDAO roleDAO = new RoleDAO();
+
+        // 1. First check what roles exist in the database
+        System.out.println("=== Checking Available Roles ===");
+        var roles = roleDAO.findAll();
+        if (roles.isEmpty()) {
+            System.out.println("No roles found in database!");
+        } else {
+            System.out.println("Available roles:");
+            roles.forEach(role -> 
+                System.out.println("Role ID: " + role.getId() + 
+                                 ", Name: " + role.getName() )
+            );
+        }
+
+        // 2. Try to create a user with role_id = 2 (should be Regular User)
+        System.out.println("\n=== Testing User Creation with role_id = 2 ===");
+        User testUser = User.builder()
+                .full_name("Test User")
+                .email("test" + System.currentTimeMillis() + "@example.com") // Unique email
+                .password("password123")
+                .gender(1)
+                .mobile("1234567890")
+                .avatar_url(null)
+                .role_id(2)  // Try with role_id = 2
+                .status("active")
+                .build();
+
+        try {
+            int userId = userDAO.insert(testUser);
+            if (userId > 0) {
+                System.out.println("Successfully created user with role_id = 2");
+                System.out.println("New user ID: " + userId);
+                
+                // Verify the user was created correctly
+                User createdUser = userDAO.findById(userId);
+                if (createdUser != null) {
+                    System.out.println("Verified user details:");
+                    System.out.println("ID: " + createdUser.getId());
+                    System.out.println("Name: " + createdUser.getFull_name());
+                    System.out.println("Email: " + createdUser.getEmail());
+                    System.out.println("Role ID: " + createdUser.getRole_id());
+                }
+            } else {
+                System.out.println("Failed to create user with role_id = 2");
+            }
+        } catch (Exception e) {
+            System.out.println("Error creating user: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // 3. Try to create a user with an invalid role_id
+        System.out.println("\n=== Testing User Creation with invalid role_id = 999 ===");
+        User invalidUser = User.builder()
+                .full_name("Invalid Role User")
+                .email("invalid" + System.currentTimeMillis() + "@example.com")
+                .password("password123")
+                .gender(1)
+                .mobile("1234567890")
+                .avatar_url(null)
+                .role_id(999)  // Try with invalid role_id
+                .status("active")
+                .build();
+
+        try {
+            int userId = userDAO.insert(invalidUser);
+            if (userId > 0) {
+                System.out.println("WARNING: Successfully created user with invalid role_id = 999");
+            } else {
+                System.out.println("Expected failure: Could not create user with invalid role_id = 999");
+            }
+        } catch (Exception e) {
+            System.out.println("Expected error creating user with invalid role: " + e.getMessage());
+        }
+    }
 
     public User findByEmailAndPassword(String email, String password) {
         String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
