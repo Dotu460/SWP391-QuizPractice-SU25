@@ -447,6 +447,23 @@
                 </div>
               </div>
 
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="price_package_id">Price Package</label>
+                  <select id="price_package_id" name="price_package_id" class="form-control">
+                    <option value="" disabled>Select a price package (optional)</option>
+                    <c:forEach var="pricePackage" items="${pricePackages}">
+                      <option value="${pricePackage.id}" ${pricePackage.id == subject.price_package_id ? 'selected' : ''}>
+                        ${pricePackage.name} - $${pricePackage.sale_price}
+                      </option>
+                    </c:forEach>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <!-- Empty space for layout balance -->
+                </div>
+              </div>
+
               <div class="form-row single">
                 <div class="form-group">
                   <label class="form-label" for="brief_info">Brief Information</label>

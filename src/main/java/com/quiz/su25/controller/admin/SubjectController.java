@@ -12,12 +12,14 @@ import com.quiz.su25.entity.Subject;
 import com.quiz.su25.entity.SubjectCategories;
 import com.quiz.su25.entity.Media;
 import com.quiz.su25.entity.User;
+import com.quiz.su25.config.GlobalConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import java.io.IOException;
 import java.util.Collection;
@@ -279,7 +281,12 @@ public class SubjectController extends HttpServlet {
     private void showNewSubjectForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // Get all categories for the form
         List<SubjectCategories> categories = categoryDAO.findAll();
+        
+        // Get all price packages for the form
+        List<PricePackage> pricePackages = packageDAO.findAll();
+        
         request.setAttribute("categories", categories);
+        request.setAttribute("pricePackages", pricePackages);
 
         // Forward to the new subject form
         request.getRequestDispatcher("/view/admin/subject/new.jsp").forward(request, response);
@@ -295,8 +302,16 @@ public class SubjectController extends HttpServlet {
             String status = request.getParameter("status");
             String featuredFlag = request.getParameter("featured_flag");
             int categoryId = getIntParameter(request, "category_id", 0);
-            String owner = request.getParameter("owner");
-            int pricePackageId = getIntParameter(request, "price_package_id", 0); // Lấy thêm trường này
+            int pricePackageId = getIntParameter(request, "price_package_id", 0);
+
+            // Get current user from session
+            User currentUser = getCurrentUser(request);
+            
+            if (currentUser == null) {
+                request.getSession().setAttribute("errorMessage", "You must be logged in to create a subject!");
+                response.sendRedirect(request.getContextPath() + "/login");
+                return;
+            }
 
             // Validate required fields
             if (title == null || title.trim().isEmpty() || categoryId == 0) {
@@ -312,17 +327,11 @@ public class SubjectController extends HttpServlet {
                 return;
             }
 
-            if (owner == null || owner.trim().isEmpty()) {
-                request.getSession().setAttribute("errorMessage", "Course owner is required!");
-                response.sendRedirect(request.getContextPath() + "/admin/subject/new");
-                return;
-            }
-
             // No need for thumbnail_url - using Media table for images
 
             // Create new subject
             Subject newSubject = Subject.builder()
-                    .price_package_id(pricePackageId) // Bổ sung trường này
+                    .price_package_id(pricePackageId)
                     .title(title.trim())
                     .tag_line(tagLine != null ? tagLine.trim() : null)
                     .brief_info(briefInfo != null ? briefInfo.trim() : null)
@@ -331,11 +340,11 @@ public class SubjectController extends HttpServlet {
                     .status(status != null ? status : "draft")
                     .featured_flag("on".equals(featuredFlag))
                     .category_id(categoryId)
-                    .owner_id(1) // TODO: Get actual user ID from session
+                    .owner_id(currentUser.getId()) // Get actual user ID from session
                     .created_at(new java.util.Date())
                     .updated_at(new java.util.Date())
-                    .created_by(1) // TODO: Get from session
-                    .updated_by(1) // TODO: Get from session
+                    .created_by(currentUser.getId()) // Get from session
+                    .updated_by(currentUser.getId()) // Get from session
                     .build();
 
             // Insert the subject
@@ -556,6 +565,9 @@ public class SubjectController extends HttpServlet {
                 // Get all categories for the form
                 List<SubjectCategories> categories = categoryDAO.findAll();
                 
+                // Get all price packages for the form
+                List<PricePackage> pricePackages = packageDAO.findAll();
+                
                 // Get existing media for the subject
                 List<Media> subjectMedia = mediaDAO.findBySubjectId(subjectId);
                 List<Media> subjectImages = mediaDAO.findImagesBySubjectId(subjectId);
@@ -563,6 +575,7 @@ public class SubjectController extends HttpServlet {
 
                 request.setAttribute("subject", subject);
                 request.setAttribute("categories", categories);
+                request.setAttribute("pricePackages", pricePackages);
                 request.setAttribute("subjectMedia", subjectMedia);
                 request.setAttribute("subjectImages", subjectImages);
                 request.setAttribute("subjectVideos", subjectVideos);
@@ -602,6 +615,16 @@ public class SubjectController extends HttpServlet {
             String status = request.getParameter("status");
             String featuredFlag = request.getParameter("featured_flag");
             int categoryId = getIntParameter(request, "category_id", 0);
+            int pricePackageId = getIntParameter(request, "price_package_id", 0);
+
+            // Get current user from session
+            User currentUser = getCurrentUser(request);
+            
+            if (currentUser == null) {
+                request.getSession().setAttribute("errorMessage", "You must be logged in to update a subject!");
+                response.sendRedirect(request.getContextPath() + "/login");
+                return;
+            }
 
             // Validate required fields
             if (title == null || title.trim().isEmpty() || categoryId == 0) {
@@ -620,6 +643,7 @@ public class SubjectController extends HttpServlet {
             // Update the subject
             Subject updatedSubject = Subject.builder()
                     .id(subjectId)
+                    .price_package_id(pricePackageId > 0 ? pricePackageId : existingSubject.getPrice_package_id())
                     .title(title.trim())
                     .tag_line(tagLine != null ? tagLine.trim() : null)
                     .brief_info(briefInfo != null ? briefInfo.trim() : null)
@@ -632,7 +656,7 @@ public class SubjectController extends HttpServlet {
                     .created_at(existingSubject.getCreated_at()) // Keep original creation date
                     .updated_at(new java.util.Date()) // Update modification date
                     .created_by(existingSubject.getCreated_by()) // Keep original creator
-                    .updated_by(1) // TODO: Get from session
+                    .updated_by(currentUser.getId()) // Get from session
                     .build();
 
             // Update the subject
@@ -822,6 +846,16 @@ public class SubjectController extends HttpServlet {
             }
         }
         return defaultValue;
+    }
+
+    /**
+     * Get current user from session
+     * @param request HttpServletRequest
+     * @return User object or null if not logged in
+     */
+    private User getCurrentUser(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        return (User) session.getAttribute(GlobalConfig.SESSION_ACCOUNT);
     }
 
     public static void main(String[] args) {
