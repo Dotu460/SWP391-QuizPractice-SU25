@@ -195,10 +195,14 @@
                 const changePasswordBtn = document.getElementById('changePasswordBtn');
 
                 function validateForm() {
+                    // Clear any existing server errors
+                    const serverErrors = document.querySelectorAll('.alert-danger');
+                    serverErrors.forEach(error => error.remove());
+
                     const errorContainer = document.getElementById('form-errors');
                     errorContainer.innerHTML = "";
 
-                    // CHỈ kiểm tra các field không được trống
+                    // Chỉ kiểm tra trống
                     if (currentPassword.value.trim() === "" || newPassword.value.trim() === "" || confirmPassword.value.trim() === "") {
                         const errorDiv = document.createElement('div');
                         errorDiv.className = 'alert alert-danger';
@@ -207,7 +211,6 @@
                         return false;
                     }
 
-                    // Nếu không trống thì cho phép submit để server kiểm tra
                     return true;
                 }
 
