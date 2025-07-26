@@ -169,6 +169,9 @@
                                 <c:if test="${not empty param.pageSize}">
                                     <c:param name="pageSize" value="${param.pageSize}" />
                                 </c:if>
+                                <c:if test="${not empty param.showAll}">
+                                    <c:param name="showAll" value="${param.showAll}" />
+                                </c:if>
                             </c:url>
 
                             <c:url value="" var="currentParams">
@@ -176,6 +179,7 @@
                                 <c:if test="${not empty searchFilter}"><c:param name="search" value="${searchFilter}" /></c:if>
                                 <c:if test="${not empty pageSize}"><c:param name="pageSize" value="${pageSize}" /></c:if>
                                 <c:if test="${not empty currentPage}"><c:param name="page" value="${currentPage}" /></c:if>
+                                <c:if test="${not empty param.showAll}"><c:param name="showAll" value="${param.showAll}" /></c:if>
                             </c:url>
 
                             <div class="col-xl-9">
@@ -208,7 +212,7 @@
 
                                     <!-- Filter Form -->
                                     <div class="filter-form">
-                                        <form action="${pageContext.request.contextPath}/slider-list" method="get">
+                                        <form action="${pageContext.request.contextPath}/slider-list" method="get" id="filterForm">
                                             <div class="row">
                                                 <div class="col-md-5">
                                                     <div class="form-group">
@@ -228,10 +232,13 @@
                                                     </div>
                                                 </div>
                                                 <div class="col-md-3 d-flex align-items-end">
-                                                    <button type="submit" class="btn btn-primary">Filter</button>
-                                                    <a href="${pageContext.request.contextPath}/slider-list" class="btn btn-secondary" style="margin-left: 12px;">Reset</a>
+                                                    <button type="submit" class="btn btn-primary" onclick="updateShowAllField()">Filter</button>
+                                                    <a href="${pageContext.request.contextPath}/slider-list" class="btn btn-secondary" style="margin-left: 12px;" onclick="resetForm()">Reset</a>
                                                 </div>
                                             </div>
+                                            
+                                            <!-- Hidden field to preserve showAll parameter -->
+                                            <input type="hidden" id="showAllField" name="showAll" value="${param.showAll}" />
                                         </form>
                                     </div>
 
@@ -242,7 +249,7 @@
                                         </div>
                                         <div class="d-flex align-items-center">
                                             <div class="input-group" style="width: auto;">
-                                                <input type="number" id="customPageSize" class="form-control form-control-sm" min="1" max="100" value="${pageSize}" style="width: 80px; height: 38px;" ${param.showAll eq 'true' ? 'disabled' : ''}>
+                                                <input type="number" id="customPageSize" class="form-control form-control-sm" min="1" max="100" value="${showAll ? '' : pageSize}" style="width: 80px; height: 38px;" ${showAll ? 'disabled placeholder="-"' : ''}>
                                                 <button class="btn btn-primary" onclick="applyCustomPageSize()" id="applySizeBtn" style="padding: 6px 12px; font-size: 15px;">Apply</button>
                                             </div>
                                             <span class="ms-2">items per page</span>
@@ -485,13 +492,70 @@
                 // Add event listener for checkbox
                 document.getElementById('showAllCheckbox').addEventListener('change', function() {
                     const customSizeInput = document.getElementById('customPageSize');
+                    const showAllField = document.getElementById('showAllField');
                     
                     if (this.checked) {
                         customSizeInput.disabled = true;
+                        customSizeInput.value = '';
+                        customSizeInput.placeholder = '-';
+                        showAllField.value = 'true';
                     } else {
                         customSizeInput.disabled = false;
+                        customSizeInput.value = '${pageSize == 2147483647 ? 10 : pageSize}';
+                        customSizeInput.placeholder = '';
+                        showAllField.value = '';
                     }
                 });
+
+                // Function to update showAll field before form submission
+                window.updateShowAllField = function() {
+                    const showAllCheckbox = document.getElementById('showAllCheckbox');
+                    const showAllField = document.getElementById('showAllField');
+                    
+                    if (showAllCheckbox.checked) {
+                        showAllField.value = 'true';
+                    } else {
+                        showAllField.value = '';
+                    }
+                };
+
+                // Add form submit event listener to ensure showAll state is preserved
+                document.getElementById('filterForm').addEventListener('submit', function(e) {
+                    updateShowAllField();
+                });
+
+                // Initialize checkbox state based on URL parameters
+                function initializeCheckboxState() {
+                    const showAllCheckbox = document.getElementById('showAllCheckbox');
+                    const customSizeInput = document.getElementById('customPageSize');
+                    const showAllField = document.getElementById('showAllField');
+                    
+                    // Check if showAll parameter is in URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const showAllParam = urlParams.get('showAll');
+                    
+                    if (showAllParam === 'true') {
+                        showAllCheckbox.checked = true;
+                        customSizeInput.disabled = true;
+                        customSizeInput.value = '';
+                        customSizeInput.placeholder = '-';
+                        showAllField.value = 'true';
+                    } else {
+                        showAllCheckbox.checked = false;
+                        customSizeInput.disabled = false;
+                        customSizeInput.value = '${pageSize == 2147483647 ? 10 : pageSize}';
+                        customSizeInput.placeholder = '';
+                        showAllField.value = '';
+                    }
+                }
+
+                // Function to reset form and redirect to base URL
+                window.resetForm = function() {
+                    window.location.href = '${pageContext.request.contextPath}/slider-list';
+                };
+
+                // Call initialization function
+                initializeCheckboxState();
 
                 // --- Main Event Handlers ---
                 $('#columnSettingsBtn').click(function() {

@@ -95,10 +95,12 @@ public class SliderController extends HttpServlet {
         // Get filter parameters
         String statusFilter = request.getParameter("status");
         String searchFilter = request.getParameter("search");
+        String showAllParam = request.getParameter("showAll");
+        boolean showAll = "true".equals(showAllParam);
         
         // Get pagination parameters
         int page = 1;
-        int pageSize = 5; // Default page size
+        int pageSize = 10; // Default page size changed from 5 to 10
         String pageStr = request.getParameter("page");
         String pageSizeStr = request.getParameter("pageSize");
         
@@ -111,13 +113,16 @@ public class SliderController extends HttpServlet {
             }
         }
         
-        if (pageSizeStr != null && !pageSizeStr.isEmpty()) {
+        if (showAll) {
+            // If showAll is true, set pageSize to a very large number to get all records
+            pageSize = Integer.MAX_VALUE;
+        } else if (pageSizeStr != null && !pageSizeStr.isEmpty()) {
             try {
                 pageSize = Integer.parseInt(pageSizeStr);
-                if (pageSize < 1) pageSize = 5;
-                if (pageSize > 50) pageSize = 50; // Max limit
+                if (pageSize < 1) pageSize = 10;
+                if (pageSize > 100) pageSize = 100; // Max limit increased from 50 to 100
             } catch (NumberFormatException e) {
-                pageSize = 5;
+                pageSize = 10;
             }
         }
         
@@ -128,14 +133,16 @@ public class SliderController extends HttpServlet {
         int totalSliders = sliderDAO.getTotalFilteredSliders(
                 statusFilter, searchFilter);
         
-        int totalPages = (int) Math.ceil((double) totalSliders / pageSize);
+        int totalPages = showAll ? 1 : (int) Math.ceil((double) totalSliders / pageSize);
         
         // Set attributes for JSP
         request.setAttribute("sliders", sliders);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("totalSliders", totalSliders);
-        request.setAttribute("pageSize", pageSize);
+        // Don't pass Integer.MAX_VALUE to the view when showAll is true
+        request.setAttribute("pageSize", showAll ? 10 : pageSize);
+        request.setAttribute("showAll", showAll);
         
         // Maintain filter values in the view
         request.setAttribute("statusFilter", statusFilter);
@@ -334,6 +341,7 @@ public class SliderController extends HttpServlet {
             String search = request.getParameter("search");
             String pageSize = request.getParameter("pageSize");
             String page = request.getParameter("page");
+            String showAll = request.getParameter("showAll");
 
             List<String> params = new ArrayList<>();
             if (status != null && !status.isEmpty()) {
@@ -347,6 +355,9 @@ public class SliderController extends HttpServlet {
             }
             if (page != null && !page.isEmpty()) {
                 params.add("page=" + page);
+            }
+            if (showAll != null && !showAll.isEmpty()) {
+                params.add("showAll=" + showAll);
             }
 
             return String.join("&", params);
