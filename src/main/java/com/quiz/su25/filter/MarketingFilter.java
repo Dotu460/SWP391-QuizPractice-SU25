@@ -18,16 +18,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
-/**
- * Filter để kiểm tra xem người dùng có phải là Expert không.
- * Chỉ xử lý các trang thuần Expert.
- */
-@WebFilter(filterName = "ExpertFilter", urlPatterns = {
-    "/expert/*", "/expert/essay-grading", "/essay-score", "/upload-media"
-})
-public class ExpertFilter implements Filter {
+@WebFilter(filterName = "MarketingFilter", urlPatterns = {
+        "/slider-list"
 
-    @Override
+})
+
+public class MarketingFilter implements Filter {
+  @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         // Không cần khởi tạo
     }
@@ -44,12 +41,12 @@ public class ExpertFilter implements Filter {
         if (isLoggedIn) {
             User user = (User) session.getAttribute(GlobalConfig.SESSION_ACCOUNT);
             
-            // Chỉ Expert mới có thể truy cập các trang Expert
-            if (user.getRole_id().equals(GlobalConfig.ROLE_EXPERT)) {
-                // Người dùng là Expert, cho phép truy cập
+            // Expert và Admin đều có thể truy cập các trang này
+            if (user.getRole_id().equals(GlobalConfig.ROLE_MARKETING)) {
+                // Người dùng là Expert hoặc Admin, cho phép truy cập
                 chain.doFilter(request, response);
             } else {
-                // Không phải Expert, chuyển hướng đến trang chủ với thông báo lỗi
+                // Không phải Expert hoặc Admin, chuyển hướng đến trang chủ với thông báo lỗi
                 //session.setAttribute("errorMessage", "Bạn không có quyền truy cập trang này");
                 httpResponse.sendRedirect(httpRequest.getContextPath() + "/home");
             }
@@ -63,4 +60,5 @@ public class ExpertFilter implements Filter {
     public void destroy() {
         // Không cần dọn dẹp
     }
+    
 }

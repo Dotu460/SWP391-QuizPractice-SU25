@@ -212,6 +212,58 @@
                     max-width: 100%;
                     height: auto;
                 }
+
+                .answer-input-container {
+                    flex: 1;
+                    margin-right: 10px;
+                }
+
+                .answer-input, .answer-textarea {
+                    width: 100%;
+                    border: 1px solid #dce3e8;
+                    border-radius: 4px;
+                    padding: 8px 12px;
+                    font-size: 14px;
+                    transition: border-color 0.3s ease;
+                }
+
+                .answer-textarea {
+                    min-height: 80px;
+                    resize: vertical;
+                    font-family: inherit;
+                }
+
+                .answer-input:focus, .answer-textarea:focus {
+                    border-color: #007bff;
+                    outline: none;
+                    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+                }
+
+                .correct-checkbox {
+                    margin-right: 10px;
+                    transform: scale(1.2);
+                    cursor: pointer;
+                }
+
+                #essay-info {
+                    color: #28a745;
+                    font-weight: 500;
+                }
+
+                #multiple-choice-info {
+                    color: #007bff;
+                    font-weight: 500;
+                }
+
+                .essay-mode .correct-checkbox {
+                    display: none;
+                }
+
+                .essay-mode .answer-option {
+                    border-left: 4px solid #28a745;
+                    padding-left: 15px;
+                    background-color: #f8fffe;
+                }
             </style>
         </head>
 
@@ -258,13 +310,45 @@
                                         <div class="form-group">
                                             <label class="form-label">Quiz</label>
                                             <select class="form-control" id="quizId" name="quizId" required>
-                                                <option value="">-- Select Quiz --</option>
-                                                <c:forEach items="${quizzesList}" var="quiz">
-                                                    <option value="${quiz.id}" ${question.quiz_id == quiz.id ? 'selected' : ''}>
-                                                        ${quiz.name}
-                                                    </option>
-                                                </c:forEach>
+                                                <c:choose>
+                                                    <c:when test="${not empty quizzesList}">
+                                                        <option value="">-- Select Quiz --</option>
+                                                        <c:forEach items="${quizzesList}" var="quiz">
+                                                            <c:set var="lesson" value="${lessonDAO.findById(quiz.lesson_id)}" />
+                                                            <c:set var="subject" value="${subjectDAO.findById(lesson.subject_id)}" />
+                                                            <option value="${quiz.id}" ${question.quiz_id == quiz.id ? 'selected' : ''}>
+                                                                <c:choose>
+                                                                    <c:when test="${not empty subject and not empty lesson}">
+                                                                        ${subject.title} - ${lesson.title}: ${quiz.name}
+                                                                    </c:when>
+                                                                    <c:when test="${not empty lesson}">
+                                                                        Unknown Subject - ${lesson.title}: ${quiz.name}
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        ${quiz.name}
+                                                                    </c:otherwise>
+                                                                </c:choose>
+                                                            </option>
+                                                        </c:forEach>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <option value="">No quizzes available - Please create quizzes first</option>
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </select>
+                                            
+                                            <!-- Check if no quizzes available -->
+                                            <c:if test="${empty quizzesList}">
+                                                <div class="alert alert-warning mt-2 mb-0" role="alert">
+                                                    <i class="fa fa-exclamation-triangle me-2"></i>
+                                                    <strong>No quizzes found!</strong> 
+                                                    You need to create quizzes first before adding questions.
+                                                    <br>
+                                                    <a href="${pageContext.request.contextPath}/quizzes-list?action=add" class="btn btn-sm btn-outline-primary mt-2">
+                                                        <i class="fa fa-plus"></i> Create New Quiz
+                                                    </a>
+                                                </div>
+                                            </c:if>
                                         </div>
 
                                         <!-- Question Type -->
@@ -306,6 +390,10 @@
                                         <!-- Media URL -->
                                         <div class="form-group">
                                             <label class="form-label">Media (Images/Video)</label>
+                                            <small class="form-text text-muted mb-2">
+                                                <i class="fa fa-info-circle"></i> 
+                                                Maximum file size: <strong>Images: 1024MB</strong> | <strong>Videos: 1024MB</strong>
+                                            </small>
                                             <textarea id="media_url" name="media_url">${question.media_url}</textarea>
                                         </div>
                                     </div>
@@ -313,22 +401,42 @@
                                     <div class="form-section">
                                         <div class="form-section-title">Answers</div>
                                         <div class="form-group">
+                                            <label class="form-label">Answer Type</label>
+                                            <c:set var="hasAnswerText" value="false" />
+                                            <c:forEach var="option" items="${question.questionOptions}">
+                                                <c:if test="${not empty option.answer_text}">
+                                                    <c:set var="hasAnswerText" value="true" />
+                                                </c:if>
+                                            </c:forEach>
+                                            <select class="form-control" id="answerType" onchange="handleAnswerTypeChange()">
+                                                <option value="option_text" <c:if test="${hasAnswerText eq false}">selected</c:if>>Multiple Choice Options</option>
+                                                <option value="answer_text" <c:if test="${hasAnswerText eq true}">selected</c:if>>Essay Answer Criteria</option>
+                                            </select>
+                                            <small class="form-text">Multiple Choice: Simple text options | Essay: Rich text criteria for grading</small>
+                                        </div>
+                                        
+                                        <div class="form-group">
                                             <label class="form-label">Answers</label>
-                                            <small class="form-text">Tick multiple checkboxes to select multiple correct answers</small>
+                                            <div id="answer-instructions">
+                                                <small class="form-text" id="multiple-choice-info">Tick multiple checkboxes to select multiple correct answers</small>
+                                                <small class="form-text" id="essay-info" style="display: none;">For essay questions, provide sample answers or grading criteria</small>
+                                            </div>
                                             <div id="answers-container">
                                                 <c:choose>
                                                     <c:when test="${not empty question.questionOptions}">
                                                         <c:forEach items="${question.questionOptions}" var="option" varStatus="status">
                                                             <div class="answer-option" id="answer-${status.index + 1}">
-                                                                <input type="checkbox" name="correctAnswers" value="${status.index + 1}" ${option.correct_key ? 'checked' : ''}>
-                                                                <c:choose>
-                                                                    <c:when test="${not empty option.answer_text}">
-                                                                        <input type="text" class="form-control" name="answerText_${status.index + 1}" value="${option.answer_text}" placeholder="Answer Text ${status.index + 1}" required>
-                                                                    </c:when>
-                                                                    <c:otherwise>
-                                                                        <input type="text" class="form-control" name="optionText_${status.index + 1}" value="${option.option_text}" placeholder="Answer ${status.index + 1}" required>
-                                                                    </c:otherwise>
-                                                                </c:choose>
+                                                                <input type="checkbox" name="correctAnswers" value="${status.index + 1}" ${option.correct_key ? 'checked' : ''} class="correct-checkbox">
+                                                                <div class="answer-input-container">
+                                                                    <c:choose>
+                                                                        <c:when test="${not empty option.answer_text}">
+                                                                            <textarea class="form-control answer-textarea" name="answerText_${status.index + 1}" placeholder="Essay Answer/Criteria ${status.index + 1}" required>${option.answer_text}</textarea>
+                                                                        </c:when>
+                                                                        <c:otherwise>
+                                                                            <input type="text" class="form-control answer-input" name="optionText_${status.index + 1}" value="${option.option_text}" placeholder="Option ${status.index + 1}" required>
+                                                                        </c:otherwise>
+                                                                    </c:choose>
+                                                                </div>
                                                                 <input type="hidden" name="optionId_${status.index + 1}" value="${option.id}">
                                                                 <button type="button" class="btn-remove-option" onclick="removeOption('${status.index + 1}')">
                                                                     <i class="fas fa-times"></i>
@@ -339,8 +447,10 @@
                                                     <c:otherwise>
                                                         <c:forEach begin="1" end="4" var="i">
                                                             <div class="answer-option" id="answer-${i}">
-                                                                <input type="checkbox" name="correctAnswers" value="${i}" ${i == 1 ? 'checked' : ''}>
-                                                                <input type="text" class="form-control" name="optionText_${i}" placeholder="Answer ${i}" required>
+                                                                <input type="checkbox" name="correctAnswers" value="${i}" ${i == 1 ? 'checked' : ''} class="correct-checkbox">
+                                                                <div class="answer-input-container">
+                                                                    <input type="text" class="form-control answer-input" name="optionText_${i}" placeholder="Option ${i}" required>
+                                                                </div>
                                                                 <input type="hidden" name="optionId_${i}" value="0">
                                                                 <button type="button" class="btn-remove-option" onclick="removeOption('${i}')">
                                                                     <i class="fas fa-times"></i>
@@ -368,8 +478,19 @@
 
                                     <div class="form-actions">
                                         <a href="${pageContext.request.contextPath}/questions-list" class="btn btn-outline-secondary">Cancel</a>
-                                        <button type="submit" class="btn btn-primary">Save Question</button>
+                                        <button type="submit" class="btn btn-primary" 
+                                                ${empty quizzesList ? 'disabled title="Please create quizzes first"' : ''}>
+                                            Save Question
+                                        </button>
                                     </div>
+                                    
+                                    <c:if test="${empty quizzesList}">
+                                        <div class="alert alert-info mt-3" role="alert">
+                                            <i class="fa fa-info-circle me-2"></i>
+                                            <strong>Important:</strong> You cannot create questions without quizzes. 
+                                            Please create at least one quiz first, then come back to add your questions.
+                                        </div>
+                                    </c:if>
                                 </form>
                             </div>
                         </div>
@@ -389,6 +510,15 @@
 
             <script>
                                                 $(document).ready(function () {
+                                    // Check if quizzes list is empty
+                                    <c:choose>
+                                        <c:when test="${not empty quizzesList}">
+                                            var hasQuizzes = true;
+                                        </c:when>
+                                        <c:otherwise>
+                                            var hasQuizzes = false;
+                                        </c:otherwise>
+                                    </c:choose>
                                                     function normalizeUploadUrl(url) {
                                                         if (!url) return url;
                                                         
@@ -435,7 +565,7 @@
                                                             toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright | image media | preview code | removeformat',
                                                             height: 400,
 
-                                                            images_upload_url: '/SWP391_QUIZ_PRACTICE_SU25/upload-media',
+                                                            images_upload_url: '/SWP391_QUIZ_PRACTICE_SU25/manage-subjects/upload-media',
                                                             automatic_uploads: true,
                                                             file_picker_types: 'image media',
 
@@ -455,7 +585,7 @@
                                                                         const formData = new FormData();
                                                                         formData.append('file', blobInfo.blob(), blobInfo.filename());
 
-                                                                        fetch('/SWP391_QUIZ_PRACTICE_SU25/upload-media', {
+                                                                        fetch('/SWP391_QUIZ_PRACTICE_SU25/manage-subjects/upload-media', {
                                                                             method: 'POST',
                                                                             body: formData
                                                                         })
@@ -510,7 +640,7 @@
                                                                         var formData = new FormData();
                                                                         formData.append('file', blob, filename);
                                                                         
-                                                                        fetch('/SWP391_QUIZ_PRACTICE_SU25/upload-media', {
+                                                                        fetch('/SWP391_QUIZ_PRACTICE_SU25/manage-subjects/upload-media', {
                                                                             method: 'POST',
                                                                             body: formData
                                                                         })
@@ -546,7 +676,7 @@
                                                                     var formData = new FormData();
                                                                     formData.append('file', file);
 
-                                                                    fetch('/SWP391_QUIZ_PRACTICE_SU25/upload-media', {
+                                                                    fetch('/SWP391_QUIZ_PRACTICE_SU25/manage-subjects/upload-media', {
                                                                         method: 'POST',
                                                                         body: formData
                                                                     })
@@ -625,179 +755,292 @@
                                                         });
                                                     }
 
-                                                    // Initialize TinyMCE for media_url
-                                                    initTinyMCE();
-                                                    fixOldMediaUrls('#media_url');
+                                                                                        // Initialize TinyMCE for media_url
+                                    initTinyMCE();
+                                    fixOldMediaUrls('#media_url');
 
-                                                    // Form validation
-                                                    $('#questionForm').submit(function (e) {
-                                                        tinymce.triggerSave();
+                                    // Initialize answer type display
+                                    handleAnswerTypeChange();
 
-                                                        if (!validateForm()) {
-                                                            e.preventDefault();
-                                                            return false;
-                                                        }
-                                                        return true;
-                                                    });
-                                                });
+                                    // Form validation
+                                    $('#questionForm').submit(function (e) {
+                                        if (!hasQuizzes) {
+                                            e.preventDefault();
+                                            alert('Cannot create questions without quizzes. Please create quizzes first.');
+                                            return false;
+                                        }
+                                        
+                                        tinymce.triggerSave();
 
-                                                function validateForm() {
-                                                    var content = $('input[name="content"]').val();
-                                                    if (!content || content.trim() === '') {
-                                                        iziToast.error({
-                                                            title: 'Error',
-                                                            message: 'Question content cannot be empty',
-                                                            position: 'topRight',
-                                                            timeout: 3000
-                                                        });
-                                                        return false;
-                                                    }
+                                        if (!validateForm()) {
+                                            e.preventDefault();
+                                            return false;
+                                        }
+                                        return true;
+                                    });
+                                });
 
-                                                    if (!$('input[name="correctAnswers"]:checked').length) {
-                                                        iziToast.error({
-                                                            title: 'Error',
-                                                            message: 'Please select at least one correct answer',
-                                                            position: 'topRight',
-                                                            timeout: 3000
-                                                        });
-                                                        return false;
-                                                    }
+                                                                                function handleAnswerTypeChange() {
+                                    var answerType = $('#answerType').val();
+                                    var answersContainer = $('#answers-container');
+                                    var multipleChoiceInfo = $('#multiple-choice-info');
+                                    var essayInfo = $('#essay-info');
 
-                                                    // Check if we have at least 2 answer options
-                                                    var optionCount = $('.answer-option').length;
-                                                    if (optionCount < 2) {
-                                                        iziToast.error({
-                                                            title: 'Error',
-                                                            message: 'A question must have at least 2 answer options',
-                                                            position: 'topRight',
-                                                            timeout: 3000
-                                                        });
-                                                        return false;
-                                                    }
+                                    if (answerType === 'answer_text') {
+                                        // Essay mode
+                                        answersContainer.addClass('essay-mode');
+                                        multipleChoiceInfo.hide();
+                                        essayInfo.show();
+                                        convertToEssayAnswers();
+                                    } else {
+                                        // Multiple choice mode
+                                        answersContainer.removeClass('essay-mode');
+                                        multipleChoiceInfo.show();
+                                        essayInfo.hide();
+                                        convertToMultipleChoiceAnswers();
+                                    }
+                                }
 
-                                                    // Check if all visible answer fields are filled
-                                                    var allFilled = true;
-                                                    $('.answer-option input[type="text"]').each(function () {
-                                                        if ($(this).val().trim() === '') {
-                                                            allFilled = false;
-                                                            return false;
-                                                        }
-                                                    });
+                                function convertToEssayAnswers() {
+                                    $('.answer-option').each(function(index) {
+                                        var $option = $(this);
+                                        var $inputContainer = $option.find('.answer-input-container');
+                                        var currentValue = $inputContainer.find('input, textarea').val() || '';
+                                        var optionNumber = index + 1;
 
-                                                    if (!allFilled) {
-                                                        iziToast.error({
-                                                            title: 'Error',
-                                                            message: 'All answer fields must be filled',
-                                                            position: 'topRight',
-                                                            timeout: 3000
-                                                        });
-                                                        return false;
-                                                    }
+                                        // Replace input with textarea for essay
+                                        $inputContainer.html(
+                                            '<textarea class="form-control answer-textarea" name="answerText_' + optionNumber + 
+                                            '" placeholder="Essay Answer/Criteria ' + optionNumber + '" required>' + 
+                                            currentValue + '</textarea>'
+                                        );
+                                    });
+                                }
 
-                                                    return true;
-                                                }
+                                function convertToMultipleChoiceAnswers() {
+                                    $('.answer-option').each(function(index) {
+                                        var $option = $(this);
+                                        var $inputContainer = $option.find('.answer-input-container');
+                                        var currentValue = $inputContainer.find('input, textarea').val() || '';
+                                        var optionNumber = index + 1;
 
-                                                function addOption() {
-                                                    var optionCount = parseInt($('#optionCount').val());
-                                                    optionCount++;
+                                        // Replace textarea with input for multiple choice
+                                        $inputContainer.html(
+                                            '<input type="text" class="form-control answer-input" name="optionText_' + optionNumber + 
+                                            '" value="' + currentValue + '" placeholder="Option ' + optionNumber + '" required>'
+                                        );
+                                    });
+                                }
 
-                                                    var newOptionHtml = '<div class="answer-option" id="answer-' + optionCount + '">' +
-                                                            '<input type="checkbox" name="correctAnswers" value="' + optionCount + '">' +
-                                                            '<input type="text" class="form-control" name="optionText_' + optionCount + '" placeholder="Answer ' + optionCount + '" required>' +
-                                                            '<input type="hidden" name="optionId_' + optionCount + '" value="0">' +
-                                                            '<button type="button" class="btn-remove-option" onclick="removeOption(' + optionCount + ')">' +
-                                                            '<i class="fas fa-times"></i>' +
-                                                            '</button>' +
-                                                            '</div>';
+                                function validateForm() {
+                                    var content = $('input[name="content"]').val();
+                                    var answerType = $('#answerType').val();
+                                    var quizId = $('#quizId').val();
+                                    
+                                    if (!content || content.trim() === '') {
+                                        iziToast.error({
+                                            title: 'Error',
+                                            message: 'Question content cannot be empty',
+                                            position: 'topRight',
+                                            timeout: 3000
+                                        });
+                                        return false;
+                                    }
+                                    
+                                    // Check quiz selection
+                                    if (!quizId || quizId === '') {
+                                        iziToast.error({
+                                            title: 'Error',
+                                            message: 'Please select a quiz for this question',
+                                            position: 'topRight',
+                                            timeout: 3000
+                                        });
+                                        $('#quizId').focus();
+                                        return false;
+                                    }
 
-                                                    $('#answers-container').append(newOptionHtml);
-                                                    $('#optionCount').val(optionCount);
-                                                }
+                                    // For essay questions, correct answers validation is optional
+                                    if (answerType === 'option_text' && !$('input[name="correctAnswers"]:checked').length) {
+                                        iziToast.error({
+                                            title: 'Error',
+                                            message: 'Please select at least one correct answer for multiple choice questions',
+                                            position: 'topRight',
+                                            timeout: 3000
+                                        });
+                                        return false;
+                                    }
 
-                                                function removeOption(optionNumber) {
-                                                    var optionCount = parseInt($('#optionCount').val());
-                                                    if (optionCount > 2) {
-                                                        var optionElement = $('#answer-' + optionNumber);
-                                                        var optionId = optionElement.find('input[name="optionId_' + optionNumber + '"]').val();
+                                    // Check if we have at least 1 answer option for essay, 2 for multiple choice
+                                    var optionCount = $('.answer-option').length;
+                                    var minOptions = answerType === 'answer_text' ? 1 : 2;
+                                    
+                                    if (optionCount < minOptions) {
+                                        iziToast.error({
+                                            title: 'Error',
+                                            message: answerType === 'answer_text' ? 
+                                                'Essay questions must have at least 1 answer criteria' :
+                                                'Multiple choice questions must have at least 2 answer options',
+                                            position: 'topRight',
+                                            timeout: 3000
+                                        });
+                                        return false;
+                                    }
 
-                                                        if (optionId && optionId !== '0') {
-                                                            // Option exists in database, ask for confirmation and delete via AJAX
-                                                            if (confirm('Are you sure you want to delete this answer option?')) {
-                                                                $.ajax({
-                                                                    url: '/SWP391_QUIZ_PRACTICE_SU25/questions-list',
-                                                                    type: 'POST',
-                                                                    data: {
-                                                                        action: 'deleteOption',
-                                                                        optionId: optionId
-                                                                    },
-                                                                    dataType: 'json',
-                                                                    success: function (response) {
-                                                                        if (response.success) {
-                                                                            // Remove from UI
-                                                                            optionElement.fadeOut(300, function () {
-                                                                                $(this).remove();
-                                                                                reindexOptions();
-                                                                            });
+                                    // Check if all visible answer fields are filled
+                                    var allFilled = true;
+                                    $('.answer-option input[type="text"], .answer-option textarea').each(function () {
+                                        if ($(this).val().trim() === '') {
+                                            allFilled = false;
+                                            return false;
+                                        }
+                                    });
 
-                                                                            iziToast.success({
-                                                                                title: 'Success',
-                                                                                message: 'Answer option deleted successfully',
-                                                                                position: 'topRight',
-                                                                                timeout: 3000
-                                                                            });
-                                                                        } else {
-                                                                            iziToast.error({
-                                                                                title: 'Error',
-                                                                                message: response.message || 'Failed to delete answer option',
-                                                                                position: 'topRight',
-                                                                                timeout: 3000
-                                                                            });
-                                                                        }
-                                                                    },
-                                                                    error: function (xhr, status, error) {
-                                                                        console.error('Delete option error:', error);
-                                                                        iziToast.error({
-                                                                            title: 'Error',
-                                                                            message: 'Failed to delete answer option: ' + error,
-                                                                            position: 'topRight',
-                                                                            timeout: 3000
-                                                                        });
-                                                                    }
-                                                                });
-                                                            }
-                                                        } else {
-                                                            // New option not saved yet, just remove from UI
+                                    if (!allFilled) {
+                                        iziToast.error({
+                                            title: 'Error',
+                                            message: 'All answer fields must be filled',
+                                            position: 'topRight',
+                                            timeout: 3000
+                                        });
+                                        return false;
+                                    }
+
+                                    return true;
+                                }
+
+                                                                                function addOption() {
+                                    var optionCount = parseInt($('#optionCount').val());
+                                    var answerType = $('#answerType').val();
+                                    optionCount++;
+
+                                    var inputField, fieldName, placeholder;
+                                    if (answerType === 'answer_text') {
+                                        inputField = '<textarea class="form-control answer-textarea" name="answerText_' + optionCount + '" placeholder="Essay Answer/Criteria ' + optionCount + '" required></textarea>';
+                                        fieldName = 'answerText_' + optionCount;
+                                        placeholder = 'Essay Answer/Criteria ' + optionCount;
+                                    } else {
+                                        inputField = '<input type="text" class="form-control answer-input" name="optionText_' + optionCount + '" placeholder="Option ' + optionCount + '" required>';
+                                        fieldName = 'optionText_' + optionCount;
+                                        placeholder = 'Option ' + optionCount;
+                                    }
+
+                                    var newOptionHtml = '<div class="answer-option" id="answer-' + optionCount + '">' +
+                                            '<input type="checkbox" name="correctAnswers" value="' + optionCount + '" class="correct-checkbox">' +
+                                            '<div class="answer-input-container">' +
+                                            inputField +
+                                            '</div>' +
+                                            '<input type="hidden" name="optionId_' + optionCount + '" value="0">' +
+                                            '<button type="button" class="btn-remove-option" onclick="removeOption(' + optionCount + ')">' +
+                                            '<i class="fas fa-times"></i>' +
+                                            '</button>' +
+                                            '</div>';
+
+                                    $('#answers-container').append(newOptionHtml);
+                                    $('#optionCount').val(optionCount);
+                                }
+
+                                                                                function removeOption(optionNumber) {
+                                    var optionCount = parseInt($('#optionCount').val());
+                                    var answerType = $('#answerType').val();
+                                    var minOptions = answerType === 'answer_text' ? 1 : 2;
+                                    
+                                    if (optionCount > minOptions) {
+                                        var optionElement = $('#answer-' + optionNumber);
+                                        var optionId = optionElement.find('input[name="optionId_' + optionNumber + '"]').val();
+
+                                        if (optionId && optionId !== '0') {
+                                            // Option exists in database, ask for confirmation and delete via AJAX
+                                            if (confirm('Are you sure you want to delete this answer option?')) {
+                                                $.ajax({
+                                                    url: '/SWP391_QUIZ_PRACTICE_SU25/questions-list',
+                                                    type: 'POST',
+                                                    data: {
+                                                        action: 'deleteOption',
+                                                        optionId: optionId
+                                                    },
+                                                    dataType: 'json',
+                                                    success: function (response) {
+                                                        if (response.success) {
+                                                            // Remove from UI
                                                             optionElement.fadeOut(300, function () {
                                                                 $(this).remove();
                                                                 reindexOptions();
                                                             });
+
+                                                            iziToast.success({
+                                                                title: 'Success',
+                                                                message: 'Answer option deleted successfully',
+                                                                position: 'topRight',
+                                                                timeout: 3000
+                                                            });
+                                                        } else {
+                                                            iziToast.error({
+                                                                title: 'Error',
+                                                                message: response.message || 'Failed to delete answer option',
+                                                                position: 'topRight',
+                                                                timeout: 3000
+                                                            });
                                                         }
-                                                    } else {
-                                                        iziToast.warning({
-                                                            title: 'Warning',
-                                                            message: 'A question must have at least 2 answers',
+                                                    },
+                                                    error: function (xhr, status, error) {
+                                                        console.error('Delete option error:', error);
+                                                        iziToast.error({
+                                                            title: 'Error',
+                                                            message: 'Failed to delete answer option: ' + error,
                                                             position: 'topRight',
                                                             timeout: 3000
                                                         });
                                                     }
-                                                }
+                                                });
+                                            }
+                                        } else {
+                                            // New option not saved yet, just remove from UI
+                                            optionElement.fadeOut(300, function () {
+                                                $(this).remove();
+                                                reindexOptions();
+                                            });
+                                        }
+                                    } else {
+                                        var warningMessage = answerType === 'answer_text' ? 
+                                            'Essay questions must have at least 1 answer criteria' : 
+                                            'Multiple choice questions must have at least 2 answers';
+                                            
+                                        iziToast.warning({
+                                            title: 'Warning',
+                                            message: warningMessage,
+                                            position: 'topRight',
+                                            timeout: 3000
+                                        });
+                                    }
+                                }
 
-                                                function reindexOptions() {
-                                                    var optionCount = 0;
-                                                    $('.answer-option').each(function (index) {
-                                                        optionCount++;
-                                                        var newIndex = index + 1;
+                                                                                function reindexOptions() {
+                                    var optionCount = 0;
+                                    var answerType = $('#answerType').val();
+                                    
+                                    $('.answer-option').each(function (index) {
+                                        optionCount++;
+                                        var newIndex = index + 1;
 
-                                                        $(this).attr('id', 'answer-' + newIndex);
-                                                        $(this).find('input[type="checkbox"]').attr('value', newIndex);
-                                                        $(this).find('input[type="text"]').attr('name', 'optionText_' + newIndex);
-                                                        $(this).find('input[type="text"]').attr('placeholder', 'Answer ' + newIndex);
-                                                        $(this).find('input[type="hidden"]').attr('name', 'optionId_' + newIndex);
-                                                        $(this).find('.btn-remove-option').attr('onclick', 'removeOption(' + newIndex + ')');
-                                                    });
+                                        $(this).attr('id', 'answer-' + newIndex);
+                                        $(this).find('input[type="checkbox"]').attr('value', newIndex);
+                                        
+                                        // Handle different field types based on answer type
+                                        var $inputField = $(this).find('input[type="text"], textarea');
+                                        if (answerType === 'answer_text') {
+                                            $inputField.attr('name', 'answerText_' + newIndex);
+                                            $inputField.attr('placeholder', 'Essay Answer/Criteria ' + newIndex);
+                                        } else {
+                                            $inputField.attr('name', 'optionText_' + newIndex);
+                                            $inputField.attr('placeholder', 'Option ' + newIndex);
+                                        }
+                                        
+                                        $(this).find('input[type="hidden"]').attr('name', 'optionId_' + newIndex);
+                                        $(this).find('.btn-remove-option').attr('onclick', 'removeOption(' + newIndex + ')');
+                                    });
 
-                                                    $('#optionCount').val(optionCount);
-                                                }
+                                    $('#optionCount').val(optionCount);
+                                }
         </script>
     </body>
 </html>
