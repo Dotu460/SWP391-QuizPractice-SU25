@@ -154,10 +154,7 @@
             color: #d03030;
         }
 
-        .status-pending {
-            background-color: #fff3cd;
-            color: #856404;
-        }
+
 
         .table-header-sortable {
             cursor: pointer;
@@ -321,7 +318,6 @@
                                             <option value="">All Status</option>
                                             <option value="active" ${statusFilter eq 'active' ? 'selected' : ''}>Active</option>
                                             <option value="inactive" ${statusFilter eq 'inactive' ? 'selected' : ''}>Inactive</option>
-                                            <option value="pending" ${statusFilter eq 'pending' ? 'selected' : ''}>Pending</option>
                                         </select>
                                     </div>
 
@@ -423,7 +419,7 @@
                                                         <span class="status-badge status-inactive">Inactive</span>
                                                     </c:when>
                                                     <c:otherwise>
-                                                        <span class="status-badge status-pending">Pending</span>
+                                                        <span class="status-badge status-inactive">Unknown</span>
                                                     </c:otherwise>
                                                 </c:choose>
                                             </td>
@@ -641,10 +637,7 @@
     color: #721c24;
   }
 
-  .status-badge.status-pending {
-    background-color: #fff3cd;
-    color: #856404;
-  }
+
 
   /* Mobile responsive for action buttons */
   @media (max-width: 768px) {
