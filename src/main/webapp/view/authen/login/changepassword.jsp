@@ -148,53 +148,41 @@
                     </div>
 
                     <form action="change-password" method="post" id="changePasswordForm" onsubmit="return validateForm()">
-                    <c:if test="${not empty errors}">
-                        <c:forEach var="err" items="${errors}">
-                            <div class="alert alert-danger">
-                                <i class="fas fa-exclamation-circle"></i>
-                                ${err}
-                            </div>
-                        </c:forEach>
-                    </c:if>
 
-                    <c:if test="${not empty message}">
-                        <div class="alert alert-success">
-                            <i class="fas fa-check-circle"></i>
-                            ${message}
+                        <!-- Hiển thị lỗi từ server (ưu tiên cao nhất) -->
+                    <c:if test="${not empty error}">
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle"></i>
+                            ${error}
                         </div>
                     </c:if>
-                    
+
+
+                    <!-- Container cho lỗi từ JavaScript (chỉ hiển thị khi không có lỗi server) -->
                     <div id="form-errors"></div>
+
+                    <!-- Các input fields -->
                     <div class="form-group">
                         <label for="current_password">Current Password</label>
                         <input type="password" class="form-control" id="current_password" name="current_password" 
                                placeholder="Enter your current password" >
-                        <span id="current-password-error" class="error-text"></span>
                     </div>
 
                     <div class="form-group">
                         <label for="new_password">New Password</label>
                         <input type="password" class="form-control" id="new_password" name="new_password" 
                                placeholder="Enter your new password" >
-                        <span id="new-password-error" class="error-text"></span>
                     </div>
 
                     <div class="form-group">
                         <label for="confirm_password">Confirm New Password</label>
                         <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
                                placeholder="Confirm your new password" >
-                        <span id="confirm-password-error" class="error-text"></span>
                     </div>
 
                     <button type="submit" class="reset-btn" id="changePasswordBtn">
                         <i class="fas fa-key me-2"></i>Change Password
                     </button>
-
-                    <div class="back-link">
-                        <a href="${pageContext.request.contextPath}/my-profile">
-                            <i class="fas fa-arrow-left me-2"></i>Back to Profile
-                        </a>
-                    </div>
                 </form>
             </div>
         </div>
@@ -207,10 +195,14 @@
                 const changePasswordBtn = document.getElementById('changePasswordBtn');
 
                 function validateForm() {
+                    // Clear any existing server errors
+                    const serverErrors = document.querySelectorAll('.alert-danger');
+                    serverErrors.forEach(error => error.remove());
+
                     const errorContainer = document.getElementById('form-errors');
-                    errorContainer.innerHTML = ""; // Clear previous errors
-                    
-                    // Check if all fields are filled
+                    errorContainer.innerHTML = "";
+
+                    // Chỉ kiểm tra trống
                     if (currentPassword.value.trim() === "" || newPassword.value.trim() === "" || confirmPassword.value.trim() === "") {
                         const errorDiv = document.createElement('div');
                         errorDiv.className = 'alert alert-danger';
@@ -219,29 +211,11 @@
                         return false;
                     }
 
-                    // Check if new password matches confirm password
-                    if (newPassword.value !== confirmPassword.value) {
-                        const errorDiv = document.createElement('div');
-                        errorDiv.className = 'alert alert-danger';
-                        errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i>New passwords do not match.';
-                        errorContainer.appendChild(errorDiv);
-                        return false;
-                    }
-
-                    // Check if new password is different from current password
-                    if (currentPassword.value === newPassword.value) {
-                        const errorDiv = document.createElement('div');
-                        errorDiv.className = 'alert alert-danger';
-                        errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i>New password must be different from current password.';
-                        errorContainer.appendChild(errorDiv);
-                        return false;
-                    }
-
                     return true;
                 }
 
                 // Add form validation on submit
-                document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+                document.getElementById('changePasswordForm').addEventListener('submit', function (e) {
                     if (!validateForm()) {
                         e.preventDefault();
                     }
