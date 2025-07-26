@@ -518,6 +518,8 @@ public class AuthenController extends HttpServlet {
 
     private void changePassword(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.removeAttribute("error");
+        request.removeAttribute("errors");
         String currentPassword = request.getParameter("current_password");
         String newPassword = request.getParameter("new_password");
         String confirmPassword = request.getParameter("confirm_password");
