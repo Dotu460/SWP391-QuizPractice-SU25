@@ -68,7 +68,7 @@
                                         <ul class="sub-menu">
                                             <li class="menu-item-has-children">
                                                 <c:if test="${sessionScope.account.role_id == 1}"> 
-                                                <a href="instructor-dashboard.html">Admin Dashboard</a>
+                                                <a>Admin Dashboard</a>
                                                 <ul class="sub-menu">
                                                     <li><a href="${pageContext.request.contextPath}/admin/users">Manage users</a></li>
                                                     <li><a href="${pageContext.request.contextPath}/admin/registrations">Registration</a></li>
@@ -79,7 +79,7 @@
                                             </li>
                                             <li class="menu-item-has-children">
                                                 <c:if test="${sessionScope.account.role_id == 1 || sessionScope.account.role_id == 3}"> 
-                                                <a href="student-dashboard.html">Expert Dashboard</a>
+                                                <a>Expert Dashboard</a>
                                                 <ul class="sub-menu">
                                                     <li><a href="${pageContext.request.contextPath}/manage-subjects">Manage Subject</a></li>
                                                     <li><a href="${pageContext.request.contextPath}/admin/subjects">Subject</a></li>

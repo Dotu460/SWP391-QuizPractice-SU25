@@ -1,5 +1,7 @@
 package com.quiz.su25.validation;
 
+import com.quiz.su25.dal.impl.UserDAO;
+import com.quiz.su25.entity.User;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,7 +15,7 @@ public class UserValidation {
      * Validates all user fields and returns any validation errors
      * @param fullName User's full name
      * @param email User's email address
-     * @param mobile User's mobile number (optional)
+     * @param mobile User's mobile number (required)
      * @param gender User's gender (0 for female, 1 for male)
      * @param roleId User's role ID
      * @param status User's status
@@ -41,11 +43,16 @@ public class UserValidation {
             errors.put("email", emailError);
         }
         
-        // Validate mobile number using MobileVal (optional)
-        if (mobile != null && !mobile.trim().isEmpty()) {
-            String mobileError = MobileVal.validate(mobile);
-            if (mobileError != null) {
-                errors.put("mobile", mobileError);
+        // Validate mobile number using MobileVal (required)
+        String mobileError = MobileVal.validate(mobile);
+        if (mobileError != null) {
+            errors.put("mobile", mobileError);
+        } else {
+            // Check if mobile number already exists in database
+            UserDAO userDAO = new UserDAO();
+            User existingUser = userDAO.findByMobile(mobile);
+            if (existingUser != null) {
+                errors.put("mobile", "Mobile number already exists in the system");
             }
         }
         

@@ -275,7 +275,7 @@
                                            id="key" 
                                            name="key" 
                                            value="${setting.key}"
-                                           required>
+                                           readonly>
                                     <div class="help-text">
                                         Use lowercase letters, numbers, and underscores only. Must be unique.
                                     </div>

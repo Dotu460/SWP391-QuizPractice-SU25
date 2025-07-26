@@ -167,6 +167,9 @@ public class EssayGradingController extends HttpServlet {
             request.setAttribute("selectedUserId", userId);
             request.setAttribute("selectedStatus", status);
             
+            // Set active parameter for sidebar highlighting
+            request.setAttribute("active", "grading");
+            
             // Kiểm tra thông báo thành công
             String success = request.getParameter("success");
             if ("true".equals(success)) {

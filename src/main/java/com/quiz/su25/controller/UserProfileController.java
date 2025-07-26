@@ -24,7 +24,7 @@ import jakarta.servlet.http.Part;
 import jakarta.servlet.annotation.MultipartConfig;
 
 @WebServlet(urlPatterns = {"/my-profile", "/uploads/*"})
-@MultipartConfig(maxFileSize = 1024 * 1024 * 5) // 5MB
+@MultipartConfig(maxFileSize = 1024 * 1024 * 1024) // 1GB
 public class UserProfileController extends HttpServlet {
 
     private UserDAO userDAO;

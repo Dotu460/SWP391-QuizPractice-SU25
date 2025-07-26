@@ -416,13 +416,7 @@
                                                                 <label class="form-check-label" for="col_registration_time">Registration Time</label>
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-3">
-                                                            <div class="form-check">
-                                                                <input type="checkbox" class="form-check-input column-selector" id="col_last_updated_by" name="selectedColumns" value="last_updated_by"
-                                                                       ${empty paramValues['selectedColumns'] ? 'checked' : fn:join(paramValues['selectedColumns'], ',').contains('last_updated_by') ? 'checked' : ''}>
-                                                                <label class="form-check-label" for="col_last_updated_by">Last Updated By</label>
-                                                            </div>
-                                                        </div>
+
                                                     </div>
                                                 </div>
                                             </div>
@@ -526,15 +520,7 @@
                                                                     </c:if>
                                                                 </a>
                                                             </c:when>
-                                                            <c:when test="${column == 'last_updated_by'}">
-                                                                <a href="?${pageContext.request.queryString}&sortBy=last_updated_by&sortOrder=${sortBy == 'last_updated_by' && sortOrder == 'asc' ? 'desc' : 'asc'}" 
-                                                                   class="text-dark text-decoration-none">
-                                                                    Last Updated By
-                                                                    <c:if test="${sortBy == 'last_updated_by'}">
-                                                                        <i class="fas fa-sort-${sortOrder == 'asc' ? 'up' : 'down'}"></i>
-                                                                    </c:if>
-                                                                </a>
-                                                            </c:when>
+
                                                         </c:choose>
                                                     </th>
                                                 </c:forEach>
@@ -542,12 +528,12 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <c:forEach items="${registrations}" var="reg">
+                                            <c:forEach items="${registrations}" var="reg" varStatus="loop">
                                                 <tr>
                                                     <c:forEach items="${selectedColumns}" var="column">
                                                         <td>
                                                             <c:choose>
-                                                                <c:when test="${column == 'id'}">${reg.id}</c:when>
+                                                                <c:when test="${column == 'id'}">${loop.index + 1}</c:when>
                                                                 <c:when test="${column == 'email'}">${userEmails[reg.user_id]}</c:when>
                                                                 <c:when test="${column == 'subject'}">${subjectTitles[reg.subject_id]}</c:when>
                                                                 <c:when test="${column == 'package'}">${packageNames[reg.package_id]}</c:when>
@@ -562,11 +548,7 @@
                                                                 <c:when test="${column == 'registration_time'}">
                                                                     <fmt:formatDate value="${reg.registration_time}" pattern="yyyy-MM-dd"/>
                                                                 </c:when>
-                                                                <c:when test="${column == 'last_updated_by'}">
-                                                                    <c:set var="adminNames" value="${['Admin User', 'John Doe', 'Jane Smith', 'Mike Johnson', 'Sarah Wilson']}"/>
-                                                                    <c:set var="randomIndex" value="${fn:substring(reg.id, 0, 1) % 5}"/>
-                                                                    ${adminNames[randomIndex]}
-                                                                </c:when>
+
                                                             </c:choose>
                                                         </td>
                                                     </c:forEach>

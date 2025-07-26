@@ -58,7 +58,7 @@
             <!-- Font Awesome -->
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
             <!-- TinyMCE -->
-            <script src="https://cdn.tiny.cloud/1/5ynsnptn3yryfyduzpqdheibiiqvgbz5oe6ypn6t4vnl1154/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+            <script src="https://cdn.tiny.cloud/1/d9h5oobjfvk0bo44fve7wa9hxtmb8fxjnktcskhbseso5cjd/tinymce/8/tinymce.min.js" referrerpolicy="origin"></script>
 
             <style>
                 /* Main content area */

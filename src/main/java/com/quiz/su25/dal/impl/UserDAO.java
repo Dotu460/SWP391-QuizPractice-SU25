@@ -518,5 +518,27 @@ public class UserDAO extends DBContext implements I_DAO<User> {
         }
         return null;
     }
+    
+    /**
+     * Find user by mobile number
+     * @param mobile Mobile number to search for
+     * @return User object if found, null otherwise
+     */
+    public User findByMobile(String mobile) {
+        String sql = "SELECT * FROM users WHERE mobile = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, mobile);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                return getFromResultSet(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error finding user by mobile: " + e.getMessage());
+        }
+        return null;
+    }
 
 }

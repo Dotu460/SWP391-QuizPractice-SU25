@@ -27,7 +27,7 @@
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.min.css">
 
             <!-- TinyMCE CDN -->
-            <script src="https://cdn.tiny.cloud/1/5ynsnptn3yryfyduzpqdheibiiqvgbz5oe6ypn6t4vnl1154/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+            <script src="https://cdn.tiny.cloud/1/d9h5oobjfvk0bo44fve7wa9hxtmb8fxjnktcskhbseso5cjd/tinymce/8/tinymce.min.js" referrerpolicy="origin"></script>
 
             <style>
                 .form-container {

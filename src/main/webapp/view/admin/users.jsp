@@ -394,9 +394,9 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    <c:forEach items="${users}" var="user">
+                                    <c:forEach items="${users}" var="user" varStatus="loop">
                                         <tr>
-                                            <td>${user.id}</td>
+                                            <td>${loop.index + 1}</td>
                                             <td>
                                                 <div class="dashboard__quiz-info">
                                                     <h6 class="title">${user.full_name}</h6>

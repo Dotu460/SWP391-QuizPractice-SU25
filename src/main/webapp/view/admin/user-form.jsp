@@ -220,9 +220,13 @@
             </div>
 
             <div class="mb-3">
-              <label for="mobile" class="form-label">Mobile Number</label>
+              <label for="mobile" class="form-label">Mobile Number*</label>
               <input type="tel" class="form-control" id="mobile" name="mobile"
-                     value="${user.mobile}">
+                     value="${user.mobile}" placeholder="Enter mobile number (e.g., 0123456789)" required>
+              <div class="invalid-feedback" id="mobile-error">
+                Please provide a valid mobile number.
+              </div>
+              <div class="form-text">Mobile number must start with 03, 05, 07, 08, 09 and have 10 digits</div>
             </div>
 
             <div class="mb-3">
@@ -294,6 +298,59 @@
             }, false)
         })
     })()
+
+    // Mobile number validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const mobileInput = document.getElementById('mobile');
+        const mobileError = document.getElementById('mobile-error');
+        
+        function validateMobile(mobile) {
+            // Remove all spaces and special characters
+            const cleanMobile = mobile.replaceAll(/[\s\-\(\)]/g, '');
+            
+            // Check if it's a valid Vietnamese mobile number
+            // Pattern requires: starts with 03, 05, 07, 08, or 09 and has exactly 10 digits
+            const mobileRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
+            
+            if (mobile.trim() === '') {
+                return 'Mobile number is required';
+            }
+            
+            if (!mobileRegex.test(cleanMobile)) {
+                return 'Mobile number must start with 03, 05, 07, 08, 09 and have 10 digits';
+            }
+            
+            return null; // No error
+        }
+        
+        mobileInput.addEventListener('input', function() {
+            const mobileValue = this.value;
+            const error = validateMobile(mobileValue);
+            
+            if (error) {
+                mobileInput.classList.add('is-invalid');
+                mobileError.textContent = error;
+            } else {
+                mobileInput.classList.remove('is-invalid');
+                mobileInput.classList.add('is-valid');
+                mobileError.textContent = '';
+            }
+        });
+        
+        mobileInput.addEventListener('blur', function() {
+            const mobileValue = this.value;
+            const error = validateMobile(mobileValue);
+            
+            if (error) {
+                mobileInput.classList.add('is-invalid');
+                mobileError.textContent = error;
+            } else {
+                mobileInput.classList.remove('is-invalid');
+                mobileInput.classList.add('is-valid');
+                mobileError.textContent = '';
+            }
+        });
+    });
 </script>
 </body>
 </html>
