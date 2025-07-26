@@ -339,6 +339,7 @@ public class SliderController extends HttpServlet {
         try {
             String status = request.getParameter("status");
             String search = request.getParameter("search");
+
             String pageSize = request.getParameter("pageSize");
             String page = request.getParameter("page");
             String showAll = request.getParameter("showAll");
@@ -350,6 +351,7 @@ public class SliderController extends HttpServlet {
             if (search != null && !search.isEmpty()) {
                 params.add("search=" + URLEncoder.encode(search, "UTF-8"));
             }
+
             if (pageSize != null && !pageSize.isEmpty()) {
                 params.add("pageSize=" + pageSize);
             }

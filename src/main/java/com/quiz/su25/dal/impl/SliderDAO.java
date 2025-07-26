@@ -178,7 +178,7 @@ public class SliderDAO extends DBContext implements I_DAO<Slider> {
             sql.append(" AND (title LIKE ?)");
         }
         
-        sql.append(" ORDER BY id LIMIT ? OFFSET ?");
+        sql.append(" ORDER BY id ASC LIMIT ? OFFSET ?");
         
         try {
             connection = getConnection();

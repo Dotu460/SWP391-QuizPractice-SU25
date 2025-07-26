@@ -166,6 +166,7 @@
                                 <c:if test="${not empty param.search}">
                                     <c:param name="search" value="${param.search}" />
                                 </c:if>
+
                                 <c:if test="${not empty param.pageSize}">
                                     <c:param name="pageSize" value="${param.pageSize}" />
                                 </c:if>
@@ -177,6 +178,7 @@
                             <c:url value="" var="currentParams">
                                 <c:if test="${not empty statusFilter}"><c:param name="status" value="${statusFilter}" /></c:if>
                                 <c:if test="${not empty searchFilter}"><c:param name="search" value="${searchFilter}" /></c:if>
+
                                 <c:if test="${not empty pageSize}"><c:param name="pageSize" value="${pageSize}" /></c:if>
                                 <c:if test="${not empty currentPage}"><c:param name="page" value="${currentPage}" /></c:if>
                                 <c:if test="${not empty param.showAll}"><c:param name="showAll" value="${param.showAll}" /></c:if>
@@ -231,6 +233,7 @@
                                                         </select>
                                                     </div>
                                                 </div>
+
                                                 <div class="col-md-3 d-flex align-items-end">
                                                     <button type="submit" class="btn btn-primary" onclick="updateShowAllField()">Filter</button>
                                                     <a href="${pageContext.request.contextPath}/slider-list" class="btn btn-secondary" style="margin-left: 12px;" onclick="resetForm()">Reset</a>
@@ -267,7 +270,7 @@
                                         <table class="table table-striped table-hover" id="sliderTable">
                                             <thead>
                                                 <tr>
-                                                    <th class="column-id">ID</th>
+                                                    <th class="column-id">No.</th>
                                                     <th class="column-title">Title</th>
                                                     <th class="column-image">Image</th>
                                                     <th class="column-backlink">Backlink</th>
@@ -276,9 +279,18 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <c:forEach items="${sliders}" var="slider">
+                                                <c:forEach items="${sliders}" var="slider" varStatus="status">
                                                     <tr>
-                                                        <td class="column-id">${slider.id}</td>
+                                                        <td class="column-id">
+                                                            <c:choose>
+                                                                <c:when test="${showAll}">
+                                                                    ${status.index + 1}
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    ${(currentPage - 1) * pageSize + status.index + 1}
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </td>
                                                         <td class="column-title"><strong>${slider.title}</strong></td>
                                                         <td class="column-image"><img src="${pageContext.request.contextPath}${slider.image_url}" alt="${slider.title}" class="slider-image"/></td>
                                                         <td class="column-backlink"><a href="${slider.backlink_url}" target="_blank">${slider.backlink_url}</a></td>
@@ -365,7 +377,7 @@
                         <form id="columnSettingsForm">
                             <div class="column-checkbox">
                                 <input type="checkbox" id="col-id" value="id" checked>
-                                <label for="col-id">ID</label>
+                                <label for="col-id">No.</label>
                             </div>
                             <div class="column-checkbox">
                                 <input type="checkbox" id="col-title" value="title" checked disabled>

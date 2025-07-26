@@ -201,6 +201,14 @@
                                     <div class="filter-form">
                                         <form action="${pageContext.request.contextPath}/admin/price-package-list" method="get" id="filterForm">
                                             <div class="row">
+
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="search">Search</label>
+                                                        <input type="text" class="form-control" id="search" name="search" 
+                                                               placeholder="Search by name, description..." value="${param.search}">
+                                                    </div>
+                                                </div>
                                                 <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label for="status">Status</label>
@@ -209,13 +217,6 @@
                                                             <option value="active" ${param.status == 'active' ? 'selected' : ''}>Active</option>
                                                             <option value="inactive" ${param.status == 'inactive' ? 'selected' : ''}>Inactive</option>
                                                         </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <div class="form-group">
-                                                        <label for="search">Search</label>
-                                                        <input type="text" class="form-control" id="search" name="search" 
-                                                               placeholder="Search by name, description..." value="${param.search}">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-3">
@@ -271,7 +272,7 @@
                                         <table class="table table-striped table-hover" id="pricePackageTable">
                                             <thead>
                                                 <tr>
-                                                    <th class="column-id">ID</th>
+                                                    <th class="column-id">No.</th>
                                                     <th class="column-name">Name</th>
                                                     <th class="column-duration">Duration (Months)</th>
                                                     <th class="column-list-price">List Price</th>
@@ -284,7 +285,16 @@
                                             <tbody>
                                                 <c:forEach items="${pricePackages}" var="pkg" varStatus="loop">
                                                     <tr>
-                                                        <td class="column-id">${pkg.id}</td>
+                                                        <td class="column-id">
+                                                            <c:choose>
+                                                                <c:when test="${showAll}">
+                                                                    ${loop.index + 1}
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    ${(currentPage - 1) * pageSize + loop.index + 1}
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </td>
                                                         <td class="column-name"><strong>${pkg.name}</strong></td>
                                                         <td class="column-duration">${pkg.access_duration_months}</td>
                                                         <td class="column-list-price"><fmt:formatNumber value="${pkg.list_price}" type="currency" currencySymbol="₫" /></td>
@@ -381,7 +391,7 @@
                         <form id="columnSettingsForm">
                             <div class="column-checkbox">
                                 <input type="checkbox" id="col-id" value="id" checked>
-                                <label for="col-id">ID</label>
+                                <label for="col-id">No.</label>
                             </div>
                             <div class="column-checkbox">
                                 <input type="checkbox" id="col-name" value="name" checked>
@@ -534,10 +544,10 @@
                                                                         });
 
                                                                         // Function to update showAll field before form submission
-                                                                        window.updateShowAllField = function() {
+                                                                        window.updateShowAllField = function () {
                                                                             const showAllCheckbox = document.getElementById('showAllCheckbox');
                                                                             const showAllField = document.getElementById('showAllField');
-                                                                            
+
                                                                             if (showAllCheckbox.checked) {
                                                                                 showAllField.value = 'true';
                                                                             } else {
@@ -546,7 +556,7 @@
                                                                         };
 
                                                                         // Add form submit event listener to ensure showAll state is preserved
-                                                                        document.getElementById('filterForm').addEventListener('submit', function(e) {
+                                                                        document.getElementById('filterForm').addEventListener('submit', function (e) {
                                                                             updateShowAllField();
                                                                         });
 
@@ -555,11 +565,11 @@
                                                                             const showAllCheckbox = document.getElementById('showAllCheckbox');
                                                                             const customSizeInput = document.getElementById('customPageSize');
                                                                             const showAllField = document.getElementById('showAllField');
-                                                                            
+
                                                                             // Check if showAll parameter is in URL
                                                                             const urlParams = new URLSearchParams(window.location.search);
                                                                             const showAllParam = urlParams.get('showAll');
-                                                                            
+
                                                                             if (showAllParam === 'true') {
                                                                                 showAllCheckbox.checked = true;
                                                                                 customSizeInput.disabled = true;
@@ -579,7 +589,7 @@
                                                                         initializeCheckboxState();
 
                                                                         // Function to reset form and redirect to base URL
-                                                                        window.resetForm = function() {
+                                                                        window.resetForm = function () {
                                                                             window.location.href = '${pageContext.request.contextPath}/admin/price-package-list';
                                                                         };
                                                                     });
