@@ -16,6 +16,10 @@
 
   <!-- Custom CSS for this page -->
   <style>
+    .dashboard__content-title {
+      padding: 20px 0;
+    }
+
     .dashboard__subjects-filter {
       padding: 25px;
       background-color: #f8f9fa;
@@ -157,6 +161,28 @@
       background-color: #f0f0f0;
       color: #6c757d;
     }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .dashboard__content-wrap {
+        padding: 0 10px;
+      }
+      
+      .dashboard__subjects-filter form {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .dashboard__subjects-filter .form-group {
+        min-width: 100%;
+      }
+      
+      .dashboard__actions {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+      }
+    }
   </style>
 </head>
 
@@ -176,8 +202,8 @@
 <main class="main-area">
   <!-- dashboard-area -->
   <section class="dashboard__area section-pb-120">
-    <div class="dashboard__bg"><img src="assets/img/bg/dashboard_bg.jpg" alt=""></div>
-    <div class="container">
+    <div class="dashboard__bg"><img src="${pageContext.request.contextPath}/assets/img/bg/dashboard_bg.jpg" alt=""></div>
+    <div class="container-fluid" style="padding: 0 20px;">
       <div class="dashboard__inner-wrap">
         <div class="row">
           <div class="col-lg-3">
@@ -190,6 +216,21 @@
               <div class="dashboard__content-title">
                 <h4 class="title">Subject Management</h4>
               </div>
+
+              <!-- Success/Error Messages -->
+              <c:if test="${not empty sessionScope.successMessage}">
+                <div class="alert alert-success" style="margin-bottom: 20px; padding: 15px; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 5px;">
+                  <i class="fas fa-check-circle"></i> ${sessionScope.successMessage}
+                </div>
+                <c:remove var="successMessage" scope="session"/>
+              </c:if>
+
+              <c:if test="${not empty sessionScope.errorMessage}">
+                <div class="alert alert-danger" style="margin-bottom: 20px; padding: 15px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 5px;">
+                  <i class="fas fa-exclamation-circle"></i> ${sessionScope.errorMessage}
+                </div>
+                <c:remove var="errorMessage" scope="session"/>
+              </c:if>
 
               <!-- Filters Section -->
               <div class="dashboard__subjects-filter">
@@ -225,7 +266,7 @@
 
               <!-- Add Subject Button -->
               <div class="dashboard__actions">
-                <h5>Total Subjects: <span class="text-primary">${subjects.size()}</span></h5>
+                <h5>Numbers of Subject display: <span class="text-primary">${subjects.size()}</span></h5>
                 <a href="${pageContext.request.contextPath}/admin/subject/new" class="add-subject-btn">
                   <i class="fas fa-plus"></i> Add New Subject
                 </a>
@@ -246,9 +287,9 @@
                   </tr>
                   </thead>
                   <tbody>
-                  <c:forEach var="subject" items="${subjects}">
+                  <c:forEach var="subject" items="${subjects}" varStatus="status">
                     <tr>
-                      <td>${subject.id}</td>
+                      <td>${(page - 1) * pageSize + status.index + 1}</td>
                       <td>
                         <div class="dashboard__quiz-info">
                           <h6 class="title">${subject.title}</h6>
@@ -261,14 +302,10 @@
                           </c:if>
                         </c:forEach>
                       </td>
-                        <%--                                            <td>--%>
-                        <%--                                                <span class="badge bg-light text-dark">${lessonCounts[subject.]}</span>--%>
-                        <%--                                            </td>--%>
                       <td>
-                                                <span class="badge bg-light text-dark">
-
-                                                    <%= (int)(Math.floor(Math.random() * 13) + 3) %>
-                                                </span>
+                        <span class="badge bg-light text-dark">
+                          ${lessonCounts[subject.id]}
+                        </span>
                       </td>
                       <td>${ownerNames[subject.owner_id]}</td>
                       <td>
@@ -286,8 +323,18 @@
                       </td>
                       <td>
                         <div class="dashboard__review-action">
-                          <a href="${pageContext.request.contextPath}/admin/subject/details?id=${subject.id}" class="subject-action-link edit-link" title="Edit"><i class="skillgro-edit"></i> Edit</a>
-                          <a href="${pageContext.request.contextPath}/admin/subject/view?id=${subject.id}" class="subject-action-link view-link" title="View"><i class="skillgro-book-2"></i> View</a>
+                          <a href="${pageContext.request.contextPath}/admin/subject/view?id=${subject.id}" class="subject-action-link view-link" title="View">
+                            <i class="skillgro-book-2"></i> View
+                          </a>
+                          <a href="${pageContext.request.contextPath}/admin/subject/edit?id=${subject.id}" class="subject-action-link edit-link" title="Edit">
+                            <i class="skillgro-edit"></i> Edit
+                          </a>
+                          <form method="post" style="display: inline;" onsubmit="return confirmDelete('${subject.title}', '${subject.id}');">
+                            <input type="hidden" name="id" value="${subject.id}">
+                            <button type="submit" formaction="${pageContext.request.contextPath}/admin/subject/delete" class="subject-action-link delete-link" title="Delete">
+                              <i class="fas fa-trash"></i> Delete
+                            </button>
+                          </form>
                         </div>
                       </td>
                     </tr>
@@ -335,6 +382,156 @@
   $(document).ready(function() {
     $('#category, #status').select2();
   });
+
+  // Confirmation dialog for deleting subjects
+  function confirmDelete(subjectTitle, subjectId) {
+    var message = 'Are you sure you want to delete the course "' + subjectTitle + '"?\n\nThis action cannot be undone. If this course has active registrations, the deletion will be blocked.';
+    return confirm(message);
+  }
+
+
 </script>
+
+<style>
+  /* Action buttons styling */
+  .dashboard__review-action {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .subject-action-link {
+    padding: 6px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    min-width: 60px;
+    height: 28px;
+  }
+
+  .subject-action-link.view-link {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .subject-action-link.view-link:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+  }
+
+  .subject-action-link.edit-link {
+    background-color: #28a745;
+    color: white;
+  }
+
+  .subject-action-link.edit-link:hover {
+    background-color: #1e7e34;
+    transform: translateY(-1px);
+  }
+
+  .subject-action-link.delete-link {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  .subject-action-link.delete-link:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+  }
+
+  /* Table styling */
+  .dashboard__review-table {
+    overflow-x: auto;
+  }
+
+  .dashboard__review-table table {
+    width: 100%;
+    min-width: 800px;
+  }
+
+  .dashboard__review-table th {
+    white-space: nowrap;
+    padding: 12px 8px;
+    vertical-align: middle;
+  }
+
+  .dashboard__review-table td {
+    padding: 12px 8px;
+    vertical-align: middle;
+  }
+
+  /* Status badges */
+  .status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .status-badge.status-active {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  .status-badge.status-inactive {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+
+  .status-badge.status-draft {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+
+  /* Full width layout adjustments */
+  @media (min-width: 1200px) {
+    .container-fluid {
+      padding-left: 30px !important;
+      padding-right: 30px !important;
+    }
+  }
+
+  @media (min-width: 1400px) {
+    .container-fluid {
+      padding-left: 40px !important;
+      padding-right: 40px !important;
+    }
+  }
+
+  /* Mobile responsive for action buttons */
+  @media (max-width: 768px) {
+    .dashboard__review-action {
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .subject-action-link {
+      width: 100%;
+      justify-content: center;
+      min-width: auto;
+    }
+
+    .dashboard__review-table {
+      font-size: 12px;
+    }
+
+    .dashboard__review-table th,
+    .dashboard__review-table td {
+      padding: 8px 4px;
+    }
+  }
+</style>
 </body>
 </html>
